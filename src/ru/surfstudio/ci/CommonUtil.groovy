@@ -3,8 +3,8 @@ package ru.surfstudio.ci
 
 class CommonUtil {
 
-    public static void abortPreviousBuilds(BaseContext ctx, String jobIdentifier) {
-        ctx.origin.currentBuild.description = jobIdentifier
+    public static void abortPreviousBuilds(BaseContext ctx, String jobIdentifier) { //todo
+        /*ctx.origin.currentBuild.description = jobIdentifier
         Run previousBuild = ctx.origin.currentBuild.rawBuild.getPreviousBuildInProgress()
 
         while (previousBuild != null) {
@@ -19,7 +19,7 @@ class CommonUtil {
             }
 
             previousBuild = previousBuild.getPreviousBuildInProgress()
-        }
+        }*/
     }
 
     public static void applyParameterIfNotEmpty(BaseContext ctx, String varName, paramValue, assignmentAction) {

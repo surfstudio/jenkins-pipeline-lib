@@ -17,22 +17,22 @@ class AndroidPrPipelineExecutor extends BasePipelineExecutor<PrContext> {
                     initStageBody()
                 }
                 stageWithStrategy('PreMerge', ctx.preMergeStageStrategy) {
-                    preMergeStageBody()
+                    //preMergeStageBody()
                 }
                 stageWithStrategy('Build', ctx.buildStageStrategy) {
-                    buildStageBody()
+                    //buildStageBody()
                 }
                 stageWithStrategy('Unit Test', ctx.unitTestStageStrategy) {
-                    unitTestStageBody()
+                    //unitTestStageBody()
                 }
                 stageWithStrategy('Small Instrumentation Test', ctx.smallInstrumentationTestStageStrategy) {
-                    smallInstrumentationTestStageBody()
+                    //smallInstrumentationTestStageBody()
                 }
                 stageWithStrategy('Static Code Analysis', ctx.staticCodeAnalysisStageStrategy) {
-                    staticCodeAnalysisStageBody()
+                    //staticCodeAnalysisStageBody()
                 }
             } finally {
-                finalizeBody()
+                //finalizeBody()
             }
         }
     }
