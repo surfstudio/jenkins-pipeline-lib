@@ -6,11 +6,11 @@ import ru.surfstudio.ci.*
 class PrContext extends BaseContext {
 
     //strategies
-    public preMergeStageStrategy = FAIL_WHEN_STAGE_ERROR
-    public buildStageStrategy = FAIL_WHEN_STAGE_ERROR
-    public unitTestStageStrategy = UNSTABLE_WHEN_STAGE_ERROR
-    public smallInstrumentationTestStageStrategy = UNSTABLE_WHEN_STAGE_ERROR
-    public staticCodeAnalysisStageStrategy = UNSTABLE_WHEN_STAGE_ERROR
+    public preMergeStageStrategy = StageStartegy.FAIL_WHEN_STAGE_ERROR
+    public buildStageStrategy = StageStartegy.FAIL_WHEN_STAGE_ERROR
+    public unitTestStageStrategy = StageStartegy.UNSTABLE_WHEN_STAGE_ERROR
+    public smallInstrumentationTestStageStrategy = StageStartegy.UNSTABLE_WHEN_STAGE_ERROR
+    public staticCodeAnalysisStageStrategy = StageStartegy.UNSTABLE_WHEN_STAGE_ERROR
 
     //scm
     public sourceBranch = ""
