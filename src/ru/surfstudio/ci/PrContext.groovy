@@ -1,7 +1,7 @@
 #!/usr/bin/groovy
 package ru.surfstudio.ci
 
-import static ru.surfstudio.ci.StageStartegy.*
+import ru.surfstudio.ci.*
 
 class PrContext extends BaseContext {
 
