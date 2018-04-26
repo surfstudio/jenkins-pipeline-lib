@@ -1,13 +1,13 @@
 #!/usr/bin/groovy
 package ru.surfstudio.ci
 
-abstract class BaseContext {
+abstract class BaseContext implements Serializable {
 
-    BaseContext(script) {
-        this.script = script
-    }
-
-    public script
+    public origin //Jenkins Pipeline Script context
     public stageResults = [:]
     public jobResult = Result.SUCCESS
+
+    BaseContext(origin) {
+        this.origin = origin
+    }
 }

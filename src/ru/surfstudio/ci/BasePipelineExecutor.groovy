@@ -1,9 +1,9 @@
 package ru.surfstudio.ci
 
-abstract class BasePiplineExecutor<C extends BaseContext> {
+abstract class BasePipelineExecutor<C extends BaseContext> implements Serializable {
     protected C ctx
 
-    BasePiplineExecutor(C ctx) {
+    BasePipelineExecutor(C ctx) {
         this.ctx = ctx
     }
 
@@ -12,12 +12,12 @@ abstract class BasePiplineExecutor<C extends BaseContext> {
 
     protected void stageWithStrategy(String stageName, String strategy, stageBody) {
         //https://issues.jenkins-ci.org/browse/JENKINS-39203 подождем пока сделают разные статусы на разные Stage
-        ctx.script.stage(stageName) {
+        ctx.origin.stage(stageName) {
             if (strategy == StageStartegy.SKIP_STAGE) {
                 return
             } else {
                 try {
-                    ctx.script.bitbucketStatusNotify(
+                    ctx.origin.bitbucketStatusNotify(
                             buildState: 'INPROGRESS',
                             buildKey: stageName,
                             buildName: stageName
@@ -38,13 +38,13 @@ abstract class BasePiplineExecutor<C extends BaseContext> {
                     } else if (strategy == StageStartegy.SUCCESS_WHEN_STAGE_ERROR) {
                         ctx.stageResults.put(stageName, Result.SUCCESS)
                     } else {
-                        ctx.script.error("Unsupported strategy " + strategy)
+                        ctx.origin.error("Unsupported strategy " + strategy)
                     }
                 } finally {
                     String bitbucketStatus = ctx.stageResults.get(stageName) == Result.SUCCESS ?
                             'SUCCESSFUL' :
                             'FAILED'
-                    ctx.script.bitbucketStatusNotify(
+                    ctx.origin.bitbucketStatusNotify(
                             buildState: bitbucketStatus,
                             buildKey: stageName,
                             buildName: stageName
