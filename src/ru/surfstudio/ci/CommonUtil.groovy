@@ -2,7 +2,7 @@ package ru.surfstudio.ci
 
 class CommonUtil {
 
-    public static void stageWithStrategy(BaseContext ctx, String stageName, String strategy, stageBody) {
+    public static void stageWithStrategy(Pipeline ctx, String stageName, String strategy, stageBody) {
         //https://issues.jenkins-ci.org/browse/JENKINS-39203 подождем пока сделают разные статусы на разные Stage
         ctx.origin.stage(stageName) {
             if (strategy == StageStrategy.SKIP_STAGE) {
@@ -46,7 +46,7 @@ class CommonUtil {
         }
     }
 
-    public static void abortDuplicateBuilds(BaseContext ctx, String buildIdentifier) {
+    public static void abortDuplicateBuilds(Pipeline ctx, String buildIdentifier) {
         hudson.model.Run currentBuild = ctx.origin.currentBuild.rawBuild
         currentBuild.setDescription(buildIdentifier)
         hudson.model.Run previousBuild = currentBuild.getPreviousBuildInProgress()
@@ -66,14 +66,14 @@ class CommonUtil {
         }
     }
 
-    public static void applyParameterIfNotEmpty(BaseContext ctx, String varName, paramValue, assignmentAction) {
+    public static void applyParameterIfNotEmpty(Pipeline ctx, String varName, paramValue, assignmentAction) {
         if (paramValue?.trim()) {
             ctx.origin.echo "value of {$varName} sets from parameters to {$paramValue}"
             assignmentAction(paramValue)
         }
     }
 
-    public static void printDefaultVar(BaseContext ctx, String varName, varValue) {
+    public static void printDefaultVar(Pipeline ctx, String varName, varValue) {
         ctx.origin.echo "default value of {$varName} is {$varValue}"
     }
 }

@@ -1,8 +1,8 @@
 import ru.surfstudio.ci.NodeProvider
-import ru.surfstudio.ci.PrContext
+import ru.surfstudio.ci.PrPipelineAndroid
 import static ru.surfstudio.ci.CommonUtil.*
 
-def call(PrContext ctx) {
+def call(PrPipelineAndroid ctx) {
     ctx.origin.node(NodeProvider.getAndroidNode()) {
         try {
             ctx.origin.stage('Init') {
@@ -12,10 +12,13 @@ def call(PrContext ctx) {
                 prPreMergeStage.call(ctx)
             }
             stageWithStrategy(ctx, 'Build', ctx.buildStageStrategy) {
-                //buildStageBody()
+                buildStageAndroid.call(ctx, ctx.buildGradleTask)
             }
             stageWithStrategy(ctx, 'Unit Test', ctx.unitTestStageStrategy) {
-                //unitTestStageBody()
+                unitTestStageAndroid.call(ctx,
+                        ctx.unitTestGradleTask,
+                        ctx.unitTestResultPathXml,
+                        ctx.unitTestResultPathDirHtml)
             }
             stageWithStrategy(ctx, 'Small Instrumentation Test', ctx.smallInstrumentationTestStageStrategy) {
                 //smallInstrumentationTestStageBody()

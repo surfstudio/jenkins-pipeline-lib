@@ -1,8 +1,6 @@
 package ru.surfstudio.ci
 
-import ru.surfstudio.ci.StageStrategy
-
-class PrContext extends BaseContext implements Serializable {
+class PrPipeline extends Pipeline {
 
     //strategies
     public preMergeStageStrategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
@@ -16,7 +14,7 @@ class PrContext extends BaseContext implements Serializable {
     public destinationBranch = ""
     public authorUsername = ""
 
-    PrContext(Object script) {
-        super(script)
+    PrPipeline(Object origin) {
+        super(origin)
     }
 }

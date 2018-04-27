@@ -1,5 +1,0 @@
-
-def static call(String gradleTask) {
-    sh "./gradlew clean ${gradleTask}"
-    step([$class: 'ArtifactArchiver', artifacts: '**/*.apk'])
-}

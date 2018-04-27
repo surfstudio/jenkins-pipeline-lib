@@ -1,10 +1,10 @@
 import ru.surfstudio.ci.CommonUtil
-import ru.surfstudio.ci.PrContext
+import ru.surfstudio.ci.PrPipeline
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 import static ru.surfstudio.ci.CommonUtil.printDefaultVar
 
-def static call(PrContext ctx) {
+def static call(PrPipeline ctx) {
     printDefaultVar(ctx, 'preMergeStageStrategy', ctx.preMergeStageStrategy)
     printDefaultVar(ctx, 'buildStageStrategy', ctx.buildStageStrategy)
     printDefaultVar(ctx, 'unitTestStageStrategy', ctx.unitTestStageStrategy)
@@ -41,5 +41,5 @@ def static call(PrContext ctx) {
         value -> ctx.authorUsername = value
     })
 
-    CommonUtil.abortDuplicateBuilds(ctx, ctx.sourceBranch) 
+    CommonUtil.abortDuplicateBuilds(ctx, ctx.sourceBranch)
 }
