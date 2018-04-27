@@ -1,7 +1,7 @@
 package ru.surfstudio.ci
 
-/**
- * Created by maximus on 26.04.18.
- */
 class NodeProvider {
+    public static String getAndroidNode(){
+        return "android"; //"android" - метка, поэтому будет использоваться один из доступных компьютеров с этой метокй
+    }
 }
