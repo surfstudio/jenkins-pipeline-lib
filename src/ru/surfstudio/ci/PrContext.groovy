@@ -1,9 +1,11 @@
 package ru.surfstudio.ci
 
+import ru.surfstudio.ci.StageStrategy
+
 class PrContext extends BaseContext implements Serializable {
 
     //strategies
-    public preMergeStageStrategy = ru.surfstudio.ci.StageStrategy.FAIL_WHEN_STAGE_ERROR
+    public preMergeStageStrategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
     /*public buildStageStrategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
     public unitTestStageStrategy = StageStrategy.UNSTABLE_WHEN_STAGE_ERROR
     public smallInstrumentationTestStageStrategy = StageStrategy.UNSTABLE_WHEN_STAGE_ERROR
