@@ -13,7 +13,7 @@ abstract class BasePipelineExecutor<C extends BaseContext> implements Serializab
     protected void stageWithStrategy(String stageName, String strategy, stageBody) {
         //https://issues.jenkins-ci.org/browse/JENKINS-39203 подождем пока сделают разные статусы на разные Stage
         ctx.origin.stage(stageName) {
-            if (strategy == StageStartegy.SKIP_STAGE) {
+            if (strategy == StageStrategy.SKIP_STAGE) {
                 return
             } else {
                 try {
@@ -26,16 +26,16 @@ abstract class BasePipelineExecutor<C extends BaseContext> implements Serializab
                     ctx.stageResults.put(stageName, Result.SUCCESS)
                 } catch (e) {
 
-                    if (strategy == StageStartegy.FAIL_WHEN_STAGE_ERROR) {
+                    if (strategy == StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                         ctx.stageResults.put(stageName, Result.FAILURE)
                         ctx.jobResult = Result.FAILURE
                         throw e
-                    } else if (strategy == StageStartegy.UNSTABLE_WHEN_STAGE_ERROR) {
+                    } else if (strategy == StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                         ctx.stageResults.put(stageName, Result.UNSTABLE)
                         if (ctx.jobResult != Result.FAILURE) {
                             ctx.jobResult = Result.UNSTABLE
                         }
-                    } else if (strategy == StageStartegy.SUCCESS_WHEN_STAGE_ERROR) {
+                    } else if (strategy == StageStrategy.SUCCESS_WHEN_STAGE_ERROR) {
                         ctx.stageResults.put(stageName, Result.SUCCESS)
                     } else {
                         ctx.origin.error("Unsupported strategy " + strategy)
