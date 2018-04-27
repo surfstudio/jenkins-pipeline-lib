@@ -10,7 +10,7 @@ class AndroidPrPipelineExecutor extends BasePipelineExecutor<PrContext> {
     }
 
     @Override
-    void run() {
+    public void run() {
         ctx.origin.node(NodeProvider.getAndroidNode()) {
             try {
                 ctx.origin.stage('Init') {
@@ -37,7 +37,7 @@ class AndroidPrPipelineExecutor extends BasePipelineExecutor<PrContext> {
         }
     }
 
-    void initStageBody() {
+    public void initStageBody() {
         printDefaultVar(ctx, 'preMergeStageStrategy', ctx.preMergeStageStrategy)
         printDefaultVar(ctx, 'buildStageStrategy', ctx.buildStageStrategy)
         printDefaultVar(ctx, 'unitTestStageStrategy', ctx.unitTestStageStrategy)
