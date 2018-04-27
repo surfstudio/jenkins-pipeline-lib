@@ -9,7 +9,7 @@ def call(PrContext ctx) {
                 prInitStage.call(ctx)
             }
             stageWithStrategy(ctx, 'PreMerge', ctx.preMergeStageStrategy) {
-                //preMergeStageBody()
+                prPreMergeStage.call(ctx)
             }
             stageWithStrategy(ctx, 'Build', ctx.buildStageStrategy) {
                 //buildStageBody()
