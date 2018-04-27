@@ -1,6 +1,4 @@
 package ru.surfstudio.ci
-import jenkins.model.CauseOfInterruption.UserInterruption
-import hudson.model.Run
 
 class CommonUtil {
 
@@ -50,14 +48,14 @@ class CommonUtil {
 
     public static void abortPreviousBuilds(BaseContext ctx, String jobIdentifier) {
         ctx.origin.currentBuild.description = jobIdentifier
-        Run previousBuild = ctx.origin.currentBuild.rawBuild.getPreviousBuildInProgress()
+        hudson.model.Run previousBuild = ctx.origin.currentBuild.rawBuild.getPreviousBuildInProgress()
 
         while (previousBuild != null) {
             if (previousBuild.isInProgress() && previousBuild.getDescription() == ctx.origin.currentBuild.description) {
                 def executor = previousBuild.getExecutor()
                 if (executor != null) {
                     ctx.origin.echo ">> Aborting older build #${previousBuild.number}"
-                    executor.interrupt(Result.ABORTED, new UserInterruption(
+                    executor.interrupt(hudson.model.Result.ABORTED, new jenkins.model.CauseOfInterruption.UserInterruption(
                             "Aborted by newer build #${ctx.origin.currentBuild.number}"
                     ))
                 }
