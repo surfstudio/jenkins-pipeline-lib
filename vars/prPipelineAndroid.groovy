@@ -6,7 +6,6 @@ def call(PrContext ctx) {
     ctx.origin.node(NodeProvider.getAndroidNode()) {
         try {
             ctx.origin.stage('Init') {
-                echo "adun"
                 prInitStage.call(ctx)
             }
             stageWithStrategy(ctx, 'PreMerge', ctx.preMergeStageStrategy) {
