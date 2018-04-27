@@ -1,6 +1,7 @@
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.PrContext
 import static ru.surfstudio.ci.CommonUtil.*
+import jenkins.model.CauseOfInterruption.UserInterruption
 
 def call(PrContext ctx) {
     ctx.origin.node(NodeProvider.getAndroidNode()) {
