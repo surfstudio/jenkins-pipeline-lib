@@ -41,5 +41,5 @@ def static call(PrContext ctx) {
         value -> ctx.authorUsername = value
     })
 
-    CommonUtil.abortPreviousBuilds(ctx, "test id")//ctx.sourceBranch)
+    CommonUtil.abortDuplicateBuilds(ctx, ctx.sourceBranch) 
 }

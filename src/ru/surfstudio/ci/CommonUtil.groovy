@@ -46,17 +46,18 @@ class CommonUtil {
         }
     }
 
-    public static void abortPreviousBuilds(BaseContext ctx, String jobIdentifier) {
-        ctx.origin.currentBuild.description = jobIdentifier
-        hudson.model.Run previousBuild = ctx.origin.currentBuild.rawBuild.getPreviousBuildInProgress()
+    public static void abortDuplicateBuilds(BaseContext ctx, String buildIdentifier) {
+        hudson.model.Run currentBuild = ctx.origin.currentBuild.rawBuild
+        currentBuild.setDescription(buildIdentifier)
+        hudson.model.Run previousBuild = currentBuild.getPreviousBuildInProgress()
 
         while (previousBuild != null) {
-            if (previousBuild.isInProgress() && previousBuild.getDescription() == ctx.origin.currentBuild.description) {
+            if (previousBuild.isInProgress() && previousBuild.getDescription() == currentBuild.getDescription()) {
                 def executor = previousBuild.getExecutor()
                 if (executor != null) {
-                    ctx.origin.echo ">> Aborting older build #${previousBuild.number}"
+                    ctx.origin.echo ">> Aborting older build #${previousBuild.getNumber()}"
                     executor.interrupt(hudson.model.Result.ABORTED, new jenkins.model.CauseOfInterruption.UserInterruption(
-                            "Aborted by newer build #${ctx.origin.currentBuild.number}"
+                            "Aborted by newer build #${currentBuild.getNumber()}"
                     ))
                 }
             }
