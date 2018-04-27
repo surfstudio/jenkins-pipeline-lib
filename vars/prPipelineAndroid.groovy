@@ -6,6 +6,9 @@ def call(PrContext ctx) {
     ctx.origin.node(NodeProvider.getAndroidNode()) {
         try {
             ctx.origin.stage('Init') {
+                new UserInterruption(
+                        "Aborted by newer build #${ctx.origin.currentBuild.number}"
+                )
                 prInitStage.call(ctx)
             }
             stageWithStrategy(ctx, 'PreMerge', ctx.preMergeStageStrategy) {

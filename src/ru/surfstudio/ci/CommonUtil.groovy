@@ -47,7 +47,7 @@ class CommonUtil {
         }
     }
 
-    public static void abortPreviousBuilds(BaseContext ctx, String jobIdentifier) { 
+    public static void abortPreviousBuilds(BaseContext ctx, String jobIdentifier) {
         ctx.origin.currentBuild.description = jobIdentifier
         Run previousBuild = ctx.origin.currentBuild.rawBuild.getPreviousBuildInProgress()
 
