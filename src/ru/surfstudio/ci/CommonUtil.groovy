@@ -1,5 +1,6 @@
 package ru.surfstudio.ci
-
+import jenkins.model.CauseOfInterruption.UserInterruption
+import hudson.model.Run
 
 class CommonUtil {
 
