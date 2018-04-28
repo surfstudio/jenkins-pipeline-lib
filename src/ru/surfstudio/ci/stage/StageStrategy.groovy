@@ -1,4 +1,4 @@
-package ru.surfstudio.ci
+package ru.surfstudio.ci.stage
 
 public class StageStrategy implements Serializable {
     public static final String SKIP_STAGE = "SKIP_STAGE"
