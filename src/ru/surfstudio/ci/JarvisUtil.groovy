@@ -49,4 +49,22 @@ class JarvisUtil {
                     validResponseCodes: '204'
         }
     }
+
+    def static getMainBranch(Object script, String repoUrl){
+        def rawResponse = script.httpRequest consoleLogResponseBody: true,
+                httpMode: 'GET',
+                url: "${Constants.JARVIS_URL}repositories/branches/default?repo_url=${repoUrl}",
+                validResponseCodes: '200'
+        def response = script.readJSON text: rawResponse.content
+        return response.name
+    }
+
+    def static changeTaskStatus(Object script, String newTaskStatus, String taskKey) {
+        script.httpRequest consoleLogResponseBody: true,
+                url: "${Constants.JARVIS_URL}issues/change-status/",
+                requestBody: "{\"status_name\": \"$newTaskStatus\", \"issue_key\": \"$taskKey\"}",
+                httpMode: 'POST',
+                contentType: 'APPLICATION_JSON',
+                validResponseCodes: '204'
+    }
 }

@@ -1,16 +1,19 @@
 package ru.surfstudio.ci.stage.body
 
 import ru.surfstudio.ci.AndroidUtil
+import ru.surfstudio.ci.CommonUtil
 
 class CommonAndroidStages {
 
-    def static buildStageAndroidBody(Object script, String buildGradleTask) {
-        script.sh "./gradlew clean ${buildGradleTask}"
+    def static buildStageBodyAndroid(Object script, String buildGradleTask) {
+        script.sh "./gradlew ${buildGradleTask}"
         script.step([$class: 'ArtifactArchiver', artifacts: '**/*.apk'])
-        script.step([$class: 'ArtifactArchiver', artifacts: '**/mapping.txt'])
+        CommonUtil.safe(script) {
+            script.step([$class: 'ArtifactArchiver', artifacts: '**/mapping.txt'])
+        }
     }
 
-    def static unitTestStageAndroidBody(Object script, String unitTestGradleTask, String testResultPathXml, String testResultPathDirHtml) {
+    def static unitTestStageBodyAndroid(Object script, String unitTestGradleTask, String testResultPathXml, String testResultPathDirHtml) {
         try {
             script.sh "./gradlew ${unitTestGradleTask}"
         } finally {
@@ -26,7 +29,7 @@ class CommonAndroidStages {
         }
     }
 
-    def static instrumentationTestStageAndroidBody(Object script, String testGradleTask, String testResultPathXml, String testResultPathDirHtml) {
+    def static instrumentationTestStageBodyAndroid(Object script, String testGradleTask, String testResultPathXml, String testResultPathDirHtml) {
         AndroidUtil.onEmulator(script, "avd-main"){
             try {
                 script.sh "./gradlew uninstallAll ${testGradleTask}"

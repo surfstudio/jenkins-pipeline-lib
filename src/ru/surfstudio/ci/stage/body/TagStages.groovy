@@ -11,7 +11,7 @@ import static ru.surfstudio.ci.CommonUtil.printDefaultVar
 
 class TagStages {
 
-    def static tagInitStageBody(TagPipeline ctx) {
+    def static initStageBody(TagPipeline ctx) {
         def script = ctx.script
         printDefaultVar(script, 'checkoutStageStrategy', ctx.checkoutStageStrategy)
         printDefaultVar(script,'buildStageStrategy', ctx.buildStageStrategy)
@@ -52,7 +52,7 @@ class TagStages {
         CommonUtil.abortDuplicateBuilds(script, ctx.repoTag)
     }
 
-    def static tagCheckoutStageBody(Object script, String repoTag) {
+    def static checkoutStageBody(Object script, String repoTag) {
         script.checkout([
                 $class                           : 'GitSCM',
                 branches                         : [[name: "refs/tags/${repoTag}"]],
@@ -63,11 +63,11 @@ class TagStages {
 
     }
 
-    def static betaUploadStageAndroidBody(Object script, String betaUploadGradleTask) {
+    def static betaUploadStageBodyAndroid(Object script, String betaUploadGradleTask) {
         script.sh "./gradlew ${betaUploadGradleTask}"
     }
 
-    def static tagFinalizeStageBody(TagPipeline ctx) {
+    def static finalizeStageBody(TagPipeline ctx) {
         def script = ctx.script
         def stageResultsBody = []
         for (stage in ctx.stages) {

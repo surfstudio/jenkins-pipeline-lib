@@ -3,12 +3,11 @@ package ru.surfstudio.ci.pipeline
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.stage.body.CommonAndroidStages
-import ru.surfstudio.ci.stage.body.TagStages
+import ru.surfstudio.ci.stage.body.PrStages
 
-class TagPipelineAndroid extends TagPipeline {
+class PrPipelineAndroid extends PrPipeline {
 
-    public buildGradleTask = "clean assembleQa assembleRelease"
-    public betaUploadGradleTask = "crashlyticsUploadDistributionQa"
+    public buildGradleTask = "clean assembleQa"
 
     public unitTestGradleTask = "testQaUnitTest"
     public unitTestResultPathXml = "**/test-results/testQaUnitTest/*.xml"
@@ -19,39 +18,36 @@ class TagPipelineAndroid extends TagPipeline {
     public instrumentedTestResultPathDirHtml = "app/build/reports/androidTests/connected/"
 
 
-    TagPipelineAndroid(Object script) {
+    PrPipelineAndroid(Object script) {
         super(script)
         node = NodeProvider.getAndroidNode()
         stages = [
                 createStage('Init', StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    TagStages.initStageBody(this)
+                    PrStages.initStageBody(this)
                 },
-                createStage('Checkout', checkoutStageStrategy) {
-                    TagStages.checkoutStageBody(script, repoTag)
+                createStage('PreMerge', preMergeStageStrategy) {
+                    PrStages.preMergeStageBody(origin, sourceBranch, destinationBranch)
                 },
                 createStage('Build', buildStageStrategy) {
-                    CommonAndroidStages.buildStageBodyAndroid(script, buildGradleTask)
+                    CommonAndroidStages.buildStageBodyAndroid(origin, buildGradleTask)
                 },
                 createStage('Unit Test', unitTestStageStrategy) {
-                    CommonAndroidStages.unitTestStageBodyAndroid(script,
+                    CommonAndroidStages.unitTestStageBodyAndroid(origin,
                             unitTestGradleTask,
                             unitTestResultPathXml,
                             unitTestResultPathDirHtml)
                 },
                 createStage('Small Instrumentation Test', smallInstrumentationTestStageStrategy) {
-                    CommonAndroidStages.instrumentationTestStageBodyAndroid(script,
+                    CommonAndroidStages.instrumentationTestStageBodyAndroid(origin,
                             instrumentedTestGradleTask,
                             instrumentedTestResultPathXml,
                             instrumentedTestResultPathDirHtml)
                 },
                 createStage('Static Code Analysis', staticCodeAnalysisStageStrategy) {
-                    CommonAndroidStages.staticCodeAnalysisStageBody(script)
-                },
-                createStage('Beta Upload', betaUploadStageStrategy) {
-                    TagStages.betaUploadStageBodyAndroid(script, betaUploadGradleTask)
+                    CommonAndroidStages.staticCodeAnalysisStageBody(origin)
                 },
 
         ]
-        finalizeBody = { TagStages.finalizeStageBody(this) }
+        finalizeBody = { PrStages.finalizeStageBody(this) }
     }
 }

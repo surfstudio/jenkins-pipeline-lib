@@ -61,6 +61,13 @@ class CommonUtil {
         return  "<a href=\"${script.JENKINS_URL}blue/organizations/jenkins/${script.JOB_NAME}/detail/${script.JOB_NAME}/${script.BUILD_NUMBER}/pipeline\">build</a>"
     }
 
+    def static getJiraTaskHtmlLink(String taskKey){
+        return "<a href=\"${Constants.JIRA_URL}browse/${taskKey}\">${taskKey}</a>"
+    }
+
+    void shWithRuby(Object script, String command, String version = "2.3.5") {
+        script.sh "set +x; source /home/jenkins/.bashrc; source /usr/share/rvm/scripts/rvm; rvm use $version; $command"
+    }
 
     def static abortDuplicateBuilds(Object script, String buildIdentifier) {
         hudson.model.Run currentBuild = script.currentBuild.rawBuild
@@ -99,5 +106,18 @@ class CommonUtil {
 
     def static printDefaultVar(Object script, String varName, varValue) {
         script.echo "default value of {$varName} is {$varValue}"
+    }
+
+    def static unsuccessReasonsToString(Pipeline pipeline){
+        def unsuccessReasons = ""
+        for (stage in pipeline.stages) {
+            if (stage.result != Result.SUCCESS) {
+                if (!unsuccessReasons.isEmpty()) {
+                    unsuccessReasons += ", "
+                }
+                unsuccessReasons += "${stage.name} -> ${stage.result}"
+            }
+        }
+        return unsuccessReasons
     }
 }

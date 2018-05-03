@@ -9,7 +9,7 @@ import static ru.surfstudio.ci.CommonUtil.printDefaultVar
 
 class PrStages {
 
-    def static prInitStageBody(PrPipeline ctx) {
+    def static initStageBody(PrPipeline ctx) {
         def script = ctx.script
         printDefaultVar(script, 'preMergeStageStrategy', ctx.preMergeStageStrategy)
         printDefaultVar(script, 'buildStageStrategy', ctx.buildStageStrategy)
@@ -50,7 +50,7 @@ class PrStages {
         CommonUtil.abortDuplicateBuilds(script, ctx.sourceBranch)
     }
 
-    def static prPreMergeStageBody(Object script, String sourceBranch, String destinationBranch) {
+    def static preMergeStageBody(Object script, String sourceBranch, String destinationBranch) {
         script.sh 'git config --global user.name "Jenkins"'
         script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
         script.checkout changelog: true, poll: true, scm:
@@ -74,17 +74,9 @@ class PrStages {
         script.echo 'PreMerge Success'
     }
 
-    def static prFinalizeStageBody(PrPipeline ctx){
+    def static finalizeStageBody(PrPipeline ctx){
         if (ctx.jobResult != Result.SUCCESS) {
-            def unsuccessReasons = ""
-            for (stage in ctx.stages) {
-                if (stage.result != Result.SUCCESS) {
-                    if (!unsuccessReasons.isEmpty()) {
-                        unsuccessReasons += ", "
-                    }
-                    unsuccessReasons += "${stage.name} -> ${stage.result}"
-                }
-            }
+            def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx)
             def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlHtmlLink(ctx.script)}"
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "bitbucket")
         }
