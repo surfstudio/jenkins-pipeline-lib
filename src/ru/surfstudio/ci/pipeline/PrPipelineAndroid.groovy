@@ -31,27 +31,25 @@ class PrPipelineAndroid extends PrPipeline {
                 createStage('Init', StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     PrStages.initStageBody(this)
                 },
-                createStage('PreMerge', preMergeStageStrategy) {
-                    printDefaultVar(script, 'buildStageStrategy', buildStageStrategy)
+                createStage('PreMerge', StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     PrStages.preMergeStageBody(script, sourceBranch, destinationBranch)
                 },
-                createStage('Build', buildStageStrategy) {
-                    printDefaultVar(script, 'buildStageStrategy', buildStageStrategy)
+                createStage('Build', StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     CommonAndroidStages.buildStageBodyAndroid(script, buildGradleTask)
                 },
-                createStage('Unit Test', unitTestStageStrategy) {
+                createStage('Unit Test', StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     CommonAndroidStages.unitTestStageBodyAndroid(script,
                             unitTestGradleTask,
                             unitTestResultPathXml,
                             unitTestResultPathDirHtml)
                 },
-                createStage('Small Instrumentation Test', smallInstrumentationTestStageStrategy) {
+                createStage('Small Instrumentation Test', StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     CommonAndroidStages.instrumentationTestStageBodyAndroid(script,
                             instrumentedTestGradleTask,
                             instrumentedTestResultPathXml,
                             instrumentedTestResultPathDirHtml)
                 },
-                createStage('Static Code Analysis', staticCodeAnalysisStageStrategy) {
+                createStage('Static Code Analysis', StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     CommonAndroidStages.staticCodeAnalysisStageBody(script)
                 },
 

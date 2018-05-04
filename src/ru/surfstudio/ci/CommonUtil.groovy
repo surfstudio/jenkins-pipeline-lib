@@ -6,43 +6,6 @@ import ru.surfstudio.ci.stage.StageStrategy
 
 class CommonUtil {
 
-     def static stageWithStrategy(Pipeline ctx, Stage stage) {
-        //https://issues.jenkins-ci.org/browse/JENKINS-39203 подождем пока сделают разные статусы на разные Stage
-         def script = ctx.script
-         script.stage(stage.name) {
-            if (stage.strategy == StageStrategy.SKIP_STAGE) {
-                return
-            } else {
-                try {
-                    script.echo("stage ${stage.name} started")
-                    notifyBitbucketAboutStageStart(script, stage.name)
-                    stage.body()
-                    stage.result = Result.SUCCESS
-                    script.echo("stage ${stage.name} success")
-                } catch (e) {
-                    script.echo("stage ${stage.name} fail")
-                    script.echo("apply stage strategy: ${stage.strategy}")
-                    if (stage.strategy == StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                        stage.result = Result.FAILURE
-                        ctx.jobResult = Result.FAILURE
-                        throw e
-                    } else if (stage.strategy == StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                        stage.result = Result.UNSTABLE
-                        if (ctx.jobResult != Result.FAILURE) {
-                            ctx.jobResult = Result.UNSTABLE
-                        }
-                    } else if (stage.strategy == StageStrategy.SUCCESS_WHEN_STAGE_ERROR) {
-                        stage.result = Result.SUCCESS
-                    }  else {
-                        script.error("Unsupported strategy " + stage.strategy)
-                    }
-                } finally {
-                    notifyBitbucketAboutStageFinish(script, stage.name, stage.result == Result.SUCCESS)
-                }
-            }
-        }
-    }
-
     def static notifyBitbucketAboutStageStart(Object script, String stageName){
         script.bitbucketStatusNotify(
                 buildState: 'INPROGRESS',
@@ -63,14 +26,14 @@ class CommonUtil {
     }
 
     def static getBuildUrlHtmlLink(Object script){
-        return  "<a href=\"${script.JENKINS_URL}blue/organizations/jenkins/${script.JOB_NAME}/detail/${script.JOB_NAME}/${script.BUILD_NUMBER}/pipeline\">build</a>"
+        return  "<a href=\"${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline\">build</a>"
     }
 
     def static getJiraTaskHtmlLink(String taskKey){
         return "<a href=\"${Constants.JIRA_URL}browse/${taskKey}\">${taskKey}</a>"
     }
 
-    void shWithRuby(Object script, String command, String version = "2.3.5") {
+    def static shWithRuby(Object script, String command, String version = "2.3.5") {
         script.sh "set +x; source /home/jenkins/.bashrc; source /usr/share/rvm/scripts/rvm; rvm use $version; $command"
     }
 

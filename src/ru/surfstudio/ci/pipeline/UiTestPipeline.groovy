@@ -23,16 +23,6 @@ class UiTestPipeline extends Pipeline {
     public taskName = ""
     public userEmail = ""
 
-    //default stage strategies
-    public checkoutSourcesStageStrategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
-    public checkoutTestsStageStrategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
-    public buildStageStrategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
-    public prepareArtifactStageStrategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
-    public prepareTestStageStrategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
-    public testStageStrategy = StageStrategy.UNSTABLE_WHEN_STAGE_ERROR
-    public publishResultsStageStrategy = StageStrategy.UNSTABLE_WHEN_STAGE_ERROR
-
-
     UiTestPipeline(Object script) {
         super(script)
     }

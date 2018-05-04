@@ -25,33 +25,34 @@ class TagPipelineAndroid extends TagPipeline {
 
     @Override
     def init() {
+
         node = NodeProvider.getAndroidNode()
         stages = [
                 createStage('Init', StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     TagStages.initStageBody(this)
                 },
-                createStage('Checkout', checkoutStageStrategy) {
+                createStage('Checkout', StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     TagStages.checkoutStageBody(script, repoTag)
                 },
-                createStage('Build', buildStageStrategy) {
+                createStage('Build', StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     CommonAndroidStages.buildStageBodyAndroid(script, buildGradleTask)
                 },
-                createStage('Unit Test', unitTestStageStrategy) {
+                createStage('Unit Test', StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     CommonAndroidStages.unitTestStageBodyAndroid(script,
                             unitTestGradleTask,
                             unitTestResultPathXml,
                             unitTestResultPathDirHtml)
                 },
-                createStage('Small Instrumentation Test', smallInstrumentationTestStageStrategy) {
+                createStage('Small Instrumentation Test', StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     CommonAndroidStages.instrumentationTestStageBodyAndroid(script,
                             instrumentedTestGradleTask,
                             instrumentedTestResultPathXml,
                             instrumentedTestResultPathDirHtml)
                 },
-                createStage('Static Code Analysis', staticCodeAnalysisStageStrategy) {
+                createStage('Static Code Analysis', StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     CommonAndroidStages.staticCodeAnalysisStageBody(script)
                 },
-                createStage('Beta Upload', betaUploadStageStrategy) {
+                createStage('Beta Upload', StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     TagStages.betaUploadStageBodyAndroid(script, betaUploadGradleTask)
                 },
 
