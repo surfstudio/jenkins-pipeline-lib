@@ -59,7 +59,7 @@ class CommonUtil {
         try {
             body()
         } catch (e){
-            script.sh "Ignored exception: ${e.message}"
+            script.echo "Ignored exception: ${e.message}"
         }
     }
 
