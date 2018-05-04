@@ -4,7 +4,7 @@ import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.stage.body.CommonAndroidStages
 import ru.surfstudio.ci.stage.body.PrStages
 
-abstract class PrPipeline extends Pipeline {
+abstract class PrPipeline extends BitbucketPipeline {
 
     //stage names
     public static final String INIT = 'Init'

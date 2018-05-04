@@ -7,20 +7,20 @@ import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
 
 /**
- * Ключевая сущность для выполнения пайплайна
- * По сути знает что и как выполнять и определяет контекст выполнения
- *  "как" определяется методом run (не нужно переопределять)
- *  "что" определяется в методе init (нужно переопределять)
- *  "контекст" определяется через публичные переменные
+ * Наследники класса Pipeline - ключевые сущности для выполнения скрипта
+ * По сути знают что и как выполнять и определяют контекст выполнения
+ *  - "как" определяется методом run (не нужно переопределять)
+ *  - "что" определяется в методе init (нужно переопределять)
+ *  - "контекст" определяется через публичные переменные
  *
- *  В методе init необходимо определенить:
+ *  Для создания собственного наследника необходимо переопределить метод init и в нем определенить переменные:
  *  - node
  *  - stages
  *  - finalizeBody
  *
  *  Предусмотрены различные способы кастомизации
  *  - изменение переменных, определяющих контекст
- *  - изменение стратегии, тела Stage (для получения следует использовать getStage())
+ *  - изменение стратегии/тела Stage (для получения следует использовать getStage())
  *  - замена целых Stage через метод replaceStage() или напрямую через переменную stages
  *  - все остальное, что может прийти в голову, так как все переменные публичные
  *
@@ -35,6 +35,9 @@ abstract class Pipeline implements Serializable {
     public List<Stage> stages
     public Closure finalizeBody
     public node
+
+    public preExecuteStageBody
+    public postExecuteStageBody
 
     Pipeline(script) {
         this.script = script
@@ -68,7 +71,9 @@ abstract class Pipeline implements Serializable {
             } else {
                 try {
                     script.echo("Stage ${stage.name} started")
-                    CommonUtil.notifyBitbucketAboutStageStart(script, stage.name)
+                    if(preExecuteStageBody){
+                        preExecuteStageBody(stage)
+                    }
                     stage.body()
                     stage.result = Result.SUCCESS
                     script.echo("Stage ${stage.name} success")
@@ -90,7 +95,9 @@ abstract class Pipeline implements Serializable {
                         script.error("Unsupported strategy " + stage.strategy)
                     }
                 } finally {
-                    CommonUtil.notifyBitbucketAboutStageFinish(script, stage.name, stage.result == Result.SUCCESS)
+                    if(postExecuteStageBody){
+                        postExecuteStageBody(stage)
+                    }
                 }
             }
         }

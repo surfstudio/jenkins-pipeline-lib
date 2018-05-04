@@ -2,7 +2,7 @@ package ru.surfstudio.ci.pipeline
 
 import ru.surfstudio.ci.stage.StageStrategy
 
-abstract class TagPipeline extends Pipeline {
+abstract class TagPipeline extends BitbucketPipeline {
 
     //stage names
     public static final String INIT = 'Init'

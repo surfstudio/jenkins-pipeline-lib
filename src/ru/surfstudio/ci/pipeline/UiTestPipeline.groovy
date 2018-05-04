@@ -2,7 +2,7 @@ package ru.surfstudio.ci.pipeline
 
 import ru.surfstudio.ci.stage.StageStrategy
 
-abstract class UiTestPipeline extends Pipeline {
+abstract class UiTestPipeline extends BitbucketPipeline {
     public sourcesDir = "sources"
     public featuresDir = "features"
     public outputsDir = "outputs"

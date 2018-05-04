@@ -18,7 +18,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
     @Override
     def init() {
-
+        super.init()
         //default stage strategies
         node = NodeProvider.getAndroidNode()
         stages = [
