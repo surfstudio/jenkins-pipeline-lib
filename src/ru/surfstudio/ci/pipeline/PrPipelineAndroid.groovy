@@ -24,7 +24,6 @@ class PrPipelineAndroid extends PrPipeline {
 
     @Override
     def init() {
-        super.init()
         node = NodeProvider.getAndroidNode()
         stages = [
                 createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
