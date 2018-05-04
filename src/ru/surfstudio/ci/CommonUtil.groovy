@@ -59,7 +59,7 @@ class CommonUtil {
         try {
             body()
         } catch (e){
-            script.echo "Ignored exception: ${e.toString()} ^^^"
+            script.echo "^^^^ Ignored exception: ${e.toString()} ^^^^"
         }
     }
 
