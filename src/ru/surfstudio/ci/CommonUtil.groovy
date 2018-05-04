@@ -65,7 +65,7 @@ class CommonUtil {
 
     def static applyParameterIfNotEmpty(Object script, String varName, paramValue, assignmentAction) {
         if (paramValue?.trim()) {
-            script.echo "value of {$varName} sets from parameters to {$paramValue}"
+            script.echo "{$varName} sets from parameters to {$paramValue}"
             assignmentAction(paramValue)
         }
     }
