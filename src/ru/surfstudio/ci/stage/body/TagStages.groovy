@@ -1,24 +1,21 @@
 package ru.surfstudio.ci.stage.body
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Constants
-import ru.surfstudio.ci.JarvisUtil
-import ru.surfstudio.ci.Result
-import ru.surfstudio.ci.pipeline.PrPipeline
 import ru.surfstudio.ci.pipeline.TagPipeline
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
-import static ru.surfstudio.ci.CommonUtil.printDefaultVar
+import static ru.surfstudio.ci.CommonUtil.printInitialVar
 
 class TagStages {
 
     def static initStageBody(TagPipeline ctx) {
         def script = ctx.script
-        printDefaultVar(script, 'checkoutStageStrategy', ctx.checkoutStageStrategy)
-        printDefaultVar(script,'buildStageStrategy', ctx.buildStageStrategy)
-        printDefaultVar(script,'unitTestStageStrategy', ctx.unitTestStageStrategy)
-        printDefaultVar(script,'smallInstrumentationTestStageStrategy', ctx.smallInstrumentationTestStageStrategy)
-        printDefaultVar(script,'staticCodeAnalysisStageStrategy', ctx.staticCodeAnalysisStageStrategy)
-        printDefaultVar(script,'betaUploadStageStrategy', ctx.betaUploadStageStrategy)
+        printInitialVar(script, 'checkoutStageStrategy', ctx.checkoutStageStrategy)
+        printInitialVar(script,'buildStageStrategy', ctx.buildStageStrategy)
+        printInitialVar(script,'unitTestStageStrategy', ctx.unitTestStageStrategy)
+        printInitialVar(script,'smallInstrumentationTestStageStrategy', ctx.smallInstrumentationTestStageStrategy)
+        printInitialVar(script,'staticCodeAnalysisStageStrategy', ctx.staticCodeAnalysisStageStrategy)
+        printInitialVar(script,'betaUploadStageStrategy', ctx.betaUploadStageStrategy)
 
 
         //Используем нестандартные стратегии для Stage из параметров, если они установлены

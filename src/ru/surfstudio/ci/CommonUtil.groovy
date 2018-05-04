@@ -1,8 +1,6 @@
 package ru.surfstudio.ci
 
 import ru.surfstudio.ci.pipeline.Pipeline
-import ru.surfstudio.ci.stage.Stage
-import ru.surfstudio.ci.stage.StageStrategy
 
 class CommonUtil {
 
@@ -72,8 +70,8 @@ class CommonUtil {
         }
     }
 
-    def static printDefaultVar(Object script, String varName, varValue) {
-        script.echo "default value of {$varName} is {$varValue}"
+    def static printInitialVar(Object script, String varName, varValue) {
+        script.echo "initial value of {$varName} is {$varValue}"
     }
 
     def static unsuccessReasonsToString(Pipeline pipeline){
@@ -87,5 +85,24 @@ class CommonUtil {
             }
         }
         return unsuccessReasons
+    }
+
+    def static printDefaultStageStrategies(Pipeline pipeline){
+        for (stage in pipeline.stages) {
+            printInitialVar(pipeline.script, stage.name + ".strategy", stage.strategy)
+        }
+    }
+
+    /**
+     * @param pipeline
+     * @param strategiesFromParams - map, key - stageName, value - new strategy value
+     */
+    def static applyStrategiesFromParams(Pipeline pipeline, Map strategiesFromParamsMap) {
+        strategiesFromParamsMap.each{ stageName, strategyValue ->
+            if(strategyValue) {
+                pipeline.getStage(stageName).strategy = strategyValue
+                pipeline.script.echo "value of ${stageName}.strategy sets from parameters to ${strategyValue}"
+            }
+        }
     }
 }

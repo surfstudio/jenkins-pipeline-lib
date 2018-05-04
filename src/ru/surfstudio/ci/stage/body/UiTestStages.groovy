@@ -5,23 +5,22 @@ import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Constants
 import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.Result
-import ru.surfstudio.ci.pipeline.TagPipeline
 import ru.surfstudio.ci.pipeline.UiTestPipeline
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 import static ru.surfstudio.ci.CommonUtil.getJiraTaskHtmlLink
-import static ru.surfstudio.ci.CommonUtil.printDefaultVar
+import static ru.surfstudio.ci.CommonUtil.printInitialVar
 
 class UiTestStages {
 
     def static initStageBody(UiTestPipeline ctx) {
         def script = ctx.script
-        printDefaultVar(script,'checkoutSourcesStageStrategy', ctx.checkoutSourcesStageStrategy)
-        printDefaultVar(script, 'checkoutTestsStageStrategy', ctx.checkoutTestsStageStrategy)
-        printDefaultVar(script, 'buildStageStrategy', ctx.buildStageStrategy)
-        printDefaultVar(script, 'prepareTestStageStrategy', ctx.prepareTestStageStrategy)
-        printDefaultVar(script, 'testStageStrategy', ctx.testStageStrategy)
-        printDefaultVar(script, 'publishResultsStageStrategy', ctx.publishResultsStageStrategy)
+        printInitialVar(script,'checkoutSourcesStageStrategy', ctx.checkoutSourcesStageStrategy)
+        printInitialVar(script, 'checkoutTestsStageStrategy', ctx.checkoutTestsStageStrategy)
+        printInitialVar(script, 'buildStageStrategy', ctx.buildStageStrategy)
+        printInitialVar(script, 'prepareTestStageStrategy', ctx.prepareTestStageStrategy)
+        printInitialVar(script, 'testStageStrategy', ctx.testStageStrategy)
+        printInitialVar(script, 'publishResultsStageStrategy', ctx.publishResultsStageStrategy)
 
         //Выбираем значения веток, прогона и тд из параметров, Установка их в параметры происходит
         // если триггером был webhook или если стартанули Job вручную

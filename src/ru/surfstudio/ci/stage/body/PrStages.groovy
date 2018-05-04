@@ -2,48 +2,38 @@ package ru.surfstudio.ci.stage.body
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.Result
+import ru.surfstudio.ci.pipeline.Pipeline
 import ru.surfstudio.ci.pipeline.PrPipeline
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
-import static ru.surfstudio.ci.CommonUtil.printDefaultVar
+import static ru.surfstudio.ci.CommonUtil.printInitialVar
 
 class PrStages {
 
     def static initStageBody(PrPipeline ctx) {
         def script = ctx.script
-        printDefaultVar(script, 'preMergeStageStrategy', ctx.preMergeStageStrategy)
-        printDefaultVar(script, 'buildStageStrategy', ctx.buildStageStrategy)
-        printDefaultVar(script, 'unitTestStageStrategy', ctx.unitTestStageStrategy)
-        printDefaultVar(script, 'smallInstrumentationTestStageStrategy', ctx.smallInstrumentationTestStageStrategy)
-        printDefaultVar(script, 'staticCodeAnalysisStageStrategy', ctx.staticCodeAnalysisStageStrategy)
+        CommonUtil.printDefaultStageStrategies(ctx)
 
         //Используем нестандартные стратегии для Stage из параметров, если они установлены
         //Параметры могут быть установлены только если Job стартовали вручную
-        applyParameterIfNotEmpty(script, 'preMergeStageStrategy', script.params.preMergeStageStrategy) {
-            param -> ctx.preMergeStageStrategy = param
-        }
-        applyParameterIfNotEmpty(script, 'buildStageStrategy', script.params.buildStageStrategy) {
-            param -> ctx.buildStageStrategy = param
-        }
-        applyParameterIfNotEmpty(script, 'unitTestStageStrategy', script.params.unitTestStageStrategy) {
-            param -> ctx.unitTestStageStrategy = param
-        }
-        applyParameterIfNotEmpty(script, 'smallInstrumentationTestStageStrategy', script.params.smallInstrumentationTestStageStrategy) {
-            param -> ctx.smallInstrumentationTestStageStrategy = param
-        }
-        applyParameterIfNotEmpty(script, 'staticCodeAnalysisStageStrategy', script.params.staticCodeAnalysisStageStrategy) {
-            param -> ctx.staticCodeAnalysisStageStrategy = param
-        }
+        def params = script.params
+        CommonUtil.applyStrategiesFromParams(ctx, [
+                (ctx.PRE_MERGE): params.preMergeStageStrategy,
+                (ctx.BUILD): params.buildStageStrategy,
+                (ctx.UNIT_TEST): params.unitTestStageStrategy,
+                (ctx.INSTRUMENTATION_TEST): params.smallInstrumentationTestStageStrategy,
+                (ctx.STATIC_CODE_ANALYSIS): params.staticCodeAnalysisStageStrategy
+        ])
 
         //Выбираем значения веток и автора из параметров, Установка их в параметры происходит
         // если триггером был webhook или если стартанули Job вручную
-        applyParameterIfNotEmpty(script, 'sourceBranch', script.params.sourceBranch, {
+        applyParameterIfNotEmpty(script, 'sourceBranch', params.sourceBranch, {
             value -> ctx.sourceBranch = value
         })
-        applyParameterIfNotEmpty(script, 'destinationBranch', script.params.destinationBranch, {
+        applyParameterIfNotEmpty(script, 'destinationBranch', params.destinationBranch, {
             value -> ctx.destinationBranch = value
         })
-        applyParameterIfNotEmpty(script, 'authorUsername', script.params.authorUsername, {
+        applyParameterIfNotEmpty(script, 'authorUsername', params.authorUsername, {
             value -> ctx.authorUsername = value
         })
 

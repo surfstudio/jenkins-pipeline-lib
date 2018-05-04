@@ -5,8 +5,6 @@ import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.stage.body.CommonAndroidStages
 import ru.surfstudio.ci.stage.body.PrStages
 
-import static ru.surfstudio.ci.CommonUtil.printDefaultVar
-
 class PrPipelineAndroid extends PrPipeline {
 
     public buildGradleTask = "clean assembleQa"
@@ -28,28 +26,28 @@ class PrPipelineAndroid extends PrPipeline {
     def init() {
         node = NodeProvider.getAndroidNode()
         stages = [
-                createStage('Init', StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     PrStages.initStageBody(this)
                 },
-                createStage('PreMerge', StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                createStage(PRE_MERGE, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     PrStages.preMergeStageBody(script, sourceBranch, destinationBranch)
                 },
-                createStage('Build', StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     CommonAndroidStages.buildStageBodyAndroid(script, buildGradleTask)
                 },
-                createStage('Unit Test', StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                createStage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     CommonAndroidStages.unitTestStageBodyAndroid(script,
                             unitTestGradleTask,
                             unitTestResultPathXml,
                             unitTestResultPathDirHtml)
                 },
-                createStage('Small Instrumentation Test', StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                createStage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     CommonAndroidStages.instrumentationTestStageBodyAndroid(script,
                             instrumentedTestGradleTask,
                             instrumentedTestResultPathXml,
                             instrumentedTestResultPathDirHtml)
                 },
-                createStage('Static Code Analysis', StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                createStage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     CommonAndroidStages.staticCodeAnalysisStageBody(script)
                 },
 
