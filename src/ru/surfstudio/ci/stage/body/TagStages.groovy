@@ -1,11 +1,9 @@
 package ru.surfstudio.ci.stage.body
 import ru.surfstudio.ci.CommonUtil
-import ru.surfstudio.ci.Constants
 import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.pipeline.TagPipeline
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
-import static ru.surfstudio.ci.CommonUtil.printInitialVar
 
 class TagStages {
 

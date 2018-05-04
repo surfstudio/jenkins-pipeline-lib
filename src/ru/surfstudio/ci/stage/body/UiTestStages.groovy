@@ -8,7 +8,6 @@ import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.UiTestPipeline
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
-import static ru.surfstudio.ci.CommonUtil.getJiraTaskHtmlLink
 import static ru.surfstudio.ci.CommonUtil.printInitialVar
 
 class UiTestStages {
@@ -50,7 +49,7 @@ class UiTestStages {
             value -> ctx.userEmail = value
         })
 
-        sendStartNotification()
+        sendStartNotification(ctx)
 
         //Достаем main branch для sourceRepo, если не указали в параметрах
         if (!ctx.sourceBranch) {
@@ -179,8 +178,8 @@ class UiTestStages {
     }
 
     def static sendFinishNotification(UiTestPipeline ctx) {
+        def testExecutionLink = CommonUtil.getJiraTaskHtmlLink(ctx.taskKey)
         def jenkinsLink = CommonUtil.getBuildUrlHtmlLink(ctx.script)
-        def testExecutionLink = getJiraTaskHtmlLink()
         def testExecutionName = ctx.taskName ? "\"${ctx.taskName}\"" : ""
         if (ctx.jobResult != Result.SUCCESS) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx)
