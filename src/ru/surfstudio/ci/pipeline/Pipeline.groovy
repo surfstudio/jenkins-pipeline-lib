@@ -30,7 +30,7 @@ abstract class Pipeline implements Serializable {
         script.node(node) {
             try {
                 for (Stage stage : stages) {
-                    stageWithStrategy(this, stage)
+                    stageWithStrategy(stage)
                 }
             }  finally {
                 script.echo "Finalize build:"
@@ -47,14 +47,14 @@ abstract class Pipeline implements Serializable {
                 return
             } else {
                 try {
-                    script.echo("stage ${stage.name} started")
+                    script.echo("Stage ${stage.name} started")
                     CommonUtil.notifyBitbucketAboutStageStart(script, stage.name)
                     stage.body()
                     stage.result = Result.SUCCESS
-                    script.echo("stage ${stage.name} success")
+                    script.echo("Stage ${stage.name} success")
                 } catch (e) {
-                    script.echo("stage ${stage.name} fail")
-                    script.echo("apply stage strategy: ${stage.strategy}")
+                    script.echo("Stage ${stage.name} fail")
+                    script.echo("Apply stage strategy: ${stage.strategy}")
                     if (stage.strategy == StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                         stage.result = Result.FAILURE
                         jobResult = Result.FAILURE
