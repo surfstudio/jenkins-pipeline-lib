@@ -93,7 +93,9 @@ class JarvisUtil {
         withJarvisToken(script) {
             def stageResultsBody = []
             for (stage in ctx.stages) {
-                stageResultsBody.add([name: stage.name, status: stage.result])
+                if(stage.result) {
+                    stageResultsBody.add([name: stage.name, status: stage.result])
+                }
             }
 
             def body = [
