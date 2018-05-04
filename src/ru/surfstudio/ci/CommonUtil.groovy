@@ -87,7 +87,7 @@ class CommonUtil {
         return unsuccessReasons
     }
 
-    def static printDefaultStageStrategies(Pipeline pipeline){
+    def static printInitialStageStrategies(Pipeline pipeline){
         for (stage in pipeline.stages) {
             printInitialVar(pipeline.script, stage.name + ".strategy", stage.strategy)
         }

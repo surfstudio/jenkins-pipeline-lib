@@ -8,18 +8,12 @@ import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.UiTestPipeline
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
-import static ru.surfstudio.ci.CommonUtil.printInitialVar
 
 class UiTestStages {
 
     def static initStageBody(UiTestPipeline ctx) {
         def script = ctx.script
-        printInitialVar(script,'checkoutSourcesStageStrategy', ctx.checkoutSourcesStageStrategy)
-        printInitialVar(script, 'checkoutTestsStageStrategy', ctx.checkoutTestsStageStrategy)
-        printInitialVar(script, 'buildStageStrategy', ctx.buildStageStrategy)
-        printInitialVar(script, 'prepareTestStageStrategy', ctx.prepareTestStageStrategy)
-        printInitialVar(script, 'testStageStrategy', ctx.testStageStrategy)
-        printInitialVar(script, 'publishResultsStageStrategy', ctx.publishResultsStageStrategy)
+        CommonUtil.printInitialStageStrategies(ctx)
 
         //Выбираем значения веток, прогона и тд из параметров, Установка их в параметры происходит
         // если триггером был webhook или если стартанули Job вручную

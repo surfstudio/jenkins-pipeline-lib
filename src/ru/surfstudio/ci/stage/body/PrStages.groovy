@@ -10,7 +10,7 @@ class PrStages {
 
     def static initStageBody(PrPipeline ctx) {
         def script = ctx.script
-        CommonUtil.printDefaultStageStrategies(ctx)
+        CommonUtil.printInitialStageStrategies(ctx)
 
         //Используем нестандартные стратегии для Stage из параметров, если они установлены
         //Параметры могут быть установлены только если Job стартовали вручную
