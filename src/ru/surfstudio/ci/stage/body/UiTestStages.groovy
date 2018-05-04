@@ -134,14 +134,14 @@ class UiTestStages {
         script.dir(outputsDir) {
             def testResult = script.readFile file: outputJsonFile
             script.echo "Test result json: $testResult"
-            script.withCredentials([usernamePassword(
+            script.withCredentials([script.usernamePassword(
                     credentialsId: jiraAuthenticationName,
                     usernameVariable: 'USERNAME',
                     passwordVariable: 'PASSWORD')]) {
 
-                script.echo "publish result bot username=$USERNAME"
+                script.echo "publish result bot username=${script.env.USERNAME}"
                 //http request plugin не пашет, видимо что то с форматом body
-                script.sh "curl -H \"Content-Type: application/json\" -X POST -u $USERNAME:$PASSWORD --data @${TEST_RESULT_JSON} ${JIRA_URL}rest/raven/1.0/import/execution/cucumber"
+                script.sh "curl -H \"Content-Type: application/json\" -X POST -u ${script.env.USERNAME}:${script.env.PASSWORD} --data @${outputJsonFile} ${Constants.JIRA_URL}rest/raven/1.0/import/execution/cucumber"
             }
 
 
