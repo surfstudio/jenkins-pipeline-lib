@@ -18,6 +18,5 @@ abstract class PrPipeline extends Pipeline {
 
     PrPipeline(Object script) {
         super(script)
-        script.echo "DEL pr ppl construct"
     }
 }

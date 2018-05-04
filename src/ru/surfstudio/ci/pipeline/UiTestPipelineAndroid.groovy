@@ -14,6 +14,10 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
     UiTestPipelineAndroid(Object script) {
         super(script)
+    }
+
+    @Override
+    def init() {
         node = NodeProvider.getAndroidNode()
         stages = [
                 createStage('Init', StageStrategy.FAIL_WHEN_STAGE_ERROR) {

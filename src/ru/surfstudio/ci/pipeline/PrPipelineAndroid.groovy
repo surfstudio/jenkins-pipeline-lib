@@ -20,16 +20,11 @@ class PrPipelineAndroid extends PrPipeline {
 
     PrPipelineAndroid(Object script) {
         super(script)
-        script.echo "DEL android pr ppl construct"
     }
 
     @Override
     def init() {
-        script.echo "DEL init started"
-        def nodeTmp = NodeProvider.getAndroidNode()
-        script.echo "DEL node temp"
         node = NodeProvider.getAndroidNode()
-        script.echo "DEL node provided"
         stages = [
                 createStage('Init', StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     PrStages.initStageBody(this)
@@ -57,8 +52,6 @@ class PrPipelineAndroid extends PrPipeline {
                 },
 
         ]
-        script.echo "DEL stages filled"
         finalizeBody = { PrStages.finalizeStageBody(this) }
-        script.echo "DEL final filled"
     }
 }

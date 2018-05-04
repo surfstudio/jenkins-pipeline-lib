@@ -112,7 +112,7 @@ class CommonUtil {
     def static unsuccessReasonsToString(Pipeline pipeline){
         def unsuccessReasons = ""
         for (stage in pipeline.stages) {
-            if (stage.result != Result.SUCCESS) {
+            if (stage.result && stage.result != Result.SUCCESS) {
                 if (!unsuccessReasons.isEmpty()) {
                     unsuccessReasons += ", "
                 }

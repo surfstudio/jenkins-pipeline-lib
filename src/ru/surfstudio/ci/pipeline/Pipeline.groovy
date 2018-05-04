@@ -16,10 +16,13 @@ abstract class Pipeline implements Serializable {
     public node
 
     Pipeline(script) {
-        script.echo "DEL ppl construct"
         this.script = script
     }
 
+    /**
+     * Инициализацию пайплайна нужно проводить здесь вместо конструктора из-за особенностей рантайм выполенния
+     * https://issues.jenkins-ci.org/browse/JENKINS-26313
+     */
     def init() {
 
     }

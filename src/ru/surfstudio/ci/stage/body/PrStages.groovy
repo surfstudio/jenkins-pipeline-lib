@@ -66,7 +66,7 @@ class PrStages {
                                         options: [
                                                 mergeStrategy  : 'MergeCommand.Strategy',
                                                 fastForwardMode: 'NO_FF',
-                                                mergeRemote    : 'script',
+                                                mergeRemote    : 'origin',
                                                 mergeTarget    : "${destinationBranch}"
                                         ]
                                 ]
