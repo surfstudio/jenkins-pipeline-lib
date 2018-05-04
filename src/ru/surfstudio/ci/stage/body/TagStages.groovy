@@ -1,6 +1,7 @@
 package ru.surfstudio.ci.stage.body
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Constants
+import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.pipeline.TagPipeline
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
@@ -10,34 +11,20 @@ class TagStages {
 
     def static initStageBody(TagPipeline ctx) {
         def script = ctx.script
-        printInitialVar(script, 'checkoutStageStrategy', ctx.checkoutStageStrategy)
-        printInitialVar(script,'buildStageStrategy', ctx.buildStageStrategy)
-        printInitialVar(script,'unitTestStageStrategy', ctx.unitTestStageStrategy)
-        printInitialVar(script,'smallInstrumentationTestStageStrategy', ctx.smallInstrumentationTestStageStrategy)
-        printInitialVar(script,'staticCodeAnalysisStageStrategy', ctx.staticCodeAnalysisStageStrategy)
-        printInitialVar(script,'betaUploadStageStrategy', ctx.betaUploadStageStrategy)
 
+        CommonUtil.printDefaultStageStrategies(ctx)
 
         //Используем нестандартные стратегии для Stage из параметров, если они установлены
         //Параметры могут быть установлены только если Job стартовали вручную
-        applyParameterIfNotEmpty(script,'checkoutStageStrategy', script.params.checkoutStageStrategy) {
-            param -> ctx.checkoutStageStrategy = param
-        }
-        applyParameterIfNotEmpty(script,'buildStageStrategy', script.params.buildStageStrategy) {
-            param -> ctx.buildStageStrategy = param
-        }
-        applyParameterIfNotEmpty(script,'unitTestStageStrategy', script.params.unitTestStageStrategy) {
-            param -> ctx.unitTestStageStrategy = param
-        }
-        applyParameterIfNotEmpty(script,'smallInstrumentationTestStageStrategy', script.params.smallInstrumentationTestStageStrategy) {
-            param -> ctx.smallInstrumentationTestStageStrategy = param
-        }
-        applyParameterIfNotEmpty(script,'staticCodeAnalysisStageStrategy', script.params.staticCodeAnalysisStageStrategy) {
-            param -> ctx.staticCodeAnalysisStageStrategy = param
-        }
-        applyParameterIfNotEmpty(script,'betaUploadStageStrategy', script.params.betaUploadStageStrategy) {
-            param -> ctx.betaUploadStageStrategy = param
-        }
+        def params = script.params
+        CommonUtil.applyStrategiesFromParams(ctx, [
+                (ctx.CHECKOUT): params.checkoutStageStrategy,
+                (ctx.BUILD): params.buildStageStrategy,
+                (ctx.UNIT_TEST): params.unitTestStageStrategy,
+                (ctx.INSTRUMENTATION_TEST): params.instrumentationTestStageStrategy,
+                (ctx.STATIC_CODE_ANALYSIS): params.staticCodeAnalysisStageStrategy,
+                (ctx.BETA_UPLOAD): params.betaUploadStageStrategy,
+        ])
 
         //Выбираем значения веток и автора из параметров, Установка их в параметры происходит
         // если триггером был webhook или если стартанули Job вручную
@@ -63,31 +50,7 @@ class TagStages {
     }
 
     def static finalizeStageBody(TagPipeline ctx) {
-        def script = ctx.script
-        def stageResultsBody = []
-        for (stage in ctx.stages) {
-            stageResultsBody.add([name: stage.name, status: stage.result])
-        }
-
-        def body = [
-                build   : [
-                        job_name     : script.env.JOB_NAME,
-                        number : script.env.BUILD_NUMBER,
-                        status : ctx.jobResult,
-                        stages_result: stageResultsBody
-                ],
-                repo_url: script.scm.userRemoteConfigs[0].url,
-                ci_url  : script.env.JENKINS_URL,
-                tag_name : ctx.repoTag
-        ]
-        def jsonBody = groovy.json.JsonOutput.toJson(body)
-        script.echo "jarvis request body: $jsonBody"
-        script.httpRequest consoleLogResponseBody: true,
-                contentType: 'APPLICATION_JSON',
-                httpMode: 'POST',
-                requestBody: jsonBody,
-                url: "${Constants.JARVIS_URL}webhooks/version/",
-                validResponseCodes: '202'
+        JarvisUtil.createVersionAndNotify(ctx)
     }
 
 

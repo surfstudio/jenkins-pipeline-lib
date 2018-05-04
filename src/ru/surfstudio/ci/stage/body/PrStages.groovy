@@ -21,7 +21,7 @@ class PrStages {
                 (ctx.PRE_MERGE): params.preMergeStageStrategy,
                 (ctx.BUILD): params.buildStageStrategy,
                 (ctx.UNIT_TEST): params.unitTestStageStrategy,
-                (ctx.INSTRUMENTATION_TEST): params.smallInstrumentationTestStageStrategy,
+                (ctx.INSTRUMENTATION_TEST): params.instrumentationTestStageStrategy,
                 (ctx.STATIC_CODE_ANALYSIS): params.staticCodeAnalysisStageStrategy
         ])
 
