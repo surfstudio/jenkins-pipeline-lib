@@ -9,13 +9,14 @@ import static ru.surfstudio.ci.CommonUtil.stageWithStrategy
 
 abstract class Pipeline implements Serializable {
 
-    public script //Jenkins Pipeline Script context
+    public script //Jenkins Pipeline Script
     public jobResult = Result.SUCCESS
     public List<Stage> stages
     public Closure finalizeBody
     public node
 
     Pipeline(script) {
+        script.echo "DEL ppl construct"
         this.script = script
     }
 

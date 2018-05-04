@@ -11,6 +11,7 @@ class PrStages {
 
     def static initStageBody(PrPipeline ctx) {
         def script = ctx.script
+        Error
         printDefaultVar(script, 'preMergeStageStrategy', ctx.preMergeStageStrategy)
         printDefaultVar(script, 'buildStageStrategy', ctx.buildStageStrategy)
         printDefaultVar(script, 'unitTestStageStrategy', ctx.unitTestStageStrategy)
@@ -58,7 +59,7 @@ class PrStages {
                         $class                           : 'GitSCM',
                         branches                         : [[name: "${sourceBranch}"]],
                         doGenerateSubmoduleConfigurations: false,
-                        userRemoteConfigs                :script.scm.userRemoteConfigs,
+                        userRemoteConfigs                : script.scm.userRemoteConfigs,
                         extensions                       : [
                                 [
                                         $class : 'PreBuildMerge',
