@@ -18,6 +18,11 @@ abstract class Pipeline implements Serializable {
     Pipeline(script) {
         script.echo "DEL ppl construct"
         this.script = script
+        init()
+    }
+
+    def init() {
+
     }
 
     def run() {

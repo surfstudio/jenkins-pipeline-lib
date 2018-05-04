@@ -21,6 +21,11 @@ class PrPipelineAndroid extends PrPipeline {
     PrPipelineAndroid(Object script) {
         super(script)
         script.echo "DEL android pr ppl construct"
+    }
+
+    @Override
+    def init() {
+        script.echo "DEL init started"
         def nodeTmp = NodeProvider.getAndroidNode()
         script.echo "DEL node temp"
         node = NodeProvider.getAndroidNode()
