@@ -13,7 +13,6 @@ class TagStages {
 
     def static initStageBody(TagPipeline ctx) {
         def script = ctx.script
-        script.echo "Init started"
         printDefaultVar(script, 'checkoutStageStrategy', ctx.checkoutStageStrategy)
         printDefaultVar(script,'buildStageStrategy', ctx.buildStageStrategy)
         printDefaultVar(script,'unitTestStageStrategy', ctx.unitTestStageStrategy)
@@ -54,25 +53,20 @@ class TagStages {
     }
 
     def static checkoutStageBody(Object script, String repoTag) {
-        script.echo "Checkout started"
         script.checkout([
                 $class                           : 'GitSCM',
                 branches                         : [[name: "refs/tags/${repoTag}"]],
                 doGenerateSubmoduleConfigurations: script.scm.doGenerateSubmoduleConfigurations,
                 userRemoteConfigs                : script.scm.userRemoteConfigs,
         ])
-        script.echo 'Checkout Success'
-
     }
 
     def static betaUploadStageBodyAndroid(Object script, String betaUploadGradleTask) {
-        script.echo "Beta Upload started"
         script.sh "./gradlew ${betaUploadGradleTask}"
     }
 
     def static finalizeStageBody(TagPipeline ctx) {
         def script = ctx.script
-        script.echo "Finalize"
         def stageResultsBody = []
         for (stage in ctx.stages) {
             stageResultsBody.add([name: stage.name, status: stage.result])

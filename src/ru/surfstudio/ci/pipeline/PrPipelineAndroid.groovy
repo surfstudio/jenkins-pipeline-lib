@@ -5,6 +5,8 @@ import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.stage.body.CommonAndroidStages
 import ru.surfstudio.ci.stage.body.PrStages
 
+import static ru.surfstudio.ci.CommonUtil.printDefaultVar
+
 class PrPipelineAndroid extends PrPipeline {
 
     public buildGradleTask = "clean assembleQa"
@@ -30,9 +32,11 @@ class PrPipelineAndroid extends PrPipeline {
                     PrStages.initStageBody(this)
                 },
                 createStage('PreMerge', preMergeStageStrategy) {
+                    printDefaultVar(script, 'buildStageStrategy', buildStageStrategy)
                     PrStages.preMergeStageBody(script, sourceBranch, destinationBranch)
                 },
                 createStage('Build', buildStageStrategy) {
+                    printDefaultVar(script, 'buildStageStrategy', buildStageStrategy)
                     CommonAndroidStages.buildStageBodyAndroid(script, buildGradleTask)
                 },
                 createStage('Unit Test', unitTestStageStrategy) {

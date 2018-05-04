@@ -33,9 +33,8 @@ abstract class Pipeline implements Serializable {
                 for (Stage stage : stages) {
                     stageWithStrategy(this, stage)
                 }
-            } catch (e){
-                script.echo e.toString() //todo del
-            } finally {
+            }  finally {
+                script.echo "Finalize build:"
                 script.currentBuild.result = jobResult
                 finalizeBody()
             }

@@ -11,7 +11,6 @@ class PrStages {
 
     def static initStageBody(PrPipeline ctx) {
         def script = ctx.script
-        script.echo "Init started"
         printDefaultVar(script, 'preMergeStageStrategy', ctx.preMergeStageStrategy)
         printDefaultVar(script, 'buildStageStrategy', ctx.buildStageStrategy)
         printDefaultVar(script, 'unitTestStageStrategy', ctx.unitTestStageStrategy)
@@ -52,7 +51,6 @@ class PrStages {
     }
 
     def static preMergeStageBody(Object script, String sourceBranch, String destinationBranch) {
-        script.echo "PreMerge started"
         script.sh 'git config --global user.name "Jenkins"'
         script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
         script.checkout changelog: true, poll: true, scm:
@@ -73,11 +71,9 @@ class PrStages {
                                 ]
                         ]
                 ]
-        script.echo 'PreMerge Success'
     }
 
     def static finalizeStageBody(PrPipeline ctx){
-        ctx.script.echo "Finalize"
         if (ctx.jobResult != Result.SUCCESS) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx)
             def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlHtmlLink(ctx.script)}"

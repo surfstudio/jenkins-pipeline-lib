@@ -6,7 +6,6 @@ import ru.surfstudio.ci.CommonUtil
 class CommonAndroidStages {
 
     def static buildStageBodyAndroid(Object script, String buildGradleTask) {
-        script.echo "Build started"
         script.sh "./gradlew ${buildGradleTask}"
         script.step([$class: 'ArtifactArchiver', artifacts: '**/*.apk'])
         CommonUtil.safe(script) {
@@ -15,7 +14,6 @@ class CommonAndroidStages {
     }
 
     def static unitTestStageBodyAndroid(Object script, String unitTestGradleTask, String testResultPathXml, String testResultPathDirHtml) {
-        script.echo "Unit tests started"
         try {
             script.sh "./gradlew ${unitTestGradleTask}"
         } finally {
@@ -32,7 +30,6 @@ class CommonAndroidStages {
     }
 
     def static instrumentationTestStageBodyAndroid(Object script, String testGradleTask, String testResultPathXml, String testResultPathDirHtml) {
-        script.echo "Instrumented tests started"
         AndroidUtil.onEmulator(script, "avd-main"){
             try {
                 script.sh "./gradlew uninstallAll ${testGradleTask}"
@@ -50,7 +47,6 @@ class CommonAndroidStages {
     }
 
     def static staticCodeAnalysisStageBody(Object script) {
-        script.echo "Static Code Analysis started"
         script.echo "empty"
         //todo
     }
