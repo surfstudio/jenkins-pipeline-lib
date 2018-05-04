@@ -18,18 +18,24 @@ class CommonUtil {
                     stage.body()
                     stage.result = Result.SUCCESS
                 } catch (e) {
+                    script.echo("stage ${stage.name} fail")
+                    script.echo("apply stage strategy: ${stage.strategy}")
                     if (stage.strategy == StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                        script.echo("apply stage strategy: fail") //todo del
                         stage.result = Result.FAILURE
                         ctx.jobResult = Result.FAILURE
                         throw e
                     } else if (stage.strategy == StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                        script.echo("apply stage strategy: unstable") //todo del
                         stage.result = Result.UNSTABLE
                         if (ctx.jobResult != Result.FAILURE) {
                             ctx.jobResult = Result.UNSTABLE
                         }
                     } else if (stage.strategy == StageStrategy.SUCCESS_WHEN_STAGE_ERROR) {
+                        script.echo("apply stage strategy: success") //todo del
                         stage.result = Result.SUCCESS
                     }  else {
+                        script.echo("apply stage strategy: unrecognized") //todo del
                         script.error("Unsupported strategy " + stage.strategy)
                     }
                 } finally {

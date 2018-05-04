@@ -30,9 +30,11 @@ abstract class Pipeline implements Serializable {
     def run() {
         script.node(node) {
             try {
-                for(Stage stage : stages) {
+                for (Stage stage : stages) {
                     stageWithStrategy(this, stage)
                 }
+            } catch (e){
+                script.echo e.toString() //todo del
             } finally {
                 script.currentBuild.result = jobResult
                 finalizeBody()
