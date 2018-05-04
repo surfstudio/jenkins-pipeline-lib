@@ -28,7 +28,7 @@ class TagStages {
         // если триггером был webhook или если стартанули Job вручную
         //Используется имя repoTag_0 из за особенностей jsonPath в GenericWebhook plugin
         applyParameterIfNotEmpty(script,'repoTag', script.params.repoTag_0, {
-            value -> repoTag = value
+            value -> ctx.repoTag = value
         })
 
         CommonUtil.abortDuplicateBuilds(script, ctx.repoTag)
