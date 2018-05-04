@@ -16,6 +16,7 @@ class UiTestStages {
 
     def static initStageBody(UiTestPipeline ctx) {
         def script = ctx.script
+        script.echo "Init started"
         printDefaultVar(script,'checkoutSourcesStageStrategy', ctx.checkoutSourcesStageStrategy)
         printDefaultVar(script, 'checkoutTestsStageStrategy', ctx.checkoutTestsStageStrategy)
         printDefaultVar(script, 'buildStageStrategy', ctx.buildStageStrategy)
@@ -62,12 +63,14 @@ class UiTestStages {
     }
 
     def static checkoutSourcesBody(Object script, String sourcesDir, String sourceRepoUrl, String sourceBranch) {
+        script.echo "Checkout Sources started"
         script.dir(sourcesDir) {
             script.git(url: sourceRepoUrl, branch: sourceBranch)
         }
     }
 
     def static checkoutTestsStageBody(Object script, String testBranch) {
+        script.echo "Checkout Tests started"
         script.checkout([
                 $class                           : 'GitSCM',
                 branches                         : [[name: "${testBranch}"]],
@@ -77,12 +80,14 @@ class UiTestStages {
     }
 
     def static buildStageBodyAndroid(Object script, String sourcesDir, String buildGradleTask) {
+        script.echo "Build started"
         script.dir(sourcesDir) {
             script.sh "./gradlew ${buildGradleTask}"
         }
     }
 
     def static prepareApkStageBodyAndroid(Object script, String builtApkPattern, String newApkForTest) {
+        script.echo "Prepare Apk started"
         script.step([$class: 'ArtifactArchiver', artifacts: builtApkPattern])
 
         def files = script.findFiles(glob: builtApkPattern)
@@ -101,7 +106,8 @@ class UiTestStages {
                                      String jiraAuthenticationName,
                                      String taskKey,
                                      String featuresDir,
-                                     String newFeatureForTest){
+                                     String newFeatureForTest) {
+        script.echo "Prepare Tests started"
         def response = script.httpRequest consoleLogResponseBody: true,
                 url: "${Constants.JIRA_URL}rest/raven/1.0/export/test?keys=${taskKey}",
                 authentication: jiraAuthenticationName
@@ -120,6 +126,7 @@ class UiTestStages {
                              String featureFile,
                              String outputHtmlFile,
                              String outputJsonFile) {
+        script.echo "Tests started"
         AndroidUtil.onEmulator(script, "avd-main"){
             script.echo "start tests for $artifactForTest $taskKey"
             CommonUtil.safe(script) {
@@ -136,6 +143,7 @@ class UiTestStages {
                                        String outputHtmlFile,
                                        String jiraAuthenticationName,
                                        String htmlReportName) {
+        script.echo "Publish Results started"
         script.dir(outputsDir) {
             def testResult = script.readFile file: outputJsonFile
             script.echo "Test result json: $testResult"
@@ -163,9 +171,10 @@ class UiTestStages {
 
     def static finalizeStageBody(UiTestPipeline ctx) {
         def script = ctx.script
+        script.echo "Finalize"
         sendFinishNotification(ctx)
         def newTaskStatus = ctx.jobResult == Result.SUCCESS ? "DONE" : "BLOCKED"
-        JarvisUtil.changeTaskStatus(ctx.script, newTaskStatus, ctx.taskKey)
+        JarvisUtil.changeTaskStatus(script, newTaskStatus, ctx.taskKey)
     }
 
     // ================================== UTILS ===================================

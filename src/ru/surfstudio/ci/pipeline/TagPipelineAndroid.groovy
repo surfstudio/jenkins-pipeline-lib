@@ -21,7 +21,6 @@ class TagPipelineAndroid extends TagPipeline {
 
     TagPipelineAndroid(Object script) {
         super(script)
-
     }
 
     @Override
