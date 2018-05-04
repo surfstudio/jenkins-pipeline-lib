@@ -36,8 +36,8 @@ abstract class Pipeline implements Serializable {
     public Closure finalizeBody
     public node
 
-    public preExecuteStageBody
-    public postExecuteStageBody
+    public preExecuteStageBody = { stage -> CommonUtil.notifyBitbucketAboutStageStart(script, stage.name) }
+    public postExecuteStageBody = { stage -> CommonUtil.notifyBitbucketAboutStageFinish(script, stage.name, stage.result == Result.SUCCESS)}
 
     Pipeline(script) {
         this.script = script
