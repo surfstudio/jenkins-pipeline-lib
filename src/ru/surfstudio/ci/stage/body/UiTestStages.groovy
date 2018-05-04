@@ -43,7 +43,9 @@ class UiTestStages {
             value -> ctx.userEmail = value
         })
 
-        sendStartNotification(ctx)
+        if(ctx.notificationEnabled) {
+            sendStartNotification(ctx)
+        }
 
         //Достаем main branch для sourceRepo, если не указали в параметрах
         if (!ctx.sourceBranch) {
@@ -156,7 +158,9 @@ class UiTestStages {
 
     def static finalizeStageBody(UiTestPipeline ctx) {
         def script = ctx.script
-        sendFinishNotification(ctx)
+        if(ctx.notificationEnabled) {
+            sendFinishNotification(ctx)
+        }
         def newTaskStatus = ctx.jobResult == Result.SUCCESS ? "DONE" : "BLOCKED"
         JarvisUtil.changeTaskStatus(script, newTaskStatus, ctx.taskKey)
     }

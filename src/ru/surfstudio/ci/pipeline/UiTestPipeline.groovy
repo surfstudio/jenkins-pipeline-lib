@@ -23,6 +23,9 @@ abstract class UiTestPipeline extends Pipeline {
     public taskName = ""
     public userEmail = ""
 
+    //notification
+    public notificationEnabled = true
+
     UiTestPipeline(Object script) {
         super(script)
     }
