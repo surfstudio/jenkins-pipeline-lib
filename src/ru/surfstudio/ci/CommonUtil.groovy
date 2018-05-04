@@ -8,12 +8,13 @@ class CommonUtil {
 
      def static stageWithStrategy(Pipeline ctx, Stage stage) {
         //https://issues.jenkins-ci.org/browse/JENKINS-39203 подождем пока сделают разные статусы на разные Stage
-        ctx.script.stage(stage.name) {
+         def script = ctx.script
+         script.stage(stage.name) {
             if (stage.strategy == StageStrategy.SKIP_STAGE) {
                 return
             } else {
                 try {
-                    notifyBitbucketAboutStageStart(ctx.script, stage.name)
+                    notifyBitbucketAboutStageStart(script, stage.name)
                     stage.body()
                     stage.result = Result.SUCCESS
                 } catch (e) {
@@ -29,10 +30,10 @@ class CommonUtil {
                     } else if (stage.strategy == StageStrategy.SUCCESS_WHEN_STAGE_ERROR) {
                         stage.result = Result.SUCCESS
                     }  else {
-                        ctx.script.error("Unsupported strategy " + stage.strategy)
+                        script.error("Unsupported strategy " + stage.strategy)
                     }
                 } finally {
-                    notifyBitbucketAboutStageFinish(ctx.script, stage.name, stage.result == Result.SUCCESS)
+                    notifyBitbucketAboutStageFinish(script, stage.name, stage.result == Result.SUCCESS)
                 }
             }
         }
@@ -89,7 +90,7 @@ class CommonUtil {
         }
     }
 
-    def static safe(Object script, Closure body){
+    def static safe(Object script, Closure body) {
         try {
             body()
         } catch (e){

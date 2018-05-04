@@ -26,25 +26,25 @@ class PrPipelineAndroid extends PrPipeline {
                     PrStages.initStageBody(this)
                 },
                 createStage('PreMerge', preMergeStageStrategy) {
-                    PrStages.preMergeStageBody(origin, sourceBranch, destinationBranch)
+                    PrStages.preMergeStageBody(script, sourceBranch, destinationBranch)
                 },
                 createStage('Build', buildStageStrategy) {
-                    CommonAndroidStages.buildStageBodyAndroid(origin, buildGradleTask)
+                    CommonAndroidStages.buildStageBodyAndroid(script, buildGradleTask)
                 },
                 createStage('Unit Test', unitTestStageStrategy) {
-                    CommonAndroidStages.unitTestStageBodyAndroid(origin,
+                    CommonAndroidStages.unitTestStageBodyAndroid(script,
                             unitTestGradleTask,
                             unitTestResultPathXml,
                             unitTestResultPathDirHtml)
                 },
                 createStage('Small Instrumentation Test', smallInstrumentationTestStageStrategy) {
-                    CommonAndroidStages.instrumentationTestStageBodyAndroid(origin,
+                    CommonAndroidStages.instrumentationTestStageBodyAndroid(script,
                             instrumentedTestGradleTask,
                             instrumentedTestResultPathXml,
                             instrumentedTestResultPathDirHtml)
                 },
                 createStage('Static Code Analysis', staticCodeAnalysisStageStrategy) {
-                    CommonAndroidStages.staticCodeAnalysisStageBody(origin)
+                    CommonAndroidStages.staticCodeAnalysisStageBody(script)
                 },
 
         ]
