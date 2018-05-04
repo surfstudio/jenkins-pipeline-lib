@@ -22,6 +22,7 @@ class PrPipelineAndroid extends PrPipeline {
         super(script)
         script.echo "DEL android pr ppl construct"
         def nodeTmp = NodeProvider.getAndroidNode()
+        script.echo "DEL node temp"
         node = NodeProvider.getAndroidNode()
         script.echo "DEL node provided"
         stages = [
