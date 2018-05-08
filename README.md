@@ -52,6 +52,9 @@ pipeline.getStage(pipeline.INSTRUMENTATION_TEST).body = {
 pipeline.run()
 ```
 
+###Шаблоны
+В папке templates находятся стандартные Jenkins скрипты для разных типов проектов (android, ios, ui_test)
+
 ###Инструменты
 Для работы с библиотекой удобно использовать [IntelliJ IDEA](https://www.jetbrains.com/idea/) c установленным [Groovy](http://groovy-lang.org/install.html).
 В ProjectStructure на вкладке Modules директорию "src" следует пометить как "Sources" 
