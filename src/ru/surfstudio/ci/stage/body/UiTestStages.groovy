@@ -180,7 +180,7 @@ class UiTestStages {
         def jenkinsLink = CommonUtil.getBuildUrlHtmlLink(ctx.script)
         def testExecutionName = ctx.taskName ? "\"${ctx.taskName}\"" : ""
         if (ctx.jobResult != Result.SUCCESS) {
-            def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx)
+            def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
             def message = "Tесты прогона ${testExecutionLink} ${testExecutionName} не выполнены из-за этапов: ${unsuccessReasons}. ${jenkinsLink}"
             sendMessage(ctx, message, false)
         } else {

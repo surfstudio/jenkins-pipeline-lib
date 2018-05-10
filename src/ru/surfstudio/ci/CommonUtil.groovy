@@ -1,6 +1,7 @@
 package ru.surfstudio.ci
 
 import ru.surfstudio.ci.pipeline.Pipeline
+import ru.surfstudio.ci.stage.Stage
 
 class CommonUtil {
 
@@ -74,9 +75,9 @@ class CommonUtil {
         script.echo "initial value of {$varName} is {$varValue}"
     }
 
-    def static unsuccessReasonsToString(Pipeline pipeline){
+    def static unsuccessReasonsToString(List<Stage> stages){
         def unsuccessReasons = ""
-        for (stage in pipeline.stages) {
+        for (stage in stages) {
             if (stage.result && stage.result != Result.SUCCESS) {
                 if (!unsuccessReasons.isEmpty()) {
                     unsuccessReasons += ", "
