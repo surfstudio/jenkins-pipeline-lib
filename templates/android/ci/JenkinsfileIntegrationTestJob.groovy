@@ -52,9 +52,9 @@ pipeline.stages = [
 ]
 
 pipeline.finalizeBody = {
-    def jenkinsLink = CommonUtil.getBuildUrlHtmlLink(ctx.script)
+    def jenkinsLink = CommonUtil.getBuildUrlHtmlLink(this)
     def message
-    def success = ctx.jobResult != Result.SUCCESS
+    def success = pipeline.jobResult != Result.SUCCESS
     if (success) {
         def unsuccessReasons = CommonUtil.unsuccessReasonsToString(pipeline.stages)
         message = "Интеграционные тесты не выполнены из-за этапов: ${unsuccessReasons}. ${jenkinsLink}"
