@@ -4,22 +4,22 @@ import ru.surfstudio.ci.CommonUtil
 
 class CommoniOSStages {
 
-    def static buildStageBodyAndroid(Object script) {
+    def static buildStageBodyiOS(Object script) {
         script.sh "make init"
         script.sh "make build"
     }
 
-    def static unitTestStageBodyAndroid(Object script) {
+    def static unitTestStageBodyiOS(Object script) {
         script.echo "empty"
         // TODO: Implement me
     }
 
-    def static instrumentationTestStageBodyAndroid(Object script) {
+    def static instrumentationTestStageBodyiOS(Object script) {
         script.echo "empty"
         // TODO: Implement me
     }
 
-    def static staticCodeAnalysisStageBody(Object script) {
+    def static staticCodeAnalysisStageBodyiOS(Object script) {
         script.sh "make sonar"
     }
 

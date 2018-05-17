@@ -22,16 +22,16 @@ class PrPipelineiOS extends PrPipeline {
                     PrStages.preMergeStageBody(script, sourceBranch, destinationBranch)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    CommoniOSStages.buildStageBodyAndroid(script)
+                    CommoniOSStages.buildStageBodyiOS(script)
                 },
                 createStage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    CommoniOSStages.unitTestStageBodyAndroid(script)
+                    CommoniOSStages.unitTestStageBodyiOS(script)
                 },
                 createStage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    CommoniOSStages.instrumentationTestStageBodyAndroid(script)
+                    CommoniOSStages.instrumentationTestStageBodyiOS(script)
                 },
                 createStage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    CommoniOSStages.staticCodeAnalysisStageBody(script)
+                    CommoniOSStages.staticCodeAnalysisStageBodyiOS(script)
                 }
         ]
         finalizeBody = { PrStages.finalizeStageBody(this) }
