@@ -51,7 +51,7 @@ class PrStages {
                                 [
                                         $class : 'PreBuildMerge',
                                         options: [
-                                                mergeStrategy  : 'MergeCommand.Strategy',
+                                                mergeStrategy  : 'DEFAULT',
                                                 fastForwardMode: 'NO_FF',
                                                 mergeRemote    : 'origin',
                                                 mergeTarget    : "${destinationBranch}"
