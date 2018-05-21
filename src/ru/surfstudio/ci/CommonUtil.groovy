@@ -32,7 +32,7 @@ class CommonUtil {
         return "<a href=\"${Constants.JIRA_URL}browse/${taskKey}\">${taskKey}</a>"
     }
 
-    def static shWithRuby(Object script, String command, String version = "2.4.4") {
+    def static shWithRuby(Object script, String command, String version = "2.3.5") {
         script.sh "set +x; source /home/jenkins/.bashrc; source /usr/share/rvm/scripts/rvm; rvm use $version; $command"
     }
 
