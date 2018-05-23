@@ -167,12 +167,14 @@ class UiTestStages {
     }
 
     def static finalizeStageBody(UiTestPipeline ctx) {
-        def script = ctx.script
-        if(ctx.notificationEnabled) {
-            sendFinishNotification(ctx)
+        if(!ifBulkJob(ctx)) {
+            def script = ctx.script
+            if (ctx.notificationEnabled) {
+                sendFinishNotification(ctx)
+            }
+            def newTaskStatus = ctx.jobResult == Result.SUCCESS ? "DONE" : "BLOCKED"
+            JarvisUtil.changeTaskStatus(script, newTaskStatus, ctx.taskKey)
         }
-        def newTaskStatus = ctx.jobResult == Result.SUCCESS ? "DONE" : "BLOCKED"
-        JarvisUtil.changeTaskStatus(script, newTaskStatus, ctx.taskKey)
     }
 
     // ================================== UTILS ===================================
