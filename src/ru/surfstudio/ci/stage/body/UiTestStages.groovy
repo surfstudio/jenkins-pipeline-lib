@@ -215,12 +215,14 @@ class UiTestStages {
             script.echo "Parallel bulk UI TEST job"
             def tasks = ctx.taskKey.split(",")
             for (task in tasks) {
-                script.build job: script.env.JOB_NAME, parameters: [
-                        script.string(name: 'taskKey', value: task.trim()),
-                        script.string(name: 'testBranch', value: ctx.testBranch),
-                        script.string(name: 'sourceBranch', value: ctx.sourceBranch),
-                        script.string(name: 'userEmail', value: ctx.userEmail)
-                ]
+                CommonUtil.safe(script) {
+                    script.build job: script.env.JOB_NAME, parameters: [
+                            script.string(name: 'taskKey', value: task.trim()),
+                            script.string(name: 'testBranch', value: ctx.testBranch),
+                            script.string(name: 'sourceBranch', value: ctx.sourceBranch),
+                            script.string(name: 'userEmail', value: ctx.userEmail)
+                    ]
+                }
             }
             for (stage in ctx.stages) {
                 if (stage.name != ctx.INIT) {
