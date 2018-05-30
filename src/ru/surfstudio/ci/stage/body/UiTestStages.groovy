@@ -6,6 +6,7 @@ import ru.surfstudio.ci.Constants
 import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.UiTestPipeline
+import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 
@@ -53,11 +54,20 @@ class UiTestStages {
         }
 
         CommonUtil.abortDuplicateBuilds(script, "taskKey: ${ctx.taskKey}, testBranch: ${ctx.testBranch}, sourceBranch: ${ctx.sourceBranch}")
+
+        checkAndParallelBulkJob(ctx)
     }
 
     def static checkoutSourcesBody(Object script, String sourcesDir, String sourceRepoUrl, String sourceBranch) {
+        def credentialsId = script.scm.userRemoteConfigs.first().credentialsId
+        script.echo("Using credentials ${credentialsId} for checkout")
         script.dir(sourcesDir) {
-            script.git(url: sourceRepoUrl, branch: sourceBranch)
+            script.checkout([
+                    $class                           : 'GitSCM',
+                    branches                         : [[name: "${sourceBranch}"]],
+                    doGenerateSubmoduleConfigurations: script.scm.doGenerateSubmoduleConfigurations,
+                    userRemoteConfigs                : [[credentialsId: credentialsId, url:sourceRepoUrl]],
+            ])
         }
     }
 
@@ -157,22 +167,27 @@ class UiTestStages {
     }
 
     def static finalizeStageBody(UiTestPipeline ctx) {
-        def script = ctx.script
-        if(ctx.notificationEnabled) {
-            sendFinishNotification(ctx)
+        if(!ifBulkJob(ctx)) {
+            def script = ctx.script
+            if (ctx.notificationEnabled) {
+                sendFinishNotification(ctx)
+            }
+            def newTaskStatus = ctx.jobResult == Result.SUCCESS ? "DONE" : "BLOCKED"
+            JarvisUtil.changeTaskStatus(script, newTaskStatus, ctx.taskKey)
         }
-        def newTaskStatus = ctx.jobResult == Result.SUCCESS ? "DONE" : "BLOCKED"
-        JarvisUtil.changeTaskStatus(script, newTaskStatus, ctx.taskKey)
     }
 
     // ================================== UTILS ===================================
 
     def static sendStartNotification(UiTestPipeline ctx) {
-        def testExecutionLink = CommonUtil.getJiraTaskHtmlLink(ctx.taskKey)
         def jenkinsLink = CommonUtil.getBuildUrlHtmlLink(ctx.script)
-        def testExecutionName = ctx.taskName ? "\"${ctx.taskName}\"" : ""
-
-        sendMessage(ctx,"Запущено выполнение тестов прогона ${testExecutionLink} ${testExecutionName}. ${jenkinsLink}", true)
+        if(ifBulkJob(ctx)){
+            sendMessage(ctx,"Запущено параллельное выполнение тестов прогонов ${ctx.taskKey}. ${jenkinsLink}", true)
+        } else {
+            def testExecutionLink = CommonUtil.getJiraTaskHtmlLink(ctx.taskKey)
+            def testExecutionName = ctx.taskName ? "\"${ctx.taskName}\"" : ""
+            sendMessage(ctx, "Запущено выполнение тестов прогона ${testExecutionLink} ${testExecutionName}. ${jenkinsLink}", true)
+        }
     }
 
     def static sendFinishNotification(UiTestPipeline ctx) {
@@ -194,6 +209,33 @@ class UiTestStages {
         } else {
             JarvisUtil.sendMessageToGroup(ctx.script, message, ctx.sourceRepoUrl, "bitbucket", success)
         }
+    }
+
+    def static checkAndParallelBulkJob(UiTestPipeline ctx) {
+        if(ifBulkJob(ctx)) {
+            def script = ctx.script
+            script.echo "Parallel bulk UI TEST job"
+            def tasks = ctx.taskKey.split(",")
+            for (task in tasks) {
+                CommonUtil.safe(script) {
+                    script.build job: script.env.JOB_NAME, parameters: [
+                            script.string(name: 'taskKey', value: task.trim()),
+                            script.string(name: 'testBranch', value: ctx.testBranch),
+                            script.string(name: 'sourceBranch', value: ctx.sourceBranch),
+                            script.string(name: 'userEmail', value: ctx.userEmail)
+                    ]
+                }
+            }
+            for (stage in ctx.stages) {
+                if (stage.name != ctx.INIT) {
+                    stage.strategy = StageStrategy.SKIP_STAGE
+                }
+            }
+        }
+    }
+
+    def static ifBulkJob(UiTestPipeline ctx){
+        return ctx.taskKey.contains(",")
     }
 
 }
