@@ -40,6 +40,10 @@ abstract class UiTestPipeline extends Pipeline {
     //notification
     public notificationEnabled = true
 
+    //ios
+    public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
+    public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey"
+
     UiTestPipeline(Object script) {
         super(script)
     }
