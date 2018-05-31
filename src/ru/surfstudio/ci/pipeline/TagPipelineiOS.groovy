@@ -16,24 +16,34 @@ class PrPipelineiOS extends PrPipeline {
         node = NodeProvider.getiOSNode()
         stages = [
                 createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    PrStages.initStageBody(this)
+                    TagStages.initStageBody(this)
                 },
-                createStage(PRE_MERGE, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    PrStages.preMergeStageBody(script, sourceBranch, destinationBranch)
+                createStage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                    TagStages.checkoutStageBody(script, repoTag)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    TagiOSStages.buildStageBodyiOS(script)
+                    CommoniOSStages.buildStageBodyiOS(script,
+                        iOSKeychainCredenialId,
+                        iOSCertfileCredentialId
+                    )
                 },
-                createStage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    TagiOSStages.unitTestStageBodyiOS(script)
+                createStage(UNIT_TEST, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                    CommoniOSStages.unitTestStageBodyiOS(script)
                 },
-                createStage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    TagiOSStages.instrumentationTestStageBodyiOS(script)
+                createStage(INSTRUMENTATION_TEST, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                    CommoniOSStages.instrumentationTestStageBodyiOS(script)
                 },
-                createStage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    TagiOSStages.staticCodeAnalysisStageBodyiOS(script)
-                }
+                createStage(STATIC_CODE_ANALYSIS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                    CommoniOSStages.staticCodeAnalysisStageBodyiOS(script)
+                },
+                createStage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                    TagStages.betaUploadStageBodyiOS(script,
+                        iOSKeychainCredenialId,
+                        iOSCertfileCredentialId
+                    )
+                },
+
         ]
-        finalizeBody = { PrStages.finalizeStageBody(this) }
+        finalizeBody = { TagStages.finalizeStageBody(this) }
     }
 }

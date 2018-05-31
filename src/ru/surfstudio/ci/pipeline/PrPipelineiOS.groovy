@@ -22,7 +22,10 @@ class PrPipelineiOS extends PrPipeline {
                     PrStages.preMergeStageBody(script, sourceBranch, destinationBranch)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    CommoniOSStages.buildStageBodyiOS(script)
+                    CommoniOSStages.buildStageBodyiOS(script,
+                        iOSKeychainCredenialId,
+                        iOSCertfileCredentialId
+                    )
                 },
                 createStage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     CommoniOSStages.unitTestStageBodyiOS(script)
