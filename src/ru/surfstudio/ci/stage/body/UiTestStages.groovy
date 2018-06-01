@@ -50,7 +50,7 @@ class UiTestStages {
 
         //Достаем main branch для sourceRepo, если не указали в параметрах
         if (!ctx.sourceBranch) {
-            ctx.sourceBranch = JarvisUtil.getMainBranch(script, ctx.sourceRepoUrl)
+            ctx.sourceBranch = JarvisUtil.getMainBranch(ctx.script, ctx.sourceRepoUrl)
         }
 
         CommonUtil.abortDuplicateBuilds(script, "taskKey: ${ctx.taskKey}, testBranch: ${ctx.testBranch}, sourceBranch: ${ctx.sourceBranch}")
