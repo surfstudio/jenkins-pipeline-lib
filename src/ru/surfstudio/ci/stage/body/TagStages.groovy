@@ -47,6 +47,20 @@ class TagStages {
         script.sh "./gradlew ${betaUploadGradleTask}"
     }
 
+    def static betaUploadStageBodyiOS(Object script, String keychainCredenialId, String certfileCredentialId) {
+        script.withCredentials([
+            script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
+            script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
+        ]) {
+
+            script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
+            script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
+            
+            script.sh "make init"
+            script.sh "make beta"
+        }
+    }
+
     def static finalizeStageBody(TagPipeline ctx) {
         JarvisUtil.createVersionAndNotify(ctx)
     }

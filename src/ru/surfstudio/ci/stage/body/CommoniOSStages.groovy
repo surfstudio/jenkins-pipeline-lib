@@ -4,10 +4,10 @@ import ru.surfstudio.ci.CommonUtil
 
 class CommoniOSStages {
 
-    def static buildStageBodyiOS(Object script) {
+    def static buildStageBodyiOS(Object script, String keychainCredenialId, String certfileCredentialId) {
         script.withCredentials([
-            script.string(credentialsId: 'add420b4-78fc-4db0-95e9-eeb0eac780f6', variable: 'KEYCHAIN_PASS'),
-            script.file(credentialsId: 'IvanSmetanin_iOS_Dev_CertKey', variable: 'DEVELOPER_P12_KEY')
+            script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
+            script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
         ]) {
 
             script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
