@@ -33,7 +33,7 @@ class CommonUtil {
     }
 
     def static shWithRuby(Object script, String command, String version = "2.3.5") {
-        script.sh "set +x; source /home/jenkins/.bashrc; source /home/jenkins/.rvm/scripts/rvm; rvm use $version; $command"
+        script.sh "set +x; hostname; source /home/jenkins/.bashrc; source /home/jenkins/.rvm/scripts/rvm; rvm use $version; $command"
     }
 
     def static abortDuplicateBuilds(Object script, String buildIdentifier) {
