@@ -2,7 +2,7 @@ package ru.surfstudio.ci.pipeline
 
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
-import ru.surfstudio.ci.stage.body.TagiOSStages
+import ru.surfstudio.ci.stage.body.TagStages
 import ru.surfstudio.ci.stage.body.PrStages
 
 class PrPipelineiOS extends PrPipeline {
