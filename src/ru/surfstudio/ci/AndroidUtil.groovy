@@ -3,7 +3,7 @@ package ru.surfstudio.ci
 class AndroidUtil {
 
     def static onEmulator(Object script, String avdName, Closure body) {
-        script.timeout(time: 2*60*60, unit: 'SECONDS') { //2 hours
+        script.timeout(time: 5*60*60, unit: 'SECONDS') { //2 hours
             def ADB = "${script.env.ANDROID_HOME}/platform-tools/adb"
             def EMULATOR = "${script.env.ANDROID_HOME}/tools/emulator"
             script.sh "$ADB devices"
