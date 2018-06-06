@@ -100,7 +100,7 @@ class UiTestStages {
                 script.sh "make init"
                 script.sh "cd .."   
                 script.sh "bundle install"
-                script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme *-cal -allowProvisioningUpdates -sdk iphonesimulator11.4 -derivedDataPath ${sourcesDir}"
+                script.sh "xcodebuild -workspace ${sourcesDir}/MDK.xcworkspace -scheme MDK-cal -allowProvisioningUpdates -sdk iphonesimulator11.4 -derivedDataPath ${sourcesDir}"
                 script.sh "open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app/"
                 script.sh "xcrun simctl install booted ${sourcesDir}/Build/Products/Debug-iphonesimulator/*-cal.app"
                 script.sh "sleep 20 && xcrun simctl io booted screenshot ${sourcesDir}/screen.png"
