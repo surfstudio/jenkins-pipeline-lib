@@ -97,10 +97,9 @@ class UiTestStages {
                 script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
                 script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
                 
-                script.sh "make init"   
-                script.sh "ls" 
-                script.sh "cd .. &&  ls && bundle update "
-                script.sh "cd .. && yes | bundle exec calabash-ios setup"    
+                script.sh "make init"    
+                script.sh "cd .. && bundle install"
+                script.sh "cd .. && echo -ne 'yes \n' | bundle exec calabash-ios setup ${sourcesDir}"    
                 script.sh "xcodebuild -workspace MDK.xcworkspace -scheme MDK-cal -allowProvisioningUpdates -sdk iphonesimulator11.4 -derivedDataPath ${sourcesDir}"
                 script.sh "open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app/"
                 script.sh "xcrun simctl install booted ${sourcesDir}/Build/Products/Debug-iphonesimulator/*-cal.app"
