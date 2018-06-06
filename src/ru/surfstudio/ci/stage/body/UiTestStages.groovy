@@ -125,8 +125,7 @@ class UiTestStages {
                              String outputHtmlFile,
                              String outputJsonFile) {
         script.echo "Tests started"
-        //AndroidUtil.onEmulator(script, "avd-main")
-{
+        AndroidUtil.onEmulator(script, "avd-main"){
             script.echo "start tests for $artifactForTest $taskKey"
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
