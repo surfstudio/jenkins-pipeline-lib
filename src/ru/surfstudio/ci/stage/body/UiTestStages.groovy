@@ -98,8 +98,9 @@ class UiTestStages {
                 script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
                 
                 script.sh "make init"
-                script.sh "yes | calabash-ios setup"
-                script.sh "xcodebuild -workspace *.xcworkspace -scheme *-cal -allowProvisioningUpdates -sdk iphonesimulator11.3 -derivedDataPath ${sourcesDir}"
+                script.sh "cd .."   
+                script.sh "bundle install"
+                script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme *-cal -allowProvisioningUpdates -sdk iphonesimulator11.3 -derivedDataPath ${sourcesDir}"
                 script.sh "open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app/"
                 script.sh "xcrun simctl install booted ${sourcesDir}/Build/Products/Debug-iphonesimulator/*-cal.app"
                 script.sh "sleep 20 && xcrun simctl io booted screenshot ${sourcesDir}/screen.png"
