@@ -98,7 +98,9 @@ class UiTestStages {
                 script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
                 
                 script.sh "make init"
+                script.sh "ls"    
                 script.sh "cd .."   
+                script.sh "ls"
                 script.sh "bundle install"
                 script.sh "xcodebuild -workspace ${sourcesDir}/MDK.xcworkspace -scheme MDK-cal -allowProvisioningUpdates -sdk iphonesimulator11.4 -derivedDataPath ${sourcesDir}"
                 script.sh "open /Applications/Xcode.app/Contents/Developer/Applications/Simulator.app/"
