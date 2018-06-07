@@ -103,24 +103,22 @@ class UiTestStages {
                 script.sh "xcodebuild -workspace MDK.xcworkspace -scheme MDK-cal -allowProvisioningUpdates -sdk iphonesimulator11.4 -derivedDataPath ${sourcesDir}"
                 //script.sh "xcrun simctl shutdown EF911543-AFDF-473A-9A76-9C1C0ED28E31"
                 //нужно написать функцию проверки, запущен симулятор уже или нет
-                script.sh "xcrun simctl boot EF911543-AFDF-473A-9A76-9C1C0ED28E31"
-                script.sh "xcrun simctl install booted ${sourcesDir}/Build/Products/Debug-iphonesimulator/MDK-cal.app"
-                script.sh "sleep 5"
+                
             }
 
         }
     }
 
     def static prepareApkStageBodyAndroid(Object script, String builtApkPattern, String newApkForTest) {
-        script.step([$class: 'ArtifactArchiver', artifacts: builtApkPattern])
+        //script.step([$class: 'ArtifactArchiver', artifacts: builtApkPattern])
 
-        def files = script.findFiles(glob: builtApkPattern)
-        String foundedApks = files.join("\n")
-        script.echo "founded apks: $foundedApks"
-        def apkPath = files[0].path
-        script.echo "use first: $apkPath"
+        //def files = script.findFiles(glob: builtApkPattern)
+        //String foundedApks = files.join("\n")
+        //script.echo "founded apks: $foundedApks"
+        //def apkPath = files[0].path
+        //script.echo "use first: $apkPath"
 
-        script.sh "mv \"${apkPath}\" ${newApkForTest}"
+        //script.sh "mv \"${apkPath}\" ${newApkForTest}"
     }
 
     /**
@@ -149,15 +147,17 @@ class UiTestStages {
                              String featureFile,
                              String outputHtmlFile,
                              String outputJsonFile) {
-        script.echo "Tests started"
-        AndroidUtil.onEmulator(script, "avd-main"){
+            script.echo "Tests started"
+            script.sh "xcrun simctl boot EF911543-AFDF-473A-9A76-9C1C0ED28E31"
+            script.sh "xcrun simctl install booted ${sourcesDir}/Build/Products/Debug-iphonesimulator/MDK-cal.app"
+            script.sh "sleep 5"
             script.echo "start tests for $artifactForTest $taskKey"
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
             }
-            CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
+            CommonUtil.shWithRuby(script, "bundle exec cucumber APP_BUNDLE_PATH=${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
 
-        }
+        
     }
 
     def static publishResultsStageBody(Object script,
