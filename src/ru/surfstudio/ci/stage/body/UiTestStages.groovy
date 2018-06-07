@@ -125,14 +125,15 @@ class UiTestStages {
                              String outputHtmlFile,
                              String outputJsonFile) {
         script.echo "Tests started"
-        AndroidUtil.onEmulator(script, "avd-main"){
-           script.echo "start tests for $artifactForTest $taskKey"
+        script.echo "start tests for $artifactForTest $taskKey"
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
             }
             CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
 
-        }
+        //AndroidUtil.onEmulator(script, "avd-main"){
+           
+        //}
     }
 
     def static publishResultsStageBody(Object script,
