@@ -124,7 +124,9 @@ class UiTestStages {
                              String featureFile,
                              String outputHtmlFile,
                              String outputJsonFile) {
-        script.sh "adb devices"                     
+    
+        script.sh "${script.env.ANDROID_HOME}/platform-tools/adb devices"
+        script.sh "$ADB shell input keyevent 3 &"
         script.echo "Tests started"
         script.echo "start tests for $artifactForTest $taskKey"
             CommonUtil.safe(script) {
