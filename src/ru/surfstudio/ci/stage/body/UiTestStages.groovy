@@ -150,7 +150,7 @@ class UiTestStages {
                              String outputJsonFile) {
             script.echo "Tests started"
             script.sh "xcrun simctl boot EF911543-AFDF-473A-9A76-9C1C0ED28E31"
-            script.sh "xcrun simctl install booted ${sourcesDir}/Build/Products/Debug-iphonesimulator/MDK-cal.app"
+            script.sh "xcrun simctl install booted $sourcesDir/Build/Products/Debug-iphonesimulator/MDK-cal.app"
             script.sh "sleep 5"
             script.echo "start tests for $artifactForTest $taskKey"
             CommonUtil.safe(script) {
