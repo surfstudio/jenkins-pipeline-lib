@@ -103,7 +103,7 @@ class UiTestStages {
                 script.echo "${sourcesDir}"
                 script.sh "xcodebuild -workspace MDK.xcworkspace -scheme MDK-cal -allowProvisioningUpdates -sdk iphonesimulator11.4 -derivedDataPath ${sourcesDir}"
                 script.sh "xcrun simctl boot EF911543-AFDF-473A-9A76-9C1C0ED28E31"
-                script.sh "xcrun simctl install booted $sourcesDir/Build/Products/Debug-iphonesimulator/MDK-cal.app"
+                script.sh "xcrun simctl install booted ${sourcesDir}/Build/Products/Debug-iphonesimulator/MDK-cal.app"
                 script.sh "sleep 5"
                 //script.sh "xcrun simctl shutdown EF911543-AFDF-473A-9A76-9C1C0ED28E31"
                 //нужно написать функцию проверки, запущен симулятор уже или нет
