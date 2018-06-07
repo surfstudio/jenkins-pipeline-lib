@@ -102,7 +102,14 @@ class UiTestStages {
                 script.sh "cd .. && echo -ne 'yes \n' | bundle exec calabash-ios setup ${sourcesDir}"  
                 script.echo "${sourcesDir}"
                 script.sh "xcodebuild -workspace MDK.xcworkspace -scheme MDK-cal -allowProvisioningUpdates -sdk iphonesimulator11.4 -derivedDataPath ${sourcesDir}"
+                
+                try {
+                script.sh "xcrun simctl shutdown EF911543-AFDF-473A-9A76-9C1C0ED28E31"
+                } 
+                finally {
                 script.sh "xcrun simctl boot EF911543-AFDF-473A-9A76-9C1C0ED28E31"
+                }
+                
                 script.sh "xcrun simctl install booted ${sourcesDir}/Build/Products/Debug-iphonesimulator/MDK-cal.app"
                 script.sh "sleep 5"
                 //script.sh "xcrun simctl shutdown EF911543-AFDF-473A-9A76-9C1C0ED28E31"
