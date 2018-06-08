@@ -13,10 +13,23 @@ class CommonUtil {
         )
     }
 
-    def static notifyBitbucketAboutStageFinish(Object script, String stageName, boolean success){
-        def bitbucketStatus = success ?
-                'SUCCESSFUL' :
-                'FAILED'
+    def static notifyBitbucketAboutStageFinish(Object script, String stageName, Result result){
+        def bitbucketStatus
+
+        switch (result){
+            case Result.SUCCESS:
+                bitbucketStatus = 'SUCCESSFUL'
+                break
+            case Result.ABORTED:
+                bitbucketStatus = 'NOT_BUILT'
+                break
+            case Result.FAILURE:
+            case Result.UNSTABLE:
+                bitbucketStatus = 'FAILED'
+                break
+            default:
+                script.error "Unsupported Result: ${result}"
+        }
         script.bitbucketStatusNotify(
                 buildState: bitbucketStatus,
                 buildKey: stageName,
