@@ -110,6 +110,9 @@ abstract class Pipeline implements Serializable {
                     if(postExecuteStageBody){
                         postExecuteStageBody(stage)
                     }
+                    if(jobResult == Result.ABORTED || jobResult == Result.FAILURE) {
+                        script.echo "Job stopped, see reason above ^^^^"
+                    }
                 }
             }
         }
