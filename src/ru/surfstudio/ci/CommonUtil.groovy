@@ -13,7 +13,7 @@ class CommonUtil {
         )
     }
 
-    def static notifyBitbucketAboutStageFinish(Object script, String stageName, Result result){
+    def static notifyBitbucketAboutStageFinish(Object script, String stageName, String result){
         def bitbucketStatus
 
         switch (result){
