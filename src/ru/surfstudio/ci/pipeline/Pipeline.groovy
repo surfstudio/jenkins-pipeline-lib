@@ -81,6 +81,7 @@ abstract class Pipeline implements Serializable {
                     stage.result = Result.SUCCESS
                     script.echo("Stage ${stage.name} success")
                 } catch (e) {
+                    script.sh "Error: ${e.toString()}"
                     if(e instanceof InterruptedException) {
                         script.echo("Stage ${stage.name} aborted")
                         stage.result = Result.ABORTED
