@@ -1,6 +1,7 @@
 #!/usr/bin/groovy
 package ru.surfstudio.ci.pipeline
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.stage.Stage
@@ -81,7 +82,7 @@ abstract class Pipeline implements Serializable {
                     stage.result = Result.SUCCESS
                     script.echo("Stage ${stage.name} success")
                 } catch (e) {
-                    script.sh "Error: ${e.toString()}"
+                    script.echo "Error: ${e.toString()}"
                     if(e instanceof InterruptedException || e instanceof hudson.AbortException) {
                         script.echo("Stage ${stage.name} aborted")
                         stage.result = Result.ABORTED
