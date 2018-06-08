@@ -38,10 +38,7 @@ abstract class Pipeline implements Serializable {
     public node
 
     public preExecuteStageBody = { stage -> CommonUtil.notifyBitbucketAboutStageStart(script, stage.name) }
-    public postExecuteStageBody = { stage ->
-        def bitbucketStatusSuccess = (stage.result == Result.SUCCESS || stage.result == Result.ABORTED)
-        CommonUtil.notifyBitbucketAboutStageFinish(script, stage.name, bitbucketStatusSuccess)
-    }
+    public postExecuteStageBody = { stage -> CommonUtil.notifyBitbucketAboutStageFinish(script, stage.name, stage.result)}
 
     Pipeline(script) {
         this.script = script
