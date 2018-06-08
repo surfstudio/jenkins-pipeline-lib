@@ -21,7 +21,7 @@ class CommonUtil {
                 bitbucketStatus = 'SUCCESSFUL'
                 break
             case Result.ABORTED:
-                bitbucketStatus = 'NOT_BUILT'
+                bitbucketStatus = 'SUCCESSFUL' //todo плагин не поддерживает статус STOPPED, возможно он нам и нужен
                 break
             case Result.FAILURE:
             case Result.UNSTABLE:
