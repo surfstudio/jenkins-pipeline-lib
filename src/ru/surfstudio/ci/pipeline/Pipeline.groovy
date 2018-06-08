@@ -37,7 +37,10 @@ abstract class Pipeline implements Serializable {
     public node
 
     public preExecuteStageBody = { stage -> CommonUtil.notifyBitbucketAboutStageStart(script, stage.name) }
-    public postExecuteStageBody = { stage -> CommonUtil.notifyBitbucketAboutStageFinish(script, stage.name, stage.result == Result.SUCCESS)}
+    public postExecuteStageBody = { stage ->
+        def bitbucketStatusSuccess = (stage.result == Result.SUCCESS || stage.result == Result.ABORTED)
+        CommonUtil.notifyBitbucketAboutStageFinish(script, stage.name, bitbucketStatusSuccess)
+    }
 
     Pipeline(script) {
         this.script = script
@@ -78,21 +81,28 @@ abstract class Pipeline implements Serializable {
                     stage.result = Result.SUCCESS
                     script.echo("Stage ${stage.name} success")
                 } catch (e) {
-                    script.echo("Stage ${stage.name} fail")
-                    script.echo("Apply stage strategy: ${stage.strategy}")
-                    if (stage.strategy == StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                        stage.result = Result.FAILURE
-                        jobResult = Result.FAILURE
+                    if(e instanceof InterruptedException) {
+                        script.echo("Stage ${stage.name} aborted")
+                        stage.result = Result.ABORTED
+                        jobResult = Result.ABORTED
                         throw e
-                    } else if (stage.strategy == StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                        stage.result = Result.UNSTABLE
-                        if (jobResult != Result.FAILURE) {
-                            jobResult = Result.UNSTABLE
+                    } else {
+                        script.echo("Stage ${stage.name} fail")
+                        script.echo("Apply stage strategy: ${stage.strategy}")
+                        if (stage.strategy == StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                            stage.result = Result.FAILURE
+                            jobResult = Result.FAILURE
+                            throw e
+                        } else if (stage.strategy == StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                            stage.result = Result.UNSTABLE
+                            if (jobResult != Result.FAILURE) {
+                                jobResult = Result.UNSTABLE
+                            }
+                        } else if (stage.strategy == StageStrategy.SUCCESS_WHEN_STAGE_ERROR) {
+                            stage.result = Result.SUCCESS
+                        } else {
+                            script.error("Unsupported strategy " + stage.strategy)
                         }
-                    } else if (stage.strategy == StageStrategy.SUCCESS_WHEN_STAGE_ERROR) {
-                        stage.result = Result.SUCCESS
-                    }  else {
-                        script.error("Unsupported strategy " + stage.strategy)
                     }
                 } finally {
                     if(postExecuteStageBody){
