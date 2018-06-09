@@ -152,7 +152,7 @@ class UiTestStages {
     def static testStageBody(Object script,
                              String taskKey,
                              String outputsDir,
-                             String sourcesDir
+                             String sourcesDir,
                              String featuresDir,
                              String platform,
                              String artifactForTest,
