@@ -62,7 +62,7 @@ class PrStages {
     }
 
     def static finalizeStageBody(PrPipeline ctx){
-        if (ctx.jobResult != Result.SUCCESS) {
+        if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
             def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlHtmlLink(ctx.script)}"
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "bitbucket")
