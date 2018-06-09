@@ -152,6 +152,7 @@ class UiTestStages {
     def static testStageBody(Object script,
                              String taskKey,
                              String outputsDir,
+                             String sourcesDir
                              String featuresDir,
                              String platform,
                              String artifactForTest,
@@ -163,8 +164,8 @@ class UiTestStages {
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
             }
-            CommonUtil.shWithRuby(script, "bundle exec cucumber APP_BUNDLE_PATH=${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
-
+            //CommonUtil.shWithRuby(script, "bundle exec cucumber APP_BUNDLE_PATH=${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
+            CommonUtil.shWithRuby(script, "bundle exec cucumber APP_BUNDLE_PATH=${sourcesDir}/Build/Products/Debug-iphonesimulator/MDK-cal.app -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
         
     }
 
