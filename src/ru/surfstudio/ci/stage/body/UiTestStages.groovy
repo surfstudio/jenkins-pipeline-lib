@@ -168,7 +168,7 @@ class UiTestStages {
             }
             //CommonUtil.shWithRuby(script, "bundle exec cucumber APP_BUNDLE_PATH=${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
             //CommonUtil.shWithRuby(script, "bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
-            script.sh "DEVICE_TARGET=EF911543-AFDF-473A-9A76-9C1C0ED28E31 bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}"
+            script.sh "APP_BUNDLE_PATH=/Users/jenkins/jenkinsCI/workspace/MDK_iOS_UI_TEST/sources/sources/Build/Products/Debug-iphonesimulator/MDK-cal.app DEVICE_TARGET=EF911543-AFDF-473A-9A76-9C1C0ED28E31 bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}"
     }
 
     def static publishResultsStageBody(Object script,
