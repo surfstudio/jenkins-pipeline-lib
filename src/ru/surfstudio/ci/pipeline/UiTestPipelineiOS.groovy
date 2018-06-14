@@ -12,6 +12,17 @@ class UiTestPipelineiOS extends UiTestPipeline {
     public buildGradleTask = "clean assembleQa"
     public builtApkPattern = "${sourcesDir}/**/*qa*.apk"
 
+    //dirs
+    public derivedDataPath = "${sourcesDir}"
+
+    //files
+    public simulatorIdentificationFile = "currentSim"
+
+    //environment
+    public testDeviceName = "iPhone 7"
+    public testOSVersion = "11.4"
+    public testiOSSDK = "iphonesimulator11.4"
+
     UiTestPipelineiOS(Object script) {
         super(script)
     }
@@ -24,18 +35,24 @@ class UiTestPipelineiOS extends UiTestPipeline {
                     UiTestStages.initStageBody(this)
                 },
                 createStage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    UiTestStages.checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch)
+                    UiTestStages.checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch,)
                 },
                 createStage(CHECKOUT_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     UiTestStages.checkoutTestsStageBody(script, testBranch)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    UiTestStages.buildStageBodyiOS(script, sourcesDir, iOSKeychainCredenialId, iOSCertfileCredentialId)
+                    UiTestStages.buildStageBodyiOS(script, 
+                            sourcesDir, 
+                            derivedDataPath,
+                            testiOSSDK,
+                            iOSKeychainCredenialId, 
+                            iOSCertfileCredentialId)
                 },
                 createStage(PREPARE_ARTIFACT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     UiTestStages.prepareApkStageBodyAndroid(script,
                             builtApkPattern,
                             artifactForTest)
+                    // TODO: Удалить
                 },
                 createStage(PREPARE_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     UiTestStages.prepareTestsStageBody(script,
@@ -45,12 +62,13 @@ class UiTestPipelineiOS extends UiTestPipeline {
                             featureForTest)
                 },
                 createStage(TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    UiTestStages.testStageBody(script,
+                    UiTestStages.testStageBodyiOS(script,
                             taskKey,
+                            derivedDataPath,
+                            testDeviceName,
+                            testOSVersion,
                             outputsDir,
                             featuresDir,
-                            "android",
-                            artifactForTest,
                             featureForTest,
                             outputHtmlFile,
                             outputJsonFile)
