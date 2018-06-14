@@ -94,6 +94,9 @@ class UiTestStages {
                 script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
             ]) {
 
+                device = "iPhone 7"
+                iosVersion = "11.4"
+
                 script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
                 script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
                 
@@ -104,10 +107,10 @@ class UiTestStages {
                 script.sh "cd .. && bundle install"
                 script.sh "cd .. && echo -ne 'yes \n' | bundle exec calabash-ios setup ${sourcesDir}"  
                 
-                script.sh "xcodebuild -workspace *.xcworkspace -scheme \$(xcodebuild -workspace *.xcworkspace -list | grep '\\-cal' | sed 's/ *//') -allowProvisioningUpdates -sdk iphonesimulator11.4 -derivedDataPath ${sourcesDir}"
+                script.sh "xcodebuild -workspace *.xcworkspace -scheme \$(xcodebuild -workspace *.xcworkspace -list | grep '\\-cal' | sed 's/ *//') -allowProvisioningUpdates -sdk iphonesimulator${iosVersion} -derivedDataPath ${sourcesDir}"
                 
 
-                script.sh "xcrun simctl create \"MyTestiPhone\" \"iPhone 7\" \"11.4\" > currentsim"
+                script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > currentsim"
 
         
                 script.sh "xcrun simctl boot \$(cat currentsim)"
