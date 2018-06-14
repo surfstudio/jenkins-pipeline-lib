@@ -97,7 +97,7 @@ class UiTestStages {
                 script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
                 script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
                 
-                script.sh "gem install bundler"
+                //script.sh "gem install bundler"
                 //CommonUtil.shWithRuby(script, "
                 //    derivedDataFolder = Dir.glob(Dir.home + "/Library/Developer/Xcode/DerivedData/*")
                 //          moduleCache = Dir.glob("/var/folders/**/com.apple.DeveloperTools*")
