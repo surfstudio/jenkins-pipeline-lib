@@ -98,23 +98,21 @@ class UiTestStages {
                 script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
                 
                 //script.sh "gem install bundler"
-                //CommonUtil.shWithRuby(script, "
-                //    derivedDataFolder = Dir.glob(Dir.home + "/Library/Developer/Xcode/DerivedData/*")
-                //          moduleCache = Dir.glob("/var/folders/**/com.apple.DeveloperTools*")
-                //          FileUtils.rm_rf derivedDataFolder + moduleCache")
                 
                 script.sh "make init"    
 
                 script.sh "cd .. && bundle install"
                 script.sh "cd .. && echo -ne 'yes \n' | bundle exec calabash-ios setup ${sourcesDir}"  
-                script.sh "xcodebuild -workspace MDK.xcworkspace -scheme MDK-cal -allowProvisioningUpdates -sdk iphonesimulator11.4 -derivedDataPath ${sourcesDir}"
+                
+                script.sh "xcodebuild -workspace *.xcworkspace -scheme $(xcodebuild -workspace *.xcworkspace -list | grep '\-cal' | sed 's/ *//') -allowProvisioningUpdates -sdk iphonesimulator11.4 -derivedDataPath ${sourcesDir}"
+                
                 try {
                 script.sh "xcrun simctl shutdown EF911543-AFDF-473A-9A76-9C1C0ED28E31"
                 script.sh "xcrun simctl erase all"
                 } 
                 catch(e) {
-                //currentBuild.result = "UNSTABLE" 
-                result = "FAIL"    }    
+                script.currentBuild.result = "UNSTABLE" 
+                script.result = "FAIL"    }    
                 finally {
                 script.sh "xcrun simctl boot EF911543-AFDF-473A-9A76-9C1C0ED28E31"
                 }
@@ -175,7 +173,7 @@ class UiTestStages {
             //CommonUtil.shWithRuby(script, "bundle exec cucumber APP_BUNDLE_PATH=${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
             //CommonUtil.shWithRuby(script, "bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
             //script.sh "xcrun simctl io booted screenshot screenshot1.png"
-            script.sh "APP_BUNDLE_PATH=/Users/jenkins/jenkinsCI/workspace/MDK_iOS_UI_TEST/sources/sources/Build/Products/Debug-iphonesimulator/MDK-cal.app DEVICE_TARGET=EF911543-AFDF-473A-9A76-9C1C0ED28E31 bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}"
+            script.sh "APP_BUNDLE_PATH=/Users/jenkins/jenkinsCI/workspace/MDK_iOS_UI_TEST/sources/sources/Build/Products/Debug-iphonesimulator/MDK-cal.app DEVICE_TARGET=EF911543-AFDF-473A-9A76-9C1C0ED28E31 bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty"
     }
 
     def static publishResultsStageBody(Object script,
