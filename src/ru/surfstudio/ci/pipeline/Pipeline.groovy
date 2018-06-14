@@ -1,6 +1,7 @@
 #!/usr/bin/groovy
 package ru.surfstudio.ci.pipeline
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.stage.Stage
@@ -37,7 +38,7 @@ abstract class Pipeline implements Serializable {
     public node
 
     public preExecuteStageBody = { stage -> CommonUtil.notifyBitbucketAboutStageStart(script, stage.name) }
-    public postExecuteStageBody = { stage -> CommonUtil.notifyBitbucketAboutStageFinish(script, stage.name, stage.result == Result.SUCCESS)}
+    public postExecuteStageBody = { stage -> CommonUtil.notifyBitbucketAboutStageFinish(script, stage.name, stage.result)}
 
     Pipeline(script) {
         this.script = script
@@ -78,25 +79,41 @@ abstract class Pipeline implements Serializable {
                     stage.result = Result.SUCCESS
                     script.echo("Stage ${stage.name} success")
                 } catch (e) {
-                    script.echo("Stage ${stage.name} fail")
-                    script.echo("Apply stage strategy: ${stage.strategy}")
-                    if (stage.strategy == StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                        stage.result = Result.FAILURE
-                        jobResult = Result.FAILURE
+                    script.echo "Error: ${e.toString()}"
+                    if(e.getCause()!=null) {
+                        script.echo "Cause error: ${e.getCause().toString()}"
+                    }
+
+                    if(e instanceof InterruptedException || //отменено из другого процесса
+                            e instanceof hudson.AbortException && e.getMessage() == "script returned exit code 143") { //отменено пользователем
+                        script.echo("Stage ${stage.name} aborted")
+                        stage.result = Result.ABORTED
+                        jobResult = Result.ABORTED
                         throw e
-                    } else if (stage.strategy == StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                        stage.result = Result.UNSTABLE
-                        if (jobResult != Result.FAILURE) {
-                            jobResult = Result.UNSTABLE
+                    } else {
+                        script.echo("Stage ${stage.name} fail")
+                        script.echo("Apply stage strategy: ${stage.strategy}")
+                        if (stage.strategy == StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                            stage.result = Result.FAILURE
+                            jobResult = Result.FAILURE
+                            throw e
+                        } else if (stage.strategy == StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                            stage.result = Result.UNSTABLE
+                            if (jobResult != Result.FAILURE) {
+                                jobResult = Result.UNSTABLE
+                            }
+                        } else if (stage.strategy == StageStrategy.SUCCESS_WHEN_STAGE_ERROR) {
+                            stage.result = Result.SUCCESS
+                        } else {
+                            script.error("Unsupported strategy " + stage.strategy)
                         }
-                    } else if (stage.strategy == StageStrategy.SUCCESS_WHEN_STAGE_ERROR) {
-                        stage.result = Result.SUCCESS
-                    }  else {
-                        script.error("Unsupported strategy " + stage.strategy)
                     }
                 } finally {
                     if(postExecuteStageBody){
                         postExecuteStageBody(stage)
+                    }
+                    if(jobResult == Result.ABORTED || jobResult == Result.FAILURE) {
+                        script.echo "Job stopped, see reason above ^^^^"
                     }
                 }
             }

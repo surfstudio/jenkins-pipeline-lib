@@ -13,10 +13,23 @@ class CommonUtil {
         )
     }
 
-    def static notifyBitbucketAboutStageFinish(Object script, String stageName, boolean success){
-        def bitbucketStatus = success ?
-                'SUCCESSFUL' :
-                'FAILED'
+    def static notifyBitbucketAboutStageFinish(Object script, String stageName, String result){
+        def bitbucketStatus
+
+        switch (result){
+            case Result.SUCCESS:
+                bitbucketStatus = 'SUCCESSFUL'
+                break
+            case Result.ABORTED:
+                bitbucketStatus = 'SUCCESSFUL' //todo плагин не поддерживает статус STOPPED, возможно он здесь лучше подходит
+                break
+            case Result.FAILURE:
+            case Result.UNSTABLE:
+                bitbucketStatus = 'FAILED'
+                break
+            default:
+                script.error "Unsupported Result: ${result}"
+        }
         script.bitbucketStatusNotify(
                 buildState: bitbucketStatus,
                 buildKey: stageName,
@@ -33,7 +46,7 @@ class CommonUtil {
     }
 
     def static shWithRuby(Object script, String command, String version = "2.3.5") {
-        script.sh "hostname; set +x; source /home/jenkins/.bashrc; source /home/jenkins/.rvm/scripts/rvm; rvm use $version; $command"
+        script.sh "hostname; set +x; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use $version; $command"
     }
 
     def static abortDuplicateBuilds(Object script, String buildIdentifier) {

@@ -134,7 +134,7 @@ class UiTestStages {
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
             }
-            CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
+            CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
 
         //AndroidUtil.onEmulator(script, "avd-main"){
            
