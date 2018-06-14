@@ -94,8 +94,8 @@ class UiTestStages {
                 script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
             ]) {
 
-                device = "iPhone 7"
-                iosVersion = "11.4"
+                def device = "iPhone 7"
+                def iosVersion = "11.4"
 
                 script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
                 script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
