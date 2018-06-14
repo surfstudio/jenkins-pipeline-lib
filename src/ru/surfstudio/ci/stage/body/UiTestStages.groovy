@@ -152,7 +152,7 @@ class UiTestStages {
             script.echo "Setting up simulator ..."
             script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > ${simulatorIdentifierFile}"        
             script.sh "xcrun simctl boot \$(cat ${simulatorIdentifierFile})"
-            script.sh "xcrun simctl install booted ${resultDerivedDataPath}/Build/Products/Debug-iphonesimulator/*.app"
+            script.sh "xcrun simctl install booted ${derivedDataPath}/Build/Products/Debug-iphonesimulator/*.app"
             
             script.echo "Tests started"
             script.echo "start tests for $taskKey"
