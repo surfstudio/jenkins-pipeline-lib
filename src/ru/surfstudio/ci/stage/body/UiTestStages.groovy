@@ -106,20 +106,15 @@ class UiTestStages {
                 
                 script.sh "xcodebuild -workspace *.xcworkspace -scheme \$(xcodebuild -workspace *.xcworkspace -list | grep '\\-cal' | sed 's/ *//') -allowProvisioningUpdates -sdk iphonesimulator11.4 -derivedDataPath ${sourcesDir}"
                 
-                try {
-                script.sh "xcrun simctl shutdown EF911543-AFDF-473A-9A76-9C1C0ED28E31"
-                script.sh "xcrun simctl erase all"
-                } 
-                catch(e) {
-                script.currentBuild.result = "UNSTABLE" 
-                script.result = "FAIL"    }    
-                finally {
-                script.sh "xcrun simctl boot EF911543-AFDF-473A-9A76-9C1C0ED28E31"
-                }
+
+                script.sh "xcrun simctl create \"MyTestiPhone\" \"iPhone 7\" \"11.4\" > currentsim"
+
+        
+                script.sh "xcrun simctl boot \$(cat currentsim)"
+            
+                script.sh "xcrun simctl install booted ${sourcesDir}/Build/Products/Debug-iphonesimulator/*.app"
                 
-                script.sh "xcrun simctl install booted ${sourcesDir}/Build/Products/Debug-iphonesimulator/MDK-cal.app"
-                script.sh "sleep 5"
-                
+
                 //нужно написать функцию проверки, запущен симулятор уже или нет
                 
             }
@@ -170,11 +165,15 @@ class UiTestStages {
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
             }
-            //CommonUtil.shWithRuby(script, "bundle exec cucumber APP_BUNDLE_PATH=${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
-            //CommonUtil.shWithRuby(script, "bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
-            //script.sh "xcrun simctl io booted screenshot screenshot1.png"
-            script.sh "APP_BUNDLE_PATH=/Users/jenkins/jenkinsCI/workspace/MDK_iOS_UI_TEST/sources/sources/Build/Products/Debug-iphonesimulator/MDK-cal.app DEVICE_TARGET=EF911543-AFDF-473A-9A76-9C1C0ED28E31 bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty"
+            
+            try {
+            script.sh "APP_BUNDLE_PATH=/Users/jenkins/jenkinsCI/workspace/MDK_iOS_UI_TEST/sources/sources/Build/Products/Debug-iphonesimulator/MDK-cal.app DEVICE_TARGET=\$(cat /Users/jenkins/jenkinsCI/workspace/MDK_iOS_UI_TEST/sources/currentsim) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty"
+            }
+            finally {
+
+            script.sh "xcrun simctl delete \$(cat /Users/jenkins/jenkinsCI/workspace/MDK_iOS_UI_TEST/sources/currentsim)"
     }
+                             }
 
     def static publishResultsStageBody(Object script,
                                        String outputsDir,
