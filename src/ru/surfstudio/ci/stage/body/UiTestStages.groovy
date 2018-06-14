@@ -102,7 +102,7 @@ class UiTestStages {
                 //    derivedDataFolder = Dir.glob(Dir.home + "/Library/Developer/Xcode/DerivedData/*")
                 //          moduleCache = Dir.glob("/var/folders/**/com.apple.DeveloperTools*")
                 //          FileUtils.rm_rf derivedDataFolder + moduleCache")
-                script.sh "xcrun simctl erase all"
+                
                 script.sh "make init"    
 
                 script.sh "cd .. && bundle install"
@@ -110,6 +110,7 @@ class UiTestStages {
                 script.sh "xcodebuild -workspace MDK.xcworkspace -scheme MDK-cal -allowProvisioningUpdates -sdk iphonesimulator11.4 -derivedDataPath ${sourcesDir}"
                 try {
                 script.sh "xcrun simctl shutdown EF911543-AFDF-473A-9A76-9C1C0ED28E31"
+                script.sh "xcrun simctl erase all"
                 } 
                 catch(e) {
                 //currentBuild.result = "UNSTABLE" 
