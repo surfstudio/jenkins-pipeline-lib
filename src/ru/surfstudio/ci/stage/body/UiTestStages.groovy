@@ -98,11 +98,13 @@ class UiTestStages {
                 script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
                 
                 script.sh "gem install bundler"
-                CommonUtil.shWithRuby(script, "
-                    derivedDataFolder = Dir.glob(Dir.home + "/Library/Developer/Xcode/DerivedData/*")
-                          moduleCache = Dir.glob("/var/folders/**/com.apple.DeveloperTools*")
-                          FileUtils.rm_rf derivedDataFolder + moduleCache")
+                //CommonUtil.shWithRuby(script, "
+                //    derivedDataFolder = Dir.glob(Dir.home + "/Library/Developer/Xcode/DerivedData/*")
+                //          moduleCache = Dir.glob("/var/folders/**/com.apple.DeveloperTools*")
+                //          FileUtils.rm_rf derivedDataFolder + moduleCache")
+                script.sh "xcrun simctl erase all"
                 script.sh "make init"    
+
                 script.sh "cd .. && bundle install"
                 script.sh "cd .. && echo -ne 'yes \n' | bundle exec calabash-ios setup ${sourcesDir}"  
                 script.sh "xcodebuild -workspace MDK.xcworkspace -scheme MDK-cal -allowProvisioningUpdates -sdk iphonesimulator11.4 -derivedDataPath ${sourcesDir}"
