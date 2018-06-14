@@ -100,9 +100,7 @@ class UiTestStages {
                 script.sh "make init"    
                 script.sh "cd .. && bundle install"
                 script.sh "cd .. && echo -ne 'yes \n' | bundle exec calabash-ios setup ${sourcesDir}"  
-                script.echo "${sourcesDir}"
                 script.sh "xcodebuild -workspace MDK.xcworkspace -scheme MDK-cal -allowProvisioningUpdates -sdk iphonesimulator11.4 -derivedDataPath ${sourcesDir}"
-                script.echo "${sourcesDir}"
                 try {
                 script.sh "xcrun simctl shutdown EF911543-AFDF-473A-9A76-9C1C0ED28E31"
                 } 
@@ -115,7 +113,7 @@ class UiTestStages {
                 
                 script.sh "xcrun simctl install booted ${sourcesDir}/Build/Products/Debug-iphonesimulator/MDK-cal.app"
                 script.sh "sleep 5"
-                //script.sh "xcrun simctl shutdown EF911543-AFDF-473A-9A76-9C1C0ED28E31"
+                script.sh "xcrun simctl io booted screenshot screenshot0.png"
                 //нужно написать функцию проверки, запущен симулятор уже или нет
                 
             }
@@ -168,6 +166,7 @@ class UiTestStages {
             }
             //CommonUtil.shWithRuby(script, "bundle exec cucumber APP_BUNDLE_PATH=${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
             //CommonUtil.shWithRuby(script, "bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
+            script.sh "xcrun simctl io booted screenshot screenshot1.png"
             script.sh "APP_BUNDLE_PATH=/Users/jenkins/jenkinsCI/workspace/MDK_iOS_UI_TEST/sources/sources/Build/Products/Debug-iphonesimulator/MDK-cal.app DEVICE_TARGET=EF911543-AFDF-473A-9A76-9C1C0ED28E31 bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}"
     }
 
