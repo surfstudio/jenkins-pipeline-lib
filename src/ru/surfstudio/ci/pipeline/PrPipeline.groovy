@@ -19,10 +19,6 @@ abstract class PrPipeline extends Pipeline {
     public destinationBranch = ""
     public authorUsername = ""
 
-    //ios
-    public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
-    public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey"
-
     PrPipeline(Object script) {
         super(script)
     }
