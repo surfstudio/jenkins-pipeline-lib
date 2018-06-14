@@ -105,7 +105,7 @@ class UiTestStages {
                 script.sh "xcrun simctl shutdown EF911543-AFDF-473A-9A76-9C1C0ED28E31"
                 } 
                 catch(e) {
-                currentBuild.result = "UNSTABLE" 
+                //currentBuild.result = "UNSTABLE" 
                 result = "FAIL"    }    
                 finally {
                 script.sh "xcrun simctl boot EF911543-AFDF-473A-9A76-9C1C0ED28E31"
