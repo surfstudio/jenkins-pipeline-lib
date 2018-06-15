@@ -86,42 +86,24 @@ class UiTestStages {
         }
     }
 
-    def static buildStageBodyiOS(Object script, String sourcesDir, String keychainCredenialId, String certfileCredentialId) {
-        script.dir(sourcesDir) {
+    def static buildStageBodyiOS(Object script, String sourcesDir, String derivedDataPath, String sdk, String keychainCredenialId, String certfileCredentialId) {            
+        script.withCredentials([
+            script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
+            script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
+        ]) {
+            script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
+            script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
             
-            script.withCredentials([
-                script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
-                script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
-            ]) {
+            //script.sh "gem install bundler"
 
-                def device = "iPhone 7"
-                def iosVersion = "11.4"
+            script.dir(sourcesDir) {
+                script.sh "make init" 
+            }   
 
-                script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
-                script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
-                
-                //script.sh "gem install bundler"
-                
-                script.sh "make init"    
-
-                script.sh "cd .. && bundle install"
-                script.sh "cd .. && echo -ne 'yes \n' | bundle exec calabash-ios setup ${sourcesDir}"  
-                
-                script.sh "xcodebuild -workspace *.xcworkspace -scheme \$(xcodebuild -workspace *.xcworkspace -list | grep '\\-cal' | sed 's/ *//') -allowProvisioningUpdates -sdk iphonesimulator${iosVersion} -derivedDataPath ${sourcesDir}"
-                
-
-                script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > currentsim"
-
-        
-                script.sh "xcrun simctl boot \$(cat currentsim)"
+            script.sh "bundle install"
+            script.sh "echo -ne 'yes \n' | bundle exec calabash-ios setup ${sourcesDir}"
             
-                script.sh "xcrun simctl install booted ${sourcesDir}/Build/Products/Debug-iphonesimulator/*.app"
-                
-
-                //нужно написать функцию проверки, запущен симулятор уже или нет
-                
-            }
-
+            script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//') -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
         }
     }
 
@@ -154,29 +136,37 @@ class UiTestStages {
         }
     }
 
-    def static testStageBody(Object script,
+    def static testStageBodyiOS(Object script,
                              String taskKey,
+                             String derivedDataPath,
+                             String device,
+                             String iosVersion,
                              String outputsDir,
                              String featuresDir,
-                             String platform,
-                             String artifactForTest,
                              String featureFile,
                              String outputHtmlFile,
                              String outputJsonFile) {
+            
+            def simulatorIdentifierFile = "currentsim"
+
+            script.echo "Setting up simulator ..."
+            script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > ${simulatorIdentifierFile}"        
+            script.sh "xcrun simctl boot \$(cat ${simulatorIdentifierFile})"
+            script.sh "xcrun simctl install booted ${derivedDataPath}/Build/Products/Debug-iphonesimulator/*.app"
+            
             script.echo "Tests started"
-            script.echo "start tests for $artifactForTest $taskKey"
+            script.echo "start tests for $taskKey"
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
             }
             
             try {
-            script.sh "APP_BUNDLE_PATH=/Users/jenkins/jenkinsCI/workspace/MDK_iOS_UI_TEST/sources/sources/Build/Products/Debug-iphonesimulator/MDK-cal.app DEVICE_TARGET=\$(cat /Users/jenkins/jenkinsCI/workspace/MDK_iOS_UI_TEST/sources/currentsim) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty"
+                script.sh "APP_BUNDLE_PATH=${derivedDataPath}/Build/Products/Debug-iphonesimulator/*.app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty"
+            } finally {
+                script.echo "Removing simulator ..."
+                script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
             }
-            finally {
-
-            script.sh "sudo xcrun simctl delete \$(cat /Users/jenkins/jenkinsCI/workspace/MDK_iOS_UI_TEST/sources/currentsim)"
     }
-                             }
 
     def static publishResultsStageBody(Object script,
                                        String outputsDir,
