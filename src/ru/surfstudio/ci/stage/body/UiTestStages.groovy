@@ -174,7 +174,7 @@ class UiTestStages {
             }
             finally {
 
-            script.sh "xcrun simctl delete \$(cat /Users/jenkins/jenkinsCI/workspace/MDK_iOS_UI_TEST/sources/currentsim)"
+            script.sh "sudo xcrun simctl delete \$(cat /Users/jenkins/jenkinsCI/workspace/MDK_iOS_UI_TEST/sources/currentsim)"
     }
                              }
 
