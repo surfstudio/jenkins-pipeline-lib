@@ -64,6 +64,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
                 createStage(TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     UiTestStages.testStageBodyiOS(script,
                             taskKey,
+                            sourcesDir,
                             derivedDataPath,
                             testDeviceName,
                             testOSVersion,

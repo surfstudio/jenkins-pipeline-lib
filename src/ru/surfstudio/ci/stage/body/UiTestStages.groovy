@@ -138,6 +138,7 @@ class UiTestStages {
 
     def static testStageBodyiOS(Object script,
                              String taskKey,
+                             String sourcesDir,
                              String derivedDataPath,
                              String device,
                              String iosVersion,
