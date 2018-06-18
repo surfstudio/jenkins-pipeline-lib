@@ -138,7 +138,7 @@ class UiTestStages {
             CommonUtil.shWithRuby (script, "bundle install")
             //CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
             CommonUtil.shWithRuby(script, "bundle exec parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}\" ${featuresDir}/${featureFile} --concurrent")
-
+            script.sh "sh Scripts/all_res_to_zip.sh"
         //AndroidUtil.onEmulator(script, "avd-main"){
            
         //}
@@ -160,7 +160,7 @@ class UiTestStages {
 
                 script.echo "publish result bot username=${script.env.USERNAME}"
                 //http request plugin не пашет, видимо что то с форматом body
-                script.sh "curl -H \"Content-Type: application/json\" -X POST -u ${script.env.USERNAME}:${script.env.PASSWORD} --data @${outputJsonFile} ${Constants.JIRA_URL}rest/raven/1.0/import/execution/cucumber"
+                script.sh "curl -H \"Content-Type: application/json\" -X POST -u ${script.env.USERNAME}:${script.env.PASSWORD} --data @arhive.zip ${Constants.JIRA_URL}rest/raven/1.0/import/execution/cucumber"
             }
 
 
