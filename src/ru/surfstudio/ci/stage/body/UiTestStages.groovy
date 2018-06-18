@@ -166,9 +166,9 @@ class UiTestStages {
             }
             
             try {
-                script. "${derivedDataPath}"
-                script.sh "${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//').app"
-                script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\'-cal' | sed 's/ *//'"    
+                script.echo "${derivedDataPath}"
+                script.echo "${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//').app"
+                script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\-cal' | sed 's/ *//'"    
                 script.sh "APP_BUNDLE_PATH=${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//').app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty"
             } finally {
                 script.echo "Removing simulator ..."
