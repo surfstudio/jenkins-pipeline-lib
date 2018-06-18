@@ -128,16 +128,15 @@ class UiTestStages {
         script.sh "${script.env.ANDROID_HOME}/platform-tools/adb kill-server"
         script.sh "${script.env.ANDROID_HOME}/platform-tools/adb start-server"
         script.sh "${script.env.ANDROID_HOME}/platform-tools/adb devices"
-        script.sh "${script.env.ANDROID_HOME}/platform-tools/adb shell input keyevent 3 &"
+        
         script.echo "Tests started"
         script.echo "start tests for $artifactForTest $taskKey"
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
             }
-            CommonUtil.shWithRuby (script, "gem install bundler")
-            CommonUtil.shWithRuby (script, "bundle install")
+
             //CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
-            CommonUtil.shWithRuby(script, "bundle exec parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputJsonFile}\" ${featuresDir}/${featureFile} --concurrent")
+            CommonUtil.shWithRuby(script, "${script.env.ANDROID_HOME}/platform-tools/adb kill-server; ${script.env.ANDROID_HOME}/platform-tools/adb start-server; ${script.env.ANDROID_HOME}/platform-tools/adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputJsonFile}\" ${featuresDir}/${featureFile} --concurrent")
             script.sh "sh Scripts/all_res_to_zip.sh"
         //AndroidUtil.onEmulator(script, "avd-main"){
            
