@@ -137,7 +137,7 @@ class UiTestStages {
             CommonUtil.shWithRuby (script, "gem install bundler")
             CommonUtil.shWithRuby (script, "bundle install")
             //CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
-            CommonUtil.shWithRuby(script, "bundle exec parallel-calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}\" ${featuresDir}/${featureFile} --concurrent")
+            CommonUtil.shWithRuby(script, "bundle exec parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}\" ${featuresDir}/${featureFile} --concurrent")
 
         //AndroidUtil.onEmulator(script, "avd-main"){
            
