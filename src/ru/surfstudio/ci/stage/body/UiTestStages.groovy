@@ -151,7 +151,11 @@ class UiTestStages {
             def simulatorIdentifierFile = "currentsim"
 
             script.echo "Setting up simulator ..."
-            script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > ${simulatorIdentifierFile}"        
+            script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > ${simulatorIdentifierFile}"  
+            script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > ${simulatorIdentifierFile}"   
+            script.sh "xcrun simctl list"
+            script.sh "xcrun simctl shutdown all"     
+      
             script.sh "xcrun simctl boot \$(cat ${simulatorIdentifierFile})"
             script.sh "xcrun simctl install booted ${derivedDataPath}/Build/Products/Debug-iphonesimulator/*.app"
             
