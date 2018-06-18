@@ -164,8 +164,8 @@ class UiTestStages {
             try {
                 script.echo "${derivedDataPath}"
                 script.echo "${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//').app"
-                script.echo "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\-cal' | sed 's/ *//'"    
-                script.sh "APP_BUNDLE_PATH=${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\-cal' | sed 's/ *//').app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty"
+                script.echo "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\'-cal' | sed 's/ *//'"    
+                script.sh "APP_BUNDLE_PATH=${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\'-cal' | sed 's/ *//').app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty"
             } finally {
                 script.echo "Removing simulator ..."
                 script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
