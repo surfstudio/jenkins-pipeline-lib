@@ -170,8 +170,11 @@ class UiTestStages {
             try { 
                 script.sh "APP_BUNDLE_PATH=${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//').app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty"
             } finally {
+                script.sh "xcrun simctl shutdown \$(cat ${simulatorIdentifierFile})" 
                 script.sh "xcrun simctl shutdown all" 
+                script.sh "sleep 5"
                 script.echo "Removing simulator ..."
+
                 script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
             }
     }
