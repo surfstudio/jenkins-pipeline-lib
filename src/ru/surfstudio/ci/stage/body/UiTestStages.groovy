@@ -131,10 +131,13 @@ class UiTestStages {
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
             }
-            //try {
+            try {
                  script.sh "rm arhive.zip"
                  script.sh "rm arhive"   
-            //}
+            }
+            finally {
+                script.echo "There aren't any arhives or it were deleted"
+            }
             //catch (NoArhives e){
             //    script.echo "No arvives"
             //}
