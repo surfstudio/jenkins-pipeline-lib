@@ -132,9 +132,13 @@ class UiTestStages {
             }
 
             //CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
-            CommonUtil.shWithRuby(script, "source ~/.bashrc; ${script.env.ANDROID_HOME}/platform-tools/adb kill-server; ${script.env.ANDROID_HOME}/platform-tools/adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputJsonFile}\" ${featuresDir}/${featureFile} --concurrent")
+
+   
             try {
+            
+            CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputJsonFile}\" ${featuresDir}/${featureFile} --concurrent")
             script.sh "sh Scripts/all_res_to_zip.sh"
+           
             }
             finally {
                     script.sh "ls"
