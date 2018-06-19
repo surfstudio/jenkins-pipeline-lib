@@ -122,12 +122,8 @@ class UiTestStages {
                              String platform,
                              String artifactForTest,
                              String featureFile,
-                             String outputHtmlFile,
-                             String outputJsonFile) {
-    
-        script.sh "${script.env.ANDROID_HOME}/platform-tools/adb kill-server"
-        script.sh "${script.env.ANDROID_HOME}/platform-tools/adb start-server"
-        script.sh "${script.env.ANDROID_HOME}/platform-tools/adb devices"
+                             String outputHtmlFile) {
+
         
         script.echo "Tests started"
         script.echo "start tests for $artifactForTest $taskKey"
@@ -137,7 +133,14 @@ class UiTestStages {
 
             //CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
             CommonUtil.shWithRuby(script, "source ~/.bashrc; ${script.env.ANDROID_HOME}/platform-tools/adb kill-server; ${script.env.ANDROID_HOME}/platform-tools/adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputJsonFile}\" ${featuresDir}/${featureFile} --concurrent")
+            try {
             script.sh "sh Scripts/all_res_to_zip.sh"
+            }
+            finally {
+                    script.sh "ls"
+            }
+            
+            
         //AndroidUtil.onEmulator(script, "avd-main"){
            
         //}
@@ -150,8 +153,8 @@ class UiTestStages {
                                        String jiraAuthenticationName,
                                        String htmlReportName) {
         script.dir(outputsDir) {
-            def testResult = script.readFile file: outputJsonFile
-            script.echo "Test result json: $testResult"
+            //def testResult = script.readFile file: outputJsonFile
+            //script.echo "Test result json: $testResult"
             script.withCredentials([script.usernamePassword(
                     credentialsId: jiraAuthenticationName,
                     usernameVariable: 'USERNAME',
@@ -159,7 +162,14 @@ class UiTestStages {
 
                 script.echo "publish result bot username=${script.env.USERNAME}"
                 //http request plugin не пашет, видимо что то с форматом body
+                
                 script.sh "curl -H \"Content-Type: application/json\" -X POST -u ${script.env.USERNAME}:${script.env.PASSWORD} --data @arhive.zip ${Constants.JIRA_URL}rest/raven/1.0/import/execution/cucumber"
+            }
+            try {
+                script.sh "rm arhive.zip" 
+            }
+            finally {
+                script.sh "ls"
             }
 
 
