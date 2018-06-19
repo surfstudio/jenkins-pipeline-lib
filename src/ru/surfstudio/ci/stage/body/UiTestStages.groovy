@@ -131,6 +131,11 @@ class UiTestStages {
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
             }
+            try {
+                 script.sh "rm arhive.zip"
+                 script.sh "rm arhive"   
+            }
+            
 
             //CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
 
@@ -138,7 +143,7 @@ class UiTestStages {
             try {
             
             CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}\" ${featuresDir}/${featureFile} --concurrent")
-            script.sh "sh Scripts/all_res_to_zip.sh"
+            script.sh "mkdir arhive; find ${outputsDir}/ -iname '*.json'; mv ~/zenit-tests/*.json arhive; zip -r arhive.zip arhive "
            
             }
             finally {
