@@ -136,7 +136,7 @@ class UiTestStages {
    
             try {
             
-            CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputJsonFile}\" ${featuresDir}/${featureFile} --concurrent")
+            CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ./${outputJsonFile}\" ${featuresDir}/${featureFile} --concurrent")
             script.sh "sh Scripts/all_res_to_zip.sh"
            
             }
