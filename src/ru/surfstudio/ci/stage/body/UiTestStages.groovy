@@ -143,15 +143,15 @@ class UiTestStages {
             //CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
 
    
-            try {
+            
             
             CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}\" ${featuresDir}/${featureFile} --concurrent")
-            script.sh "mkdir arhive; find ${outputsDir}/ -iname '*.json'; mv ~/zenit-tests/*.json arhive; zip -r arhive.zip arhive "
-           
+            
+            CommonUtil.safe(script) {
+                script.sh "mkdir arhive; find ${outputsDir}/ -iname '*.json'; mv ~/zenit-tests/*.json arhive; zip -r arhive.zip arhive "
             }
-            finally {
-                    script.sh "ls"
-            }
+            
+          
             
             
         //AndroidUtil.onEmulator(script, "avd-main"){
