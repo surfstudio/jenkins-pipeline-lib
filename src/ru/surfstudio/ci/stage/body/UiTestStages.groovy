@@ -178,13 +178,12 @@ class UiTestStages {
                 
                 script.sh "curl -H \"Content-Type: application/json\" -X POST -u ${script.env.USERNAME}:${script.env.PASSWORD} --data @arhive.zip ${Constants.JIRA_URL}rest/raven/1.0/import/execution/cucumber"
             }
-            try {
+            
+            CommonUtil.safe(script){
+
                 script.sh "rm arhive.zip" 
             }
-            finally {
-                script.sh "ls"
-            }
-
+            
 
         }
         script.publishHTML(target: [allowMissing         : true,
