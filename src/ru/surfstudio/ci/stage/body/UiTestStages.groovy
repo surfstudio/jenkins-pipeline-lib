@@ -135,7 +135,7 @@ class UiTestStages {
                 script.sh "rm arhive.zip"
                 script.sh "rm arhive"   
             }
-            
+            script.sh "rm -rf ./test_servers/*"
            //catch (NoArhives e){
             //    script.echo "No arvives"
             //}
