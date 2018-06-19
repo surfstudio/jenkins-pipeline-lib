@@ -145,7 +145,7 @@ class UiTestStages {
    
             
             
-            CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}\" ${featuresDir}/${featureFile} --concurrent")
+            CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -p json_report\" ${featuresDir}/${featureFile} --concurrent")
             
             CommonUtil.safe(script) {
                 script.sh "mkdir arhive; find ${outputsDir}/ -iname '*.json'; mv ~/zenit-tests/*.json arhive; zip -r arhive.zip arhive "
