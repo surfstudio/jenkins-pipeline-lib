@@ -136,10 +136,7 @@ class UiTestStages {
                 script.sh "rm arhive"   
             }
             
-            finally {
-                script.echo "There aren't any arhives or it were deleted"
-            }
-            //catch (NoArhives e){
+           catch (NoArhives e){
             //    script.echo "No arvives"
             //}
 
