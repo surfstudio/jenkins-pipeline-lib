@@ -122,7 +122,8 @@ class UiTestStages {
                              String platform,
                              String artifactForTest,
                              String featureFile,
-                             String outputHtmlFile) {
+                             String outputHtmlFile,
+                             String outputJsonFile) {
 
         
         script.echo "Tests started"
