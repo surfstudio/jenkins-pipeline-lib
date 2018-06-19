@@ -136,7 +136,7 @@ class UiTestStages {
                 script.sh "rm arhive"   
             }
             
-           catch (NoArhives e){
+           //catch (NoArhives e){
             //    script.echo "No arvives"
             //}
 
