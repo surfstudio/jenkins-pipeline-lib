@@ -135,7 +135,9 @@ class UiTestStages {
                  script.sh "rm arhive.zip"
                  script.sh "rm arhive"   
             }
-            
+            catch {
+                script.echo "No arvives"
+            }
 
             //CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
 
