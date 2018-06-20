@@ -94,15 +94,14 @@ class UiTestStages {
             script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
             script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
             
-            //script.sh "gem install bundler"
-
-            script.dir(sourcesDir) {
-                script.sh "make init" 
-            }   
-
-            script.sh "bundle install"
-            script.sh "echo -ne 'yes \n' | bundle exec calabash-ios setup ${sourcesDir}"
+            CommonUtil.shWithRuby("gem install bundler")
             
+            script.dir(sourcesDir) {
+                CommonUtil.shWithRuby(script, "make init")
+            }
+            CommonUtil.shWithRuby(script, "bundle install")
+            CommonUtil.shWithRuby(script, "echo -ne 'yes \n' | bundle exec calabash-ios setup ${sourcesDir}")
+                
             script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//') -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
         }
     }
