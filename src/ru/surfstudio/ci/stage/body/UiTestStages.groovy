@@ -133,9 +133,22 @@ class UiTestStages {
             }
             CommonUtil.safe(script){
                 script.sh "rm arhive.zip"
-                script.sh "rm arhive"   
+                  
             }
-            script.sh "rm -rf ./test_servers/*"
+
+            CommonUtil.safe(script) {
+                script.sh "rm arhive" 
+            }
+
+            CommonUtil.safe(script) {
+                script.sh "rm -rf ./test_servers/*"
+            }
+
+            CommonUtil.safe(script){
+                  script.sh "rm ./${outputsDir}/*"  
+            }
+
+            
            //catch (NoArhives e){
             //    script.echo "No arvives"
             //}
@@ -145,7 +158,7 @@ class UiTestStages {
    
             
             try {
-            CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  -p json_report \" ${featuresDir}/${featureFile} --concurrent")
+            CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  -p json_report\" ${featuresDir}/${featureFile} --concurrent")
             }
             finally {
             CommonUtil.safe(script) {
