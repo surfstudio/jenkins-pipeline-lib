@@ -149,8 +149,13 @@ class UiTestStages {
             
             def simulatorIdentifierFile = "currentsim"
 
+            script.sh "xcrun simctl shutdown all" 
+
             script.echo "Setting up simulator ..."
-            script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > ${simulatorIdentifierFile}"        
+            script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > ${simulatorIdentifierFile}"    
+            script.sh "xcrun simctl list"
+                
+      
             script.sh "xcrun simctl boot \$(cat ${simulatorIdentifierFile})"
             script.sh "xcrun simctl install booted ${derivedDataPath}/Build/Products/Debug-iphonesimulator/*.app"
             
@@ -160,10 +165,14 @@ class UiTestStages {
                 script.sh "mkdir $outputsDir"
             }
             
-            try {
+            try { 
                 script.sh "APP_BUNDLE_PATH=${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//').app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty"
             } finally {
+                script.sh "xcrun simctl shutdown \$(cat ${simulatorIdentifierFile})" 
+                script.sh "xcrun simctl shutdown all" 
+                script.sh "sleep 5"
                 script.echo "Removing simulator ..."
+
                 script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
             }
     }
