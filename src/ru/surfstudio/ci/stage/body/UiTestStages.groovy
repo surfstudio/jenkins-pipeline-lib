@@ -153,8 +153,7 @@ class UiTestStages {
             script.sh "xcrun simctl shutdown all" 
 
             script.echo "Setting up simulator ..."
-            script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > ${simulatorIdentifierFile}"  
-            script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > ${simulatorIdentifierFile}"   
+            script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > ${simulatorIdentifierFile}"    
             script.sh "xcrun simctl list"
                 
       
