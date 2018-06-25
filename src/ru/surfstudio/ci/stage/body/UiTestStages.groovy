@@ -136,20 +136,16 @@ class UiTestStages {
                   
             }
             CommonUtil.safe(script) {
-                script.sh "rm arhive" 
+                script.sh "rm -rf arhive" 
             }
-            CommonUtil.safe(script) {
-                script.sh "rm ${outputsDir}"
-            }
-
-            
+           
 
             CommonUtil.safe(script) {
                 script.sh "rm -rf ./test_servers/*"
             }
 
             CommonUtil.safe(script){
-                  script.sh "rm ./${outputsDir}/*"  
+                  script.sh "rm -rf ./${outputsDir}/*"  
             }
 
             
