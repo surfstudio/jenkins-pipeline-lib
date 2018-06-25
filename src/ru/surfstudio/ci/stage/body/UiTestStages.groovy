@@ -135,10 +135,14 @@ class UiTestStages {
                 script.sh "rm arhive.zip"
                   
             }
-
             CommonUtil.safe(script) {
                 script.sh "rm arhive" 
             }
+            CommonUtil.safe(script) {
+                script.sh "rm ${outputsDir}"
+            }
+
+            
 
             CommonUtil.safe(script) {
                 script.sh "rm -rf ./test_servers/*"
