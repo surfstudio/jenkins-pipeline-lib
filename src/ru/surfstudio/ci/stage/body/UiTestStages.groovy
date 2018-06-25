@@ -124,18 +124,50 @@ class UiTestStages {
                              String featureFile,
                              String outputHtmlFile,
                              String outputJsonFile) {
-    
-        script.sh "${script.env.ANDROID_HOME}/platform-tools/adb kill-server"
-        script.sh "${script.env.ANDROID_HOME}/platform-tools/adb start-server"
-        script.sh "${script.env.ANDROID_HOME}/platform-tools/adb devices"
-        script.sh "${script.env.ANDROID_HOME}/platform-tools/adb shell input keyevent 3 &"
+
+        
         script.echo "Tests started"
         script.echo "start tests for $artifactForTest $taskKey"
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
             }
-            CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
+            CommonUtil.safe(script){
+                script.sh "rm arhive.zip"
+                  
+            }
+            CommonUtil.safe(script) {
+                script.sh "rm -rf arhive" 
+            }
+           
 
+            CommonUtil.safe(script) {
+                script.sh "rm -rf ./test_servers/*"
+            }
+
+            CommonUtil.safe(script){
+                  script.sh "rm -rf ./${outputsDir}/*"  
+            }
+
+            
+           //catch (NoArhives e){
+            //    script.echo "No arvives"
+            //}
+
+            //CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
+
+   
+            
+            try {
+            CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  -p json_report\" ${featuresDir}/${featureFile} --concurrent")
+            }
+            finally {
+            CommonUtil.safe(script) {
+                script.sh "mkdir arhive "
+            }
+            script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
+            }
+            
+            
         //AndroidUtil.onEmulator(script, "avd-main"){
            
         //}
@@ -148,8 +180,8 @@ class UiTestStages {
                                        String jiraAuthenticationName,
                                        String htmlReportName) {
         script.dir(outputsDir) {
-            def testResult = script.readFile file: outputJsonFile
-            script.echo "Test result json: $testResult"
+            //def testResult = script.readFile file: outputJsonFile
+            //script.echo "Test result json: $testResult"
             script.withCredentials([script.usernamePassword(
                     credentialsId: jiraAuthenticationName,
                     usernameVariable: 'USERNAME',
@@ -157,9 +189,17 @@ class UiTestStages {
 
                 script.echo "publish result bot username=${script.env.USERNAME}"
                 //http request plugin не пашет, видимо что то с форматом body
-                script.sh "curl -H \"Content-Type: application/json\" -X POST -u ${script.env.USERNAME}:${script.env.PASSWORD} --data @${outputJsonFile} ${Constants.JIRA_URL}rest/raven/1.0/import/execution/cucumber"
+                
+                //script.sh "curl -H \"Content-Type: application/json\" -X POST -u ${script.env.USERNAME}:${script.env.PASSWORD} --data @arhive.zip ${Constants.JIRA_URL}rest/raven/1.0/import/execution/cucumber"
+                script.sh "cd .. && ls"
+                script.sh "cd .. && curl -H \"Content-Type: multipart/form-data\" -u ${script.env.USERNAME}:${script.env.PASSWORD} -F \"file=@arhive.zip\" ${Constants.JIRA_URL}rest/raven/1.0/import/execution/bundle"
             }
+            
+            CommonUtil.safe(script){
 
+                script.sh "rm arhive.zip" 
+            }
+            
 
         }
         script.publishHTML(target: [allowMissing         : true,
