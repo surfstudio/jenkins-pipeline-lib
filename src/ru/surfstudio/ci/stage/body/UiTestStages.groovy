@@ -67,6 +67,7 @@ class UiTestStages {
                     branches                         : [[name: "${sourceBranch}"]],
                     doGenerateSubmoduleConfigurations: script.scm.doGenerateSubmoduleConfigurations,
                     userRemoteConfigs                : [[credentialsId: credentialsId, url:sourceRepoUrl]],
+                    clean                            : true
             ])
         }
     }
