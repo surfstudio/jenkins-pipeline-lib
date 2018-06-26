@@ -94,7 +94,7 @@ class UiTestStages {
             script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
             script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
             
-            CommonUtil.shWithRuby("gem install bundler")
+            CommonUtil.shWithRuby(script, "gem install bundler")
             
             script.dir(sourcesDir) {
                 CommonUtil.shWithRuby(script, "make init")
