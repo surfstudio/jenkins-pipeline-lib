@@ -67,7 +67,7 @@ class UiTestStages {
                     branches                         : [[name: "${sourceBranch}"]],
                     doGenerateSubmoduleConfigurations: script.scm.doGenerateSubmoduleConfigurations,
                     userRemoteConfigs                : [[credentialsId: credentialsId, url:sourceRepoUrl]],
-                    clean                            : true
+                    clearWorkspace                   : true
             ])
         }
     }
@@ -101,7 +101,7 @@ class UiTestStages {
                 CommonUtil.shWithRuby(script, "make init")
             }
             CommonUtil.shWithRuby(script, "bundle install")
-            CommonUtil.shWithRuby(script, "echo -ne 'yes \n' | bundle exec calabash-ios setup ${sourcesDir}")
+            CommonUtil.shWithRuby(script, "echo -ne '\n' | bundle exec calabash-ios setup ${sourcesDir}")
                 
             script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//') -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
         }
