@@ -176,7 +176,7 @@ class UiTestStages {
                 script.sh "sleep 15"
                 script.echo "Removing simulator ..."
 
-                script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
+                //script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
             }
     }
 
