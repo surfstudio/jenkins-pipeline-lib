@@ -62,7 +62,9 @@ class UiTestStages {
         def credentialsId = script.scm.userRemoteConfigs.first().credentialsId
         script.echo("Using credentials ${credentialsId} for checkout")
         script.dir(sourcesDir) {
-            script.sh "rm -rf ./*"
+            CommonUtil.safe(script) { 
+                script.sh "rm -rf ./*"
+                } 
             script.checkout([
                     $class                           : 'GitSCM',
                     branches                         : [[name: "${sourceBranch}"]],
