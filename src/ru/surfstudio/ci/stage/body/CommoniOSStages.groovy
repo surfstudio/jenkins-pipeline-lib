@@ -13,6 +13,8 @@ class CommoniOSStages {
             script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
             script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
             
+            CommonUtil.shWithRuby(script, "gem install bundler")
+
             CommonUtil.shWithRuby(script, "make init")
             CommonUtil.shWithRuby(script, "make build")
         }
