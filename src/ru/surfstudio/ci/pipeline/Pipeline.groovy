@@ -61,8 +61,8 @@ abstract class Pipeline implements Serializable {
                 script.echo "Finalize build:"
                 script.echo "Current job result: ${script.currentBuild.result}"
                 script.echo "Try apply job result: ${jobResult}"
-                script.currentBuild.result = jobResult  //нельзя повышать статус, то ест если раньше был установлен failed, нельзя заменить на success
-                script.echo "Applied job result: ${script.currentBuild.result}"
+                script.currentBuild.result = jobResult  //нельзя повышать статус, то есть если раньше был установлен failed, нельзя заменить на success
+                script.echo "Updated job result: ${script.currentBuild.result}"
                 if (finalizeBody) {
                     script.echo "Start finalize body"
                     finalizeBody()
