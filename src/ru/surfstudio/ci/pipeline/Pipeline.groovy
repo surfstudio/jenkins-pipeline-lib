@@ -51,6 +51,7 @@ abstract class Pipeline implements Serializable {
     def abstract init()
 
     def run() {
+        script.currentBuild.result = Result.SUCCESS
         script.node(node) {
             try {
                 for (Stage stage : stages) {
