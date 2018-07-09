@@ -9,7 +9,7 @@ class CommonAndroidStages {
         script.sh "./gradlew ${buildGradleTask}"
         script.step([$class: 'ArtifactArchiver', artifacts: '**/*.apk'])
         CommonUtil.safe(script) {
-            script.step([$class: 'ArtifactArchiver', artifacts: '**/mapping.txt'])
+            script.step([$class: 'ArtifactArchiver', artifacts: '**/mapping.txt', allowEmptyArchive: true])
         }
     }
 
