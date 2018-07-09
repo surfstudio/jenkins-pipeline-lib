@@ -60,7 +60,8 @@ abstract class Pipeline implements Serializable {
             }  finally {
                 script.echo "Finalize build:"
                 script.echo "Apply job result: ${jobResult}"
-                script.currentBuild.result = jobResult
+                //script.currentBuild.result = jobResult
+                script.currentBuild.rawBuild.setResult(hudson.model.Result.fromString(jobResult))
                 script.echo "Applied job result: ${script.currentBuild.result}"
                 if (finalizeBody) {
                     script.echo "Start finalize body"
