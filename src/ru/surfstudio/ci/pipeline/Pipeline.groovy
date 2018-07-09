@@ -60,11 +60,13 @@ abstract class Pipeline implements Serializable {
             try {
                 script.echo "Cureent 4 job result: ${script.currentBuild.result}"
                 for (Stage stage : stages) {
+                    script.echo "Cureent 5 ${stage.name} job result: ${script.currentBuild.result}"
                     stageWithStrategy(stage)
+                    script.echo "Cureent 6 ${stage.name} job result: ${script.currentBuild.result}"
                 }
-                script.echo "Cureent 5 job result: ${script.currentBuild.result}"
+                script.echo "Cureent 7 job result: ${script.currentBuild.result}"
             }  finally {
-                script.echo "Cureent 6 job result: ${script.currentBuild.result}"
+                script.echo "Cureent 8 job result: ${script.currentBuild.result}"
                 script.echo "Finalize build:"
                 script.echo "Apply job result: ${jobResult}"
                 script.currentBuild.result = jobResult
