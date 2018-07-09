@@ -61,8 +61,9 @@ abstract class Pipeline implements Serializable {
                 script.echo "Apply job result: ${jobResult}"
                 script.currentBuild.result = jobResult
                 if (finalizeBody) {
-                    script.echo "Run finalize body"
+                    script.echo "Start finalize body"
                     finalizeBody()
+                    script.echo "End finalize body"
                 }
             }
         }
