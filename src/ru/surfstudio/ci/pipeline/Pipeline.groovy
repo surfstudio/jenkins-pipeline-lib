@@ -34,7 +34,7 @@ abstract class Pipeline implements Serializable {
     public script //Jenkins Pipeline Script
     public jobResult = Result.SUCCESS
     public List<Stage> stages
-    public Closure finalizeBody
+    public Closure finalizeBody = {}
     public node
 
     public preExecuteStageBody = { stage -> CommonUtil.notifyBitbucketAboutStageStart(script, stage.name) }
@@ -58,6 +58,7 @@ abstract class Pipeline implements Serializable {
                 }
             }  finally {
                 script.echo "Finalize build:"
+                script.echo "Apply job result: ${jobResult}"
                 script.currentBuild.result = jobResult
                 finalizeBody()
             }
