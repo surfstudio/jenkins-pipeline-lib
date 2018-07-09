@@ -51,17 +51,23 @@ abstract class Pipeline implements Serializable {
     def abstract init()
 
     def run() {
+        script.echo "Cureent 1 job result: ${script.currentBuild.result}"
         script.currentBuild.result = Result.SUCCESS
+        script.echo "Cureent 2 job result: ${script.currentBuild.result}"
         script.node(node) {
+            script.currentBuild.result = Result.SUCCESS
+            script.echo "Cureent 3 job result: ${script.currentBuild.result}"
             try {
+                script.echo "Cureent 4 job result: ${script.currentBuild.result}"
                 for (Stage stage : stages) {
                     stageWithStrategy(stage)
                 }
+                script.echo "Cureent 5 job result: ${script.currentBuild.result}"
             }  finally {
+                script.echo "Cureent 6 job result: ${script.currentBuild.result}"
                 script.echo "Finalize build:"
                 script.echo "Apply job result: ${jobResult}"
-                //script.currentBuild.result = jobResult
-                script.currentBuild.rawBuild.setResult(hudson.model.Result.fromString(jobResult))
+                script.currentBuild.result = jobResult
                 script.echo "Applied job result: ${script.currentBuild.result}"
                 if (finalizeBody) {
                     script.echo "Start finalize body"
