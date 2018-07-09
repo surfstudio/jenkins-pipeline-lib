@@ -51,25 +51,17 @@ abstract class Pipeline implements Serializable {
     def abstract init()
 
     def run() {
-        script.echo "Cureent 1 job result: ${script.currentBuild.result}"
-        script.currentBuild.result = Result.SUCCESS
-        script.echo "Cureent 2 job result: ${script.currentBuild.result}"
         script.node(node) {
-            script.currentBuild.result = Result.SUCCESS
-            script.echo "Cureent 3 job result: ${script.currentBuild.result}"
             try {
-                script.echo "Cureent 4 job result: ${script.currentBuild.result}"
                 for (Stage stage : stages) {
-                    script.echo "Cureent 5 ${stage.name} job result: ${script.currentBuild.result}"
                     stageWithStrategy(stage)
-                    script.echo "Cureent 6 ${stage.name} job result: ${script.currentBuild.result}"
                 }
-                script.echo "Cureent 7 job result: ${script.currentBuild.result}"
             }  finally {
-                script.echo "Cureent 8 job result: ${script.currentBuild.result}"
+                
                 script.echo "Finalize build:"
-                script.echo "Apply job result: ${jobResult}"
-                script.currentBuild.result = jobResult
+                script.echo "Current job result: ${script.currentBuild.result}"
+                script.echo "Try apply job result: ${jobResult}"
+                script.currentBuild.result = jobResult  //нельзя повышать статус, то ест если раньше был установлен failed, нельзя заменить на success
                 script.echo "Applied job result: ${script.currentBuild.result}"
                 if (finalizeBody) {
                     script.echo "Start finalize body"
