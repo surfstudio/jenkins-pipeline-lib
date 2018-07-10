@@ -21,6 +21,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
         node = script.params.node //приоритетная установка из параметров
         if(!node) {
             node = NodeProvider.getAndroidNode()
+            script.echo "Using default node: ${node}"
         } else {
             script.echo "Using node from params: ${node}"
         }
