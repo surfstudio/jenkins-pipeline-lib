@@ -18,7 +18,12 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
     @Override
     def init() {
-        node = NodeProvider.getAndroidNode()
+        node = script.params.node //приоритетная установка из параметров
+        if(!node) {
+            node = NodeProvider.getAndroidNode()
+        } else {
+            script.echo "Using node from params: ${node}"
+        }
         stages = [
                 createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     UiTestStages.initStageBody(this)
