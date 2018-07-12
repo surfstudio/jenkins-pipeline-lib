@@ -36,7 +36,7 @@ class JarvisUtil {
                         httpMode: 'POST',
                         requestBody: jsonBody,
                         url: "${Constants.JARVIS_URL}message/?${getHttpParamToken(script)}",
-                        validResponseCodes: '204'
+                        validResponseCodes: '201'
             }
         }
     }
@@ -61,7 +61,7 @@ class JarvisUtil {
                         httpMode: 'POST',
                         requestBody: jsonBody,
                         url: "${Constants.JARVIS_URL}notification/?${getHttpParamToken(script)}",
-                        validResponseCodes: '204'
+                        validResponseCodes: '201'
             }
         }
     }
