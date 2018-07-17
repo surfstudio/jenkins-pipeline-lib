@@ -61,7 +61,11 @@ class UiTestStages {
     def static checkoutSourcesBody(Object script, String sourcesDir, String sourceRepoUrl, String sourceBranch) {
         def credentialsId = script.scm.userRemoteConfigs.first().credentialsId
         script.echo("Using credentials ${credentialsId} for checkout")
+            
         script.dir(sourcesDir) {
+            CommonUtil.safe(script) { 
+                script.sh "rm -rf ./*"
+                } 
             script.checkout([
                     $class                           : 'GitSCM',
                     branches                         : [[name: "${sourceBranch}"]],
@@ -110,6 +114,9 @@ class UiTestStages {
                 url: "${Constants.JIRA_URL}rest/raven/1.0/export/test?keys=${taskKey}",
                 authentication: jiraAuthenticationName
         httpMode: 'GET'
+        CommonUtil.safe(script) { 
+                script.sh "rm ${newFeatureForTest}"
+                } 
         script.dir(featuresDir) {
             script.writeFile file: newFeatureForTest, text: response.content
         }
