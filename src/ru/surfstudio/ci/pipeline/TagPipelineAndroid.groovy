@@ -18,6 +18,9 @@ class TagPipelineAndroid extends TagPipeline {
     public instrumentedTestResultPathXml = "**/outputs/androidTest-results/connected/*.xml"
     public instrumentedTestResultPathDirHtml = "app/build/reports/androidTests/connected/"
 
+    public keystoreCredentials = "no_credentials"
+    public keystorePropertiesCredentials = "no_credentials"
+
 
     TagPipelineAndroid(Object script) {
         super(script)
@@ -34,7 +37,10 @@ class TagPipelineAndroid extends TagPipeline {
                     TagStages.checkoutStageBody(script, repoTag)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    CommonAndroidStages.buildStageBodyAndroid(script, buildGradleTask)
+                    CommonAndroidStages.buildWithCredentialsStageBodyAndroid(script,
+                            buildGradleTask,
+                            keystoreCredentials,
+                            keystorePropertiesCredentials)
                 },
                 createStage(UNIT_TEST, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     CommonAndroidStages.unitTestStageBodyAndroid(script,

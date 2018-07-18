@@ -13,6 +13,15 @@ class CommonAndroidStages {
         }
     }
 
+    def static buildWithCredentialsStageBodyAndroid(Object script,
+                                                    String buildGradleTask,
+                                                    String keystoreCredentials,
+                                                    String keystorePropertiesCredentials) {
+        AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials){
+            buildStageBodyAndroid(script, buildGradleTask)
+        }
+    }
+
     def static unitTestStageBodyAndroid(Object script, String unitTestGradleTask, String testResultPathXml, String testResultPathDirHtml) {
         try {
             script.sh "./gradlew ${unitTestGradleTask}"
