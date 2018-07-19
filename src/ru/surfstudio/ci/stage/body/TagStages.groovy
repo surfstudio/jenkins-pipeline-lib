@@ -54,7 +54,7 @@ class TagStages {
                                                       String keystoreCredentials,
                                                       String keystorePropertiesCredentials) {
         AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
-                betaUploadStageBodyAndroid(script, betaUploadGradleTask)
+            betaUploadStageBodyAndroid(script, betaUploadGradleTask)
         }
     }
 
@@ -75,5 +75,5 @@ class TagStages {
     def static finalizeStageBody(TagPipeline ctx) {
         JarvisUtil.createVersionAndNotify(ctx)
     }
-    
+
 }

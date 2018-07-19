@@ -58,7 +58,10 @@ class TagPipelineAndroid extends TagPipeline {
                     CommonAndroidStages.staticCodeAnalysisStageBody(script)
                 },
                 createStage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    TagStages.betaUploadStageBodyAndroid(script, betaUploadGradleTask)
+                    TagStages.betaUploadWithKeystoreStageBodyAndroid(script,
+                            keystoreCredentials,
+                            keystorePropertiesCredentials,
+                            betaUploadGradleTask)
                 },
 
         ]
