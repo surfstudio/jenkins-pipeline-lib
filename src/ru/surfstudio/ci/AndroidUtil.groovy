@@ -35,7 +35,7 @@ class AndroidUtil {
                 script.echo vars
                 script.echo "${vars instanceof List}"
                 script.withEnv(vars) {
-                    script.withEnv("storeFile=$script.KEYSTORE") {
+                    script.withEnv(["storeFile=$script.KEYSTORE"]) {
                         bodyStarted = true
                         body()
                     }
