@@ -31,7 +31,7 @@ class AndroidUtil {
             ]) {
                 String properties = script.readFile(script.KEYSTORE_PROPERTIES)
                 script.echo "extracted keystore properties: $properties"
-                def vars = properties.split('\n')
+                def vars = properties.tokenize('\n')
                 script.withEnv(vars) {
                     script.withEnv("storeFile=$script.KEYSTORE") {
                         bodyStarted = true
