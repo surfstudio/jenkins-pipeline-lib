@@ -59,9 +59,9 @@ class TagPipelineAndroid extends TagPipeline {
                 },
                 createStage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     TagStages.betaUploadWithKeystoreStageBodyAndroid(script,
+                            betaUploadGradleTask,
                             keystoreCredentials,
-                            keystorePropertiesCredentials,
-                            betaUploadGradleTask)
+                            keystorePropertiesCredentials)
                 },
 
         ]
