@@ -1,4 +1,6 @@
 package ru.surfstudio.ci.stage.body
+
+import ru.surfstudio.ci.AndroidUtil
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.pipeline.TagPipeline
@@ -47,6 +49,15 @@ class TagStages {
         script.sh "./gradlew ${betaUploadGradleTask}"
     }
 
+    def static betaUploadWithKeystoreStageBodyAndroid(Object script,
+                                                      String betaUploadGradleTask,
+                                                      String keystoreCredentials,
+                                                      String keystorePropertiesCredentials) {
+        AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
+                betaUploadStageBodyAndroid(script, betaUploadGradleTask)
+        }
+    }
+
     def static betaUploadStageBodyiOS(Object script, String keychainCredenialId, String certfileCredentialId) {
         script.withCredentials([
             script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
@@ -64,6 +75,5 @@ class TagStages {
     def static finalizeStageBody(TagPipeline ctx) {
         JarvisUtil.createVersionAndNotify(ctx)
     }
-
-
+    
 }
