@@ -138,6 +138,9 @@ class UiTestStages {
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
             }
+            
+            script.sh "bundle install"
+            
             CommonUtil.safe(script){
                 script.sh "rm arhive.zip"
                   
