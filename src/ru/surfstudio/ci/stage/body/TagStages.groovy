@@ -63,12 +63,14 @@ class TagStages {
             script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
             script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
         ]) {
-
-            script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
-            script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
             
-            script.sh "make init"
-            script.sh "make beta"
+            CommonUtil.shWithRuby(script, 'security -v unlock-keychain -p $KEYCHAIN_PASS')
+            CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P ""')
+            
+            CommonUtil.shWithRuby(script, "gem install bundler")
+
+            CommonUtil.shWithRuby(script, "make init")
+            CommonUtil.shWithRuby(script, "make beta")
         }
     }
 
