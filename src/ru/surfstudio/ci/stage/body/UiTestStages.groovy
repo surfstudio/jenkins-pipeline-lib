@@ -139,7 +139,7 @@ class UiTestStages {
                 script.sh "mkdir $outputsDir"
             }
             
-            script.sh "bundle install"
+            CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; bundle install")
             
             CommonUtil.safe(script){
                 script.sh "rm arhive.zip"
