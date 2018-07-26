@@ -144,6 +144,6 @@ class CommonUtil {
                 .collect({script.string(name: it.key, value: it.value)})
         )
         script.build job: script.env.JOB_NAME, parameters: allParams, wait: false
-        script.currentBuild.currentBuild.rawBuild.delete()
+        script.currentBuild.rawBuild.delete()
     }
 }
