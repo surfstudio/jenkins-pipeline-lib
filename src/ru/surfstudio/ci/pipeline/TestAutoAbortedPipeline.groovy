@@ -18,7 +18,7 @@ class TestAutoAbortedPipeline extends AutoAbortedPipeline {
     @Override
     def initInternal() {
 
-        abortStrategy = AbortDuplicateStrategy.ANOTHER
+        abortStrategy = AbortDuplicateStrategy.SELF
         //configuration
         node = NodeProvider.getAndroidNode()
 
