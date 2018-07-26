@@ -101,6 +101,9 @@ abstract class AutoAbortedPipeline extends Pipeline {
 
     abstract def initInternal()
 
+    /**
+     * @return уникальное имя для билда, по этому имени будут искаться похожие билды для отмены
+     */
     abstract def String getBuildIdentifier()
 
     def isAbortDuplicatePipelineMode() {
