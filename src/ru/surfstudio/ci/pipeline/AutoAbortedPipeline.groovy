@@ -1,21 +1,27 @@
 package ru.surfstudio.ci.pipeline
 
-import ru.surfstudio.ci.AbortDublicateStrategy
+import ru.surfstudio.ci.AbortDuplicateStrategy
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 
+/**
+ * Pipeline, который может отменять одинаковые билды
+ * При старте pipeline выполняет отмену билдов в соответствии с {@link AbortDuplicateStrategy} сразу после выполнения
+ * Init stage, который является обязательным для этого pipeline.
+ * После отмены при необходимости стартует оснавная логика пайплайна как копия запущенного пайплайна, причем запущенный пайплайн удаляется
+ */
 abstract class AutoAbortedPipeline extends Pipeline {
 
     public static final String INIT = 'Init'
 
-    public static final String NEED_CHECK_SAME_BUILDS_PARAM_NAME = 'needCheckSameBuilds' //todo refactor name
+    public static final String ABORT_DUPLICATE_PIPELINE_MODE_PARAM_NAME = 'abortDuplicatePipelineMode'
 
 
-    private needCheckSameBuilds = true
-    public abortStrategy
+    private abortDuplicatePipelineMode = true
+    public abortStrategy  //see AbortDuplicateStrategy
 
     AutoAbortedPipeline(Object script) {
         super(script)
@@ -23,15 +29,17 @@ abstract class AutoAbortedPipeline extends Pipeline {
 
     @Override
     def final init() {
-        abortStrategy = AbortDublicateStrategy.SELF
+        abortStrategy = AbortDuplicateStrategy.SELF
 
         initInternal()
 
-        applyParameterIfNotEmpty(script, NEED_CHECK_SAME_BUILDS_PARAM_NAME, script.params[NEED_CHECK_SAME_BUILDS_PARAM_NAME], {
-            value -> this.needCheckSameBuilds = value
+        applyParameterIfNotEmpty(script,
+                ABORT_DUPLICATE_PIPELINE_MODE_PARAM_NAME,
+                script.params[ABORT_DUPLICATE_PIPELINE_MODE_PARAM_NAME], {
+            value -> this.abortDuplicatePipelineMode = value
         })
 
-        if (needCheckSameBuilds) {
+        if (abortDuplicatePipelineMode) {
             //modify pipeline for execution only for abort duplicate builds
 
             this.node = NodeProvider.getAutoAbortNode()
@@ -45,13 +53,13 @@ abstract class AutoAbortedPipeline extends Pipeline {
                 def buildIdentifier = getBuildIdentifier()
                 def needContinueBuild = true
                 switch (abortStrategy){
-                    case AbortDublicateStrategy.SELF:
+                    case AbortDuplicateStrategy.SELF:
                         if(CommonUtil.isOlderBuildWithDescriptionRunning(script, buildIdentifier)){
                             needContinueBuild = false
                             echo "Build skipped"
                         }
                         break;
-                    case AbortDublicateStrategy.ANOTHER:
+                    case AbortDuplicateStrategy.ANOTHER:
                         CommonUtil.tryAbortOlderBuildsWithDescription(script, buildIdentifier)
                         break;
                 }
@@ -60,7 +68,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
                 if (needContinueBuild) {
                     //start clone of this build, which make main pipeline work
                     CommonUtil.startCurrentBuildCloneWithParams(script, [
-                            script.booleanParam(name: NEED_CHECK_SAME_BUILDS_PARAM_NAME, value: false)
+                            script.booleanParam(name: ABORT_DUPLICATE_PIPELINE_MODE_PARAM_NAME, value: false)
                     ])
                 }
             }
@@ -89,8 +97,8 @@ abstract class AutoAbortedPipeline extends Pipeline {
 
     abstract def String getBuildIdentifier()
 
-    def getNeedCheckSameBuilds() {
-        return needCheckSameBuilds
+    def isAbortDuplicatePipelineMode() {
+        return abortDuplicatePipelineMode
     }
 
     private def setIdentifierDescription(){
