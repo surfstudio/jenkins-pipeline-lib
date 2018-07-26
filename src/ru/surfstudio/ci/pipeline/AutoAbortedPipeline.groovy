@@ -32,7 +32,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
 
     @Override
     def final init() {
-        abortStrategy = AbortDuplicateStrategy.SELF
+        abortStrategy = AbortDuplicateStrategy.ANOTHER
 
         initInternal()
 
