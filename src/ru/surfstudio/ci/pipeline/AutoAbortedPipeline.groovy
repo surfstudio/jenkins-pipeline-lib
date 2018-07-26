@@ -81,6 +81,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
             }
             //remove build from history when it ending
             this.finalizeBody = {
+                echo "Deleting build"
                 script.currentBuild.rawBuild.delete()
             }
         } else {
