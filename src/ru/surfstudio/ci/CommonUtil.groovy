@@ -132,8 +132,12 @@ class CommonUtil {
     def static restartCurrentBuildWithParams(Object script, ArrayList<Object> extraParams) {
         script.echo "restart current build with extra params ${extraParams}"
         def Map currentBuildParams = script.params
-        def allParams = extraParams.addAll(
-                currentBuildParams.entrySet().collect({script.string(name: it.key, value: it.value)})
+
+        def allParams = []
+        allParams.addAll(extraParams)
+        allParams.addAll(currentBuildParams
+                .entrySet()
+                .collect({script.string(name: it.key, value: it.value)})
         )
         script.build job: script.env.JOB_NAME, allParams, wait: false
         script.currentBuild.currentBuild.rawBuild.delete()
