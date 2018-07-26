@@ -101,7 +101,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
         return abortDuplicatePipelineMode
     }
 
-    private def setIdentifierAsDescription(){
+    def setIdentifierAsDescription(){
         script.currentBuild.rawBuild.setDescription("${getBuildIdentifier()}")
     }
 }
