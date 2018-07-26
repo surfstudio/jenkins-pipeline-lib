@@ -20,7 +20,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
     public static final String ABORT_DUPLICATE_PIPELINE_MODE_PARAM_NAME = 'abortDuplicatePipelineMode'
 
 
-    private abortDuplicatePipelineMode = true
+    public abortDuplicatePipelineMode = true
     public abortStrategy  //see AbortDuplicateStrategy
 
     AutoAbortedPipeline(Object script) {
@@ -88,7 +88,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
             def initBody = getStage(INIT).body
             getStage(INIT).body = {
                 initBody()
-                setIdentifierDescription()
+                setIdentifierAsDescription()
             }
         }
     }
@@ -101,7 +101,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
         return abortDuplicatePipelineMode
     }
 
-    private def setIdentifierDescription(){
+    private def setIdentifierAsDescription(){
         script.currentBuild.rawBuild.setDescription("${getBuildIdentifier()}")
     }
 }
