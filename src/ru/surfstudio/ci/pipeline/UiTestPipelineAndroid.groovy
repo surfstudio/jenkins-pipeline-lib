@@ -17,7 +17,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
     }
 
     @Override
-    def init() {
+    def initInternal() {
         node = script.params.node //приоритетная установка из параметров
         if(!node) {
             node = NodeProvider.getAndroidNode()

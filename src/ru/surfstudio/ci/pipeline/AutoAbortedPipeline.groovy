@@ -12,6 +12,8 @@ import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
  * При старте pipeline выполняет отмену билдов в соответствии с {@link AbortDuplicateStrategy} сразу после выполнения
  * Init stage, который является обязательным для этого pipeline.
  * После отмены при необходимости стартует оснавная логика пайплайна как копия запущенного пайплайна, причем запущенный пайплайн удаляется
+ *
+ * Для этого пайплайна необходимо переопределить метод initInternal вместо init и метод getBuildIdentifier
  */
 abstract class AutoAbortedPipeline extends Pipeline {
 

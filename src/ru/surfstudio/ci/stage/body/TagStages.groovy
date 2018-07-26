@@ -32,8 +32,6 @@ class TagStages {
         applyParameterIfNotEmpty(script,'repoTag', script.params.repoTag_0, {
             value -> ctx.repoTag = value
         })
-
-        CommonUtil.tryAbortOlderBuildsWithDescription(script, ctx.repoTag)
     }
 
     def static checkoutStageBody(Object script, String repoTag) {

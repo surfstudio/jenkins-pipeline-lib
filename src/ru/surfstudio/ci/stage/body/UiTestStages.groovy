@@ -52,8 +52,6 @@ class UiTestStages {
             ctx.sourceBranch = JarvisUtil.getMainBranch(script, ctx.sourceRepoUrl)
         }
 
-        CommonUtil.tryAbortOlderBuildsWithDescription(script, "taskKey: ${ctx.taskKey}, testBranch: ${ctx.testBranch}, sourceBranch: ${ctx.sourceBranch}")
-
         checkAndParallelBulkJob(ctx)
     }
 

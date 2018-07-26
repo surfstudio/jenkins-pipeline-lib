@@ -2,10 +2,10 @@ package ru.surfstudio.ci.pipeline
 
 import ru.surfstudio.ci.stage.StageStrategy
 
-abstract class TagPipeline extends Pipeline {
+abstract class TagPipeline extends AutoAbortedPipeline {
 
     //stage names
-    public static final String INIT = 'Init'
+    //Init stage inherited from AutoAbortedPipeline
     public static final String CHECKOUT = 'Checkout'
     public static final String BUILD = 'Build'
     public static final String UNIT_TEST = 'Unit Test'
@@ -18,5 +18,10 @@ abstract class TagPipeline extends Pipeline {
 
     TagPipeline(Object script) {
         super(script)
+    }
+
+    @Override
+    String getBuildIdentifier() {
+        return repoTag
     }
 }

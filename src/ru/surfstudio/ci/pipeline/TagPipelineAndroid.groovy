@@ -27,7 +27,7 @@ class TagPipelineAndroid extends TagPipeline {
     }
 
     @Override
-    def init() {
+    def initInternal() {
         node = NodeProvider.getAndroidNode()
         stages = [
                 createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
