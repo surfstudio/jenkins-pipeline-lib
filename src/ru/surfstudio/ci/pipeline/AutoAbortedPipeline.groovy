@@ -11,7 +11,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
 
     public static final String INIT = 'Init'
 
-    public static final String NEED_CHECK_SAME_BUILDS_PARAM_NAME = 'needCheckSameBuilds'
+    public static final String NEED_CHECK_SAME_BUILDS_PARAM_NAME = 'needCheckSameBuilds' //todo refactor name
 
 
     private needCheckSameBuilds = true
@@ -43,30 +43,32 @@ abstract class AutoAbortedPipeline extends Pipeline {
             getStage(INIT).body = {
                 initBody()
                 def buildIdentifier = getBuildIdentifier()
-                script.currentBuild.rawBuild.setDescription("$buildIdentifier")
                 def needContinueBuild = true
                 switch (abortStrategy){
                     case AbortDublicateStrategy.SELF:
-                        if(CommonUtil.isSameBuildRunning(script)){
+                        if(CommonUtil.isOlderBuildWithDescriptionRunning(script, buildIdentifier)){
                             needContinueBuild = false
+                            echo "Build skipped"
                         }
                         break;
                     case AbortDublicateStrategy.ANOTHER:
-                        CommonUtil.tryAbortSameBuilds(script)
+                        CommonUtil.tryAbortOlderBuildsWithDescription(script, buildIdentifier)
                         break;
                 }
-                script.currentBuild.rawBuild.setDescription("$buildIdentifier abort duplicate" )
+                script.currentBuild.rawBuild.setDescription("check same for \"$buildIdentifier\"" )
 
                 if (needContinueBuild) {
+                    //start clone of this build, which make main pipeline work
                     CommonUtil.startCurrentBuildCloneWithParams(script, [
                             script.booleanParam(name: NEED_CHECK_SAME_BUILDS_PARAM_NAME, value: false)
                     ])
                 }
             }
-            //skip all another stages
+            //clear all another stages
             for (stage in stages) {
                 if(stage.name != INIT) {
                     stage.strategy = StageStrategy.SKIP_STAGE
+                    stage.body = {}
                 }
             }
             //remove build from history when it ending
@@ -74,18 +76,24 @@ abstract class AutoAbortedPipeline extends Pipeline {
                 script.currentBuild.rawBuild.delete()
             }
         } else {
-            //extent normal init stage for storing identifier as description
+            //extent normal init stage for storing identifier as description, it will be used for searching same builds
             def initBody = getStage(INIT).body
             getStage(INIT).body = {
                 initBody()
-                def buildIdentifier = getBuildIdentifier()
-                script.currentBuild.rawBuild.setDescription("$buildIdentifier")
+                setIdentifierDescription()
             }
         }
-
     }
 
     abstract def initInternal()
 
     abstract def String getBuildIdentifier()
+
+    def getNeedCheckSameBuilds() {
+        return needCheckSameBuilds
+    }
+
+    private def setIdentifierDescription(){
+        script.currentBuild.rawBuild.setDescription("${getBuildIdentifier()}")
+    }
 }

@@ -33,7 +33,7 @@ pipeline.stages = [
                 this.echo "Using Main Branch: ${branchName}"
             }
 
-            CommonUtil.tryAbortSameBuilds(this, branchName)
+            CommonUtil.tryAbortOlderBuildsWithDescription(this, branchName)
         },
         pipeline.createStage("Checkout", StageStrategy.FAIL_WHEN_STAGE_ERROR){
             this.checkout([
