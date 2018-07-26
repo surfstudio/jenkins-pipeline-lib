@@ -35,7 +35,7 @@ class PrStages {
             value -> ctx.authorUsername = value
         })
 
-        CommonUtil.abortDuplicateBuilds(script, ctx.sourceBranch)
+        CommonUtil.tryAbortDuplicateBuilds(script, ctx.sourceBranch)
     }
 
     def static preMergeStageBody(Object script, String sourceBranch, String destinationBranch) {

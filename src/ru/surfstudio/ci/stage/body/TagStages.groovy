@@ -33,7 +33,7 @@ class TagStages {
             value -> ctx.repoTag = value
         })
 
-        CommonUtil.abortDuplicateBuilds(script, ctx.repoTag)
+        CommonUtil.tryAbortDuplicateBuilds(script, ctx.repoTag)
     }
 
     def static checkoutStageBody(Object script, String repoTag) {

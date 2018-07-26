@@ -49,20 +49,29 @@ class CommonUtil {
         script.sh "hostname; set +x; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use $version; $command"
     }
 
-    def static abortDuplicateBuilds(Object script, String buildIdentifier) {
+    def static tryAbortDuplicateBuilds(Object script, String buildIdentifier, String abortStrategy) {
         hudson.model.Run currentBuild = script.currentBuild.rawBuild
         currentBuild.setDescription(buildIdentifier)
         hudson.model.Run previousBuild = currentBuild.getPreviousBuildInProgress()
 
         while (previousBuild != null) {
             if (previousBuild.isInProgress() && previousBuild.getDescription() == currentBuild.getDescription()) {
-                def executor = previousBuild.getExecutor()
-                if (executor != null) {
-                    script.echo ">> Aborting older build #${previousBuild.getNumber()}"
-                    executor.interrupt(hudson.model.Result.ABORTED, new jenkins.model.CauseOfInterruption.UserInterruption(
-                            "Aborted by newer build #${currentBuild.getNumber()}"
-                    ))
+                switch (abortStrategy) {
+                    case AbortDublicateStrategy.ANOTHER:
+                        def executor = previousBuild.getExecutor()
+                        if (executor != null) {
+                            script.echo ">> Aborting older build #${previousBuild.getNumber()}"
+                            executor.interrupt(hudson.model.Result.ABORTED, new jenkins.model.CauseOfInterruption.UserInterruption(
+                                    "Aborted by newer build #${currentBuild.getNumber()}"
+                            ))
+                        }
+                        break;
+                    case AbortDublicateStrategy.SELF:
+                        script.echo ">> Aborting this build #${currentBuild.getNumber()}, becouse same is running"
+                        currentBuild.doTerm()
+                        currentBuild.delete()
                 }
+
             }
 
             previousBuild = previousBuild.getPreviousBuildInProgress()
@@ -118,5 +127,15 @@ class CommonUtil {
                 pipeline.script.echo "value of ${stageName}.strategy sets from parameters to ${strategyValue}"
             }
         }
+    }
+
+    def static restartCurrentBuildWithParams(Object script, ArrayList<Object> extraParams) {
+        script.echo "restart current build with extra params ${extraParams}"
+        def Map currentBuildParams = script.params
+        def allParams = extraParams.addAll(
+                currentBuildParams.entrySet().collect({script.string(name: it.key, value: it.value)})
+        )
+        script.build job: script.env.JOB_NAME, allParams, wait: false
+        script.currentBuild.currentBuild.rawBuild.delete()
     }
 }
