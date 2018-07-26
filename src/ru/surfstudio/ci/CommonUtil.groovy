@@ -139,7 +139,7 @@ class CommonUtil {
                 .entrySet()
                 .collect({script.string(name: it.key, value: it.value)})
         )
-        script.build job: script.env.JOB_NAME, allParams, wait: false
+        script.build job: script.env.JOB_NAME, parameters: allParams, wait: false
         script.currentBuild.currentBuild.rawBuild.delete()
     }
 }
