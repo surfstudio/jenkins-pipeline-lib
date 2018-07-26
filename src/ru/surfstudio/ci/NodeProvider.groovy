@@ -8,4 +8,9 @@ class NodeProvider {
     def static getiOSNode() {
         return "ios"
     }
+
+    def static getAutoAbortNode() {
+        return "auto_abort" //"android" - метка, поэтому будет использоваться один из доступных компьютеров с этой метокй
+    }
+
 }

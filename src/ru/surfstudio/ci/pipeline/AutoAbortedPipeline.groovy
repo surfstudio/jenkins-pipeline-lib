@@ -2,6 +2,7 @@ package ru.surfstudio.ci.pipeline
 
 import ru.surfstudio.ci.AbortDublicateStrategy
 import ru.surfstudio.ci.CommonUtil
+import ru.surfstudio.ci.NodeProvider
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 
@@ -30,6 +31,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
         })
 
         if(needCheckActiveDublicateBuilds) {
+            this.node = NodeProvider.getAutoAbortNode()
             this.preExecuteStageBody = {}
             this.postExecuteStageBody = {}
             def initBody = getStage(INIT).body
