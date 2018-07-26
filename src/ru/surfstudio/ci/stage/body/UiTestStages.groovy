@@ -1,6 +1,5 @@
 package ru.surfstudio.ci.stage.body
 
-import ru.surfstudio.ci.AndroidUtil
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Constants
 import ru.surfstudio.ci.JarvisUtil
@@ -52,8 +51,6 @@ class UiTestStages {
         if (!ctx.sourceBranch) {
             ctx.sourceBranch = JarvisUtil.getMainBranch(script, ctx.sourceRepoUrl)
         }
-
-        CommonUtil.abortDuplicateBuilds(script, "taskKey: ${ctx.taskKey}, testBranch: ${ctx.testBranch}, sourceBranch: ${ctx.sourceBranch}")
 
         checkAndParallelBulkJob(ctx)
     }

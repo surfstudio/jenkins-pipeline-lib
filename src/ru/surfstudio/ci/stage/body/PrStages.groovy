@@ -34,8 +34,6 @@ class PrStages {
         applyParameterIfNotEmpty(script, 'authorUsername', params.authorUsername, {
             value -> ctx.authorUsername = value
         })
-
-        CommonUtil.abortDuplicateBuilds(script, ctx.sourceBranch)
     }
 
     def static preMergeStageBody(Object script, String sourceBranch, String destinationBranch) {

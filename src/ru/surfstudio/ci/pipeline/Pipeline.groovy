@@ -47,8 +47,9 @@ abstract class Pipeline implements Serializable {
     /**
      * Инициализацию пайплайна нужно проводить здесь вместо конструктора из-за особенностей рантайм выполенния
      * https://issues.jenkins-ci.org/browse/JENKINS-26313
+     * Этот метод нужно вызвать после вызова конструктора
      */
-    def abstract init()
+    abstract def init()
 
     def run() {
         script.node(node) {

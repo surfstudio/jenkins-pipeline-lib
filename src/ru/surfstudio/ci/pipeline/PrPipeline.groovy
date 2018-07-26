@@ -4,10 +4,10 @@ import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.stage.body.CommonAndroidStages
 import ru.surfstudio.ci.stage.body.PrStages
 
-abstract class PrPipeline extends Pipeline {
+abstract class PrPipeline extends AutoAbortedPipeline {
 
     //stage names
-    public static final String INIT = 'Init'
+    //Init stage inherited from AutoAbortedPipeline
     public static final String PRE_MERGE = 'PreMerge'
     public static final String BUILD = 'Build'
     public static final String UNIT_TEST = 'Unit Test'
@@ -21,5 +21,10 @@ abstract class PrPipeline extends Pipeline {
 
     PrPipeline(Object script) {
         super(script)
+    }
+
+    @Override
+    String getBuildIdentifier() {
+        return sourceBranch
     }
 }
