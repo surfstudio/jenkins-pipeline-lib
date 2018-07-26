@@ -28,7 +28,7 @@ abstract class TestAutoAbortedPipeline extends AutoAbortedPipeline {
 
         stages = [
                 createStage("Init", StageStrategy.FAIL_WHEN_STAGE_ERROR){
-                    applyParameterIfNotEmpty(script, "branchName", script.paramsbranchName.branchName, {
+                    applyParameterIfNotEmpty(script, "branchName", script.params.branchName, {
                         value -> this.branchName = value
                     })
                 },
