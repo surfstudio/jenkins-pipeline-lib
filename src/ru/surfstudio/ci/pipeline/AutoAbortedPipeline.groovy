@@ -57,7 +57,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
                     case AbortDuplicateStrategy.SELF:
                         if(CommonUtil.isOlderBuildWithDescriptionRunning(script, buildIdentifier)){
                             needContinueBuild = false
-                            echo "Build skipped"
+                            script.echo "Build skipped"
                         }
                         break;
                     case AbortDuplicateStrategy.ANOTHER:
@@ -83,7 +83,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
             //remove build from history when it ending
             this.finalizeBody = {
                 if(deletingBuildsWithAbortDuplicatePipelineModeEnabled) {
-                    echo "Deleting build"
+                    script.echo "Deleting build"
                     script.currentBuild.rawBuild.delete()
                 }
             }
