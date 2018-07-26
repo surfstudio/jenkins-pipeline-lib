@@ -26,6 +26,9 @@ abstract class AutoAbortedPipeline extends Pipeline {
 
         initInternal()
 
+        def buildIdentifier = getBuildIdentifier()
+        script.currentBuild.rawBuild.setDescription("$buildIdentifier abort duplicate" )
+
         applyParameterIfNotEmpty(script, NEED_CHECK_SAME_BUILDS_PARAM_NAME, script.params[NEED_CHECK_SAME_BUILDS_PARAM_NAME], {
             value -> this.needCheckSameBuilds = value
         })
@@ -38,7 +41,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
             getStage(INIT).body = {
                 initBody()
                 if (needCheckActiveDublicateBuilds) {
-                    CommonUtil.tryAbortDuplicateBuilds(script, getBuildIdentifier(), abortStrategy)
+                    CommonUtil.tryAbortDuplicateBuilds(script, "${getBuildIdentifier()}", abortStrategy)
                     CommonUtil.restartCurrentBuildWithParams(script, [
                             script.booleanParam(name: NEED_CHECK_SAME_BUILDS_PARAM_NAME, value: false)
                     ])
@@ -50,5 +53,5 @@ abstract class AutoAbortedPipeline extends Pipeline {
 
     abstract def initInternal()
 
-    abstract def String getBuildIdentifier()
+    abstract def getBuildIdentifier()
 }
