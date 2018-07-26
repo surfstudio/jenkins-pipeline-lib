@@ -52,7 +52,7 @@ class UiTestStages {
             ctx.sourceBranch = JarvisUtil.getMainBranch(script, ctx.sourceRepoUrl)
         }
 
-        CommonUtil.tryAbortDuplicateBuilds(script, "taskKey: ${ctx.taskKey}, testBranch: ${ctx.testBranch}, sourceBranch: ${ctx.sourceBranch}")
+        CommonUtil.tryAbortSameBuilds(script, "taskKey: ${ctx.taskKey}, testBranch: ${ctx.testBranch}, sourceBranch: ${ctx.sourceBranch}")
 
         checkAndParallelBulkJob(ctx)
     }

@@ -3,6 +3,7 @@ package ru.surfstudio.ci.pipeline
 import ru.surfstudio.ci.AbortDublicateStrategy
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
+import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 
@@ -26,28 +27,52 @@ abstract class AutoAbortedPipeline extends Pipeline {
 
         initInternal()
 
-        def buildIdentifier = getBuildIdentifier()
-        script.currentBuild.rawBuild.setDescription("$buildIdentifier abort duplicate" )
-
         applyParameterIfNotEmpty(script, NEED_CHECK_SAME_BUILDS_PARAM_NAME, script.params[NEED_CHECK_SAME_BUILDS_PARAM_NAME], {
             value -> this.needCheckSameBuilds = value
         })
 
-        if(needCheckSameBuilds) {
+        if (needCheckSameBuilds) {
+            //modify pipeline for execution only for abort duplicate builds
+            def buildIdentifier = getBuildIdentifier()
             this.node = NodeProvider.getAutoAbortNode()
             this.preExecuteStageBody = {}
             this.postExecuteStageBody = {}
+
+            //extent init stage
             def initBody = getStage(INIT).body
             getStage(INIT).body = {
                 initBody()
-                CommonUtil.tryAbortDuplicateBuilds(script, getBuildIdentifier(), abortStrategy)
-                CommonUtil.restartCurrentBuildWithParams(script, [
-                        script.booleanParam(name: NEED_CHECK_SAME_BUILDS_PARAM_NAME, value: false)
-                ])
+                def needContinueBuild = true
+                switch (abortStrategy){
+                    case AbortDublicateStrategy.SELF:
+                        if(CommonUtil.isSameBuildRunning(script, buildIdentifier)){
+                            needContinueBuild = false
+                        }
+                        break;
+                    case AbortDublicateStrategy.ANOTHER:
+                        CommonUtil.tryAbortSameBuilds(script, buildIdentifier)
+                        break;
+                }
+                script.currentBuild.rawBuild.setDescription("$buildIdentifier abort duplicate" )
+
+                if (needContinueBuild) {
+                    CommonUtil.startCurrentBuildCloneWithParams(script, [
+                            script.booleanParam(name: NEED_CHECK_SAME_BUILDS_PARAM_NAME, value: false)
+                    ])
+                }
+            }
+            //skip all another stages
+            for (stage in stages) {
+                if(stage.name != INIT) {
+                    stage.strategy = StageStrategy.SKIP_STAGE
+                }
+            }
+            //remove build from history when it ending
+            this.finalizeBody = {
+                script.currentBuild.rawBuild.delete()
             }
         }
     }
-
 
     abstract def initInternal()
 

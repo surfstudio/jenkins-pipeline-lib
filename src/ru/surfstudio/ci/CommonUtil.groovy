@@ -49,33 +49,43 @@ class CommonUtil {
         script.sh "hostname; set +x; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use $version; $command"
     }
 
-    def static tryAbortDuplicateBuilds(Object script, String buildIdentifier, String abortStrategy) {
+    @Deprecated
+    def static abortDuplicateBuilds(Object script, String buildIdentifier) {
+        tryAbortSameBuilds(script, buildIdentifier)
+    }
+
+    def static tryAbortSameBuilds(Object script, String buildIdentifier) {
         hudson.model.Run currentBuild = script.currentBuild.rawBuild
         currentBuild.setDescription(buildIdentifier)
         hudson.model.Run previousBuild = currentBuild.getPreviousBuildInProgress()
 
         while (previousBuild != null) {
             if (previousBuild.isInProgress() && previousBuild.getDescription() == currentBuild.getDescription()) {
-                switch (abortStrategy) {
-                    case AbortDublicateStrategy.ANOTHER:
-                        def executor = previousBuild.getExecutor()
-                        if (executor != null) {
-                            script.echo ">> Aborting older build #${previousBuild.getNumber()}"
-                            executor.interrupt(hudson.model.Result.ABORTED, new jenkins.model.CauseOfInterruption.UserInterruption(
-                                    "Aborted by newer build #${currentBuild.getNumber()}"
-                            ))
-                        }
-                        break;
-                    case AbortDublicateStrategy.SELF:
-                        script.echo ">> Aborting this build #${currentBuild.getNumber()}, becouse same is running"
-                        currentBuild.doTerm()
-                        currentBuild.delete()
+                def executor = previousBuild.getExecutor()
+                if (executor != null) {
+                    script.echo ">> Aborting older build #${previousBuild.getNumber()}"
+                    executor.interrupt(hudson.model.Result.ABORTED, new jenkins.model.CauseOfInterruption.UserInterruption(
+                            "Aborted by newer build #${currentBuild.getNumber()}"
+                    ))
                 }
-
             }
 
             previousBuild = previousBuild.getPreviousBuildInProgress()
         }
+    }
+
+    def static isSameBuildRunning(Object script, String buildIdentifier) {
+        def boolean result = false
+        hudson.model.Run currentBuild = script.currentBuild.rawBuild
+        hudson.model.Run previousBuild = currentBuild.getPreviousBuildInProgress()
+
+        while (previousBuild != null) {
+            if(previousBuild.isInProgress() && previousBuild.getDescription() == currentBuild.getDescription()) {
+                return true
+            }
+            previousBuild = previousBuild.getPreviousBuildInProgress()
+        }
+        return false
     }
 
     def static safe(Object script, Closure body) {
@@ -133,8 +143,8 @@ class CommonUtil {
         }
     }
 
-    def static restartCurrentBuildWithParams(Object script, ArrayList<Object> extraParams) {
-        script.echo "restart current build with extra params ${extraParams}"
+    def static startCurrentBuildCloneWithParams(Object script, ArrayList<Object> extraParams) {
+        script.echo "start current build clone with extra params ${extraParams}"
         def Map currentBuildParams = script.params
 
         def allParams = []
@@ -144,6 +154,5 @@ class CommonUtil {
                 .collect({script.string(name: it.key, value: it.value)})
         )
         script.build job: script.env.JOB_NAME, parameters: allParams, wait: false
-        script.currentBuild.rawBuild.delete()
     }
 }
