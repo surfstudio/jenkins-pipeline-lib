@@ -35,7 +35,7 @@ abstract class Pipeline implements Serializable {
     public jobResult = Result.SUCCESS
     public List<Stage> stages
     public Closure finalizeBody
-    public Closure initializeBody = {}
+    public Closure initializeBody
     public node
 
     public preExecuteStageBody = { stage -> CommonUtil.notifyBitbucketAboutStageStart(script, stage.name) }
@@ -53,14 +53,13 @@ abstract class Pipeline implements Serializable {
     abstract def init()
 
     def run() {
-        //if (initializeBody) {
-            script.echo "Start initializeBody body"
-            initializeBody()
-            script.echo "End initializeBody body"
-        //}
         script.node(node) {
             try {
-
+                if (initializeBody) {
+                    script.echo "Start initializeBody body"
+                    initializeBody()
+                    script.echo "End initializeBody body"
+                }
                 for (Stage stage : stages) {
                     stageWithStrategy(stage)
                 }
