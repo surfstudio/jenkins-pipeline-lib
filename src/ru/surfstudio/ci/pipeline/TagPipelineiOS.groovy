@@ -15,7 +15,7 @@ class TagPipelineiOS extends TagPipeline {
     }
 
     @Override
-    def init() {
+    def initInternal() {
         node = NodeProvider.getiOSNode()
         stages = [
                 createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
