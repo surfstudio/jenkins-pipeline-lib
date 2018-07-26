@@ -41,7 +41,7 @@ class TestAutoAbortedPipeline extends AutoAbortedPipeline {
         ]
 
         finalizeBody = {
-            script.currentBuild.result = "NOT_BUILT"
+
         }
     }
 
