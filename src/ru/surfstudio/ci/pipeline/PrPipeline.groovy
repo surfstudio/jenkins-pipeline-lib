@@ -18,6 +18,7 @@ abstract class PrPipeline extends AutoAbortedPipeline {
     public sourceBranch = ""
     public destinationBranch = ""
     public authorUsername = ""
+    public targetBranchChanged = false
 
     PrPipeline(Object script) {
         super(script)

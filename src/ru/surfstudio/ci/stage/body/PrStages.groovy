@@ -8,6 +8,20 @@ import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 
 class PrStages {
 
+    def static initializeBody(PrPipeline ctx) {
+        def script = ctx.script
+        applyParameterIfNotEmpty(script, 'targetBranchChanged', script.params.targetBranchChanged, {
+            value -> ctx.targetBranchChanged = value
+        })
+
+        if(ctx.targetBranchChanged) {
+            script.echo "build triggered by target branch changes"
+            script.echo "bitbucket notification disabled"
+            ctx.preExecuteStageBody = {}
+            ctx.postExecuteStageBody = {}
+        }
+    }
+
     def static initStageBody(PrPipeline ctx) {
         def script = ctx.script
         CommonUtil.printInitialStageStrategies(ctx)
