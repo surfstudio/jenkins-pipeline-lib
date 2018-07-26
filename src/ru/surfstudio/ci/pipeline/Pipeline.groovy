@@ -64,7 +64,6 @@ abstract class Pipeline implements Serializable {
                     stageWithStrategy(stage)
                 }
             }  finally {
-                
                 script.echo "Finalize build:"
                 script.echo "Current job result: ${script.currentBuild.result}"
                 script.echo "Try apply job result: ${jobResult}"
