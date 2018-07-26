@@ -1,5 +1,6 @@
 package ru.surfstudio.ci.pipeline
 
+import ru.surfstudio.ci.AbortDuplicateStrategy
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
 
@@ -17,6 +18,7 @@ class TestAutoAbortedPipeline extends AutoAbortedPipeline {
     @Override
     def initInternal() {
 
+        abortStrategy = AbortDuplicateStrategy.ANOTHER
         //configuration
         node = NodeProvider.getAndroidNode()
 
