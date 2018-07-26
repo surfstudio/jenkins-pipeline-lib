@@ -22,6 +22,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
 
     public abortDuplicatePipelineMode = true
     public abortStrategy  //see AbortDuplicateStrategy
+    public deletingBuildsWithAbortDuplicatePipelineModeEnabled = true
 
     AutoAbortedPipeline(Object script) {
         super(script)
@@ -81,8 +82,10 @@ abstract class AutoAbortedPipeline extends Pipeline {
             }
             //remove build from history when it ending
             this.finalizeBody = {
-                echo "Deleting build"
-                script.currentBuild.rawBuild.delete()
+                if(deletingBuildsWithAbortDuplicatePipelineModeEnabled) {
+                    echo "Deleting build"
+                    script.currentBuild.rawBuild.delete()
+                }
             }
         } else {
             //extent normal init stage for storing identifier as description, it will be used for searching same builds
