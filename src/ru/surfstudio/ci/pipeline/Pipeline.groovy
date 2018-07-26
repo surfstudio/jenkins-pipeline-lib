@@ -53,13 +53,14 @@ abstract class Pipeline implements Serializable {
     abstract def init()
 
     def run() {
+        if (initializeBody) {
+            script.echo "Start initializeBody body"
+            initializeBody()
+            script.echo "End initializeBody body"
+        }
         script.node(node) {
             try {
-                if (initializeBody) {
-                    script.echo "Start initializeBody body"
-                    initializeBody()
-                    script.echo "End initializeBody body"
-                }
+
                 for (Stage stage : stages) {
                     stageWithStrategy(stage)
                 }
