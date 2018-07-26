@@ -64,7 +64,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
                         CommonUtil.tryAbortOlderBuildsWithDescription(script, buildIdentifier)
                         break;
                 }
-                script.currentBuild.rawBuild.setDescription("check same for \"$buildIdentifier\"" )
+                script.currentBuild.rawBuild.setDescription("check active duplicates for \"$buildIdentifier\"" )
 
                 if (needContinueBuild) {
                     //start clone of this build, which make main pipeline work

@@ -31,7 +31,7 @@ class TestAutoAbortedPipeline extends AutoAbortedPipeline {
                     })
                 },
                 createStage("Checkout", StageStrategy.FAIL_WHEN_STAGE_ERROR){
-                    script.sleep(3)
+                    script.sleep(10)
                 },
                 createStage("IntegrationTest", StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
 
