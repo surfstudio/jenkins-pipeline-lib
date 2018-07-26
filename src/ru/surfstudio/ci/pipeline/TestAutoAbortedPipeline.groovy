@@ -7,7 +7,7 @@ import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 
-abstract class TestAutoAbortedPipeline extends AutoAbortedPipeline {
+class TestAutoAbortedPipeline extends AutoAbortedPipeline {
 
 
     def String branchName = ""
