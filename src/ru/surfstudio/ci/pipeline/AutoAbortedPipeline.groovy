@@ -33,19 +33,17 @@ abstract class AutoAbortedPipeline extends Pipeline {
             value -> this.needCheckSameBuilds = value
         })
 
-        if(needCheckActiveDublicateBuilds) {
+        if(needCheckSameBuilds) {
             this.node = NodeProvider.getAutoAbortNode()
             this.preExecuteStageBody = {}
             this.postExecuteStageBody = {}
             def initBody = getStage(INIT).body
             getStage(INIT).body = {
                 initBody()
-                if (needCheckActiveDublicateBuilds) {
-                    CommonUtil.tryAbortDuplicateBuilds(script, getBuildIdentifier(), abortStrategy)
-                    CommonUtil.restartCurrentBuildWithParams(script, [
-                            script.booleanParam(name: NEED_CHECK_SAME_BUILDS_PARAM_NAME, value: false)
-                    ])
-                }
+                CommonUtil.tryAbortDuplicateBuilds(script, getBuildIdentifier(), abortStrategy)
+                CommonUtil.restartCurrentBuildWithParams(script, [
+                        script.booleanParam(name: NEED_CHECK_SAME_BUILDS_PARAM_NAME, value: false)
+                ])
             }
         }
     }
