@@ -4,6 +4,7 @@ import ru.surfstudio.ci.pipeline.Pipeline
 import ru.surfstudio.ci.stage.Stage
 
 class CommonUtil {
+    static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50
 
     def static notifyBitbucketAboutStageStart(Object script, String stageName){
         script.bitbucketStatusNotify(
@@ -56,10 +57,12 @@ class CommonUtil {
     }
 
     def static tryAbortOlderBuildsWithDescription(Object script, String buildDescription) {
+        int depth = 0
         hudson.model.Run currentBuild = script.currentBuild.rawBuild
         hudson.model.Run previousBuild = currentBuild.getPreviousBuildInProgress()
 
-        while (previousBuild != null) {
+        while (previousBuild != null && depth <= MAX_DEPTH_FOR_SEARCH_SAME_BUILDS) {
+            depth++
             if (previousBuild.isInProgress() && previousBuild.getDescription() == buildDescription) {
                 def executor = previousBuild.getExecutor()
                 if (executor != null) {
@@ -74,10 +77,12 @@ class CommonUtil {
     }
 
     def static isOlderBuildWithDescriptionRunning(Object script, String buildDescription) {
+        int depth = 0
         hudson.model.Run currentBuild = script.currentBuild.rawBuild
         hudson.model.Run previousBuild = currentBuild.getPreviousBuildInProgress()
 
-        while (previousBuild != null) {
+        while (previousBuild != null && depth <= MAX_DEPTH_FOR_SEARCH_SAME_BUILDS) {
+            depth++
             if(previousBuild.isInProgress() && previousBuild.getDescription() == buildDescription) {
                 script.echo "build with description ${buildDescription} is running"
                 return true
