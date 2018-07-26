@@ -14,7 +14,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
     public static final String NEED_CHECK_SAME_BUILDS_PARAM_NAME = 'needCheckSameBuilds'
 
 
-    public needCheckSameBuilds = true
+    private needCheckSameBuilds = true
     public abortStrategy
 
     AutoAbortedPipeline(Object script) {
@@ -33,24 +33,26 @@ abstract class AutoAbortedPipeline extends Pipeline {
 
         if (needCheckSameBuilds) {
             //modify pipeline for execution only for abort duplicate builds
-            def buildIdentifier = getBuildIdentifier()
+
             this.node = NodeProvider.getAutoAbortNode()
             this.preExecuteStageBody = {}
             this.postExecuteStageBody = {}
 
-            //extent init stage
+            //extent init stage for abort duplicate builds
             def initBody = getStage(INIT).body
             getStage(INIT).body = {
                 initBody()
+                def buildIdentifier = getBuildIdentifier()
+                script.currentBuild.rawBuild.setDescription("$buildIdentifier")
                 def needContinueBuild = true
                 switch (abortStrategy){
                     case AbortDublicateStrategy.SELF:
-                        if(CommonUtil.isSameBuildRunning(script, buildIdentifier)){
+                        if(CommonUtil.isSameBuildRunning(script)){
                             needContinueBuild = false
                         }
                         break;
                     case AbortDublicateStrategy.ANOTHER:
-                        CommonUtil.tryAbortSameBuilds(script, buildIdentifier)
+                        CommonUtil.tryAbortSameBuilds(script)
                         break;
                 }
                 script.currentBuild.rawBuild.setDescription("$buildIdentifier abort duplicate" )
@@ -71,7 +73,16 @@ abstract class AutoAbortedPipeline extends Pipeline {
             this.finalizeBody = {
                 script.currentBuild.rawBuild.delete()
             }
+        } else {
+            //extent normal init stage for storing identifier as description
+            def initBody = getStage(INIT).body
+            getStage(INIT).body = {
+                initBody()
+                def buildIdentifier = getBuildIdentifier()
+                script.currentBuild.rawBuild.setDescription("$buildIdentifier")
+            }
         }
+
     }
 
     abstract def initInternal()

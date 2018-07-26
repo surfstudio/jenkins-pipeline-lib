@@ -51,36 +51,35 @@ class CommonUtil {
 
     @Deprecated
     def static abortDuplicateBuilds(Object script, String buildIdentifier) {
-        tryAbortSameBuilds(script, buildIdentifier)
+        script.currentBuild.setDescription(buildIdentifier)
+        tryAbortSameBuilds(script)
     }
 
-    def static tryAbortSameBuilds(Object script, String buildIdentifier) {
+    def static tryAbortSameBuilds(Object script) {
         hudson.model.Run currentBuild = script.currentBuild.rawBuild
-        currentBuild.setDescription(buildIdentifier)
         hudson.model.Run previousBuild = currentBuild.getPreviousBuildInProgress()
 
         while (previousBuild != null) {
             if (previousBuild.isInProgress() && previousBuild.getDescription() == currentBuild.getDescription()) {
                 def executor = previousBuild.getExecutor()
                 if (executor != null) {
-                    script.echo ">> Aborting older build #${previousBuild.getNumber()}"
+                    script.echo ">> Aborting older build #${previousBuild.getNumber()} with description ${currentBuild.getDescription()}"
                     executor.interrupt(hudson.model.Result.ABORTED, new jenkins.model.CauseOfInterruption.UserInterruption(
-                            "Aborted by newer build #${currentBuild.getNumber()}"
+                            "Aborted by newer build #${currentBuild.getNumber()} with description ${currentBuild.getDescription()}"
                     ))
                 }
             }
-
             previousBuild = previousBuild.getPreviousBuildInProgress()
         }
     }
 
-    def static isSameBuildRunning(Object script, String buildIdentifier) {
-        def boolean result = false
+    def static isSameBuildRunning(Object script) {
         hudson.model.Run currentBuild = script.currentBuild.rawBuild
         hudson.model.Run previousBuild = currentBuild.getPreviousBuildInProgress()
 
         while (previousBuild != null) {
             if(previousBuild.isInProgress() && previousBuild.getDescription() == currentBuild.getDescription()) {
+                script.echo "same build with description ${currentBuild.getDescription()} is running "
                 return true
             }
             previousBuild = previousBuild.getPreviousBuildInProgress()
