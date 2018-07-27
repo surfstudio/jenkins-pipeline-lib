@@ -56,7 +56,7 @@ class TagStages {
         }
     }
 
-    def static betaUploadStageBodyiOS(Object script, String keychainCredenialId, String certfileCredentialId) {
+    def static betaUploadStageBodyiOS(Object script, String keychainCredenialId, String certfileCredentialId, String betaUploadConfigArgument, String betaUploadConfigValue) {
         script.withCredentials([
             script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
             script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
@@ -68,7 +68,7 @@ class TagStages {
             CommonUtil.shWithRuby(script, "gem install bundler")
 
             CommonUtil.shWithRuby(script, "make init")
-            CommonUtil.shWithRuby(script, "make beta")
+            CommonUtil.shWithRuby(script, "make beta ${betaUploadConfigArgument}=${betaUploadConfigValue}")
         }
     }
 
