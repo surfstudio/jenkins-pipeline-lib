@@ -18,7 +18,7 @@ class TagPipelineiOS extends TagPipeline {
     String getBuildConfigValue() {
         def resultConfigValue = betaUploadConfigValue
         if (!resultConfigValue?.trim()) {
-            matchValue = (this.repoTag=~/.*-([^0-9]+)[0-9]/)
+            def matchValue = (this.repoTag=~/.*-([^0-9]+)[0-9]/)
             matchValue.each { resultConfigValue = it[1] }
         }
         return resultConfigValue
