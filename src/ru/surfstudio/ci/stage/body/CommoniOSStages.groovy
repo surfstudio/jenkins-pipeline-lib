@@ -11,8 +11,9 @@ class CommoniOSStages {
         ]) {
 
             CommonUtil.shWithRuby(script, 'security -v unlock-keychain -p $KEYCHAIN_PASS')
-            CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
-            
+            CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P "" -T /usr/bin/codesign -T /usr/bin/security')
+            CommonUtil.shWithRuby(script, 'security set-key-partition-list -S apple-tool:,apple: -s -k $KEYCHAIN_PASS')
+
             CommonUtil.shWithRuby(script, "gem install bundler")
 
             CommonUtil.shWithRuby(script, "make init")
