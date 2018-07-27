@@ -60,7 +60,7 @@ class TagPipelineiOS extends TagPipeline {
                         iOSKeychainCredenialId,
                         iOSCertfileCredentialId,
                         betaUploadConfigArgument,
-                        getBuildConfigValue().
+                        getBuildConfigValue()
                     )
                 },
 
