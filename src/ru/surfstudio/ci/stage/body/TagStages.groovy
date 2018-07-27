@@ -63,7 +63,7 @@ class TagStages {
         ]) {
             
             CommonUtil.shWithRuby(script, 'security -v unlock-keychain -p $KEYCHAIN_PASS')
-            CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P ""')
+            CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P "" -T /usr/bin/codesign')
             
             CommonUtil.shWithRuby(script, "gem install bundler")
 
