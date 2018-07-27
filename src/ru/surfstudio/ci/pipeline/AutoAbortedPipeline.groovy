@@ -76,7 +76,12 @@ abstract class AutoAbortedPipeline extends Pipeline {
                 }
             }
             //clear all another stages
-            stages = []
+            for (stage in stages) {
+                stage.strategy = StageStrategy.SKIP_STAGE
+                stage.body = {
+                    script.echo "This stage empty because it invoke in abortDuplicatePipelineMode"
+                }
+            }
             //remove build from history when it ending
             this.finalizeBody = {
                 if(deletingBuildsWithAbortDuplicatePipelineModeEnabled) {
