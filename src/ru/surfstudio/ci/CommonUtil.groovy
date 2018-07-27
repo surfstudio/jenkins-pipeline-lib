@@ -7,15 +7,19 @@ class CommonUtil {
     static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50
 
     def static notifyBitbucketAboutStageStart(Object script, String stageName){
+        def bitbucketStatus = 'INPROGRESS'
+        def slug = getCurrentBitbucketRepoSlug(script)
+        script.echo "Notify bitbucket stage: $stageName, repoSlug: $slug, status: $bitbucketStatus"
         script.bitbucketStatusNotify(
                 buildState: 'INPROGRESS',
                 buildKey: stageName,
-                buildName: stageName
+                buildName: stageName,
+                repoSlug: slug
         )
     }
 
     def static notifyBitbucketAboutStageFinish(Object script, String stageName, String result){
-        def bitbucketStatus
+        def bitbucketStatus = ""
 
         switch (result){
             case Result.SUCCESS:
@@ -31,10 +35,13 @@ class CommonUtil {
             default:
                 script.error "Unsupported Result: ${result}"
         }
+        def slug = getCurrentBitbucketRepoSlug(script)
+        script.echo "Notify bitbucket stage: $stageName, repoSlug: $slug, status: $bitbucketStatus"
         script.bitbucketStatusNotify(
                 buildState: bitbucketStatus,
                 buildKey: stageName,
-                buildName: stageName
+                buildName: stageName,
+                repoSlug: slug
         )
     }
 
@@ -44,6 +51,12 @@ class CommonUtil {
 
     def static getBitbucketNotifyPostExecuteStageBody(Object script){
         return { stage -> notifyBitbucketAboutStageFinish(script, stage.name, stage.result)}
+    }
+
+    def static getCurrentBitbucketRepoSlug(Object script){
+        def String url = script.scm.userRemoteConfigs[0].url
+        def splittedUrl = url.split("/")
+        return splittedUrl[splittedUrl.length - 1]
     }
 
     def static getBuildUrlHtmlLink(Object script){
