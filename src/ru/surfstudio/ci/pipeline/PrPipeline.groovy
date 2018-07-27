@@ -7,7 +7,6 @@ import ru.surfstudio.ci.stage.body.PrStages
 abstract class PrPipeline extends AutoAbortedPipeline {
 
     //stage names
-    //Init stage inherited from AutoAbortedPipeline
     public static final String PRE_MERGE = 'PreMerge'
     public static final String BUILD = 'Build'
     public static final String UNIT_TEST = 'Unit Test'

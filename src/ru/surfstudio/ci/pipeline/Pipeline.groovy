@@ -1,7 +1,6 @@
 #!/usr/bin/groovy
 package ru.surfstudio.ci.pipeline
 
-import com.sun.org.apache.xpath.internal.operations.Bool
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.stage.Stage
@@ -30,16 +29,17 @@ import ru.surfstudio.ci.stage.StageStrategy
  *  следует делать их максимально чистыми и независимыми для возможности переиспользования без механизмов класса Pipeline
  */
 abstract class Pipeline implements Serializable {
+    public static final String INIT = 'Init'
 
     public script //Jenkins Pipeline Script
     public jobResult = Result.SUCCESS
     public List<Stage> stages
     public Closure finalizeBody
-    public Closure initializeBody
+    public Closure initStageBody
     public node
 
-    public preExecuteStageBody = { stage -> CommonUtil.notifyBitbucketAboutStageStart(script, stage.name) }
-    public postExecuteStageBody = { stage -> CommonUtil.notifyBitbucketAboutStageFinish(script, stage.name, stage.result)}
+    public preExecuteStageBody = {}
+    public postExecuteStageBody = {}
 
     Pipeline(script) {
         this.script = script
@@ -55,13 +55,12 @@ abstract class Pipeline implements Serializable {
     def run() {
         script.node(node) {
             try {
-                if (initializeBody) {
-                    script.echo "Start initializeBody body"
-                    initializeBody()
-                    script.echo "End initializeBody body"
+                if (initStageBody) {
+                    def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, initStageBody)
+                    stageWithStrategy(initStage, {}, {})
                 }
                 for (Stage stage : stages) {
-                    stageWithStrategy(stage)
+                    stageWithStrategy(stage, preExecuteStageBody, preExecuteStageBody)
                 }
             }  finally {
                 script.echo "Finalize build:"
@@ -78,7 +77,7 @@ abstract class Pipeline implements Serializable {
         }
     }
 
-    def stageWithStrategy(Stage stage) {
+    def stageWithStrategy(Stage stage, Closure preExecuteStageBody, Closure postExecuteStageBody) {
         //https://issues.jenkins-ci.org/browse/JENKINS-39203 подождем пока сделают разные статусы на разные Stage
         script.stage(stage.name) {
             if (stage.strategy == StageStrategy.SKIP_STAGE) {
