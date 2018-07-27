@@ -38,6 +38,14 @@ class CommonUtil {
         )
     }
 
+    def static getBitbucketNotifyPreExecuteStageBody(Object script){
+        return { stage -> notifyBitbucketAboutStageStart(script, stage.name) }
+    }
+
+    def static getBitbucketNotifyPostExecuteStageBody(Object script){
+        return { stage -> notifyBitbucketAboutStageFinish(script, stage.name, stage.result)}
+    }
+
     def static getBuildUrlHtmlLink(Object script){
         return  "<a href=\"${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline\">build</a>"
     }

@@ -5,7 +5,6 @@ import ru.surfstudio.ci.stage.StageStrategy
 abstract class UiTestPipeline extends AutoAbortedPipeline {
 
     //stage names
-    //Init stage inherited from AutoAbortedPipeline
     public static final String CHECKOUT_SOURCES = 'Checkout Sources'
     public static final String CHECKOUT_TESTS = 'Checkout Tests'
     public static final String BUILD = 'Build'

@@ -1,5 +1,6 @@
 package ru.surfstudio.ci.pipeline
 
+import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.stage.body.CommonAndroidStages
@@ -29,10 +30,12 @@ class TagPipelineAndroid extends TagPipeline {
     @Override
     def initInternal() {
         node = NodeProvider.getAndroidNode()
+
+        preExecuteStageBody = CommonUtil.getBitbucketNotifyPreExecuteStageBody(script)
+        postExecuteStageBody = CommonUtil.getBitbucketNotifyPostExecuteStageBody(script)
+
+        initStageBody = {  TagStages.initStageBody(this) }
         stages = [
-                createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    TagStages.initStageBody(this)
-                },
                 createStage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     TagStages.checkoutStageBody(script, repoTag)
                 },

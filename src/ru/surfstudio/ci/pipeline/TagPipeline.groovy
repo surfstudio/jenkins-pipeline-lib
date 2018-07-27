@@ -5,7 +5,6 @@ import ru.surfstudio.ci.stage.StageStrategy
 abstract class TagPipeline extends AutoAbortedPipeline {
 
     //stage names
-    //Init stage inherited from AutoAbortedPipeline
     public static final String CHECKOUT = 'Checkout'
     public static final String BUILD = 'Build'
     public static final String UNIT_TEST = 'Unit Test'
