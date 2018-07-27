@@ -9,18 +9,16 @@ import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 
 /**
  * Pipeline, который может отменять одинаковые билды
- * При старте pipeline выполняет отмену билдов в соответствии с {@link AbortDuplicateStrategy} сразу после выполнения
- * Init stage, который является обязательным для этого pipeline.
+ * При старте pipeline выполняет отмену таких же билдов в соответствии с {@link AbortDuplicateStrategy} сразу после выполнения
+ * Init stage
  * После отмены при необходимости стартует оснавная логика пайплайна как копия запущенного пайплайна, причем запущенный пайплайн удаляется
  *
  * Для этого пайплайна необходимо переопределить метод initInternal вместо init и метод getBuildIdentifier
+ * Значение, которое вернет getBuildIdentifier, будет применено как описание pipeline и имеено по описанию будут определяться идентичные билды
  */
 abstract class AutoAbortedPipeline extends Pipeline {
 
-    public static final String INIT = 'Init'
-
     public static final String ABORT_DUPLICATE_PIPELINE_MODE_PARAM_NAME = 'abortDuplicatePipelineMode'
-
 
     public abortDuplicatePipelineMode = true
     public abortStrategy  //see AbortDuplicateStrategy
@@ -50,9 +48,11 @@ abstract class AutoAbortedPipeline extends Pipeline {
             this.postExecuteStageBody = {}
 
             //extent init stage for abort duplicate builds
-            def initBody = getStage(INIT).body
-            getStage(INIT).body = {
-                initBody()
+            def originalInitStageBody = this.initStageBody
+            this.initStageBody = {
+                //execute original init stage body
+                originalInitStageBody()
+                //and add abort logic:
                 def buildIdentifier = getBuildIdentifier()
                 def needContinueBuild = true
                 switch (abortStrategy){
@@ -76,12 +76,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
                 }
             }
             //clear all another stages
-            for (stage in stages) {
-                if(stage.name != INIT) {
-                    stage.strategy = StageStrategy.SKIP_STAGE
-                    stage.body = {}
-                }
-            }
+            stages = []
             //remove build from history when it ending
             this.finalizeBody = {
                 if(deletingBuildsWithAbortDuplicatePipelineModeEnabled) {
@@ -91,9 +86,9 @@ abstract class AutoAbortedPipeline extends Pipeline {
             }
         } else {
             //extent normal init stage for storing identifier as description, it will be used for searching same builds
-            def initBody = getStage(INIT).body
-            getStage(INIT).body = {
-                initBody()
+            def originalInitStageBody = this.initStageBody
+            this.initStageBody = {
+                originalInitStageBody()
                 setIdentifierAsDescription()
             }
         }
