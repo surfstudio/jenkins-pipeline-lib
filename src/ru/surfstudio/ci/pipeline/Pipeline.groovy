@@ -60,7 +60,7 @@ abstract class Pipeline implements Serializable {
                     stageWithStrategy(initStage, {}, {})
                 }
                 for (Stage stage : stages) {
-                    stageWithStrategy(stage, preExecuteStageBody, preExecuteStageBody)
+                    stageWithStrategy(stage, preExecuteStageBody, postExecuteStageBody)
                 }
             }  finally {
                 script.echo "Finalize build:"
