@@ -1,6 +1,5 @@
 package ru.surfstudio.ci.stage.body
 
-import ru.surfstudio.ci.AndroidUtil
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Constants
 import ru.surfstudio.ci.JarvisUtil
@@ -53,14 +52,13 @@ class UiTestStages {
             ctx.sourceBranch = JarvisUtil.getMainBranch(ctx.script, ctx.sourceRepoUrl)
         }
 
-        CommonUtil.abortDuplicateBuilds(script, "taskKey: ${ctx.taskKey}, testBranch: ${ctx.testBranch}, sourceBranch: ${ctx.sourceBranch}")
-
         checkAndParallelBulkJob(ctx)
     }
 
     def static checkoutSourcesBody(Object script, String sourcesDir, String sourceRepoUrl, String sourceBranch) {
         def credentialsId = script.scm.userRemoteConfigs.first().credentialsId
         script.echo("Using credentials ${credentialsId} for checkout")
+            
         script.dir(sourcesDir) {
             CommonUtil.safe(script) { 
                 script.sh "rm -rf ./*"
@@ -133,6 +131,9 @@ class UiTestStages {
                 url: "${Constants.JIRA_URL}rest/raven/1.0/export/test?keys=${taskKey}",
                 authentication: jiraAuthenticationName
         httpMode: 'GET'
+        CommonUtil.safe(script) { 
+                script.sh "rm ${newFeatureForTest}"
+                } 
         script.dir(featuresDir) {
             script.writeFile file: newFeatureForTest, text: response.content
         }
@@ -189,8 +190,8 @@ class UiTestStages {
                                        String jiraAuthenticationName,
                                        String htmlReportName) {
         script.dir(outputsDir) {
-            def testResult = script.readFile file: outputJsonFile
-            script.echo "Test result json: $testResult"
+            //def testResult = script.readFile file: outputJsonFile
+            //script.echo "Test result json: $testResult"
             script.withCredentials([script.usernamePassword(
                     credentialsId: jiraAuthenticationName,
                     usernameVariable: 'USERNAME',
@@ -198,9 +199,17 @@ class UiTestStages {
 
                 script.echo "publish result bot username=${script.env.USERNAME}"
                 //http request plugin не пашет, видимо что то с форматом body
-                script.sh "curl -H \"Content-Type: application/json\" -X POST -u ${script.env.USERNAME}:${script.env.PASSWORD} --data @${outputJsonFile} ${Constants.JIRA_URL}rest/raven/1.0/import/execution/cucumber"
+                
+                //script.sh "curl -H \"Content-Type: application/json\" -X POST -u ${script.env.USERNAME}:${script.env.PASSWORD} --data @arhive.zip ${Constants.JIRA_URL}rest/raven/1.0/import/execution/cucumber"
+                script.sh "cd .. && ls"
+                script.sh "cd .. && curl -H \"Content-Type: multipart/form-data\" -u ${script.env.USERNAME}:${script.env.PASSWORD} -F \"file=@arhive.zip\" ${Constants.JIRA_URL}rest/raven/1.0/import/execution/bundle"
             }
+            
+            CommonUtil.safe(script){
 
+                script.sh "rm arhive.zip" 
+            }
+            
 
         }
         script.publishHTML(target: [allowMissing         : true,

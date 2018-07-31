@@ -1,23 +1,42 @@
 package ru.surfstudio.ci.pipeline
 
+import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
-import ru.surfstudio.ci.stage.body.TagiOSStages
-import ru.surfstudio.ci.stage.body.PrStages
+import ru.surfstudio.ci.stage.body.CommoniOSStages
+import ru.surfstudio.ci.stage.body.TagStages
 
-class PrPipelineiOS extends PrPipeline {
+class TagPipelineiOS extends TagPipeline {
 
-    PrPipelineiOS(Object script) {
+    public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
+    public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey"
+    public betaUploadConfigArgument = "config"
+
+    // Значение, которое передастся в Makefile скрипт beta пл ключу из betaUploadConfigArgument
+    public betaUploadConfigValue = ""
+
+    String getBuildConfigValue() {
+        def resultConfigValue = betaUploadConfigValue
+        if (!resultConfigValue?.trim()) {
+            def matchValue = this.repoTag=~/.*-([^0-9]+)[0-9]/
+            matchValue.each { resultConfigValue = it[1] }
+        }
+        return resultConfigValue
+    }
+
+    TagPipelineiOS(Object script) {
         super(script)
     }
 
     @Override
-    def init() {
+    def initInternal() {
         node = NodeProvider.getiOSNode()
+
+        preExecuteStageBody = CommonUtil.getBitbucketNotifyPreExecuteStageBody(script)
+        postExecuteStageBody = CommonUtil.getBitbucketNotifyPostExecuteStageBody(script)
+
+        initStageBody = { TagStages.initStageBody(this) }
         stages = [
-                createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    TagStages.initStageBody(this)
-                },
                 createStage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     TagStages.checkoutStageBody(script, repoTag)
                 },
@@ -39,7 +58,9 @@ class PrPipelineiOS extends PrPipeline {
                 createStage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     TagStages.betaUploadStageBodyiOS(script,
                         iOSKeychainCredenialId,
-                        iOSCertfileCredentialId
+                        iOSCertfileCredentialId,
+                        betaUploadConfigArgument,
+                        getBuildConfigValue()
                     )
                 },
 

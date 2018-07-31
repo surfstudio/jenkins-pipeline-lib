@@ -1,5 +1,6 @@
 package ru.surfstudio.ci.pipeline
 
+import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.stage.body.CommoniOSStages
@@ -7,17 +8,22 @@ import ru.surfstudio.ci.stage.body.PrStages
 
 class PrPipelineiOS extends PrPipeline {
 
+    public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
+    public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey"
+
     PrPipelineiOS(Object script) {
         super(script)
     }
 
     @Override
-    def init() {
+    def initInternal() {
         node = NodeProvider.getiOSNode()
+
+        preExecuteStageBody = CommonUtil.getBitbucketNotifyPreExecuteStageBody(script)
+        postExecuteStageBody = CommonUtil.getBitbucketNotifyPostExecuteStageBody(script)
+
+        initStageBody = { PrStages.initStageBody(this) }
         stages = [
-                createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    PrStages.initStageBody(this)
-                },
                 createStage(PRE_MERGE, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     PrStages.preMergeStageBody(script, sourceBranch, destinationBranch)
                 },

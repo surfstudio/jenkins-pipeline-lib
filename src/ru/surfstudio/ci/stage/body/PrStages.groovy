@@ -34,8 +34,12 @@ class PrStages {
         applyParameterIfNotEmpty(script, 'authorUsername', params.authorUsername, {
             value -> ctx.authorUsername = value
         })
-
-        CommonUtil.abortDuplicateBuilds(script, ctx.sourceBranch)
+        applyParameterIfNotEmpty(script, 'targetBranchChanged', script.params.targetBranchChanged, {
+            value -> ctx.targetBranchChanged = value
+        })
+        if(ctx.targetBranchChanged) {
+            script.echo "build triggered by target branch changes"
+        }
     }
 
     def static preMergeStageBody(Object script, String sourceBranch, String destinationBranch) {
@@ -62,7 +66,7 @@ class PrStages {
     }
 
     def static finalizeStageBody(PrPipeline ctx){
-        if (ctx.jobResult != Result.SUCCESS) {
+        if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
             def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlHtmlLink(ctx.script)}"
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "bitbucket")

@@ -36,7 +36,7 @@ class JarvisUtil {
                         httpMode: 'POST',
                         requestBody: jsonBody,
                         url: "${Constants.JARVIS_URL}message/?${getHttpParamToken(script)}",
-                        validResponseCodes: '204'
+                        validResponseCodes: '200:299'
             }
         }
     }
@@ -61,7 +61,7 @@ class JarvisUtil {
                         httpMode: 'POST',
                         requestBody: jsonBody,
                         url: "${Constants.JARVIS_URL}notification/?${getHttpParamToken(script)}",
-                        validResponseCodes: '204'
+                        validResponseCodes: '200:299'
             }
         }
     }
@@ -71,7 +71,7 @@ class JarvisUtil {
             def rawResponse = script.httpRequest consoleLogResponseBody: true,
                     httpMode: 'GET',
                     url: "${Constants.JARVIS_URL}repositories/branches/default?repo_url=${repoUrl}&${getHttpParamToken(script)}",
-                    validResponseCodes: '200'
+                    validResponseCodes: '200:299'
             def response = script.readJSON text: rawResponse.content
             return response.name
         }
@@ -84,7 +84,7 @@ class JarvisUtil {
                     requestBody: "{\"status_name\": \"$newTaskStatus\", \"issue_key\": \"$taskKey\"}",
                     httpMode: 'POST',
                     contentType: 'APPLICATION_JSON',
-                    validResponseCodes: '204'
+                    validResponseCodes: '200:299'
         }
     }
 
@@ -116,7 +116,7 @@ class JarvisUtil {
                     httpMode: 'POST',
                     requestBody: jsonBody,
                     url: "${Constants.JARVIS_URL}webhooks/version/?${getHttpParamToken(script)}",
-                    validResponseCodes: '202'
+                    validResponseCodes: '200:299'
         }
     }
 }

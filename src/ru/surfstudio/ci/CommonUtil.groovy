@@ -4,24 +4,59 @@ import ru.surfstudio.ci.pipeline.Pipeline
 import ru.surfstudio.ci.stage.Stage
 
 class CommonUtil {
+    static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50
 
     def static notifyBitbucketAboutStageStart(Object script, String stageName){
+        def bitbucketStatus = 'INPROGRESS'
+        def slug = getCurrentBitbucketRepoSlug(script)
+        script.echo "Notify bitbucket stage: $stageName, repoSlug: $slug, status: $bitbucketStatus"
         script.bitbucketStatusNotify(
                 buildState: 'INPROGRESS',
                 buildKey: stageName,
-                buildName: stageName
+                buildName: stageName,
+                repoSlug: slug
         )
     }
 
-    def static notifyBitbucketAboutStageFinish(Object script, String stageName, boolean success){
-        def bitbucketStatus = success ?
-                'SUCCESSFUL' :
-                'FAILED'
+    def static notifyBitbucketAboutStageFinish(Object script, String stageName, String result){
+        def bitbucketStatus = ""
+
+        switch (result){
+            case Result.SUCCESS:
+                bitbucketStatus = 'SUCCESSFUL'
+                break
+            case Result.ABORTED:
+                bitbucketStatus = 'SUCCESSFUL' //todo плагин не поддерживает статус STOPPED, возможно он здесь лучше подходит
+                break
+            case Result.FAILURE:
+            case Result.UNSTABLE:
+                bitbucketStatus = 'FAILED'
+                break
+            default:
+                script.error "Unsupported Result: ${result}"
+        }
+        def slug = getCurrentBitbucketRepoSlug(script)
+        script.echo "Notify bitbucket stage: $stageName, repoSlug: $slug, status: $bitbucketStatus"
         script.bitbucketStatusNotify(
                 buildState: bitbucketStatus,
                 buildKey: stageName,
-                buildName: stageName
+                buildName: stageName,
+                repoSlug: slug
         )
+    }
+
+    def static getBitbucketNotifyPreExecuteStageBody(Object script){
+        return { stage -> notifyBitbucketAboutStageStart(script, stage.name) }
+    }
+
+    def static getBitbucketNotifyPostExecuteStageBody(Object script){
+        return { stage -> notifyBitbucketAboutStageFinish(script, stage.name, stage.result)}
+    }
+
+    def static getCurrentBitbucketRepoSlug(Object script){
+        def String url = script.scm.userRemoteConfigs[0].url
+        def splittedUrl = url.split("/")
+        return splittedUrl[splittedUrl.length - 1]
     }
 
     def static getBuildUrlHtmlLink(Object script){
@@ -33,27 +68,49 @@ class CommonUtil {
     }
 
     def static shWithRuby(Object script, String command, String version = "2.3.5") {
-        script.sh "set +x; hostname; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use $version; $command"
+        script.sh "hostname; set +x; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use $version; $command"
     }
 
+    @Deprecated
     def static abortDuplicateBuilds(Object script, String buildIdentifier) {
+        script.currentBuild.setDescription(buildIdentifier)
+        tryAbortOlderBuildsWithDescription(script, buildIdentifier)
+    }
+
+    def static tryAbortOlderBuildsWithDescription(Object script, String buildDescription) {
+        int depth = 0
         hudson.model.Run currentBuild = script.currentBuild.rawBuild
-        currentBuild.setDescription(buildIdentifier)
         hudson.model.Run previousBuild = currentBuild.getPreviousBuildInProgress()
 
-        while (previousBuild != null) {
-            if (previousBuild.isInProgress() && previousBuild.getDescription() == currentBuild.getDescription()) {
+        while (previousBuild != null && depth <= MAX_DEPTH_FOR_SEARCH_SAME_BUILDS) {
+            depth++
+            if (previousBuild.isInProgress() && previousBuild.getDescription() == buildDescription) {
                 def executor = previousBuild.getExecutor()
                 if (executor != null) {
-                    script.echo ">> Aborting older build #${previousBuild.getNumber()}"
+                    script.echo "Aborting older build #${previousBuild.getNumber()} with description ${buildDescription}"
                     executor.interrupt(hudson.model.Result.ABORTED, new jenkins.model.CauseOfInterruption.UserInterruption(
-                            "Aborted by newer build #${currentBuild.getNumber()}"
+                            "Aborted by newer build #${currentBuild.getNumber()} by description"
                     ))
                 }
             }
-
             previousBuild = previousBuild.getPreviousBuildInProgress()
         }
+    }
+
+    def static isOlderBuildWithDescriptionRunning(Object script, String buildDescription) {
+        int depth = 0
+        hudson.model.Run currentBuild = script.currentBuild.rawBuild
+        hudson.model.Run previousBuild = currentBuild.getPreviousBuildInProgress()
+
+        while (previousBuild != null && depth <= MAX_DEPTH_FOR_SEARCH_SAME_BUILDS) {
+            depth++
+            if(previousBuild.isInProgress() && previousBuild.getDescription() == buildDescription) {
+                script.echo "build with description ${buildDescription} is running"
+                return true
+            }
+            previousBuild = previousBuild.getPreviousBuildInProgress()
+        }
+        return false
     }
 
     def static safe(Object script, Closure body) {
@@ -65,7 +122,11 @@ class CommonUtil {
     }
 
     def static applyParameterIfNotEmpty(Object script, String varName, paramValue, assignmentAction) {
-        if (paramValue?.trim()) {
+        def valueNotEmpty = paramValue != null
+        if (paramValue instanceof String) {
+            valueNotEmpty = paramValue?.trim()
+        }
+        if (valueNotEmpty) {
             script.echo "{$varName} sets from parameters to {$paramValue}"
             assignmentAction(paramValue)
         }
@@ -105,5 +166,18 @@ class CommonUtil {
                 pipeline.script.echo "value of ${stageName}.strategy sets from parameters to ${strategyValue}"
             }
         }
+    }
+
+    def static startCurrentBuildCloneWithParams(Object script, ArrayList<Object> extraParams) {
+        script.echo "start current build clone with extra params ${extraParams}"
+        def Map currentBuildParams = script.params
+
+        def allParams = []
+        allParams.addAll(extraParams)
+        allParams.addAll(currentBuildParams
+                .entrySet()
+                .collect({script.string(name: it.key, value: it.value)})
+        )
+        script.build job: script.env.JOB_NAME, parameters: allParams, wait: false
     }
 }

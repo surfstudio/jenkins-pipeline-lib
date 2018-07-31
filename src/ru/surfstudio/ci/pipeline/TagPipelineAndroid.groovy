@@ -1,5 +1,6 @@
 package ru.surfstudio.ci.pipeline
 
+import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.stage.body.CommonAndroidStages
@@ -18,23 +19,31 @@ class TagPipelineAndroid extends TagPipeline {
     public instrumentedTestResultPathXml = "**/outputs/androidTest-results/connected/*.xml"
     public instrumentedTestResultPathDirHtml = "app/build/reports/androidTests/connected/"
 
+    public keystoreCredentials = "no_credentials"
+    public keystorePropertiesCredentials = "no_credentials"
+
 
     TagPipelineAndroid(Object script) {
         super(script)
     }
 
     @Override
-    def init() {
+    def initInternal() {
         node = NodeProvider.getAndroidNode()
+
+        preExecuteStageBody = CommonUtil.getBitbucketNotifyPreExecuteStageBody(script)
+        postExecuteStageBody = CommonUtil.getBitbucketNotifyPostExecuteStageBody(script)
+
+        initStageBody = {  TagStages.initStageBody(this) }
         stages = [
-                createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    TagStages.initStageBody(this)
-                },
                 createStage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     TagStages.checkoutStageBody(script, repoTag)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    CommonAndroidStages.buildStageBodyAndroid(script, buildGradleTask)
+                    CommonAndroidStages.buildWithCredentialsStageBodyAndroid(script,
+                            buildGradleTask,
+                            keystoreCredentials,
+                            keystorePropertiesCredentials)
                 },
                 createStage(UNIT_TEST, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     CommonAndroidStages.unitTestStageBodyAndroid(script,
@@ -52,7 +61,10 @@ class TagPipelineAndroid extends TagPipeline {
                     CommonAndroidStages.staticCodeAnalysisStageBody(script)
                 },
                 createStage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    TagStages.betaUploadStageBodyAndroid(script, betaUploadGradleTask)
+                    TagStages.betaUploadWithKeystoreStageBodyAndroid(script,
+                            betaUploadGradleTask,
+                            keystoreCredentials,
+                            keystorePropertiesCredentials)
                 },
 
         ]

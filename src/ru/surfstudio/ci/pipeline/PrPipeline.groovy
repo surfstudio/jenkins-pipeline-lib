@@ -4,10 +4,9 @@ import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.stage.body.CommonAndroidStages
 import ru.surfstudio.ci.stage.body.PrStages
 
-abstract class PrPipeline extends Pipeline {
+abstract class PrPipeline extends AutoAbortedPipeline {
 
     //stage names
-    public static final String INIT = 'Init'
     public static final String PRE_MERGE = 'PreMerge'
     public static final String BUILD = 'Build'
     public static final String UNIT_TEST = 'Unit Test'
@@ -18,12 +17,14 @@ abstract class PrPipeline extends Pipeline {
     public sourceBranch = ""
     public destinationBranch = ""
     public authorUsername = ""
-
-    //ios
-    public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
-    public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey"
+    public targetBranchChanged = false
 
     PrPipeline(Object script) {
         super(script)
+    }
+
+    @Override
+    String getBuildIdentifier() {
+        return sourceBranch
     }
 }

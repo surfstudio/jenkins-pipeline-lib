@@ -2,10 +2,9 @@ package ru.surfstudio.ci.pipeline
 
 import ru.surfstudio.ci.stage.StageStrategy
 
-abstract class TagPipeline extends Pipeline {
+abstract class TagPipeline extends AutoAbortedPipeline {
 
     //stage names
-    public static final String INIT = 'Init'
     public static final String CHECKOUT = 'Checkout'
     public static final String BUILD = 'Build'
     public static final String UNIT_TEST = 'Unit Test'
@@ -16,11 +15,12 @@ abstract class TagPipeline extends Pipeline {
     //scm
     public repoTag = ""
 
-    //ios
-    public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
-    public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey"
-
     TagPipeline(Object script) {
         super(script)
+    }
+
+    @Override
+    String getBuildIdentifier() {
+        return repoTag
     }
 }
