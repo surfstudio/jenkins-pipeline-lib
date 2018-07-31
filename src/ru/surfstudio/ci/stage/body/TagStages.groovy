@@ -86,9 +86,9 @@ class TagStages {
         JarvisUtil.createVersionAndNotify(ctx)
     }
 
-    def static debugFinalizeStageBody(TagPipeline ctx) { ctx, message ->
+    def static debugFinalizeStageBody(TagPipeline ctx) {
         JarvisUtil.createVersionAndNotify(ctx)
-        TagStages.prepareMessageForPipeline(ctx, {
+        TagStages.prepareMessageForPipeline(ctx, { ctx, message ->
             JarvisUtil.sendMessageToGroup(ctx.script, message, "9d0c617e-d14a-490e-9914-83820b135cfc", "stride", false) 
         })
     }
