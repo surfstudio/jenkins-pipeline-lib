@@ -69,18 +69,18 @@ class PrStages {
         if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
             def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlHtmlLink(ctx.script)}"
-            handler(ctx, message)
+            handler(message)
         }
     }
 
     def static finalizeStageBody(PrPipeline ctx){
-        PrStages.prepareMessageForPipeline(ctx, { ctx, message ->
+        PrStages.prepareMessageForPipeline(ctx, { message ->
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "bitbucket")
         })
     }
 
     def static debugFinalizeStageBody(PrPipeline ctx) {
-        PrStages.prepareMessageForPipeline(ctx, { ctx, message ->
+        PrStages.prepareMessageForPipeline(ctx, { message ->
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "bitbucket")
             JarvisUtil.sendMessageToGroup(ctx.script, message, "9d0c617e-d14a-490e-9914-83820b135cfc", "stride", false) 
         })
