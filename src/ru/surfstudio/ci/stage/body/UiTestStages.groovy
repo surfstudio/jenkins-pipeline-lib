@@ -49,7 +49,7 @@ class UiTestStages {
 
         //Достаем main branch для sourceRepo, если не указали в параметрах
         if (!ctx.sourceBranch) {
-            ctx.sourceBranch = JarvisUtil.getMainBranch(script, ctx.sourceRepoUrl)
+            ctx.sourceBranch = JarvisUtil.getMainBranch(ctx.script, ctx.sourceRepoUrl)
         }
 
         checkAndParallelBulkJob(ctx)
@@ -67,7 +67,7 @@ class UiTestStages {
                     $class                           : 'GitSCM',
                     branches                         : [[name: "${sourceBranch}"]],
                     doGenerateSubmoduleConfigurations: script.scm.doGenerateSubmoduleConfigurations,
-                    userRemoteConfigs                : [[credentialsId: credentialsId, url:sourceRepoUrl]],
+                    userRemoteConfigs                : [[credentialsId: credentialsId, url:sourceRepoUrl]]
             ])
         }
     }
@@ -87,16 +87,36 @@ class UiTestStages {
         }
     }
 
+    def static buildStageBodyiOS(Object script, String sourcesDir, String derivedDataPath, String sdk, String keychainCredenialId, String certfileCredentialId) {            
+        script.withCredentials([
+            script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
+            script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
+        ]) {
+            script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
+            script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
+            
+            CommonUtil.shWithRuby(script, "gem install bundler")
+            
+            script.dir(sourcesDir) {
+                CommonUtil.shWithRuby(script, "make init")
+            }
+            CommonUtil.shWithRuby(script, "bundle install")
+            CommonUtil.shWithRuby(script, "echo -ne '\n' | bundle exec calabash-ios setup ${sourcesDir}")
+                
+            script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//') -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
+        }
+    }
+
     def static prepareApkStageBodyAndroid(Object script, String builtApkPattern, String newApkForTest) {
-        script.step([$class: 'ArtifactArchiver', artifacts: builtApkPattern])
+        //script.step([$class: 'ArtifactArchiver', artifacts: builtApkPattern])
 
-        def files = script.findFiles(glob: builtApkPattern)
-        String foundedApks = files.join("\n")
-        script.echo "founded apks: $foundedApks"
-        def apkPath = files[0].path
-        script.echo "use first: $apkPath"
+        //def files = script.findFiles(glob: builtApkPattern)
+        //String foundedApks = files.join("\n")
+        //script.echo "founded apks: $foundedApks"
+        //def apkPath = files[0].path
+        //script.echo "use first: $apkPath"
 
-        script.sh "mv \"${apkPath}\" ${newApkForTest}"
+        //script.sh "mv \"${apkPath}\" ${newApkForTest}"
     }
 
     /**
@@ -119,65 +139,48 @@ class UiTestStages {
         }
     }
 
-    def static testStageBody(Object script,
+    def static testStageBodyiOS(Object script,
                              String taskKey,
+                             String sourcesDir,
+                             String derivedDataPath,
+                             String device,
+                             String iosVersion,
                              String outputsDir,
                              String featuresDir,
-                             String platform,
-                             String artifactForTest,
                              String featureFile,
                              String outputHtmlFile,
                              String outputJsonFile) {
+            
+            def simulatorIdentifierFile = "currentsim"
 
-        
-        script.echo "Tests started"
-        script.echo "start tests for $artifactForTest $taskKey"
+            script.sh "xcrun simctl shutdown all" 
+
+            script.echo "Setting up simulator ..."
+            script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > ${simulatorIdentifierFile}"    
+            script.sh "xcrun simctl list"
+                
+      
+            script.sh "xcrun simctl boot \$(cat ${simulatorIdentifierFile})"
+            script.sh "xcrun simctl install booted ${derivedDataPath}/Build/Products/Debug-iphonesimulator/*.app"
+            
+            script.echo "Tests started"
+            script.echo "start tests for $taskKey"
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
             }
             
-            CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; bundle install")
             
-            CommonUtil.safe(script){
-                script.sh "rm arhive.zip"
-                  
-            }
-            CommonUtil.safe(script) {
-                script.sh "rm -rf arhive" 
-            }
-           
+            try { 
+                CommonUtil.shWithRuby(script, "APP_BUNDLE_PATH=${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//').app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty")
+            } finally {
+                script.sh "xcrun simctl shutdown \$(cat ${simulatorIdentifierFile})" 
+                script.sh "xcrun simctl shutdown all" 
+                script.sh "xcrun simctl list"
+                script.sh "sleep 15"
+                script.echo "Removing simulator ..."
 
-            CommonUtil.safe(script) {
-                script.sh "rm -rf ./test_servers/*"
+                //script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
             }
-
-            CommonUtil.safe(script){
-                  script.sh "rm -rf ./${outputsDir}/*"  
-            }
-
-            
-           //catch (NoArhives e){
-            //    script.echo "No arvives"
-            //}
-
-            //CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
-
-   
-            
-            try {
-            CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  -p json_report\" ${featuresDir}/${featureFile} --concurrent")
-            }
-            finally {
-            CommonUtil.safe(script) {
-                script.sh "mkdir arhive "
-            }
-            script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
-            }
-            
-            
-        //AndroidUtil.onEmulator(script, "avd-main"){
-           
-        //}
     }
 
     def static publishResultsStageBody(Object script,
