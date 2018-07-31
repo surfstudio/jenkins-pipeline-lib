@@ -74,7 +74,7 @@ class TagStages {
         }
     }
 
-    def static prepareMessageForPipeline(TagPipeline ctx, handler) {
+    def static prepareMessageForPipeline(TagPipeline ctx, Closure handler) {
         if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
             def message = "Завершена сборка по тэгу: ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlHtmlLink(ctx.script)}"
@@ -86,7 +86,7 @@ class TagStages {
         JarvisUtil.createVersionAndNotify(ctx)
     }
 
-    def static debugFinalizeStageBody(TagPipeline ctx) {
+    def static debugFinalizeStageBody(TagPipeline ctx) { ctx, message ->
         JarvisUtil.createVersionAndNotify(ctx)
         TagStages.prepareMessageForPipeline(ctx, {
             JarvisUtil.sendMessageToGroup(ctx.script, message, "9d0c617e-d14a-490e-9914-83820b135cfc", "stride", false) 
