@@ -77,7 +77,7 @@ class TagStages {
     def static prepareMessageForPipeline(TagPipeline ctx, handler) {
         if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
-            def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlHtmlLink(ctx.script)}"
+            def message = "Завершена сборка по тэгу: ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlHtmlLink(ctx.script)}"
             handler(ctx, message)
         }
     }
