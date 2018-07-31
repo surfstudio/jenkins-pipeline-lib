@@ -74,10 +74,6 @@ class TagStages {
         }
     }
 
-    def static finalizeStageBody(TagPipeline ctx) {
-        JarvisUtil.createVersionAndNotify(ctx)
-    }
-
     def static prepareMessageForPipeline(TagPipeline ctx, handler) {
         if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
