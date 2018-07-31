@@ -78,4 +78,23 @@ class TagStages {
         JarvisUtil.createVersionAndNotify(ctx)
     }
 
+    def static prepareMessageForPipeline(TagPipeline ctx, handler) {
+        if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED) {
+            def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
+            def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlHtmlLink(ctx.script)}"
+            handler(ctx, message)
+        }
+    }
+
+    def static finalizeStageBody(TagPipeline ctx){
+        JarvisUtil.createVersionAndNotify(ctx)
+    }
+
+    def static debugFinalizeStageBody(TagPipeline ctx) {
+        JarvisUtil.createVersionAndNotify(ctx)
+        TagStages.prepareMessageForPipeline(ctx, {
+            JarvisUtil.sendMessageToGroup(ctx.script, message, "9d0c617e-d14a-490e-9914-83820b135cfc", "stride", false) 
+        })
+    }
+
 }

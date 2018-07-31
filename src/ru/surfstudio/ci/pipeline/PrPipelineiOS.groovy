@@ -43,6 +43,6 @@ class PrPipelineiOS extends PrPipeline {
                     CommoniOSStages.staticCodeAnalysisStageBodyiOS(script)
                 }
         ]
-        finalizeBody = { PrStages.finalizeStageBody(this) }
+        finalizeBody = { PrStages.debugFinalizeStageBody(this) }
     }
 }
