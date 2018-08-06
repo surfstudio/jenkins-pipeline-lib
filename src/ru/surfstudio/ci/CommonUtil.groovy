@@ -67,6 +67,14 @@ class CommonUtil {
         return "<a href=\"${Constants.JIRA_URL}browse/${taskKey}\">${taskKey}</a>"
     }
 
+    def static getBuildUrlMarkdownLink(Object script){
+        return  "[build](${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline)"
+    }
+
+    def static getJiraTaskMarkdownLink(String taskKey){
+        return "[${taskKey}](${Constants.JIRA_URL}browse/${taskKey})"
+    }
+
     def static shWithRuby(Object script, String command, String version = "2.3.5") {
         script.sh "hostname; set +x; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use $version; $command"
     }
