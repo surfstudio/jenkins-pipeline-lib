@@ -236,19 +236,19 @@ class UiTestStages {
     // ================================== UTILS ===================================
 
     def static sendStartNotification(UiTestPipeline ctx) {
-        def jenkinsLink = CommonUtil.getBuildUrlHtmlLink(ctx.script)
+        def jenkinsLink = CommonUtil.getBuildUrlMarkdownLink(ctx.script)
         if(ifBulkJob(ctx)){
             sendMessage(ctx,"Запущено параллельное выполнение тестов прогонов ${ctx.taskKey}. ${jenkinsLink}", true)
         } else {
-            def testExecutionLink = CommonUtil.getJiraTaskHtmlLink(ctx.taskKey)
+            def testExecutionLink = CommonUtil.getJiraTaskMarkdownLink(ctx.taskKey)
             def testExecutionName = ctx.taskName ? "\"${ctx.taskName}\"" : ""
             sendMessage(ctx, "Запущено выполнение тестов прогона ${testExecutionLink} ${testExecutionName}. ${jenkinsLink}", true)
         }
     }
 
     def static sendFinishNotification(UiTestPipeline ctx) {
-        def testExecutionLink = CommonUtil.getJiraTaskHtmlLink(ctx.taskKey)
-        def jenkinsLink = CommonUtil.getBuildUrlHtmlLink(ctx.script)
+        def testExecutionLink = CommonUtil.getJiraTaskMarkdownLink(ctx.taskKey)
+        def jenkinsLink = CommonUtil.getBuildUrlMarkdownLink(ctx.script)
         def testExecutionName = ctx.taskName ? "\"${ctx.taskName}\"" : ""
         if (ctx.jobResult != Result.SUCCESS) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)

@@ -68,7 +68,7 @@ class PrStages {
     def static prepareMessageForPipeline(PrPipeline ctx, Closure handler) {
         if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
-            def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlHtmlLink(ctx.script)}"
+            def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlMarkdownLink(ctx.script)}"
             handler(message)
         }
     }
