@@ -32,8 +32,8 @@ class TagPipelineiOS extends TagPipeline {
     def initInternal() {
         node = NodeProvider.getiOSNode()
 
-        preExecuteStageBody = CommonUtil.getBitbucketNotifyPreExecuteStageBody(script)
-        postExecuteStageBody = CommonUtil.getBitbucketNotifyPostExecuteStageBody(script)
+        preExecuteStageBody = { stage -> if(stage.name != CHECKOUT) CommonUtil.getBitbucketNotifyPreExecuteStageBody(script) }
+        postExecuteStageBody = { stage -> if(stage.name != CHECKOUT) CommonUtil.getBitbucketNotifyPostExecuteStageBody(script) }
 
         initStageBody = { TagStages.initStageBody(this) }
         stages = [
