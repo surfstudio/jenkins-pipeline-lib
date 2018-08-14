@@ -27,8 +27,8 @@ class PrPipelineAndroid extends PrPipeline {
     def initInternal() {
         node = NodeProvider.getAndroidNode()
 
-        preExecuteStageBody = CommonUtil.getBitbucketNotifyPreExecuteStageBody(script)
-        postExecuteStageBody = CommonUtil.getBitbucketNotifyPostExecuteStageBody(script)
+        preExecuteStageBody = { stage -> if(stage.name != PRE_MERGE) CommonUtil.getBitbucketNotifyPreExecuteStageBody(script) }
+        postExecuteStageBody = { stage -> if(stage.name != PRE_MERGE) CommonUtil.getBitbucketNotifyPostExecuteStageBody(script) }
 
         initStageBody = {  PrStages.initStageBody(this) }
         stages = [

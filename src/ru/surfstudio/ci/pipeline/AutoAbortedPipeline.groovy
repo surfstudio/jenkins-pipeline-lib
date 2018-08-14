@@ -3,6 +3,7 @@ package ru.surfstudio.ci.pipeline
 import ru.surfstudio.ci.AbortDuplicateStrategy
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
+import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
@@ -89,6 +90,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
                     script.echo "Deleting build"
                     script.currentBuild.rawBuild.delete()
                 }
+                script.currentBuild.result = Result.NOT_BUILT
             }
         } else {
             //extent normal init stage for storing identifier as description, it will be used for searching same builds
