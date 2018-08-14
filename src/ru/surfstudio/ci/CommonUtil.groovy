@@ -6,19 +6,21 @@ import ru.surfstudio.ci.stage.Stage
 class CommonUtil {
     static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50
 
-    def static notifyBitbucketAboutStageStart(Object script, String stageName){
+    def static notifyBitbucketAboutStageStart(Object script, String stageName, String gitDir=''){
         def bitbucketStatus = 'INPROGRESS'
         def slug = getCurrentBitbucketRepoSlug(script)
-        script.echo "Notify bitbucket stage: $stageName, repoSlug: $slug, status: $bitbucketStatus"
+        def commit = getCurrentBitbucketCommitSHA1(script, gitDir)
+        script.echo "Notify bitbucket stage: $stageName, repoSlug: $slug, commitId: $commit, status: $bitbucketStatus"
         script.bitbucketStatusNotify(
                 buildState: 'INPROGRESS',
                 buildKey: stageName,
                 buildName: stageName,
-                repoSlug: slug
+                repoSlug: slug,
+                commitId: commit
         )
     }
 
-    def static notifyBitbucketAboutStageFinish(Object script, String stageName, String result){
+    def static notifyBitbucketAboutStageFinish(Object script, String stageName, String result, String gitDir=''){
         def bitbucketStatus = ""
 
         switch (result){
@@ -36,12 +38,14 @@ class CommonUtil {
                 script.error "Unsupported Result: ${result}"
         }
         def slug = getCurrentBitbucketRepoSlug(script)
-        script.echo "Notify bitbucket stage: $stageName, repoSlug: $slug, status: $bitbucketStatus"
+        def commit = getCurrentBitbucketCommitSHA1(script, gitDir)
+        script.echo "Notify bitbucket stage: $stageName, repoSlug: $slug, commitId: $commit, status: $bitbucketStatus"
         script.bitbucketStatusNotify(
                 buildState: bitbucketStatus,
                 buildKey: stageName,
                 buildName: stageName,
-                repoSlug: slug
+                repoSlug: slug,
+                commitId: commit
         )
     }
 
@@ -57,6 +61,12 @@ class CommonUtil {
         def String url = script.scm.userRemoteConfigs[0].url
         def splittedUrl = url.split("/")
         return splittedUrl[splittedUrl.length - 1]
+    }
+
+    def static getCurrentBitbucketCommitSHA1(Object script, String gitDir='') {
+        script.dir(gitDir) {
+            return script.sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+        }
     }
 
     def static getBuildUrlHtmlLink(Object script){
