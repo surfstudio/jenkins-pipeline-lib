@@ -67,6 +67,7 @@ class CommonUtil {
         //script.dir(gitDir) {
             script.echo "${script.sh(returnStdout: true, script: 'git remote -v').trim()}"
             script.echo "${script.sh(returnStdout: true, script: 'git rev-parse --short HEAD~').trim()}"
+            script.echo "${script.sh(returnStdout: true, script: 'git rev-parse HEAD~').trim()}"
             return script.sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
         //}
     }
