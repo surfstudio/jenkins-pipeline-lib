@@ -35,16 +35,13 @@ class PrStages {
         applyParameterIfNotEmpty(script, 'authorUsername', params.authorUsername, {
             value -> ctx.authorUsername = value
         })
-        script.echo "envdest: ${script.env.destinationBranch}"
-        script.echo "params: ${params.targetBranchChanged}"
-        script.echo "env: ${script.env.targetBranchChanged}"
+
         applyParameterIfNotEmpty(script, 'targetBranchChanged', params.targetBranchChanged, {
             value -> ctx.targetBranchChanged = Boolean.valueOf(value)
         })
 
-        script.echo "type: ${ctx.targetBranchChanged.class}"
         if(ctx.targetBranchChanged) {
-            script.echo "build triggered by target branch changes, run only ${ctx.stagesForTargetBranchChangedMode} stages"
+            script.echo "Build triggered by target branch changes, run only ${ctx.stagesForTargetBranchChangedMode} stages"
             for (stage in ctx.stages) {
                 def executeStage = false
                 for(stageNameForTargetBranchChangedMode in ctx.stagesForTargetBranchChangedMode){
