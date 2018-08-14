@@ -179,7 +179,7 @@ class CommonUtil {
     def static startCurrentBuildCloneWithParams(Object script, ArrayList<Object> extraParams) {
         script.echo "start current build clone with extra params ${extraParams}"
         def Map currentBuildParams = script.params
-        def Map currentBuildEnvVars = script.env
+        def Map currentBuildEnvVars = script.env.getOverriddenEnvironment()
 
 
         def allParams = []
