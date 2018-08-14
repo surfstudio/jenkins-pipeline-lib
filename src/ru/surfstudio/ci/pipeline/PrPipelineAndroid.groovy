@@ -27,8 +27,12 @@ class PrPipelineAndroid extends PrPipeline {
     def initInternal() {
         node = NodeProvider.getAndroidNode()
 
-        preExecuteStageBody = { stage -> if(stage.name != PRE_MERGE) CommonUtil.getBitbucketNotifyPreExecuteStageBody(script) }
-        postExecuteStageBody = { stage -> if(stage.name != PRE_MERGE) CommonUtil.getBitbucketNotifyPostExecuteStageBody(script) }
+        preExecuteStageBody = { stage ->
+            if(stage.name != PRE_MERGE) CommonUtil.notifyBitbucketAboutStageStart(script, stage.name)
+        }
+        postExecuteStageBody = { stage ->
+            if(stage.name != PRE_MERGE) CommonUtil.notifyBitbucketAboutStageFinish(script, stage.name, stage.result)
+        }
 
         initStageBody = {  PrStages.initStageBody(this) }
         stages = [
@@ -58,3 +62,7 @@ class PrPipelineAndroid extends PrPipeline {
         finalizeBody = { PrStages.finalizeStageBody(this) }
     }
 }
+
+//def buildData = script.currentBuild.raw.getAction(hudson.plugins.git.util.BuildData.class);
+//echo "last Build: ${buildData.getLastBuiltRevision()}"
+//echo "last Build SHA1: ${buildData.getLastBuiltRevision().getSha1String()}"
