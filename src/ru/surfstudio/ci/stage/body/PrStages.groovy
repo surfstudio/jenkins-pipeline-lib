@@ -37,7 +37,7 @@ class PrStages {
         script.echo "envdest: ${script.env.destinationBranch}"
         script.echo "params: ${params.targetBranchChanged}"
         script.echo "env: ${script.env.targetBranchChanged}"
-        applyParameterIfNotEmpty(script, 'targetBranchChanged', params.targetBranchChanged, {
+        applyParameterIfNotEmpty(script, 'targetBranchChanged', script.env.targetBranchChanged, {
             value -> ctx.targetBranchChanged = value
         })
         if(ctx.targetBranchChanged) {
