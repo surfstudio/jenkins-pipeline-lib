@@ -22,7 +22,7 @@ abstract class AutoAbortedPipeline extends Pipeline {
 
     public abortDuplicatePipelineMode = true
     public abortStrategy  //see AbortDuplicateStrategy
-    public deletingBuildsWithAbortDuplicatePipelineModeEnabled = true
+    public deletingBuildsWithAbortDuplicatePipelineModeEnabled = false
 
     AutoAbortedPipeline(Object script) {
         super(script)

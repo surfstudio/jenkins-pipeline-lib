@@ -65,6 +65,6 @@ class TagPipelineiOS extends TagPipeline {
                 },
 
         ]
-        finalizeBody = { TagStages.finalizeStageBody(this) }
+        finalizeBody = { TagStages.debugFinalizeStageBody(this) }
     }
 }

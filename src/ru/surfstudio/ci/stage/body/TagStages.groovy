@@ -63,8 +63,10 @@ class TagStages {
         ]) {
             
             CommonUtil.shWithRuby(script, 'security -v unlock-keychain -p $KEYCHAIN_PASS')
-            CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P ""')
-            
+            CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
+            CommonUtil.shWithRuby(script, 'security set-key-partition-list -S apple-tool:,apple: -s -k $KEYCHAIN_PASS ~/Library/Keychains/login.keychain-db')
+            CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
+
             CommonUtil.shWithRuby(script, "gem install bundler")
 
             CommonUtil.shWithRuby(script, "make init")
@@ -72,8 +74,23 @@ class TagStages {
         }
     }
 
-    def static finalizeStageBody(TagPipeline ctx) {
+    def static prepareMessageForPipeline(TagPipeline ctx, Closure handler) {
+        if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED) {
+            def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
+            def message = "Завершена сборка по тэгу: ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlMarkdownLink(ctx.script)}"
+            handler(message)
+        }
+    }
+
+    def static finalizeStageBody(TagPipeline ctx){
         JarvisUtil.createVersionAndNotify(ctx)
+    }
+
+    def static debugFinalizeStageBody(TagPipeline ctx) {
+        JarvisUtil.createVersionAndNotify(ctx)
+        TagStages.prepareMessageForPipeline(ctx, { message ->
+            JarvisUtil.sendMessageToGroup(ctx.script, message, "9d0c617e-d14a-490e-9914-83820b135cfc", "stride", false) 
+        })
     }
 
 }
