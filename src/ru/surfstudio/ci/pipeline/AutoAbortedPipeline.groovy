@@ -70,16 +70,17 @@ abstract class AutoAbortedPipeline extends Pipeline {
 
                 if (needContinueBuild) {
                     //start clone of this build, which make main pipeline work
-                    CommonUtil.startCurrentBuildCloneWithParams(script, [
+                    def extraParams = [
                             script.booleanParam(name: ABORT_DUPLICATE_PIPELINE_MODE_PARAM_NAME, value: false)
-                    ])
+                    ]
+                    CommonUtil.startCurrentBuildCloneWithParams(script, extraParams)
                 }
             }
             //clear all another stages
             for (stage in stages) {
                 stage.strategy = StageStrategy.SKIP_STAGE
                 stage.body = {
-                    script.echo "This stage empty because it invoke in abortDuplicatePipelineMode"
+                    script.echo "This stage empty because it changed for abortDuplicatePipelineMode"
                 }
             }
             //remove build from history when it ending

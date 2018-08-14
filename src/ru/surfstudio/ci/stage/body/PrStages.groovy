@@ -3,6 +3,7 @@ import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.PrPipeline
+import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 
@@ -37,11 +38,21 @@ class PrStages {
         script.echo "envdest: ${script.env.destinationBranch}"
         script.echo "params: ${params.targetBranchChanged}"
         script.echo "env: ${script.env.targetBranchChanged}"
-        applyParameterIfNotEmpty(script, 'targetBranchChanged', script.env.targetBranchChanged, {
+        applyParameterIfNotEmpty(script, 'targetBranchChanged', params.targetBranchChanged, {
             value -> ctx.targetBranchChanged = value
         })
+
         if(ctx.targetBranchChanged) {
-            script.echo "build triggered by target branch changes"
+            script.echo "build triggered by target branch changes, run only ${ctx.stagesForTargetBranchChangedMode} stages"
+            for (stage in ctx.stages) {
+                def executeStage = false
+                for(stageNameForTargetBranchChangedMode in ctx.stagesForTargetBranchChangedMode){
+                    executeStage = executeStage || (stageNameForTargetBranchChangedMode == stage.getName())
+                }
+                if(!executeStage) {
+                    stage.strategy = StageStrategy.SKIP_STAGE
+                }
+            }
         }
     }
 

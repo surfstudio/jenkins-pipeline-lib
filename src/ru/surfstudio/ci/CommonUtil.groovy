@@ -179,14 +179,8 @@ class CommonUtil {
     def static startCurrentBuildCloneWithParams(Object script, ArrayList<Object> extraParams) {
         script.echo "start current build clone with extra params ${extraParams}"
         def Map currentBuildParams = script.params
-        def Map currentBuildEnvVars = script.env.getOverriddenEnvironment()
-
 
         def allParams = []
-        allParams.addAll(currentBuildEnvVars
-                .entrySet()
-                .collect({script.string(name: it.key, value: "${it.value}")})
-        )
         allParams.addAll(extraParams)
         allParams.addAll(currentBuildParams
                 .entrySet()
