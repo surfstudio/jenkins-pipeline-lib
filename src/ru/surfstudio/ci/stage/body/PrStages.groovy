@@ -39,7 +39,7 @@ class PrStages {
         script.echo "params: ${params.targetBranchChanged}"
         script.echo "env: ${script.env.targetBranchChanged}"
         applyParameterIfNotEmpty(script, 'targetBranchChanged', params.targetBranchChanged, {
-            value -> ctx.targetBranchChanged = value
+            value -> ctx.targetBranchChanged = Boolean.valueOf(value)
         })
 
         script.echo "type: ${ctx.targetBranchChanged.class}"

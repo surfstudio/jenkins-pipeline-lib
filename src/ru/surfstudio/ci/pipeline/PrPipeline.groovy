@@ -17,7 +17,7 @@ abstract class PrPipeline extends AutoAbortedPipeline {
     public sourceBranch = ""
     public destinationBranch = ""
     public authorUsername = ""
-    public targetBranchChanged = false
+    public boolean targetBranchChanged = false
 
     //config
     public stagesForTargetBranchChangedMode = [PRE_MERGE]
