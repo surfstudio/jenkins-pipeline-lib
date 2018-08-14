@@ -42,6 +42,7 @@ class PrStages {
             value -> ctx.targetBranchChanged = value
         })
 
+        script.echo "type: ${ctx.targetBranchChanged.class}"
         if(ctx.targetBranchChanged) {
             script.echo "build triggered by target branch changes, run only ${ctx.stagesForTargetBranchChangedMode} stages"
             for (stage in ctx.stages) {
