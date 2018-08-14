@@ -184,7 +184,7 @@ class CommonUtil {
         allParams.addAll(extraParams)
         allParams.addAll(currentBuildParams
                 .entrySet()
-                .collect({script.string(name: it.key, value: it.value)})
+                .collect({script.string(name: it.key, value: "${it.value}")})
         )
         script.build job: script.env.JOB_NAME, parameters: allParams, wait: false
     }
