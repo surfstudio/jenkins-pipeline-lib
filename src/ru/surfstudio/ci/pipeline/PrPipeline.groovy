@@ -28,6 +28,10 @@ abstract class PrPipeline extends AutoAbortedPipeline {
 
     @Override
     String getBuildIdentifier() {
-        return sourceBranch
+        if(targetBranchChanged) {
+            return "$sourceBranch: target branch changed"
+        } else {
+            return sourceBranch
+        }
     }
 }
