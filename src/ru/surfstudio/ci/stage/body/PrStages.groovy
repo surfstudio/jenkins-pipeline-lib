@@ -14,6 +14,7 @@ class PrStages {
     def static Closure<List<Object>> propertiesProvider(PrPipeline ctx) {
         return {
             def script = ctx.script
+            CommonUtil.checkConfigurationParameterDefined(script, ctx.repoFullName, "repoFullName")
             [
                 //[$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
                 //[$class: 'JobRestrictionProperty'],

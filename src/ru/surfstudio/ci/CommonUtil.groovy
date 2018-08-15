@@ -76,6 +76,12 @@ class CommonUtil {
         }
     }
 
+    def static checkConfigurationParameterDefined(Object script, Object parameterValue, String parameterName){
+        if(!parameterValue){
+            script.error("Pipeline configuration parameter $parameterName must be set")
+        }
+    }
+
     def static applyParameterIfNotEmpty(Object script, String varName, paramValue, assignmentAction) {
         def valueNotEmpty = paramValue != null
         if (paramValue instanceof String) {

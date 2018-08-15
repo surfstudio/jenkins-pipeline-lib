@@ -13,14 +13,17 @@ abstract class PrPipeline extends AutoAbortedPipeline {
     public static final String INSTRUMENTATION_TEST = 'Instrumentation Test'
     public static final String STATIC_CODE_ANALYSIS = 'Static Code Analysis'
 
+    //required configuration
+    public repoFullName = ""
+
     //scm
     public sourceBranch = ""
     public destinationBranch = ""
     public authorUsername = ""
     public boolean targetBranchChanged = false
-    public repoFullName = "" //require sets in job settings
 
-    //config
+
+    //other config
     public stagesForTargetBranchChangedMode = [PRE_MERGE]
 
     PrPipeline(Object script) {
