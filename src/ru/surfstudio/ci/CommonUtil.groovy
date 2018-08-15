@@ -6,10 +6,10 @@ import ru.surfstudio.ci.stage.Stage
 class CommonUtil {
     static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50
 
-    def static notifyBitbucketAboutStageStart(Object script, String stageName, String gitDir=''){
+    def static notifyBitbucketAboutStageStart(Object script, String stageName){
         def bitbucketStatus = 'INPROGRESS'
         def slug = getCurrentBitbucketRepoSlug(script)
-        def commit = getCurrentBitbucketCommitSHA1(script, gitDir)
+        def commit = getCurrentCommitHash(script)
         script.echo "Notify bitbucket stage: $stageName, repoSlug: $slug, commitId: $commit, status: $bitbucketStatus"
         script.bitbucketStatusNotify(
                 buildState: 'INPROGRESS',
@@ -20,7 +20,7 @@ class CommonUtil {
         )
     }
 
-    def static notifyBitbucketAboutStageFinish(Object script, String stageName, String result, String gitDir=''){
+    def static notifyBitbucketAboutStageFinish(Object script, String stageName, String result){
         def bitbucketStatus = ""
 
         switch (result){
@@ -38,7 +38,7 @@ class CommonUtil {
                 script.error "Unsupported Result: ${result}"
         }
         def slug = getCurrentBitbucketRepoSlug(script)
-        def commit = getCurrentBitbucketCommitSHA1(script, gitDir)
+        def commit = getCurrentCommitHash(script)
         script.echo "Notify bitbucket stage: $stageName, repoSlug: $slug, commitId: $commit, status: $bitbucketStatus"
         script.bitbucketStatusNotify(
                 buildState: bitbucketStatus,
@@ -63,14 +63,8 @@ class CommonUtil {
         return splittedUrl[splittedUrl.length - 1]
     }
 
-    def static getCurrentBitbucketCommitSHA1(Object script, String gitDir='') {
-        //script.dir(gitDir) {
-            script.echo "${script.sh(returnStdout: true, script: 'git log').trim()}"
-            script.echo "${script.sh(returnStdout: true, script: 'git remote -v').trim()}"
-            script.echo "${script.sh(returnStdout: true, script: 'git rev-parse --short HEAD~').trim()}"
-            script.echo "${script.sh(returnStdout: true, script: 'git rev-parse HEAD~').trim()}"
-            return script.sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-        //}
+    def static getCurrentCommitHash(Object script) {
+        return script.env.COMMIT_HASH
     }
 
     def static getBuildUrlHtmlLink(Object script){
