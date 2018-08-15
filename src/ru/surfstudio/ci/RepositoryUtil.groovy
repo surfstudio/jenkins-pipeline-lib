@@ -27,7 +27,7 @@ class RepositoryUtil {
                 bitbucketStatus = 'SUCCESSFUL'
                 break
             case Result.ABORTED:
-                bitbucketStatus = 'SUCCESSFUL' //todo плагин не поддерживает статус STOPPED, возможно он здесь лучше подходит
+                bitbucketStatus = 'STOPPED'
                 break
             case Result.FAILURE:
             case Result.UNSTABLE:
