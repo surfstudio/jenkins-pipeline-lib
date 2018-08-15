@@ -1,6 +1,7 @@
 package ru.surfstudio.ci.stage.body
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.JarvisUtil
+import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.PrPipeline
 import ru.surfstudio.ci.stage.StageStrategy
@@ -64,9 +65,8 @@ class PrStages {
                         doGenerateSubmoduleConfigurations: false,
                         userRemoteConfigs                : script.scm.userRemoteConfigs
                 ]
-        
-        script.env.COMMIT_HASH = script.sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-        script.echo "Set global variable COMMIT_HASH to $script.env.COMMIT_HASH"
+
+        RepositoryUtil.saveCurrentGitCommitHash(script)
 
         script.checkout changelog: true, poll: true, scm:
                 [

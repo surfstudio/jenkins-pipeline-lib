@@ -2,6 +2,7 @@ package ru.surfstudio.ci.pipeline
 
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
+import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.stage.body.CommonAndroidStages
 import ru.surfstudio.ci.stage.body.PrStages
@@ -28,10 +29,10 @@ class PrPipelineAndroid extends PrPipeline {
         node = NodeProvider.getAndroidNode()
 
         preExecuteStageBody = { stage ->
-            if(stage.name != PRE_MERGE) CommonUtil.notifyBitbucketAboutStageStart(script, stage.name)
+            if(stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageStart(script, stage.name)
         }
         postExecuteStageBody = { stage ->
-            if(stage.name != PRE_MERGE) CommonUtil.notifyBitbucketAboutStageFinish(script, stage.name, stage.result)
+            if(stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageFinish(script, stage.name, stage.result)
         }
 
         initStageBody = {  PrStages.initStageBody(this) }
@@ -62,7 +63,3 @@ class PrPipelineAndroid extends PrPipeline {
         finalizeBody = { PrStages.finalizeStageBody(this) }
     }
 }
-
-//def buildData = script.currentBuild.raw.getAction(hudson.plugins.git.util.BuildData.class);
-//echo "last Build: ${buildData.getLastBuiltRevision()}"
-//echo "last Build SHA1: ${buildData.getLastBuiltRevision().getSha1String()}"

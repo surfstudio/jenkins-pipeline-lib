@@ -3,6 +3,7 @@ package ru.surfstudio.ci.stage.body
 import ru.surfstudio.ci.AndroidUtil
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.JarvisUtil
+import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.TagPipeline
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
@@ -41,6 +42,7 @@ class TagStages {
                 doGenerateSubmoduleConfigurations: script.scm.doGenerateSubmoduleConfigurations,
                 userRemoteConfigs                : script.scm.userRemoteConfigs,
         ])
+        RepositoryUtil.saveCurrentGitCommitHash(script)
     }
 
     def static betaUploadStageBodyAndroid(Object script, String betaUploadGradleTask) {

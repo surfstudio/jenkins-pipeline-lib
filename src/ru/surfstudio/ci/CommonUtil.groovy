@@ -6,67 +6,6 @@ import ru.surfstudio.ci.stage.Stage
 class CommonUtil {
     static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50
 
-    def static notifyBitbucketAboutStageStart(Object script, String stageName){
-        def bitbucketStatus = 'INPROGRESS'
-        def slug = getCurrentBitbucketRepoSlug(script)
-        def commit = getCurrentCommitHash(script)
-        script.echo "Notify bitbucket stage: $stageName, repoSlug: $slug, commitId: $commit, status: $bitbucketStatus"
-        script.bitbucketStatusNotify(
-                buildState: 'INPROGRESS',
-                buildKey: stageName,
-                buildName: stageName,
-                repoSlug: slug,
-                commitId: commit
-        )
-    }
-
-    def static notifyBitbucketAboutStageFinish(Object script, String stageName, String result){
-        def bitbucketStatus = ""
-
-        switch (result){
-            case Result.SUCCESS:
-                bitbucketStatus = 'SUCCESSFUL'
-                break
-            case Result.ABORTED:
-                bitbucketStatus = 'SUCCESSFUL' //todo плагин не поддерживает статус STOPPED, возможно он здесь лучше подходит
-                break
-            case Result.FAILURE:
-            case Result.UNSTABLE:
-                bitbucketStatus = 'FAILED'
-                break
-            default:
-                script.error "Unsupported Result: ${result}"
-        }
-        def slug = getCurrentBitbucketRepoSlug(script)
-        def commit = getCurrentCommitHash(script)
-        script.echo "Notify bitbucket stage: $stageName, repoSlug: $slug, commitId: $commit, status: $bitbucketStatus"
-        script.bitbucketStatusNotify(
-                buildState: bitbucketStatus,
-                buildKey: stageName,
-                buildName: stageName,
-                repoSlug: slug,
-                commitId: commit
-        )
-    }
-
-    def static getBitbucketNotifyPreExecuteStageBody(Object script){
-        return { stage -> notifyBitbucketAboutStageStart(script, stage.name) }
-    }
-
-    def static getBitbucketNotifyPostExecuteStageBody(Object script){
-        return { stage -> notifyBitbucketAboutStageFinish(script, stage.name, stage.result)}
-    }
-
-    def static getCurrentBitbucketRepoSlug(Object script){
-        def String url = script.scm.userRemoteConfigs[0].url
-        def splittedUrl = url.split("/")
-        return splittedUrl[splittedUrl.length - 1]
-    }
-
-    def static getCurrentCommitHash(Object script) {
-        return script.env.COMMIT_HASH
-    }
-
     def static getBuildUrlHtmlLink(Object script){
         return  "<a href=\"${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline\">build</a>"
     }
@@ -184,7 +123,7 @@ class CommonUtil {
         }
     }
 
-    def static startCurrentBuildCloneWithParams(Object script, ArrayList<Object> extraParams) {
+    def static startCurrentBuildCloneWithParams(Object script, ArrayList<hudson.model.ParameterValue> extraParams) {
         script.echo "start current build clone with extra params ${extraParams}"
         def Map currentBuildParams = script.params
 

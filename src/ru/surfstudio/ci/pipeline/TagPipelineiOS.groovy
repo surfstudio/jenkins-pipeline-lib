@@ -2,6 +2,7 @@ package ru.surfstudio.ci.pipeline
 
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
+import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.stage.body.CommoniOSStages
 import ru.surfstudio.ci.stage.body.TagStages
@@ -32,8 +33,12 @@ class TagPipelineiOS extends TagPipeline {
     def initInternal() {
         node = NodeProvider.getiOSNode()
 
-        preExecuteStageBody = { stage -> if(stage.name != CHECKOUT) CommonUtil.getBitbucketNotifyPreExecuteStageBody(script) }
-        postExecuteStageBody = { stage -> if(stage.name != CHECKOUT) CommonUtil.getBitbucketNotifyPostExecuteStageBody(script) }
+        preExecuteStageBody = { stage ->
+            if(stage.name != CHECKOUT) RepositoryUtil.notifyBitbucketAboutStageStart(script, stage.name)
+        }
+        postExecuteStageBody = { stage ->
+            if(stage.name != CHECKOUT) RepositoryUtil.notifyBitbucketAboutStageFinish(script, stage.name, stage.result)
+        }
 
         initStageBody = { TagStages.initStageBody(this) }
         stages = [

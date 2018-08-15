@@ -2,6 +2,7 @@ package ru.surfstudio.ci.pipeline
 
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
+import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.stage.body.CommoniOSStages
 import ru.surfstudio.ci.stage.body.PrStages
@@ -19,8 +20,12 @@ class PrPipelineiOS extends PrPipeline {
     def initInternal() {
         node = NodeProvider.getiOSNode()
 
-        preExecuteStageBody = { stage -> if(stage.name != PRE_MERGE) CommonUtil.getBitbucketNotifyPreExecuteStageBody(script) }
-        postExecuteStageBody = { stage -> if(stage.name != PRE_MERGE) CommonUtil.getBitbucketNotifyPostExecuteStageBody(script) }
+        preExecuteStageBody = { stage ->
+            if(stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageStart(script, stage.name)
+        }
+        postExecuteStageBody = { stage ->
+            if(stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageFinish(script, stage.name, stage.result)
+        }
 
         initStageBody = { PrStages.initStageBody(this) }
         stages = [
