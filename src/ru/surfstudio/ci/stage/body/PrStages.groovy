@@ -62,6 +62,17 @@ class PrStages {
                         $class                           : 'GitSCM',
                         branches                         : [[name: "${sourceBranch}"]],
                         doGenerateSubmoduleConfigurations: false,
+                        userRemoteConfigs                : script.scm.userRemoteConfigs
+                ]
+        
+        script.env.COMMIT_HASH = script.sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+        script.echo "Set global variable COMMIT_HASH to $script.env.COMMIT_HASH"
+
+        script.checkout changelog: true, poll: true, scm:
+                [
+                        $class                           : 'GitSCM',
+                        branches                         : [[name: "${sourceBranch}"]],
+                        doGenerateSubmoduleConfigurations: false,
                         userRemoteConfigs                : script.scm.userRemoteConfigs,
                         extensions                       : [
                                 [
