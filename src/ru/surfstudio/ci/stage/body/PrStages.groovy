@@ -11,30 +11,67 @@ import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 
 class PrStages {
 
+
+    public static final String SOURCE_BRANCH_PARAMETER_NAME = 'sourceBranch'
+    public static final String DESTINATION_BRANCH_PARAMETER_NAME = 'destinationBranch'
+    public static final String AUTHOR_USERNAME_PARAMETER_NAME = 'authorUsername'
+    public static final String TARGET_BRANCH_CHANGED = 'targetBranchChanged'
+
     def static Closure<List<Object>> propertiesProvider(PrPipeline ctx) {
-        return {
-            def script = ctx.script
-            CommonUtil.checkConfigurationParameterDefined(script, ctx.repoFullName, "repoFullName")
-            [
+        return { properties(ctx) }
+    }
+    def static List<Object> properties(PrPipeline ctx) {
+        def script = ctx.script
+        CommonUtil.checkConfigurationParameterDefined(script, ctx.repoFullName, "repoFullName")
+        return [
                 //[$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
                 //[$class: 'JobRestrictionProperty'],
                 script.buildDiscarder(
-                        script.logRotator(artifactDaysToKeepStr: '3', artifactNumToKeepStr: '10', daysToKeepStr: '180', numToKeepStr: '')
+                        script.logRotator(
+                                artifactDaysToKeepStr: '3',
+                                artifactNumToKeepStr: '10',
+                                daysToKeepStr: '180',
+                                numToKeepStr: '')
                 ),
                 script.parameters([
-                        script.string(name: 'sourceBranch', defaultValue: '', description: 'Ветка с pr, обязательный параметр', trim: false),
-                        script.string(name: 'destinationBranch', defaultValue: '', description: 'Ветка, в которую будет мержиться пр, обязательный параметр', trim: false),
-                        script.string(name: 'authorUsername', defaultValue: '', description: 'username в bitbucket создателя пр, нужно для отправки собщений, обязательный параметр', trim: false),
-                        script.booleanParam(name: 'targetBranchChanged', defaultValue: false, description: '')
+                        script.string(
+                                name: SOURCE_BRANCH_PARAMETER_NAME,
+                                description: 'Ветка с pr, обязательный параметр'),
+                        script.string(
+                                name: DESTINATION_BRANCH_PARAMETER_NAME,
+                                description: 'Ветка, в которую будет мержиться пр, обязательный параметр'),
+                        script.string(
+                                name: AUTHOR_USERNAME_PARAMETER_NAME,
+                                description: 'username в bitbucket создателя пр, нужно для отправки собщений, обязательный параметр'),
+                        script.booleanParam(
+                                name: TARGET_BRANCH_CHANGED,
+                                defaultValue: false,
+                                description: 'Не следует указывать, параметр нужен здесь для пробрасывания его в клон билда')
                 ]),
                 script.pipelineTriggers([
-                        script.GenericTrigger(genericVariables: [
-                                [key: 'sourceBranch', value: '$.pullrequest.source.branch.name'],
-                                [key: 'destinationBranch', value: '$.pullrequest.destination.branch.name'],
-                                [key: 'authorUsername', value: '$.pullrequest.author.username'],
-                                [key: 'repoFullName', value: '$.repository.full_name'],
-                                [key: 'targetBranchChanged', value: '$.target_branch.changed']
-                        ],
+                        script.GenericTrigger(
+                                genericVariables: [
+                                        [
+                                                key  : SOURCE_BRANCH_PARAMETER_NAME,
+                                                value: '$.pullrequest.source.branch.name'
+                                        ],
+                                        [
+                                                key  : DESTINATION_BRANCH_PARAMETER_NAME,
+                                                value: '$.pullrequest.destination.branch.name'
+                                        ],
+                                        [
+                                                key  : AUTHOR_USERNAME_PARAMETER_NAME,
+                                                value: '$.pullrequest.author.username'
+                                        ],
+                                        [
+                                                key  : 'repoFullName',
+                                                value: '$.repository.full_name'
+                                        ],
+                                        [
+                                                key  : TARGET_BRANCH_CHANGED,
+                                                value: '$.target_branch.changed'
+                                        ]
+                                ],
                                 printContributedVariables: true,
                                 printPostContent: true,
                                 causeString: 'Triggered by Bitbucket',
@@ -43,38 +80,28 @@ class PrStages {
                         script.pollSCM('')
                 ])
 
-            ]
-        }
+        ]
     }
 
     def static initStageBody(PrPipeline ctx) {
         def script = ctx.script
         CommonUtil.printInitialStageStrategies(ctx)
-
-        //Используем нестандартные стратегии для Stage из параметров, если они установлены
-        //Параметры могут быть установлены только если Job стартовали вручную
+        
         def params = script.params
-        CommonUtil.applyStrategiesFromParams(ctx, [
-                (ctx.PRE_MERGE): params.preMergeStageStrategy,
-                (ctx.BUILD): params.buildStageStrategy,
-                (ctx.UNIT_TEST): params.unitTestStageStrategy,
-                (ctx.INSTRUMENTATION_TEST): params.instrumentationTestStageStrategy,
-                (ctx.STATIC_CODE_ANALYSIS): params.staticCodeAnalysisStageStrategy
-        ])
 
         //Выбираем значения веток и автора из параметров, Установка их в параметры происходит
         // если триггером был webhook или если стартанули Job вручную
-        applyParameterIfNotEmpty(script, 'sourceBranch', params.sourceBranch, {
+        applyParameterIfNotEmpty(script, SOURCE_BRANCH_PARAMETER_NAME, params[SOURCE_BRANCH_PARAMETER_NAME], {
             value -> ctx.sourceBranch = value
         })
-        applyParameterIfNotEmpty(script, 'destinationBranch', params.destinationBranch, {
+        applyParameterIfNotEmpty(script, DESTINATION_BRANCH_PARAMETER_NAME, params.destinationBranch, {
             value -> ctx.destinationBranch = value
         })
-        applyParameterIfNotEmpty(script, 'authorUsername', params.authorUsername, {
+        applyParameterIfNotEmpty(script, AUTHOR_USERNAME_PARAMETER_NAME, params.authorUsername, {
             value -> ctx.authorUsername = value
         })
 
-        applyParameterIfNotEmpty(script, 'targetBranchChanged', params.targetBranchChanged, {
+        applyParameterIfNotEmpty(script, TARGET_BRANCH_CHANGED, params.targetBranchChanged, {
             value -> ctx.targetBranchChanged = Boolean.valueOf(value)
         })
 
