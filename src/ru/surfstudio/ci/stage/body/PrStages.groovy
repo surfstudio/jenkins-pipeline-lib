@@ -15,10 +15,33 @@ class PrStages {
         return {
             def script = ctx.script
             [
-                    script.parameters([
-                            script.string(name: 'sourceBranch', defaultValue: 'no_branch', description: 'no_description'),
-                            script.string(name: 'destinationBranch', defaultValue: 'no_branch', description: 'no_description'),
-                    ])
+                //[$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
+                //[$class: 'JobRestrictionProperty'],
+                script.buildDiscarder(
+                        script.logRotator(artifactDaysToKeepStr: '3', artifactNumToKeepStr: '10', daysToKeepStr: '180', numToKeepStr: '')
+                ),
+                script.parameters([
+                        script.string(name: 'sourceBranch', defaultValue: '', description: 'Ветка с pr, обязательный параметр', trim: false),
+                        script.string(name: 'destinationBranch', defaultValue: '', description: 'Ветка, в которую будет мержиться пр, обязательный параметр', trim: false),
+                        script.string(name: 'authorUsername', defaultValue: '', description: 'username в bitbucket создателя пр, нужно для отправки собщений, обязательный параметр', trim: false),
+                        script.booleanParam(name: 'targetBranchChanged', defaultValue: false, description: '')
+                ]),
+                script.pipelineTriggers([
+                        script.GenericTrigger(genericVariables: [
+                                [key: 'sourceBranch', value: '$.pullrequest.source.branch.name'],
+                                [key: 'destinationBranch', value: '$.pullrequest.destination.branch.name'],
+                                [key: 'authorUsername', value: '$.pullrequest.author.username'],
+                                [key: 'repoFullName', value: '$.repository.full_name'],
+                                [key: 'targetBranchChanged', value: '$.target_branch.changed']
+                        ],
+                                printContributedVariables: true,
+                                printPostContent: true,
+                                causeString: 'Triggered by Bitbucket',
+                                regexpFilterExpression: "$ctx.repoFullName",
+                                regexpFilterText: '$repoFullName'),
+                        script.pollSCM('')
+                ])
+
             ]
         }
     }

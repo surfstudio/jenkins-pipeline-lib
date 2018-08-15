@@ -18,6 +18,7 @@ abstract class PrPipeline extends AutoAbortedPipeline {
     public destinationBranch = ""
     public authorUsername = ""
     public boolean targetBranchChanged = false
+    public repoFullName = "" //require sets in job settings
 
     //config
     public stagesForTargetBranchChangedMode = [PRE_MERGE]
