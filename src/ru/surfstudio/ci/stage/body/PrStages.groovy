@@ -12,10 +12,11 @@ import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 class PrStages {
 
     def static Closure<List<Object>> propertiesProvider(PrPipeline ctx) {
+        def script = ctx.script
         return [
-            parameters([
-                string(name: 'sourceBranch', defaultValue: 'no_branch', description: 'no_description'),
-                string(name: 'destinationBranch', defaultValue: 'no_branch', description: 'no_description'),
+            script.parameters([
+                    script.string(name: 'sourceBranch', defaultValue: 'no_branch', description: 'no_description'),
+                    script.string(name: 'destinationBranch', defaultValue: 'no_branch', description: 'no_description'),
             ])
         ]
     }
