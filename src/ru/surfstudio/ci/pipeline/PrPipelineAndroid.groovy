@@ -26,6 +26,8 @@ class PrPipelineAndroid extends PrPipeline {
 
     @Override
     def initInternal() {
+        propertiesProvider = PrStages.propertiesProvider(this)
+
         node = NodeProvider.getAndroidNode()
 
         preExecuteStageBody = { stage ->

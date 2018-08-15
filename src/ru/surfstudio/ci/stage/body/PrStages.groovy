@@ -4,11 +4,21 @@ import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.PrPipeline
+import ru.surfstudio.ci.pipeline.PrPipelineAndroid
 import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 
 class PrStages {
+
+    def static Closure<List<Object>> propertiesProvider(PrPipeline ctx) {
+        return [
+            parameters([
+                string(name: 'sourceBranch', defaultValue: 'no_branch', description: 'no_description'),
+                string(name: 'destinationBranch', defaultValue: 'no_branch', description: 'no_description'),
+            ])
+        ]
+    }
 
     def static initStageBody(PrPipeline ctx) {
         def script = ctx.script
@@ -108,6 +118,4 @@ class PrStages {
             JarvisUtil.sendMessageToGroup(ctx.script, message, "9d0c617e-d14a-490e-9914-83820b135cfc", "stride", false) 
         })
     }
-
-
 }

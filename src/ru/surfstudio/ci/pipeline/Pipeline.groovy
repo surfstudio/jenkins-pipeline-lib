@@ -37,6 +37,7 @@ abstract class Pipeline implements Serializable {
     public Closure finalizeBody
     public Closure initStageBody
     public node
+    public Closure<List<Object>> propertiesProvider
 
     public preExecuteStageBody = {}
     public postExecuteStageBody = {}
@@ -53,6 +54,9 @@ abstract class Pipeline implements Serializable {
     abstract def init()
 
     def run() {
+        if (propertiesProvider) {
+            script.properties(propertiesProvider())
+        }
         script.node(node) {
             try {
                 if (initStageBody) {
