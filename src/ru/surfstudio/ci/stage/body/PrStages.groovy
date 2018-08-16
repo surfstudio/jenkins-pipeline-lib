@@ -22,6 +22,7 @@ class PrStages {
     }
     def static List<Object> properties(PrPipeline ctx) {
         def script = ctx.script
+        script.echo "${script.scm.userRemoteConfigs.size()}"
         CommonUtil.checkConfigurationParameterDefined(script, ctx.repoFullName, "repoFullName")
         return [
                 //[$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
