@@ -76,8 +76,9 @@ class PrStages {
                                 printContributedVariables: true,
                                 printPostContent: true,
                                 causeString: 'Triggered by Bitbucket',
-                                regexpFilterExpression: "$ctx.repoFullName",
-                                regexpFilterText: '$repoFullName'),
+                                //regexpFilterExpression: "$ctx.repoFullName",
+                                //regexpFilterText: '$repoFullName'
+                        ),
                         script.pollSCM('')
                 ])
 
