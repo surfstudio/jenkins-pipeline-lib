@@ -129,14 +129,15 @@ class PrStages {
         script.sh 'git config --global user.name "Jenkins"'
         script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
 
-
         script.git(
                 url: url,
                 credentialsId: credentialsId,
                 branch: sourceBranch
         )
+
         RepositoryUtil.saveCurrentGitCommitHash(script)
 
+        //local merge with destination
         script.sh "git merge origin/$destinationBranch --no-ff"
     }
 

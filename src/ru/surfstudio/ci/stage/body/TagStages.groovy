@@ -35,13 +35,12 @@ class TagStages {
         })
     }
 
-    def static checkoutStageBody(Object script, String repoTag) {
-        script.checkout([
-                $class                           : 'GitSCM',
-                branches                         : [[name: "refs/tags/${repoTag}"]],
-                doGenerateSubmoduleConfigurations: script.scm.doGenerateSubmoduleConfigurations,
-                userRemoteConfigs                : script.scm.userRemoteConfigs,
-        ])
+    def static checkoutStageBody(Object script,  String url, String repoTag, String credentialsId) {
+        script.git(
+                url: url,
+                credentialsId: credentialsId,
+                branch: "refs/tags/$repoTag"
+        )
         RepositoryUtil.saveCurrentGitCommitHash(script)
     }
 

@@ -1,5 +1,6 @@
 package ru.surfstudio.ci.pipeline
 
+import ru.surfstudio.ci.Constants
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.stage.body.CommonAndroidStages
 import ru.surfstudio.ci.stage.body.PrStages
@@ -15,7 +16,7 @@ abstract class PrPipeline extends AutoAbortedPipeline {
 
     //required configuration
     public repoUrl = ""
-    public repoCredentialsId = "833292f1-ee00-4a28-abb2-fb2d2b86f581" //Surf_Builder bitbucket
+    public repoCredentialsId = Constants.BITBUCKET_BUILDER_CREDENTIALS_ID
 
     //scm
     public sourceBranch = ""

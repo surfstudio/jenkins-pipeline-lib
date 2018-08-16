@@ -105,7 +105,7 @@ class JarvisUtil {
                             status       : ctx.jobResult,
                             stages_result: stageResultsBody
                     ],
-                    repo_url: script.scm.userRemoteConfigs[0].url,
+                    repo_url: ctx.repoUrl,
                     ci_url  : script.env.JENKINS_URL,
                     tag_name: ctx.repoTag
             ]

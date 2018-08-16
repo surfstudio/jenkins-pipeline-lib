@@ -31,10 +31,10 @@ class PrPipelineAndroid extends PrPipeline {
         node = NodeProvider.getAndroidNode()
 
         preExecuteStageBody = { stage ->
-            if(stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageStart(script, stage.name)
+            if(stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
         }
         postExecuteStageBody = { stage ->
-            if(stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageFinish(script, stage.name, stage.result)
+            if(stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
         }
 
         initStageBody = {  PrStages.initStageBody(this) }

@@ -1,5 +1,6 @@
 package ru.surfstudio.ci.pipeline
 
+import ru.surfstudio.ci.Constants
 import ru.surfstudio.ci.stage.StageStrategy
 
 abstract class TagPipeline extends AutoAbortedPipeline {
@@ -11,6 +12,10 @@ abstract class TagPipeline extends AutoAbortedPipeline {
     public static final String INSTRUMENTATION_TEST = 'Instrumentation Test'
     public static final String STATIC_CODE_ANALYSIS = 'Static Code Analysis'
     public static final String BETA_UPLOAD = 'Beta Upload'
+
+    //required configuration
+    public repoUrl = ""
+    public repoCredentialsId = Constants.BITBUCKET_BUILDER_CREDENTIALS_ID
 
     //scm
     public repoTag = ""

@@ -2,9 +2,9 @@ package ru.surfstudio.ci
 
 class RepositoryUtil {
 
-    def static notifyBitbucketAboutStageStart(Object script, String stageName){
+    def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName){
         def bitbucketStatus = 'INPROGRESS'
-        def slug = getCurrentBitbucketRepoSlug(script)
+        def slug = getCurrentBitbucketRepoSlug(script, repoUrl)
         def commit = getSavedGitCommitHash(script)
         if (!commit) {
             script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
@@ -19,7 +19,7 @@ class RepositoryUtil {
         )
     }
 
-    def static notifyBitbucketAboutStageFinish(Object script, String stageName, String result){
+    def static notifyBitbucketAboutStageFinish(Object script, String repoUrl, String stageName, String result){
         def bitbucketStatus = ""
 
         switch (result){
@@ -36,7 +36,7 @@ class RepositoryUtil {
             default:
                 script.error "Unsupported Result: ${result}"
         }
-        def slug = getCurrentBitbucketRepoSlug(script)
+        def slug = getCurrentBitbucketRepoSlug(script, repoUrl)
         def commit = getSavedGitCommitHash(script)
         if (!commit) {
             script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
@@ -51,9 +51,8 @@ class RepositoryUtil {
         )
     }
 
-    def static getCurrentBitbucketRepoSlug(Object script){
-        def String url = script.scm.userRemoteConfigs[0].url
-        def splittedUrl = url.split("/")
+    def static getCurrentBitbucketRepoSlug(Object script, String repoUrl){
+        def splittedUrl = repoUrl.split("/")
         return splittedUrl[splittedUrl.length - 1]
     }
 

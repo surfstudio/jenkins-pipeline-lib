@@ -34,16 +34,16 @@ class TagPipelineiOS extends TagPipeline {
         node = NodeProvider.getiOSNode()
 
         preExecuteStageBody = { stage ->
-            if(stage.name != CHECKOUT) RepositoryUtil.notifyBitbucketAboutStageStart(script, stage.name)
+            if(stage.name != CHECKOUT) RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
         }
         postExecuteStageBody = { stage ->
-            if(stage.name != CHECKOUT) RepositoryUtil.notifyBitbucketAboutStageFinish(script, stage.name, stage.result)
+            if(stage.name != CHECKOUT) RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
         }
 
         initStageBody = { TagStages.initStageBody(this) }
         stages = [
                 createStage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    TagStages.checkoutStageBody(script, repoTag)
+                    TagStages.checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     CommoniOSStages.buildStageBodyiOS(script,
