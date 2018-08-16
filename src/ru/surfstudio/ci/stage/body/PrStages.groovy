@@ -22,8 +22,13 @@ class PrStages {
     }
     def static List<Object> properties(PrPipeline ctx) {
         def script = ctx.script
-        //script.echo "${script.scm.userRemoteConfigs.size()}"
+        RepositoryUtil.tryExtractRemoteConfig(script) { url, credentialsId ->
+            ctx.repoUrl = url
+            ctx.repoCredentialsId = credentialsId
+        }
         CommonUtil.checkConfigurationParameterDefined(script, ctx.repoFullName, "repoFullName")
+        CommonUtil.checkConfigurationParameterDefined(script, ctx.repoUrl, "repoUrl")
+        CommonUtil.checkConfigurationParameterDefined(script, ctx.repoCredentialsId, "repoCredentialsId")
         return [
                 //[$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
                 //[$class: 'JobRestrictionProperty'],
@@ -76,8 +81,8 @@ class PrStages {
                                 printContributedVariables: true,
                                 printPostContent: true,
                                 causeString: 'Triggered by Bitbucket',
-                                //regexpFilterExpression: "$ctx.repoFullName",
-                                //regexpFilterText: '$repoFullName'
+                                regexpFilterExpression: "$ctx.repoFullName",
+                                regexpFilterText: '$repoFullName'
                         ),
                         script.pollSCM('')
                 ])

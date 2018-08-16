@@ -15,6 +15,8 @@ abstract class PrPipeline extends AutoAbortedPipeline {
 
     //required configuration
     public repoFullName = ""
+    public repoUrl
+
 
     //scm
     public sourceBranch = ""
@@ -25,6 +27,8 @@ abstract class PrPipeline extends AutoAbortedPipeline {
 
     //other config
     public stagesForTargetBranchChangedMode = [PRE_MERGE]
+    public repoCredentialsId
+
 
     PrPipeline(Object script) {
         super(script)

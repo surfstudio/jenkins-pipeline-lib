@@ -73,4 +73,17 @@ class RepositoryUtil {
     def static getSavedGitCommitHash(Object script) {
         return script.env.COMMIT_HASH
     }
+
+    /**
+     * @param script
+     * @param handler gets two parameters (url, credentialsId)
+     */
+    def static tryExtractRemoteConfig(Object script, Closure handler) {
+        try {
+            def config = script.scm.userRemoteConfigs[0]
+            handler(config.url, config.credentialsId)
+        } catch (e){
+            script.echo "Cannot extract repository remote config: ${e.toString()}"
+        }
+    }
 }
