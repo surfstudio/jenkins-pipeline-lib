@@ -15,7 +15,7 @@ abstract class PrPipeline extends AutoAbortedPipeline {
 
     //required configuration
     public repoUrl = ""
-    public repoCredentialsId = ""
+    public repoCredentialsId = "833292f1-ee00-4a28-abb2-fb2d2b86f581" //Surf_Builder bitbucket
 
     //scm
     public sourceBranch = ""
@@ -34,7 +34,7 @@ abstract class PrPipeline extends AutoAbortedPipeline {
 
     @Override
     String getBuildIdentifier() {
-        if(targetBranchChanged) {
+        if (targetBranchChanged) {
             return "$sourceBranch: target branch changed"
         } else {
             return sourceBranch
