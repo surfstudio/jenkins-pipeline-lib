@@ -62,7 +62,7 @@ class UiTestStages {
         script.dir(sourcesDir) {
             CommonUtil.safe(script) { 
                 script.sh "rm -rf ./*"
-                } 
+            }
             script.checkout([
                     $class                           : 'GitSCM',
                     branches                         : [[name: "${sourceBranch}"]],

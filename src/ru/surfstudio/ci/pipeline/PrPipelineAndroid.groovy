@@ -40,7 +40,7 @@ class PrPipelineAndroid extends PrPipeline {
         initStageBody = {  PrStages.initStageBody(this) }
         stages = [
                 createStage(PRE_MERGE, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    PrStages.preMergeStageBody(script, sourceBranch, destinationBranch)
+                    PrStages.preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     CommonAndroidStages.buildStageBodyAndroid(script, buildGradleTask)

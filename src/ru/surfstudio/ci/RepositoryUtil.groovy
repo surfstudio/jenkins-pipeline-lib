@@ -60,11 +60,9 @@ class RepositoryUtil {
     /**
      * call this after checkout for save source commit hash
      */
-    def static saveCurrentGitCommitHash(Object script, String gitDir='') {
-        script.dir(gitDir) {
-            script.env.COMMIT_HASH = script.sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-            script.echo "Set global variable COMMIT_HASH to $script.env.COMMIT_HASH"
-        }
+    def static saveCurrentGitCommitHash(Object script) {
+        script.env.COMMIT_HASH = script.sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+        script.echo "Set global variable COMMIT_HASH to $script.env.COMMIT_HASH"
     }
 
     /**
@@ -75,15 +73,16 @@ class RepositoryUtil {
     }
 
     /**
+     * Extract remote repository config, if pipeline places in Jenkinsfile in repo and pass it to handler
      * @param script
      * @param handler gets two parameters (url, credentialsId)
      */
-    def static tryExtractRemoteConfig(Object script, Closure handler) {
+    def static tryExtractInitialRemoteConfig(Object script, Closure handler) {
         try {
             def config = script.scm.userRemoteConfigs[0]
             handler(config.url, config.credentialsId)
         } catch (e){
-            script.echo "Cannot extract repository remote config: ${e.toString()}"
+            script.echo "Cannot extract initial repository remote config: ${e.toString()}"
         }
     }
 }

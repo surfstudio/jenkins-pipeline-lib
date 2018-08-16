@@ -14,9 +14,8 @@ abstract class PrPipeline extends AutoAbortedPipeline {
     public static final String STATIC_CODE_ANALYSIS = 'Static Code Analysis'
 
     //required configuration
-    public repoFullName = ""
-    public repoUrl
-
+    public repoUrl = ""
+    public repoCredentialsId = ""
 
     //scm
     public sourceBranch = ""
@@ -27,7 +26,6 @@ abstract class PrPipeline extends AutoAbortedPipeline {
 
     //other config
     public stagesForTargetBranchChangedMode = [PRE_MERGE]
-    public repoCredentialsId
 
 
     PrPipeline(Object script) {

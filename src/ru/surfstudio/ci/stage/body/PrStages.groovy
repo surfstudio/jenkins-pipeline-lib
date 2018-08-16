@@ -4,7 +4,6 @@ import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.PrPipeline
-import ru.surfstudio.ci.pipeline.PrPipelineAndroid
 import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
@@ -22,11 +21,11 @@ class PrStages {
     }
     def static List<Object> properties(PrPipeline ctx) {
         def script = ctx.script
-        RepositoryUtil.tryExtractRemoteConfig(script) { url, credentialsId ->
+        RepositoryUtil.tryExtractInitialRemoteConfig(script) { url, credentialsId ->
             ctx.repoUrl = url
             ctx.repoCredentialsId = credentialsId
+            script.echo "Remote repository configurations sets from initial scm"
         }
-        CommonUtil.checkConfigurationParameterDefined(script, ctx.repoFullName, "repoFullName")
         CommonUtil.checkConfigurationParameterDefined(script, ctx.repoUrl, "repoUrl")
         CommonUtil.checkConfigurationParameterDefined(script, ctx.repoCredentialsId, "repoCredentialsId")
         return [
@@ -70,8 +69,8 @@ class PrStages {
                                                 value: '$.pullrequest.author.username'
                                         ],
                                         [
-                                                key  : 'repoFullName',
-                                                value: '$.repository.full_name'
+                                                key  : 'repoUrl',
+                                                value: '$.repository.links.html.href'
                                         ],
                                         [
                                                 key  : TARGET_BRANCH_CHANGED,
@@ -81,8 +80,8 @@ class PrStages {
                                 printContributedVariables: true,
                                 printPostContent: true,
                                 causeString: 'Triggered by Bitbucket',
-                                regexpFilterExpression: "$ctx.repoFullName",
-                                regexpFilterText: '$repoFullName'
+                                regexpFilterExpression: "$ctx.repoUrl",
+                                regexpFilterText: '$repoUrl'
                         ),
                         script.pollSCM('')
                 ])
@@ -126,37 +125,19 @@ class PrStages {
         }
     }
 
-    def static preMergeStageBody(Object script, String sourceBranch, String destinationBranch) {
+    def static preMergeStageBody(Object script, String url, String sourceBranch, String destinationBranch, String credentialsId) {
         script.sh 'git config --global user.name "Jenkins"'
         script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
-        script.checkout changelog: true, poll: true, scm:
-                [
-                        $class                           : 'GitSCM',
-                        branches                         : [[name: "${sourceBranch}"]],
-                        doGenerateSubmoduleConfigurations: false,
-                        userRemoteConfigs                : script.scm.userRemoteConfigs
-                ]
 
+
+        script.git(
+                url: url,
+                credentialsId: credentialsId,
+                branch: sourceBranch
+        )
         RepositoryUtil.saveCurrentGitCommitHash(script)
 
-        script.checkout changelog: true, poll: true, scm:
-                [
-                        $class                           : 'GitSCM',
-                        branches                         : [[name: "${sourceBranch}"]],
-                        doGenerateSubmoduleConfigurations: false,
-                        userRemoteConfigs                : script.scm.userRemoteConfigs,
-                        extensions                       : [
-                                [
-                                        $class : 'PreBuildMerge',
-                                        options: [
-                                                mergeStrategy  : 'DEFAULT',
-                                                fastForwardMode: 'NO_FF',
-                                                mergeRemote    : 'origin',
-                                                mergeTarget    : "${destinationBranch}"
-                                        ]
-                                ]
-                        ]
-                ]
+        script.sh "git merge $destinationBranch --no-ff"
     }
 
     def static prepareMessageForPipeline(PrPipeline ctx, Closure handler) {
