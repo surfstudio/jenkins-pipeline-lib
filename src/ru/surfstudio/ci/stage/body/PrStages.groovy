@@ -137,7 +137,7 @@ class PrStages {
         )
         RepositoryUtil.saveCurrentGitCommitHash(script)
 
-        script.sh "git merge $destinationBranch --no-ff"
+        script.sh "git merge origin/$destinationBranch --no-ff"
     }
 
     def static prepareMessageForPipeline(PrPipeline ctx, Closure handler) {
