@@ -6,7 +6,7 @@ import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 
-class TagPipelineAndroid extends ScmPipeline {
+class TagPipelineAndroid extends TagPipeline {
 
     public buildGradleTask = "clean assembleQa assembleRelease"
     public betaUploadGradleTask = "crashlyticsUploadDistributionQa"
@@ -35,7 +35,7 @@ class TagPipelineAndroid extends ScmPipeline {
         preExecuteStageBody = TagPipeline.getPreExecuteStageBody(script, repoUrl)
         postExecuteStageBody = TagPipeline.getPostExecuteStageBody(script, repoUrl)
 
-        initializeBody = {  TagPipeline.initializeBody(this) }
+        initializeBody = { TagPipeline.initBody(this) }
         stages = [
                 createStage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     TagPipeline.checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)

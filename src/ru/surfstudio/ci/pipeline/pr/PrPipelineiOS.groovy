@@ -14,7 +14,7 @@ class PrPipelineiOS extends PrPipeline {
     }
 
     @Override
-    def initInternal() {
+    def init() {
         propertiesProvider = { PrPipeline.properties(this) }
         node = NodeProvider.getiOSNode()
 
