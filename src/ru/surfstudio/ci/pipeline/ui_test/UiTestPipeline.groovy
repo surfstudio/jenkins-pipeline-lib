@@ -79,7 +79,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
         applyParameterIfNotEmpty(script, NODE_PARAMETER, script.params[NODE_PARAMETER]) { value ->
             ctx.node = value
-            script.echo "Using node from params: ${node}"
+            script.echo "Using node from params: ${ctx.node}"
         }
 
         //scm
