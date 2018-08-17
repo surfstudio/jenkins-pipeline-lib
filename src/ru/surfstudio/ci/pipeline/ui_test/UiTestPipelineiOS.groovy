@@ -30,6 +30,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
         node = NodeProvider.getiOSNode()
 
         initializeBody = { UiTestPipeline.initBody(this) }
+        propertiesProvider = { UiTestPipeline.properties(this) }
 
         stages = [
                 createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {

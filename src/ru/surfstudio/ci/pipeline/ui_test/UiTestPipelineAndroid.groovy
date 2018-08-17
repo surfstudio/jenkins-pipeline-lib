@@ -2,6 +2,7 @@ package ru.surfstudio.ci.pipeline.ui_test
 
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
+import ru.surfstudio.ci.pipeline.tag.TagPipeline
 import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
@@ -19,12 +20,10 @@ class UiTestPipelineAndroid extends UiTestPipeline {
     @Override
     def init() {
         node = NodeProvider.getAndroidNode()
-        applyParameterIfNotEmpty(script, NODE_PARAMETER, script.params[NODE_PARAMETER]) { value ->
-            this.node = value
-            script.echo "Using node from params: ${node}"
-        }
 
         initializeBody = { UiTestPipeline.initBody(this) }
+        propertiesProvider = { UiTestPipeline.properties(this) }
+
         stages = [
                 createStage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     UiTestPipeline.checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, repoCredentialsId)

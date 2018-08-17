@@ -78,6 +78,11 @@ abstract class UiTestPipeline extends ScmPipeline {
         //Выбираем значения веток, прогона и тд из параметров, Установка их в параметры происходит
         // если триггером был webhook или если стартанули Job вручную
 
+        applyParameterIfNotEmpty(script, NODE_PARAMETER, script.params[NODE_PARAMETER]) { value ->
+            this.node = value
+            script.echo "Using node from params: ${node}"
+        }
+
         //scm
         applyParameterIfNotEmpty(script, SOURCE_BRANCH_PARAMETER, script.params[SOURCE_BRANCH_PARAMETER], {
             value -> ctx.sourceBranch = value

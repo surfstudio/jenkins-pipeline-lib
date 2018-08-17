@@ -15,13 +15,15 @@ class PrPipelineiOS extends PrPipeline {
 
     @Override
     def init() {
-        propertiesProvider = { PrPipeline.properties(this) }
+
         node = NodeProvider.getiOSNode()
 
         preExecuteStageBody = PrPipeline.getPreExecuteStageBody(script, repoUrl)
         postExecuteStageBody = PrPipeline.getPostExecuteStageBody(script, repoUrl)
 
         initializeBody = {  PrPipeline.initBody(this) }
+        propertiesProvider = { PrPipeline.properties(this) }
+
         stages = [
                 createStage(PRE_MERGE, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     PrPipeline.preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)

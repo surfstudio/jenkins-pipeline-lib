@@ -20,13 +20,14 @@ class TagPipelineiOS extends TagPipeline {
 
     @Override
     def init() {
-        propertiesProvider = { TagPipeline.properties(this) }
         node = NodeProvider.getiOSNode()
 
         preExecuteStageBody = TagPipeline.getPreExecuteStageBody(script, repoUrl)
         postExecuteStageBody = TagPipeline.getPostExecuteStageBody(script, repoUrl)
 
         initializeBody = {  TagPipeline.initBody(this) }
+        propertiesProvider = { TagPipeline.properties(this) }
+
         stages = [
                 createStage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     TagPipeline.checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
