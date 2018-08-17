@@ -49,7 +49,7 @@ abstract class TagPipeline extends ScmPipeline {
 
         def buildDescription = ctx.repoTag
         CommonUtil.setBuildDescription(script, buildDescription)
-        CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.SELF, buildDescription)
+        CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.ANOTHER, buildDescription)
     }
 
     def static checkoutStageBody(Object script,  String url, String repoTag, String credentialsId) {

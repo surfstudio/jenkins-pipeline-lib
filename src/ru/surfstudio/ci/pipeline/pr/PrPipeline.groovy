@@ -75,7 +75,7 @@ abstract class PrPipeline extends ScmPipeline {
                         ctx.sourceBranch
 
         CommonUtil.setBuildDescription(script, buildDescription)
-        CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.SELF, buildDescription)
+        CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.ANOTHER, buildDescription)
     }
 
 
