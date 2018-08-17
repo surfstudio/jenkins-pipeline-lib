@@ -38,10 +38,10 @@ class UiTestPipelineiOS extends UiTestPipeline {
                     UiTestPipeline.initBody(this)
                 },
                 createStage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    UiTestPipeline.checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch,)
+                    UiTestPipeline.checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, repoCredentialsId)
                 },
                 createStage(CHECKOUT_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    UiTestPipeline.checkoutTestsStageBody(script, testBranch)
+                    UiTestPipeline.checkoutTestsStageBody(script, repoUrl, testBranch, repoCredentialsId)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     this.buildStageBodyiOS(script,
