@@ -59,7 +59,6 @@ abstract class Pipeline implements Serializable {
                 def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, initStageBody)
                 stageWithStrategy(initStage, {}, {})
             }
-    
             if (propertiesProvider) {
                 script.properties(propertiesProvider())
             }
