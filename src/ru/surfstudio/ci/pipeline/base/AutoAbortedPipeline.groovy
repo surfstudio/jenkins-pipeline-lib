@@ -1,4 +1,4 @@
-package ru.surfstudio.ci.pipeline
+package ru.surfstudio.ci.pipeline.base
 
 import ru.surfstudio.ci.AbortDuplicateStrategy
 import ru.surfstudio.ci.CommonUtil

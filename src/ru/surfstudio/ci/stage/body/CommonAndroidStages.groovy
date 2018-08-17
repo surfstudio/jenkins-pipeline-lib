@@ -2,62 +2,43 @@ package ru.surfstudio.ci.stage.body
 
 import ru.surfstudio.ci.AndroidUtil
 import ru.surfstudio.ci.CommonUtil
+import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 
+/**
+ *  @Deprecated see {@link AndroidPipelineHelper}
+ */
+@Deprecated
 class CommonAndroidStages {
 
+    @Deprecated
     def static buildStageBodyAndroid(Object script, String buildGradleTask) {
-        script.sh "./gradlew ${buildGradleTask}"
-        script.step([$class: 'ArtifactArchiver', artifacts: '**/*.apk'])
-        CommonUtil.safe(script) {
-            script.step([$class: 'ArtifactArchiver', artifacts: '**/mapping.txt', allowEmptyArchive: true])
-        }
+        AndroidPipelineHelper.buildStageBodyAndroid(script, buildGradleTask)
     }
 
+    @Deprecated
     def static buildWithCredentialsStageBodyAndroid(Object script,
                                                     String buildGradleTask,
                                                     String keystoreCredentials,
                                                     String keystorePropertiesCredentials) {
-        AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials){
-            buildStageBodyAndroid(script, buildGradleTask)
-        }
+        AndroidPipelineHelper.buildWithCredentialsStageBodyAndroid(script, buildGradleTask, keystoreCredentials, keystorePropertiesCredentials)
     }
 
-    def static unitTestStageBodyAndroid(Object script, String unitTestGradleTask, String testResultPathXml, String testResultPathDirHtml) {
-        try {
-            script.sh "./gradlew ${unitTestGradleTask}"
-        } finally {
-            script.junit allowEmptyResults: true, testResults: testResultPathXml
-            script.publishHTML(target: [
-                    allowMissing         : true,
-                    alwaysLinkToLastBuild: false,
-                    keepAll              : true,
-                    reportDir            : testResultPathDirHtml,
-                    reportFiles          : 'index.html',
-                    reportName           : "Unit Tests"
-            ])
-        }
+    @Deprecated
+    def static unitTestStageBodyAndroid(Object script,
+                                        String unitTestGradleTask,
+                                        String testResultPathXml,
+                                        String testResultPathDirHtml) {
+        AndroidPipelineHelper.unitTestStageBodyAndroid(script, unitTestGradleTask, testResultPathXml, testResultPathDirHtml)
     }
 
+    @Deprecated
     def static instrumentationTestStageBodyAndroid(Object script, String testGradleTask, String testResultPathXml, String testResultPathDirHtml) {
-        AndroidUtil.onEmulator(script, "avd-main"){
-            try {
-                script.sh "./gradlew uninstallAll ${testGradleTask}"
-            } finally {
-                script.junit allowEmptyResults: true, testResults: testResultPathXml
-                script.publishHTML(target: [allowMissing         : true,
-                                     alwaysLinkToLastBuild: false,
-                                     keepAll              : true,
-                                     reportDir            : testResultPathDirHtml,
-                                     reportFiles          : 'index.html',
-                                     reportName           : "Instrumental Tests"
-                ])
-            }
-        }
+        AndroidPipelineHelper.instrumentationTestStageBodyAndroid(script, testGradleTask, testResultPathXml, testResultPathDirHtml)
     }
 
+    @Deprecated
     def static staticCodeAnalysisStageBody(Object script) {
-        script.echo "empty"
-        //todo
+        AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
     }
 
 

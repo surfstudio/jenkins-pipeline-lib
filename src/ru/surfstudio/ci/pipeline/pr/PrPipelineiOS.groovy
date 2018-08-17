@@ -1,11 +1,8 @@
-package ru.surfstudio.ci.pipeline
+package ru.surfstudio.ci.pipeline.pr
 
-import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
-import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.stage.StageStrategy
-import ru.surfstudio.ci.stage.body.CommoniOSStages
-import ru.surfstudio.ci.stage.body.PrStages
+import ru.surfstudio.ci.pipeline.helper.iOSPipelineHelper
 
 class PrPipelineiOS extends PrPipeline {
 
@@ -18,36 +15,33 @@ class PrPipelineiOS extends PrPipeline {
 
     @Override
     def initInternal() {
+        propertiesProvider = { PrPipeline.properties(this) }
         node = NodeProvider.getiOSNode()
 
-        preExecuteStageBody = { stage ->
-            if(stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
-        }
-        postExecuteStageBody = { stage ->
-            if(stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
-        }
+        preExecuteStageBody = PrPipeline.getPreExecuteStageBody()
+        postExecuteStageBody = PrPipeline.getPostExecuteStageBody()
 
-        initStageBody = { PrStages.initStageBody(this) }
+        initStageBody = {  PrPipeline.initStageBody(this) }
         stages = [
                 createStage(PRE_MERGE, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    PrStages.preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                    PrPipeline.preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    CommoniOSStages.buildStageBodyiOS(script,
+                    iOSPipelineHelper.buildStageBodyiOS(script,
                         iOSKeychainCredenialId,
                         iOSCertfileCredentialId
                     )
                 },
                 createStage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    CommoniOSStages.unitTestStageBodyiOS(script)
+                    iOSPipelineHelper.unitTestStageBodyiOS(script)
                 },
                 createStage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    CommoniOSStages.instrumentationTestStageBodyiOS(script)
+                    iOSPipelineHelper.instrumentationTestStageBodyiOS(script)
                 },
                 createStage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    CommoniOSStages.staticCodeAnalysisStageBodyiOS(script)
+                    iOSPipelineHelper.staticCodeAnalysisStageBodyiOS(script)
                 }
         ]
-        finalizeBody = { PrStages.debugFinalizeStageBody(this) }
+        finalizeBody = { PrPipeline.debugFinalizeStageBody(this) }
     }
 }

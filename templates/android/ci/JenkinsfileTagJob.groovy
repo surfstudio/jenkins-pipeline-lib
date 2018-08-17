@@ -1,5 +1,5 @@
 @Library('surf-lib') // https://bitbucket.org/surfstudio/jenkins-pipeline-lib/
-import ru.surfstudio.ci.pipeline.TagPipelineAndroid
+import ru.surfstudio.ci.pipeline.tag.TagPipelineAndroid
 import ru.surfstudio.ci.stage.StageStrategy
 
 //init
