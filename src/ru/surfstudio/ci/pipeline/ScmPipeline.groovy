@@ -18,9 +18,12 @@ abstract class ScmPipeline extends Pipeline {
     }
 
     @Override
-    def run() {
-        initAndCheckRepositoryConfiguration(this)
-        return super.run()
+    Closure getFullInitStageBody() {
+        def standardFullInitBody = super.getFullInitStageBody()
+        return {
+            initAndCheckRepositoryConfiguration(this)
+            standardFullInitBody()
+        }
     }
 
     def static initAndCheckRepositoryConfiguration(ScmPipeline ctx) {
@@ -30,7 +33,7 @@ abstract class ScmPipeline extends Pipeline {
             ctx.repoCredentialsId = credentialsId
             script.echo "Remote repository configurations sets from initial scm"
         }
-        CommonUtil.checkConfigurationParameterDefined(script, ctx.repoUrl, "repoUrl")
-        CommonUtil.checkConfigurationParameterDefined(script, ctx.repoCredentialsId, "repoCredentialsId")
+        CommonUtil.checkPipelineParameterDefined(script, ctx.repoUrl, "repoUrl")
+        CommonUtil.checkPipelineParameterDefined(script, ctx.repoCredentialsId, "repoCredentialsId")
     }
 }

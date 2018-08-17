@@ -96,7 +96,7 @@ class CommonUtil {
         }
     }
 
-    def static checkConfigurationParameterDefined(Object script, Object parameterValue, String parameterName){
+    def static checkPipelineParameterDefined(Object script, Object parameterValue, String parameterName){
         if(!parameterValue){
             script.error("Pipeline configuration parameter $parameterName must be set")
         }
@@ -149,7 +149,11 @@ class CommonUtil {
         }
     }
 
-    def static startCurrentBuildCloneWithParams(Object script, ArrayList<hudson.model.ParameterValue> extraParams) {
+    /**
+     * @param extraParams List<Object> -> List<hudson.model.ParameterValue>
+     * @return
+     */
+    def static startCurrentBuildCloneWithParams(Object script, ArrayList<Object> extraParams, boolean wait = false) {
         script.echo "start current build clone with extra params ${extraParams}"
         def Map currentBuildParams = script.params
 
@@ -159,6 +163,6 @@ class CommonUtil {
                 .entrySet()
                 .collect({script.string(name: it.key, value: "${it.value}")})
         )
-        script.build job: script.env.JOB_NAME, parameters: allParams, wait: false
+        script.build job: script.env.JOB_NAME, parameters: allParams, wait: wait
     }
 }

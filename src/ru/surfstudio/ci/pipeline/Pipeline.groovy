@@ -1,7 +1,6 @@
 #!/usr/bin/groovy
 package ru.surfstudio.ci.pipeline
 
-import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
@@ -37,10 +36,11 @@ abstract class Pipeline implements Serializable {
     public Closure finalizeBody
     public Closure initStageBody
     public node
+    public initNode
     public Closure<List<Object>> propertiesProvider
 
-    public preExecuteStageBody = {}
-    public postExecuteStageBody = {}
+    public preExecuteStageBody = {}  // { stage -> ... }
+    public postExecuteStageBody = {} // { stage -> ... }
 
     Pipeline(script) {
         this.script = script
@@ -55,17 +55,12 @@ abstract class Pipeline implements Serializable {
 
     def run() {
         try {
-            if (initStageBody) {
-                def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, initStageBody)
-                stageWithStrategy(initStage, {}, {})
-            }
-            if (propertiesProvider) {
-                script.properties(propertiesProvider())
-            }
+            def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, getFullInitStageBody())
+            stageWithStrategy(initStage, {}, {})
             script.node(node) {
-                    for (Stage stage : stages) {
-                        stageWithStrategy(stage, preExecuteStageBody, postExecuteStageBody)
-                    }
+                for (Stage stage : stages) {
+                    stageWithStrategy(stage, preExecuteStageBody, postExecuteStageBody)
+                }
             }
         }  finally {
             script.echo "Finalize build:"
@@ -78,6 +73,13 @@ abstract class Pipeline implements Serializable {
                 finalizeBody()
                 script.echo "End finalize body"
             }
+        }
+    }
+
+    def Closure getFullInitStageBody() {
+        return {
+            if (initStageBody) initStageBody()
+            if (propertiesProvider) script.properties(propertiesProvider())
         }
     }
 

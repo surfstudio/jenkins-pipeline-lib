@@ -78,6 +78,7 @@ abstract class PrPipeline extends ScmPipeline {
         CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.SELF, buildDescription)
     }
 
+
     def static preMergeStageBody(Object script, String url, String sourceBranch, String destinationBranch, String credentialsId) {
         script.sh 'git config --global user.name "Jenkins"'
         script.sh 'git config --global user.email "jenkins@surfstudio.ru"'

@@ -3,7 +3,6 @@ package ru.surfstudio.ci.pipeline.ui_test
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
-import ru.surfstudio.ci.stage.body.UiTestStages
 
 class UiTestPipelineiOS extends UiTestPipeline {
 
@@ -27,7 +26,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
     }
 
     @Override
-    def initInternal() {
+    def init() {
         node = NodeProvider.getiOSNode()
 
         initStageBody = { UiTestPipeline.initStageBody(this) }

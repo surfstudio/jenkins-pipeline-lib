@@ -1,15 +1,16 @@
 package ru.surfstudio.ci.pipeline.tag
 
+import ru.surfstudio.ci.AbortDuplicateStrategy
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
-import ru.surfstudio.ci.pipeline.ScmAutoAbortedPipeline
+import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.pipeline.pr.PrPipeline
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 
-abstract class TagPipeline extends ScmAutoAbortedPipeline {
+abstract class TagPipeline extends ScmPipeline {
 
     //stage names
     public static final String CHECKOUT = 'Checkout'
@@ -26,38 +27,6 @@ abstract class TagPipeline extends ScmAutoAbortedPipeline {
         super(script)
     }
 
-    @Override
-    String getBuildIdentifier() {
-        return repoTag
-    }
-@Deprecated
-class PrStages {
-
-    @Deprecated
-    def static initStageBody(PrPipeline ctx) {
-       PrPipeline.initStageBody(ctx)
-    }
-
-    @Deprecated
-    def static preMergeStageBody(Object script, String url, String sourceBranch, String destinationBranch, String credentialsId) {
-        PrPipeline.preMergeStageBody(script, url, sourceBranch, destinationBranch, credentialsId)
-    }
-
-    @Deprecated
-    def static prepareMessageForPipeline(PrPipeline ctx, Closure handler) {
-        PrPipeline.prepareMessageForPipeline(ctx, handler)
-    }
-
-    @Deprecated
-    def static finalizeStageBody(PrPipeline ctx){
-        PrPipeline.finalizeStageBody(ctx)
-    }
-
-    @Deprecated
-    def static debugFinalizeStageBody(PrPipeline ctx) {
-        PrPipeline.debugFinalizeStageBody(ctx)
-    }
-}
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
     def static initStageBody(TagPipeline ctx) {
@@ -77,6 +46,10 @@ class PrStages {
         applyParameterIfNotEmpty(script,'repoTag', script.params[REPO_TAG_PARAMETER], {
             value -> ctx.repoTag = value
         })
+
+        def buildDescription = ctx.repoTag
+        CommonUtil.setBuildDescription(script, buildDescription)
+        CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.SELF, buildDescription)
     }
 
     def static checkoutStageBody(Object script,  String url, String repoTag, String credentialsId) {

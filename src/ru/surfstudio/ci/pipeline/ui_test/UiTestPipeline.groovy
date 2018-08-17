@@ -1,15 +1,16 @@
 package ru.surfstudio.ci.pipeline.ui_test
 
+import ru.surfstudio.ci.AbortDuplicateStrategy
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Constants
 import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.Result
-import ru.surfstudio.ci.pipeline.AutoAbortedPipeline
+import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 
-abstract class UiTestPipeline extends AutoAbortedPipeline {
+abstract class UiTestPipeline extends ScmPipeline {
 
     //stage names
     public static final String CHECKOUT_SOURCES = 'Checkout Sources'
@@ -60,15 +61,18 @@ abstract class UiTestPipeline extends AutoAbortedPipeline {
         super(script)
     }
 
-    @Override
-    String getBuildIdentifier() {
-        return "taskKey: ${taskKey}, testBranch: ${testBranch}, sourceBranch: ${sourceBranch}"
-    }
-
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
     def static initStageBody(UiTestPipeline ctx) {
         def script = ctx.script
+        
+        CommonUtil.checkPipelineParameterDefined(script, ctx.sourceRepoUrl, "sourceRepoUrl")
+        CommonUtil.checkPipelineParameterDefined(script, ctx.jiraProjectKey, "jiraProjectKey")
+        CommonUtil.checkPipelineParameterDefined(script, ctx.platform, "platform")
+        CommonUtil.checkPipelineParameterDefined(script, ctx.testBranch, "testBranch")
+        CommonUtil.checkPipelineParameterDefined(script, ctx.defaultTaskKey, "defaultTaskKey")
+        CommonUtil.checkPipelineParameterDefined(script, ctx.node, "node")
+        
         CommonUtil.printInitialStageStrategies(ctx)
 
         //Выбираем значения веток, прогона и тд из параметров, Установка их в параметры происходит
@@ -105,6 +109,10 @@ abstract class UiTestPipeline extends AutoAbortedPipeline {
             ctx.sourceBranch = JarvisUtil.getMainBranch(ctx.script, ctx.sourceRepoUrl)
         }
 
+        def buildDescription = "taskKey: ${ctx.taskKey}, testBranch: ${ctx.testBranch}, sourceBranch: ${ctx.sourceBranch}"
+        CommonUtil.setBuildDescription(script, buildDescription)
+        CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.ANOTHER, buildDescription)
+
         checkAndParallelBulkJob(ctx)
     }
 
@@ -127,7 +135,6 @@ abstract class UiTestPipeline extends AutoAbortedPipeline {
                 credentialsId: credentialsId,
                 branch: testsBranch
         )
-
     }
 
     /**
@@ -238,19 +245,22 @@ abstract class UiTestPipeline extends AutoAbortedPipeline {
         }
     }
 
-    def static checkAndParallelBulkJob(UiTestPipeline ctx) {
-        if(isBulkJob(ctx)) {
+    def static Boolean checkAndParallelBulkJob(UiTestPipeline ctx) {
+        if (isBulkJob(ctx)) {
             def script = ctx.script
             script.echo "Parallel bulk UI TEST job"
             def tasks = ctx.taskKey.split(",")
             for (task in tasks) {
                 CommonUtil.safe(script) {
-                    script.build job: script.env.JOB_NAME, parameters: [
-                            script.string(name: TASK_KEY_PARAMETER, value: task.trim()),
-                            script.string(name: TEST_BRANCH_PARAMETER, value: ctx.testBranch),
-                            script.string(name: SOURCE_BRANCH_PARAMETER, value: ctx.sourceBranch),
-                            script.string(name: USER_EMAIL_PARAMETER, value: ctx.userEmail)
-                    ]
+                    CommonUtil.startCurrentBuildCloneWithParams(
+                            script: script,
+                            parameters: [
+                                script.string(name: TASK_KEY_PARAMETER, value: task.trim()),
+                                script.string(name: TEST_BRANCH_PARAMETER, value: ctx.testBranch),
+                                script.string(name: SOURCE_BRANCH_PARAMETER, value: ctx.sourceBranch),
+                                script.string(name: USER_EMAIL_PARAMETER, value: ctx.userEmail)
+                            ]
+                    )
                 }
             }
             for (stage in ctx.stages) {
@@ -258,6 +268,9 @@ abstract class UiTestPipeline extends AutoAbortedPipeline {
                     stage.strategy = StageStrategy.SKIP_STAGE
                 }
             }
+            return true
+        } else {
+            return false
         }
     }
 
@@ -278,24 +291,12 @@ abstract class UiTestPipeline extends AutoAbortedPipeline {
 
     def static List<Object> properties(UiTestPipeline ctx) {
         def script = ctx.script
-        checkConfiguration(ctx)
         return [
                 buildDiscarder(script),
                 environments(script, ctx.testBranch),
                 parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.node),
                 triggers(script, ctx.jiraProjectKey, ctx.platform)
         ]
-    }
-
-    def static checkConfiguration(UiTestPipeline ctx) {
-        def script = ctx.script
-
-        CommonUtil.checkConfigurationParameterDefined(script, ctx.sourceRepoUrl, "sourceRepoUrl")
-        CommonUtil.checkConfigurationParameterDefined(script, ctx.jiraProjectKey, "jiraProjectKey")
-        CommonUtil.checkConfigurationParameterDefined(script, ctx.platform, "platform")
-        CommonUtil.checkConfigurationParameterDefined(script, ctx.testBranch, "testBranch")
-        CommonUtil.checkConfigurationParameterDefined(script, ctx.defaultTaskKey, "defaultTaskKey")
-        CommonUtil.checkConfigurationParameterDefined(script, ctx.node, "node")
     }
 
     def static buildDiscarder(script) {

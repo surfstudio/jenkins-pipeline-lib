@@ -19,7 +19,7 @@ class TagPipelineiOS extends TagPipeline {
     }
 
     @Override
-    def initInternal() {
+    def init() {
         propertiesProvider = { TagPipeline.properties(this) }
         node = NodeProvider.getiOSNode()
 

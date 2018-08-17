@@ -17,7 +17,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
     }
 
     @Override
-    def initInternal() {
+    def init() {
         node = NodeProvider.getAndroidNode()
         applyParameterIfNotEmpty(script, NODE_PARAMETER, script.params[NODE_PARAMETER]) { value ->
             this.node = value
@@ -27,10 +27,10 @@ class UiTestPipelineAndroid extends UiTestPipeline {
         initStageBody = { UiTestPipeline.initStageBody(this) }
         stages = [
                 createStage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    UiTestPipeline.checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch)
+                    UiTestPipeline.checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, repoCredentialsId)
                 },
                 createStage(CHECKOUT_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    UiTestPipeline.checkoutTestsStageBody(script, testBranch)
+                    UiTestPipeline.checkoutTestsStageBody(script, repoUrl, testBranch, repoCredentialsId)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     this.buildStageBodyAndroid(script, sourcesDir, buildGradleTask)

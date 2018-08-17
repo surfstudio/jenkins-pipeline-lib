@@ -2,10 +2,11 @@ package ru.surfstudio.ci.pipeline.tag
 
 import ru.surfstudio.ci.AndroidUtil
 import ru.surfstudio.ci.NodeProvider
+import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 
-class TagPipelineAndroid extends TagPipeline {
+class TagPipelineAndroid extends ScmPipeline {
 
     public buildGradleTask = "clean assembleQa assembleRelease"
     public betaUploadGradleTask = "crashlyticsUploadDistributionQa"
@@ -27,7 +28,7 @@ class TagPipelineAndroid extends TagPipeline {
     }
 
     @Override
-    def initInternal() {
+    def init() {
         propertiesProvider = { TagPipeline.properties(this) }
         node = NodeProvider.getAndroidNode()
 
