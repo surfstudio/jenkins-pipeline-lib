@@ -54,34 +54,30 @@ abstract class Pipeline implements Serializable {
     abstract def init()
 
     def run() {
-        if (initStageBody) {
-            def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, initStageBody)
-            stageWithStrategy(initStage, {}, {})
-        }
-
-        if (propertiesProvider) {
-            script.properties(propertiesProvider())
-        }
-        script.node(node) {
-            try {
-                if (initStageBody) {
-                    //def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, initStageBody)
-                    //stageWithStrategy(initStage, {}, {})
-                }
-                for (Stage stage : stages) {
-                    stageWithStrategy(stage, preExecuteStageBody, postExecuteStageBody)
-                }
-            }  finally {
-                script.echo "Finalize build:"
-                script.echo "Current job result: ${script.currentBuild.result}"
-                script.echo "Try apply job result: ${jobResult}"
-                script.currentBuild.result = jobResult  //нельзя повышать статус, то есть если раньше был установлен failed, нельзя заменить на success
-                script.echo "Updated job result: ${script.currentBuild.result}"
-                if (finalizeBody) {
-                    script.echo "Start finalize body"
-                    finalizeBody()
-                    script.echo "End finalize body"
-                }
+        try {
+            if (initStageBody) {
+                def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, initStageBody)
+                stageWithStrategy(initStage, {}, {})
+            }
+    
+            if (propertiesProvider) {
+                script.properties(propertiesProvider())
+            }
+            script.node(node) {
+                    for (Stage stage : stages) {
+                        stageWithStrategy(stage, preExecuteStageBody, postExecuteStageBody)
+                    }
+            }
+        }  finally {
+            script.echo "Finalize build:"
+            script.echo "Current job result: ${script.currentBuild.result}"
+            script.echo "Try apply job result: ${jobResult}"
+            script.currentBuild.result = jobResult  //нельзя повышать статус, то есть если раньше был установлен failed, нельзя заменить на success
+            script.echo "Updated job result: ${script.currentBuild.result}"
+            if (finalizeBody) {
+                script.echo "Start finalize body"
+                finalizeBody()
+                script.echo "End finalize body"
             }
         }
     }

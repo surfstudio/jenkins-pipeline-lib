@@ -41,7 +41,8 @@ class CommonUtil {
             case AbortDuplicateStrategy.SELF:
                 if(isOlderBuildWithDescriptionRunning(script, buildDescription)){
                     script.echo "Aborting current build..."
-                    throw new InterruptedException("Another build with identical description '$buildDescription' is running")
+                    //throw new InterruptedException("Another build with identical description '$buildDescription' is running")
+
                 }
                 break;
             case AbortDuplicateStrategy.ANOTHER:
