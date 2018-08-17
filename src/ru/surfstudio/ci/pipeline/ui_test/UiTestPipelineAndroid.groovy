@@ -19,6 +19,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
     @Override
     def init() {
+        platform = "android"
         node = NodeProvider.getAndroidNode()
 
         initializeBody = { UiTestPipeline.initBody(this) }

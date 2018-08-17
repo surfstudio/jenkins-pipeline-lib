@@ -27,6 +27,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
     @Override
     def init() {
+        platform = "ios"
         node = NodeProvider.getiOSNode()
 
         initializeBody = { UiTestPipeline.initBody(this) }
