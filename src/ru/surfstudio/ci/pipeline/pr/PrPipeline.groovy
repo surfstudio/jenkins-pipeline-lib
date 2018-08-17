@@ -5,7 +5,6 @@ import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
-import ru.surfstudio.ci.pipeline.ScmAutoAbortedPipeline
 import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.stage.StageStrategy
 
@@ -75,13 +74,15 @@ abstract class PrPipeline extends ScmPipeline {
                         "$ctx.sourceBranch: target branch changed" :
                         ctx.sourceBranch
 
-        script.currentBuild.rawBuild.setDescription(buildDescription)
+        CommonUtil.setBuildDescription(script, buildDescription)
         CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.SELF, buildDescription)
     }
 
     def static preMergeStageBody(Object script, String url, String sourceBranch, String destinationBranch, String credentialsId) {
         script.sh 'git config --global user.name "Jenkins"'
         script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
+
+        script.sh "git reset --merge" //revert previous failed merge
 
         script.git(
                 url: url,
