@@ -32,6 +32,23 @@ class CommonUtil {
         tryAbortOlderBuildsWithDescription(script, buildIdentifier)
     }
 
+    def static abortDuplicateBuildsWithDescription(Object script, String abortStrategy, String buildDescription) {
+        script.currentBuild.rawBuild.setDescription(buildDescription)
+        switch (abortStrategy){
+            case AbortDuplicateStrategy.SELF:
+                if(isOlderBuildWithDescriptionRunning(script, buildDescription)){
+                    script.echo "Aborting current build..."
+                    throw new InterruptedException("Another build with identical description '$buildDescription' is running")
+                }
+                break;
+            case AbortDuplicateStrategy.ANOTHER:
+                tryAbortOlderBuildsWithDescription(script, buildDescription)
+                break;
+            default:
+                script.error("Unsupported AbortDuplicateStrategy: $abortStrategy")
+        }
+    }
+
     def static tryAbortOlderBuildsWithDescription(Object script, String buildDescription) {
         int depth = 0
         hudson.model.Run currentBuild = script.currentBuild.rawBuild
@@ -60,7 +77,7 @@ class CommonUtil {
         while (previousBuild != null && depth <= MAX_DEPTH_FOR_SEARCH_SAME_BUILDS) {
             depth++
             if(previousBuild.isInProgress() && previousBuild.getDescription() == buildDescription) {
-                script.echo "build with description ${buildDescription} is running"
+                script.echo "Build with description ${buildDescription} is running"
                 return true
             }
             previousBuild = previousBuild.getPreviousBuildInProgress()

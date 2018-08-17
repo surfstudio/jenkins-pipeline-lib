@@ -1,15 +1,17 @@
 package ru.surfstudio.ci.pipeline.pr
 
+import ru.surfstudio.ci.AbortDuplicateStrategy
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.ScmAutoAbortedPipeline
+import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 
-abstract class PrPipeline extends ScmAutoAbortedPipeline {
+abstract class PrPipeline extends ScmPipeline {
 
     //stage names
     public static final String PRE_MERGE = 'PreMerge'
@@ -30,15 +32,6 @@ abstract class PrPipeline extends ScmAutoAbortedPipeline {
 
     PrPipeline(Object script) {
         super(script)
-    }
-
-    @Override
-    String getBuildIdentifier() {
-        if (targetBranchChanged) {
-            return "$sourceBranch: target branch changed"
-        } else {
-            return sourceBranch
-        }
     }
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
@@ -77,6 +70,12 @@ abstract class PrPipeline extends ScmAutoAbortedPipeline {
                 }
             }
         }
+
+        def buildDescription = ctx.targetBranchChanged ?
+                        "$ctx.sourceBranch: target branch changed" :
+                        ctx.sourceBranch
+
+        CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.ANOTHER, buildDescription)
     }
 
     def static preMergeStageBody(Object script, String url, String sourceBranch, String destinationBranch, String credentialsId) {
