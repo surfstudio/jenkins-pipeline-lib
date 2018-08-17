@@ -29,7 +29,7 @@ abstract class TagPipeline extends ScmPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
-    def static initStageBody(TagPipeline ctx) {
+    def static initBody(TagPipeline ctx) {
         def script = ctx.script
 
         CommonUtil.printInitialStageStrategies(ctx)

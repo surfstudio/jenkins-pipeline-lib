@@ -34,7 +34,7 @@ abstract class Pipeline implements Serializable {
     public jobResult = Result.SUCCESS
     public List<Stage> stages
     public Closure finalizeBody
-    public Closure initStageBody
+    public Closure initializeBody
     public node
     public Closure<List<Object>> propertiesProvider
 
@@ -54,7 +54,7 @@ abstract class Pipeline implements Serializable {
 
     def run() {
         try {
-            def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, getFullInitStageBody())
+            def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, getInitStageBody())
             stageWithStrategy(initStage, {}, {})
             script.node(node) {
                 for (Stage stage : stages) {
@@ -75,9 +75,9 @@ abstract class Pipeline implements Serializable {
         }
     }
 
-    def Closure getFullInitStageBody() {
+    def Closure getInitStageBody() {
         return {
-            if (initStageBody) this.initStageBody()
+            if (initializeBody) initializeBody()
             if (propertiesProvider) script.properties(propertiesProvider())
         }
     }

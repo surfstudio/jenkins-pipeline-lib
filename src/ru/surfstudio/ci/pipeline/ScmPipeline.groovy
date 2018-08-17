@@ -18,8 +18,8 @@ abstract class ScmPipeline extends Pipeline {
     }
 
     @Override
-    Closure getFullInitStageBody() {
-        def standardFullInitBody = super.getFullInitStageBody()
+    Closure getInitStageBody() {
+        def standardFullInitBody = super.getInitStageBody()
         return {
             initAndCheckRepositoryConfiguration(this)
             standardFullInitBody()

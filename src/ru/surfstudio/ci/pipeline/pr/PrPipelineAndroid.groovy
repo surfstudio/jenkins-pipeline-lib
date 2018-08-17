@@ -28,7 +28,7 @@ class PrPipelineAndroid extends PrPipeline {
         preExecuteStageBody = PrPipeline.getPreExecuteStageBody(script, repoUrl)
         postExecuteStageBody = PrPipeline.getPostExecuteStageBody(script, repoUrl)
 
-        initStageBody = { PrPipeline.initStageBody1(this) }
+        initializeBody = { PrPipeline.initBody(this) }
         stages = [
                 createStage(PRE_MERGE, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     PrPipeline.preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)

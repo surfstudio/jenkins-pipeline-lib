@@ -1,6 +1,5 @@
 package ru.surfstudio.ci.stage.body
 
-import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.pipeline.ui_test.UiTestPipeline
 import ru.surfstudio.ci.pipeline.ui_test.UiTestPipelineAndroid
 import ru.surfstudio.ci.pipeline.ui_test.UiTestPipelineiOS
@@ -13,7 +12,7 @@ class UiTestStages {
 
     @Deprecated
     def static initStageBody(UiTestPipeline ctx) {
-        UiTestPipeline.initStageBody(ctx)
+        UiTestPipeline.initBody(ctx)
     }
 
     @Deprecated

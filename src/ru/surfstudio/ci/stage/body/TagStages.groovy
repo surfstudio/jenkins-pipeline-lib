@@ -9,7 +9,7 @@ class TagStages {
 
     @Deprecated
     def static initStageBody(TagPipeline ctx) {
-        TagPipeline.initStageBody(ctx)
+        TagPipeline.initBody(ctx)
     }
 
     @Deprecated

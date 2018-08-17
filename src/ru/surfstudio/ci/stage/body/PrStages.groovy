@@ -10,7 +10,7 @@ class PrStages {
 
     @Deprecated
     def static initStageBody(PrPipeline ctx) {
-       PrPipeline.initStageBody1(ctx)
+       PrPipeline.initBody(ctx)
     }
 
     @Deprecated

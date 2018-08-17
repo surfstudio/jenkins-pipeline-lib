@@ -63,7 +63,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
-    def static initStageBody(UiTestPipeline ctx) {
+    def static initBody(UiTestPipeline ctx) {
         def script = ctx.script
         
         CommonUtil.checkPipelineParameterDefined(script, ctx.sourceRepoUrl, "sourceRepoUrl")

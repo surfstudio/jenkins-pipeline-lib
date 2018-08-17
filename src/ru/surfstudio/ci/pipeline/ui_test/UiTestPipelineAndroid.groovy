@@ -24,7 +24,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
             script.echo "Using node from params: ${node}"
         }
 
-        initStageBody = { UiTestPipeline.initStageBody(this) }
+        initializeBody = { UiTestPipeline.initBody(this) }
         stages = [
                 createStage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     UiTestPipeline.checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, repoCredentialsId)

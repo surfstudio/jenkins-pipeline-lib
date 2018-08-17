@@ -29,11 +29,11 @@ class UiTestPipelineiOS extends UiTestPipeline {
     def init() {
         node = NodeProvider.getiOSNode()
 
-        initStageBody = { UiTestPipeline.initStageBody(this) }
+        initializeBody = { UiTestPipeline.initBody(this) }
 
         stages = [
                 createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    UiTestPipeline.initStageBody(this)
+                    UiTestPipeline.initBody(this)
                 },
                 createStage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     UiTestPipeline.checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch,)

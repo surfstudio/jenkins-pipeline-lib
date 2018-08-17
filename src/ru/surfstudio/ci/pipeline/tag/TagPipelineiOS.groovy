@@ -26,7 +26,7 @@ class TagPipelineiOS extends TagPipeline {
         preExecuteStageBody = TagPipeline.getPreExecuteStageBody(script, repoUrl)
         postExecuteStageBody = TagPipeline.getPostExecuteStageBody(script, repoUrl)
 
-        initStageBody = {  TagPipeline.initStageBody(this) }
+        initializeBody = {  TagPipeline.initBody(this) }
         stages = [
                 createStage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     TagPipeline.checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
