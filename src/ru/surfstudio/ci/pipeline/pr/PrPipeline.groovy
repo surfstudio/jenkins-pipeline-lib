@@ -75,7 +75,8 @@ abstract class PrPipeline extends ScmPipeline {
                         "$ctx.sourceBranch: target branch changed" :
                         ctx.sourceBranch
 
-        CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.ANOTHER, buildDescription)
+        script.currentBuild.rawBuild.setDescription(buildDescription)
+        CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.SELF, buildDescription)
     }
 
     def static preMergeStageBody(Object script, String url, String sourceBranch, String destinationBranch, String credentialsId) {

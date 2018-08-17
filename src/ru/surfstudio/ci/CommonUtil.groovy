@@ -33,7 +33,6 @@ class CommonUtil {
     }
 
     def static abortDuplicateBuildsWithDescription(Object script, String abortStrategy, String buildDescription) {
-        script.currentBuild.rawBuild.setDescription(buildDescription)
         switch (abortStrategy){
             case AbortDuplicateStrategy.SELF:
                 if(isOlderBuildWithDescriptionRunning(script, buildDescription)){
