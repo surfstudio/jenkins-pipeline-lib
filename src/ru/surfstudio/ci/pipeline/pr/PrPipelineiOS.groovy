@@ -18,8 +18,8 @@ class PrPipelineiOS extends PrPipeline {
         propertiesProvider = { PrPipeline.properties(this) }
         node = NodeProvider.getiOSNode()
 
-        preExecuteStageBody = PrPipeline.getPreExecuteStageBody()
-        postExecuteStageBody = PrPipeline.getPostExecuteStageBody()
+        preExecuteStageBody = PrPipeline.getPreExecuteStageBody(script, repoUrl)
+        postExecuteStageBody = PrPipeline.getPostExecuteStageBody(script, repoUrl)
 
         initStageBody = {  PrPipeline.initStageBody(this) }
         stages = [

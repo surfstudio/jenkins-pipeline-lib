@@ -116,13 +116,13 @@ abstract class PrPipeline extends ScmAutoAbortedPipeline {
         })
     }
 
-    def static Closure<Object> getPostExecuteStageBody() {
+    def static Closure<Object> getPostExecuteStageBody(Object script, String repoUrl) {
         { stage ->
             if (stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
         }
     }
 
-    def static Closure<Object> getPreExecuteStageBody() {
+    def static Closure<Object> getPreExecuteStageBody(Object script, String repoUrl) {
         { stage ->
             if (stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
         }

@@ -31,8 +31,8 @@ class TagPipelineAndroid extends TagPipeline {
         propertiesProvider = { TagPipeline.properties(this) }
         node = NodeProvider.getAndroidNode()
 
-        preExecuteStageBody = TagPipeline.getPreExecuteStageBody()
-        postExecuteStageBody = TagPipeline.getPostExecuteStageBody()
+        preExecuteStageBody = TagPipeline.getPreExecuteStageBody(script, repoUrl)
+        postExecuteStageBody = TagPipeline.getPostExecuteStageBody(script, repoUrl)
 
         initStageBody = {  TagPipeline.initStageBody(this) }
         stages = [

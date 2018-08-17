@@ -23,8 +23,8 @@ class TagPipelineiOS extends TagPipeline {
         propertiesProvider = { TagPipeline.properties(this) }
         node = NodeProvider.getiOSNode()
 
-        preExecuteStageBody = TagPipeline.getPreExecuteStageBody()
-        postExecuteStageBody = TagPipeline.getPostExecuteStageBody()
+        preExecuteStageBody = TagPipeline.getPreExecuteStageBody(script, repoUrl)
+        postExecuteStageBody = TagPipeline.getPostExecuteStageBody(script, repoUrl)
 
         initStageBody = {  TagPipeline.initStageBody(this) }
         stages = [
@@ -47,7 +47,7 @@ class TagPipelineiOS extends TagPipeline {
                     iOSPipelineHelper.staticCodeAnalysisStageBodyiOS(script)
                 },
                 createStage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    TagPipeline.betaUploadStageBodyiOS(script,
+                    TagPipelineiOS.betaUploadStageBodyiOS(script,
                         iOSKeychainCredenialId,
                         iOSCertfileCredentialId,
                         betaUploadConfigArgument,
