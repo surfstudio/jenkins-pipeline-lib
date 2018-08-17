@@ -1,6 +1,6 @@
 package ru.surfstudio.ci.pipeline.empty
 
-import ru.surfstudio.ci.pipeline.base.ScmAutoAbortedPipeline
+import ru.surfstudio.ci.pipeline.ScmAutoAbortedPipeline
 
 class EmptyScmAutoAbortedPipeline extends ScmAutoAbortedPipeline {
 

@@ -1,4 +1,4 @@
-package ru.surfstudio.ci.pipeline.base
+package ru.surfstudio.ci.pipeline
 
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Constants

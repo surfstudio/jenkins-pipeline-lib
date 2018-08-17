@@ -1,7 +1,7 @@
 package ru.surfstudio.ci.stage
 
 /**
- * Stage для {@link ru.surfstudio.ci.pipeline.base.Pipeline}
+ * Stage для {@link ru.surfstudio.ci.pipeline.Pipeline}
  */
 class Stage {
     String name

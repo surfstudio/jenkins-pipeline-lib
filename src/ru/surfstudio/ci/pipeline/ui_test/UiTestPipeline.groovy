@@ -4,7 +4,7 @@ import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Constants
 import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.Result
-import ru.surfstudio.ci.pipeline.base.AutoAbortedPipeline
+import ru.surfstudio.ci.pipeline.AutoAbortedPipeline
 import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty

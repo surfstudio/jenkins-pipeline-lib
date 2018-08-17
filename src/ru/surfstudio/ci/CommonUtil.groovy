@@ -1,6 +1,6 @@
 package ru.surfstudio.ci
 
-import ru.surfstudio.ci.pipeline.base.Pipeline
+import ru.surfstudio.ci.pipeline.Pipeline
 import ru.surfstudio.ci.stage.Stage
 
 class CommonUtil {
