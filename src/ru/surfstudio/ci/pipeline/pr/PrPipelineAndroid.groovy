@@ -21,8 +21,7 @@ class PrPipelineAndroid extends PrPipeline {
         super(script)
     }
 
-    @Override
-    def initInternal() {
+    def init() {
         propertiesProvider = { PrPipeline.properties(this) }
         node = NodeProvider.getAndroidNode()
 
