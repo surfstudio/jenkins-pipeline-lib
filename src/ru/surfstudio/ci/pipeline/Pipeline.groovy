@@ -32,14 +32,14 @@ abstract class Pipeline implements Serializable {
 
     public script //Jenkins Pipeline Script
     public jobResult = Result.SUCCESS
-    public List<Stage> stages
+    public List<Stage> stages     //runs on specified node
     public Closure finalizeBody
-    public Closure initializeBody
+    public Closure initializeBody  //runs on master node
     public node
-    public Closure<List<Object>> propertiesProvider
+    public Closure<List<Object>> propertiesProvider  //runs after initializeBody on master node
 
-    public preExecuteStageBody = {}  // { stage -> ... }
-    public postExecuteStageBody = {} // { stage -> ... }
+    public preExecuteStageBody = {}  // { stage -> ... } runs for all stages in 'stages' list
+    public postExecuteStageBody = {} // { stage -> ... } runs for all stages in 'stages' list
 
     Pipeline(script) {
         this.script = script
@@ -54,7 +54,7 @@ abstract class Pipeline implements Serializable {
 
     def run() {
         try {
-            def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, getInitStageBody())
+            def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, createInitStageBody())
             stageWithStrategy(initStage, {}, {})
             script.node(node) {
                 for (Stage stage : stages) {
@@ -75,7 +75,7 @@ abstract class Pipeline implements Serializable {
         }
     }
 
-    def Closure getInitStageBody() {
+    def Closure createInitStageBody() {
         return {
             if (initializeBody) initializeBody()
             if (propertiesProvider) script.properties(propertiesProvider())
