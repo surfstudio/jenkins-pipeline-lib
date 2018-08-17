@@ -21,7 +21,7 @@ class PrPipelineiOS extends PrPipeline {
         preExecuteStageBody = PrPipeline.getPreExecuteStageBody(script, repoUrl)
         postExecuteStageBody = PrPipeline.getPostExecuteStageBody(script, repoUrl)
 
-        initStageBody = {  PrPipeline.initStageBody(this) }
+        initStageBody = {  PrPipeline.initStageBody1(this) }
         stages = [
                 createStage(PRE_MERGE, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     PrPipeline.preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)

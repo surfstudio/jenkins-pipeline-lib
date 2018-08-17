@@ -35,7 +35,7 @@ abstract class PrPipeline extends ScmPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
-    def static initStageBody(PrPipeline ctx) {
+    def static initStageBody1(PrPipeline ctx) {
         def script = ctx.script
         CommonUtil.printInitialStageStrategies(ctx)
 
