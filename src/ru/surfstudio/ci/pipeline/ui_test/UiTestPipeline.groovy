@@ -71,15 +71,14 @@ abstract class UiTestPipeline extends ScmPipeline {
         CommonUtil.checkPipelineParameterDefined(script, ctx.platform, "platform")
         CommonUtil.checkPipelineParameterDefined(script, ctx.testBranch, "testBranch")
         CommonUtil.checkPipelineParameterDefined(script, ctx.defaultTaskKey, "defaultTaskKey")
-        CommonUtil.checkPipelineParameterDefined(script, ctx.node, "node")
-        
+
         CommonUtil.printInitialStageStrategies(ctx)
 
         //Выбираем значения веток, прогона и тд из параметров, Установка их в параметры происходит
         // если триггером был webhook или если стартанули Job вручную
 
         applyParameterIfNotEmpty(script, NODE_PARAMETER, script.params[NODE_PARAMETER]) { value ->
-            this.node = value
+            ctx.node = value
             script.echo "Using node from params: ${node}"
         }
 

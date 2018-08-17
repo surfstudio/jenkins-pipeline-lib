@@ -15,7 +15,9 @@ import ru.surfstudio.ci.stage.StageStrategy
  *  Для создания собственного наследника необходимо переопределить метод init и в нем определенить переменные:
  *  - node
  *  - stages
+ *  - initializeBody
  *  - finalizeBody
+ *  - propertiesProvider
  *
  *  Предусмотрены различные способы кастомизации
  *  - изменение переменных, определяющих контекст
