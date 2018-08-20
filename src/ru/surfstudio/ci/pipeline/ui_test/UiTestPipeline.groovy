@@ -257,8 +257,8 @@ abstract class UiTestPipeline extends ScmPipeline {
             for (task in tasks) {
                 CommonUtil.safe(script) {
                     CommonUtil.startCurrentBuildCloneWithParams(
-                            script: script,
-                            parameters: [
+                            script,
+                            [
                                 script.string(name: TASK_KEY_PARAMETER, value: task.trim())
                             ]
                     )
