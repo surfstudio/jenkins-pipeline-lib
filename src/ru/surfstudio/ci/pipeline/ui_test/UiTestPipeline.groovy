@@ -265,9 +265,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                 }
             }
             for (stage in ctx.stages) {
-                if (stage.name != ctx.INIT) {
-                    stage.strategy = StageStrategy.SKIP_STAGE
-                }
+                stage.strategy = StageStrategy.SKIP_STAGE
             }
             return true
         } else {

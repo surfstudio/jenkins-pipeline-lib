@@ -158,11 +158,11 @@ class CommonUtil {
         def Map currentBuildParams = script.params
 
         def allParams = []
-        allParams.addAll(extraParams)
         allParams.addAll(currentBuildParams
                 .entrySet()
                 .collect({script.string(name: it.key, value: "${it.value}")})
         )
+        allParams.addAll(extraParams)
         script.build job: script.env.JOB_NAME, parameters: allParams, wait: wait
     }
 }
