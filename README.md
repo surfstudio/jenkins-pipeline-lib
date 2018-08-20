@@ -1,7 +1,8 @@
 # jenkins-pipeline-lib
 [Библиотека](https://jenkins.io/doc/book/pipeline/shared-libraries/) для pipeline скриптов Jenkins студии [Surf](https://surfstudio.ru/)
 
-Содержит 
+Содержит: 
+
 * базовые классы для удобной работы со scripted pipeline
 * Готовые pipelines для внутреннего процесса Surf
 * Утилиты для распростаненных действия ci разработки Android и iOS приложений
