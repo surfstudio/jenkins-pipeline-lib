@@ -9,6 +9,9 @@ import ru.surfstudio.ci.RepositoryUtil
  * Если JenkinsFile выгружается из репо, то пареметры repoUrl и repoCredentialsId инициализируются из этого репо
  * Если pipeline описан в настройках самого Job, то пареметр repoUrl (опционально и repoCredentialsId) должен быть
  * явно указан между вызовами init() и run()
+ *
+ * Для checkout не следует использовать step "checkout", поскольку он не работает с pipelines, описанными в настройках Job
+ * Тоже относится и для, нампример script.scm.userRemoteConfigs
  */
 abstract class ScmPipeline extends Pipeline {
 
