@@ -43,7 +43,7 @@ abstract class TagPipeline extends ScmPipeline {
                 (ctx.BETA_UPLOAD): params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
         ])
 
-        applyParameterIfNotEmpty(script,'repoTag', script.params[REPO_TAG_PARAMETER], {
+        applyParameterIfNotEmpty(script,'repoTag', params[REPO_TAG_PARAMETER], {
             value -> ctx.repoTag = value
         })
 

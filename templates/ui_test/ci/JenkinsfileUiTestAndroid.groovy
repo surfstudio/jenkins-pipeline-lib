@@ -9,8 +9,8 @@ pipeline.init()
 //TODO: set real values ↓↓↓
 pipeline.sourceRepoUrl = "" //repository with app source code
 pipeline.jiraProjectKey = ""
-pipeline.testBranch = "" // branch with tests
 pipeline.defaultTaskKey = "" //task for run periodically
+pipeline.testBranch = "master" // branch with tests
 
 //customization
 

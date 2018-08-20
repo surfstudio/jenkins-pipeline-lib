@@ -8,6 +8,11 @@ import ru.surfstudio.ci.stage.StageStrategy
 
 class TagPipelineAndroid extends TagPipeline {
 
+    //required initial configuration
+    public keystoreCredentials = "no_credentials"
+    public keystorePropertiesCredentials = "no_credentials"
+
+
     public buildGradleTask = "clean assembleQa assembleRelease"
     public betaUploadGradleTask = "crashlyticsUploadDistributionQa"
 
@@ -19,8 +24,7 @@ class TagPipelineAndroid extends TagPipeline {
     public instrumentedTestResultPathXml = "**/outputs/androidTest-results/connected/*.xml"
     public instrumentedTestResultPathDirHtml = "app/build/reports/androidTests/connected/"
 
-    public keystoreCredentials = "no_credentials"
-    public keystorePropertiesCredentials = "no_credentials"
+
 
 
     TagPipelineAndroid(Object script) {
