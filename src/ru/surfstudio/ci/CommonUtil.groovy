@@ -150,7 +150,7 @@ class CommonUtil {
     }
 
     /**
-     * @param extraParams List<Object> -> List<hudson.model.ParameterValue>
+     * @param extraParams List<Object> -> List<hudson.model.ParameterValue>. Can override initial params
      * @return
      */
     def static startCurrentBuildCloneWithParams(Object script, List<Object> extraParams, boolean wait = false) {

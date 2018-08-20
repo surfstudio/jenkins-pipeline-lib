@@ -5,11 +5,14 @@ import ru.surfstudio.ci.Constants
 import ru.surfstudio.ci.RepositoryUtil
 
 /**
- *
+ * Базовый pipeline для Jobs, которые используют исходный код из удаленного репозитория
+ * Если JenkinsFile выгружается из репо, то пареметры repoUrl и repoCredentialsId инициализируются из этого репо
+ * Если pipeline описан в настройках самого Job, то пареметр repoUrl (опционально и repoCredentialsId) должен быть
+ * явно указан между вызовами init() и run()
  */
 abstract class ScmPipeline extends Pipeline {
 
-    //required configuration
+    //required initial configuration
     public repoUrl = ""
     public repoCredentialsId = Constants.BITBUCKET_BUILDER_CREDENTIALS_ID
 

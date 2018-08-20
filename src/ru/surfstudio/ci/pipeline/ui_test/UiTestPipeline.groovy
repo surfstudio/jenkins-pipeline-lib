@@ -267,6 +267,7 @@ abstract class UiTestPipeline extends ScmPipeline {
             for (stage in ctx.stages) {
                 stage.strategy = StageStrategy.SKIP_STAGE
             }
+            ctx.jobResult = Result.NOT_BUILT
             return true
         } else {
             return false

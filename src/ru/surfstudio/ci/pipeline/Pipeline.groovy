@@ -7,17 +7,20 @@ import ru.surfstudio.ci.stage.StageStrategy
 
 /**
  * Наследники класса Pipeline - ключевые сущности для выполнения скрипта
- * По сути знают что и как выполнять и определяют контекст выполнения
+ * По сути знают что и как выполнять и определяют параметры выполнения
  *  - "как" определяется методом run (не нужно переопределять)
  *  - "что" определяется в методе init (нужно переопределять)
- *  - "контекст" определяется через публичные переменные
+ *  - "параметры выполнения" определяются через публичные переменные
  *
- *  Для создания собственного наследника необходимо переопределить метод init и в нем определенить переменные:
- *  - node
- *  - stages
- *  - initializeBody
- *  - finalizeBody
- *  - propertiesProvider
+ *  Для создания собственного наследника необходимо переопределить метод init и в нем определенить переменные
+ *  (Любая из них может быть не проинициализирована):
+ *  - node                  :  Машина, на которой будет выполняться основная работа(stages)
+ *  - stages                :  Массив с обьектами определяющими блоки основной работы
+ *  - initializeBody        :  Лямбда, котороая будет выполняться перед стартом основной работы на master машине
+ *  - finalizeBody          :  Лямбда, которая будет выполняться после основной работы, как в случае успешного завершения, так и после ошибки
+ *  - propertiesProvider    :  Лямбда, которая должна вернуть массив properties, например триггеры и параметры сборки
+ *  - preExecuteStageBody   :  Лямбда, которая выполняется до выполнения Stage
+ *  - postExecuteStageBody  :  Лямбда, которая выполняется после выполнения Stage
  *
  *  Предусмотрены различные способы кастомизации
  *  - изменение переменных, определяющих контекст
@@ -25,20 +28,19 @@ import ru.surfstudio.ci.stage.StageStrategy
  *  - замена целых Stage через метод replaceStage() или напрямую через переменную stages
  *  - все остальное, что может прийти в голову, так как все переменные публичные
  *
- *  Наследники этого класса должны определять только общуую, высокоуровневую конфигурацию,
- *  детали реализации должны находиться в пакете stage.body в виде классов со статическими методами,
- *  следует делать их максимально чистыми и независимыми для возможности переиспользования без механизмов класса Pipeline
+ *  Большую часть деталей реализации следует размешать в классах ...Util для возможности переиспользования
+ *  без механизмов класса Pipeline
  */
 abstract class Pipeline implements Serializable {
     public static final String INIT = 'Init'
 
     public script //Jenkins Pipeline Script
     public jobResult = Result.SUCCESS
+    public node
+    public Closure initializeBody  //runs on master node
+    public Closure<List<Object>> propertiesProvider  //runs after initializeBody on master node
     public List<Stage> stages     //runs on specified node
     public Closure finalizeBody
-    public Closure initializeBody  //runs on master node
-    public node
-    public Closure<List<Object>> propertiesProvider  //runs after initializeBody on master node
 
     public preExecuteStageBody = {}  // { stage -> ... } runs for all stages in 'stages' list
     public postExecuteStageBody = {} // { stage -> ... } runs for all stages in 'stages' list

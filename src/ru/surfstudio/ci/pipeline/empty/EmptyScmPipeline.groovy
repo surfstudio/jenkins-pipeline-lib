@@ -2,6 +2,9 @@ package ru.surfstudio.ci.pipeline.empty
 
 import ru.surfstudio.ci.pipeline.ScmPipeline
 
+/**
+ * Предназначен для конфигурации кастомных скриптов на основе механизмов класса {@link ru.surfstudio.ci.pipeline.ScmPipeline}
+ */
 class EmptyScmPipeline extends ScmPipeline {
 
     def Closure<String> buildIdentifierProvider
@@ -13,10 +16,5 @@ class EmptyScmPipeline extends ScmPipeline {
     @Override
     def init() {
         //empty
-    }
-
-    @Override
-    def initInternal() {
-
     }
 }
