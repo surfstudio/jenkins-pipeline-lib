@@ -6,6 +6,11 @@ import ru.surfstudio.ci.stage.StageStrategy
 
 class PrPipelineAndroid extends PrPipeline {
 
+    //required initial configuration
+    public keystoreCredentials = "no_credentials"
+    public keystorePropertiesCredentials = "no_credentials"
+
+
     public buildGradleTask = "clean assembleQa"
 
     public unitTestGradleTask = "testQaUnitTest"
@@ -35,7 +40,10 @@ class PrPipelineAndroid extends PrPipeline {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    AndroidPipelineHelper.buildStageBodyAndroid(script, buildGradleTask)
+                    AndroidPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
+                            buildGradleTask,
+                            keystoreCredentials,
+                            keystorePropertiesCredentials)
                 },
                 createStage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.unitTestStageBodyAndroid(script,

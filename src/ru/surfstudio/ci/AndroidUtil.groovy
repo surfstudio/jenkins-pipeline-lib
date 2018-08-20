@@ -20,6 +20,28 @@ class AndroidUtil {
         }
     }
 
+    /**
+     * Run body with extracted Environment Variables:
+     *  - storePassword
+     *  - keyPassword
+     *  - keyAlias
+     *  - storeFile
+     *
+     * @param keystoreCredentials - id credentials with "keystore" file
+     * @param keystorePropertiesCredentials - id credentials with "keystore.properties" file, which contains info:
+     * storePassword=you_pass
+     * keyPassword=you_pass
+     * keyAlias=you_alias
+     *
+     * Example usage:
+     * ```
+     * AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials){
+     *     sh "./gradlew assembleRelease"
+     * }
+     * ````
+     * How configure gradle to use this variables see here https://bitbucket.org/surfstudio/android-standard/src/snapshot-0.3.0/template/keystore/
+     *
+     */
     def static withKeystore(Object script, String keystoreCredentials, String keystorePropertiesCredentials, Closure body) {
         def bodyStarted = false
         try {
