@@ -22,15 +22,15 @@ class TagPipelineiOS extends TagPipeline {
     def init() {
         node = NodeProvider.getiOSNode()
 
-        preExecuteStageBody = TagPipeline.getPreExecuteStageBody(script, repoUrl)
-        postExecuteStageBody = TagPipeline.getPostExecuteStageBody(script, repoUrl)
+        preExecuteStageBody = getPreExecuteStageBody(script, repoUrl)
+        postExecuteStageBody = getPostExecuteStageBody(script, repoUrl)
 
-        initializeBody = {  TagPipeline.initBody(this) }
-        propertiesProvider = { TagPipeline.properties(this) }
+        initializeBody = {  initBody(this) }
+        propertiesProvider = { properties(this) }
 
         stages = [
                 createStage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    TagPipeline.checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
+                    checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     iOSPipelineHelper.buildStageBodyiOS(script,
@@ -48,7 +48,7 @@ class TagPipelineiOS extends TagPipeline {
                     iOSPipelineHelper.staticCodeAnalysisStageBodyiOS(script)
                 },
                 createStage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    TagPipelineiOS.betaUploadStageBodyiOS(script,
+                    betaUploadStageBodyiOS(script,
                         iOSKeychainCredenialId,
                         iOSCertfileCredentialId,
                         betaUploadConfigArgument,
@@ -57,7 +57,7 @@ class TagPipelineiOS extends TagPipeline {
                 },
 
         ]
-        finalizeBody = { TagPipeline.debugFinalizeStageBody(this) }
+        finalizeBody = { debugFinalizeStageBody(this) }
     }
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ ======================================================

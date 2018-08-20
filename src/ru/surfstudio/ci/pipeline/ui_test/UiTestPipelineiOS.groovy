@@ -30,21 +30,21 @@ class UiTestPipelineiOS extends UiTestPipeline {
         platform = "ios"
         node = NodeProvider.getiOSNode()
 
-        initializeBody = { UiTestPipeline.initBody(this) }
-        propertiesProvider = { UiTestPipeline.properties(this) }
+        initializeBody = { initBody(this) }
+        propertiesProvider = { properties(this) }
 
         stages = [
                 createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    UiTestPipeline.initBody(this)
+                    initBody(this)
                 },
                 createStage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    UiTestPipeline.checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, repoCredentialsId)
+                    checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, repoCredentialsId)
                 },
                 createStage(CHECKOUT_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    UiTestPipeline.checkoutTestsStageBody(script, repoUrl, testBranch, repoCredentialsId)
+                    checkoutTestsStageBody(script, repoUrl, testBranch, repoCredentialsId)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    this.buildStageBodyiOS(script,
+                    buildStageBodyiOS(script,
                             sourcesDir, 
                             derivedDataPath,
                             testiOSSDK,
@@ -55,14 +55,14 @@ class UiTestPipelineiOS extends UiTestPipeline {
                     script.echo "empty stage"
                 },
                 createStage(PREPARE_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    UiTestPipeline.prepareTestsStageBody(script,
+                    prepareTestsStageBody(script,
                             jiraAuthenticationName,
                             taskKey,
                             featuresDir,
                             featureForTest)
                 },
                 createStage(TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    this.testStageBodyiOS(script,
+                    testStageBodyiOS(script,
                             taskKey,
                             sourcesDir,
                             derivedDataPath,
@@ -75,7 +75,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
                             outputJsonFile)
                 },
                 createStage(PUBLISH_RESULTS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    UiTestPipeline.publishResultsStageBody(script,
+                    publishResultsStageBody(script,
                             outputsDir,
                             outputJsonFile,
                             outputHtmlFile,
@@ -85,8 +85,10 @@ class UiTestPipelineiOS extends UiTestPipeline {
                 }
 
         ]
-        finalizeBody = { UiTestPipeline.finalizeStageBody(this) }
+        finalizeBody = { finalizeStageBody(this) }
     }
+
+    // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
     def static buildStageBodyiOS(Object script, String sourcesDir, String derivedDataPath, String sdk, String keychainCredenialId, String certfileCredentialId) {
         script.withCredentials([
@@ -151,4 +153,6 @@ class UiTestPipelineiOS extends UiTestPipeline {
             //script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
         }
     }
+    // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
+
 }

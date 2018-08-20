@@ -259,10 +259,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                     CommonUtil.startCurrentBuildCloneWithParams(
                             script: script,
                             parameters: [
-                                script.string(name: TASK_KEY_PARAMETER, value: task.trim()),
-                                script.string(name: TEST_BRANCH_PARAMETER, value: ctx.testBranch),
-                                script.string(name: SOURCE_BRANCH_PARAMETER, value: ctx.sourceBranch),
-                                script.string(name: USER_EMAIL_PARAMETER, value: ctx.userEmail)
+                                script.string(name: TASK_KEY_PARAMETER, value: task.trim())
                             ]
                     )
                 }

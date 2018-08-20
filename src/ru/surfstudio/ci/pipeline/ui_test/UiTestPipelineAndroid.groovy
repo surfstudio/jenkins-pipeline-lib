@@ -22,33 +22,33 @@ class UiTestPipelineAndroid extends UiTestPipeline {
         platform = "android"
         node = NodeProvider.getAndroidNode()
 
-        initializeBody = { UiTestPipeline.initBody(this) }
-        propertiesProvider = { UiTestPipeline.properties(this) }
+        initializeBody = { initBody(this) }
+        propertiesProvider = { properties(this) }
 
         stages = [
                 createStage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    UiTestPipeline.checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, repoCredentialsId)
+                    checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, repoCredentialsId)
                 },
                 createStage(CHECKOUT_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    UiTestPipeline.checkoutTestsStageBody(script, repoUrl, testBranch, repoCredentialsId)
+                    checkoutTestsStageBody(script, repoUrl, testBranch, repoCredentialsId)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    this.buildStageBodyAndroid(script, sourcesDir, buildGradleTask)
+                    buildStageBodyAndroid(script, sourcesDir, buildGradleTask)
                 },
                 createStage(PREPARE_ARTIFACT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    this.prepareApkStageBodyAndroid(script,
+                    prepareApkStageBodyAndroid(script,
                             builtApkPattern,
                             artifactForTest)
                 },
                 createStage(PREPARE_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    UiTestPipeline.prepareTestsStageBody(script,
+                    prepareTestsStageBody(script,
                             jiraAuthenticationName,
                             taskKey,
                             featuresDir,
                             featureForTest)
                 },
                 createStage(TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    this.testStageBodyAndroid(script,
+                    testStageBodyAndroid(script,
                             taskKey,
                             outputsDir,
                             featuresDir,
@@ -57,7 +57,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                             outputHtmlFile)
                 },
                 createStage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    UiTestPipeline.publishResultsStageBody(script,
+                    publishResultsStageBody(script,
                             outputsDir,
                             outputJsonFile,
                             outputHtmlFile,
@@ -67,7 +67,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 }
 
         ]
-        finalizeBody = { UiTestPipeline.finalizeStageBody(this) }
+        finalizeBody = { finalizeStageBody(this) }
     }
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================

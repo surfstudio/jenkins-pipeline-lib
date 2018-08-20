@@ -153,7 +153,7 @@ class CommonUtil {
      * @param extraParams List<Object> -> List<hudson.model.ParameterValue>
      * @return
      */
-    def static startCurrentBuildCloneWithParams(Object script, ArrayList<Object> extraParams, boolean wait = false) {
+    def static startCurrentBuildCloneWithParams(Object script, List<Object> extraParams, boolean wait = false) {
         script.echo "start current build clone with extra params ${extraParams}"
         def Map currentBuildParams = script.params
 

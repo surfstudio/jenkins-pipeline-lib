@@ -24,15 +24,15 @@ class PrPipelineAndroid extends PrPipeline {
     def init() {
         node = NodeProvider.getAndroidNode()
 
-        preExecuteStageBody = PrPipeline.getPreExecuteStageBody(script, repoUrl)
-        postExecuteStageBody = PrPipeline.getPostExecuteStageBody(script, repoUrl)
+        preExecuteStageBody = getPreExecuteStageBody(script, repoUrl)
+        postExecuteStageBody = getPostExecuteStageBody(script, repoUrl)
 
-        initializeBody = { PrPipeline.initBody(this) }
-        propertiesProvider = { PrPipeline.properties(this) }
+        initializeBody = { initBody(this) }
+        propertiesProvider = { properties(this) }
 
         stages = [
                 createStage(PRE_MERGE, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    PrPipeline.preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.buildStageBodyAndroid(script, buildGradleTask)
@@ -54,6 +54,6 @@ class PrPipelineAndroid extends PrPipeline {
                 },
 
         ]
-        finalizeBody = { PrPipeline.finalizeStageBody(this) }
+        finalizeBody = { finalizeStageBody(this) }
     }
 }
