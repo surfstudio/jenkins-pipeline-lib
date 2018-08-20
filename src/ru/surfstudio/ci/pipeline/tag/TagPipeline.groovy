@@ -53,11 +53,12 @@ abstract class TagPipeline extends ScmPipeline {
     }
 
     def static checkoutStageBody(Object script,  String url, String repoTag, String credentialsId) {
-        script.git(
+        script.checkout scm: [$class: 'GitSCM', userRemoteConfigs:script.scm.userRemoteConfigs, branches: [[name: "refs/tags/$repoTag"]]], poll: false
+        /*script.git(
                 url: url,
                 credentialsId: credentialsId,
                 branch: "refs/tags/$repoTag"
-        )
+        )*/ //todo 
         RepositoryUtil.saveCurrentGitCommitHash(script)
     }
 
