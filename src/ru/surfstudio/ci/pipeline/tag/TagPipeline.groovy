@@ -57,7 +57,7 @@ abstract class TagPipeline extends ScmPipeline {
                 url: url,
                 credentialsId: credentialsId
         )
-        script.sh "git checkout tags/$repoTag -b tag-branch-$repoTag"
+        script.sh "git checkout tags/$repoTag"
         RepositoryUtil.saveCurrentGitCommitHash(script)
     }
 
