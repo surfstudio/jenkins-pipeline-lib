@@ -131,6 +131,8 @@ abstract class TagPipeline extends ScmPipeline {
                         name       : REPO_TAG_PARAMETER,
                         type       : 'PT_TAG',
                         description: 'Тег для сборки',
+                        selectedValue: 'NONE',
+                        sortMode: 'DESCENDING_SMART'
                 ],
                 script.string(
                         name: UNIT_TEST_STAGE_STRATEGY_PARAMETER,
