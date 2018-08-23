@@ -2,7 +2,6 @@ package ru.surfstudio.ci.pipeline.tag
 
 import ru.surfstudio.ci.AndroidUtil
 import ru.surfstudio.ci.NodeProvider
-import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 
@@ -35,8 +34,8 @@ class TagPipelineAndroid extends TagPipeline {
     def init() {
         node = NodeProvider.getAndroidNode()
 
-        preExecuteStageBody = getPreExecuteStageBody(script, repoUrl)
-        postExecuteStageBody = getPostExecuteStageBody(script, repoUrl)
+        preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
+        postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
 
         initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }

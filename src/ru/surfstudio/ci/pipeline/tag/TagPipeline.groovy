@@ -7,6 +7,7 @@ import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.pipeline.pr.PrPipeline
+import ru.surfstudio.ci.stage.Stage
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
 
@@ -80,16 +81,12 @@ abstract class TagPipeline extends ScmPipeline {
         })
     }
 
-    def static Closure<Object> getPostExecuteStageBody(Object script, String repoUrl) {
-        { stage ->
-            if (stage.name != CHECKOUT) RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
-        }
+    def static preExecuteStageBodyTag(Object script, Stage stage, String repoUrl) {
+        if (stage.name != CHECKOUT) RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
     }
 
-    def static Closure<Object> getPreExecuteStageBody(Object script, String repoUrl) {
-        { stage ->
-            if (stage.name != CHECKOUT) RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
-        }
+    def static postExecuteStageBodyTag(Object script, Stage stage, String repoUrl) {
+        if (stage.name != CHECKOUT) RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
     }
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
 

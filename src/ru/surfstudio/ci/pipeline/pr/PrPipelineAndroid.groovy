@@ -29,8 +29,8 @@ class PrPipelineAndroid extends PrPipeline {
     def init() {
         node = NodeProvider.getAndroidNode()
 
-        preExecuteStageBody = getPreExecuteStageBody(script, repoUrl)
-        postExecuteStageBody = getPostExecuteStageBody(script, repoUrl)
+        preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
+        postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
         initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }

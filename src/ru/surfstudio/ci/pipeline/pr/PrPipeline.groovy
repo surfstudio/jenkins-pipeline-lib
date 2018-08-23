@@ -6,6 +6,7 @@ import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.ScmPipeline
+import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
@@ -118,16 +119,12 @@ abstract class PrPipeline extends ScmPipeline {
         })
     }
 
-    def static Closure<Object> getPostExecuteStageBody(Object script, String repoUrl) {
-        { stage ->
-            if (stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
-        }
+    def static preExecuteStageBodyPr(Object script, Stage stage, String repoUrl) {
+        if (stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
     }
 
-    def static Closure<Object> getPreExecuteStageBody(Object script, String repoUrl) {
-        { stage ->
-            if (stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
-        }
+    def static postExecuteStageBodyPr(Object script, Stage stage, String repoUrl) {
+         if (stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
     }
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
 

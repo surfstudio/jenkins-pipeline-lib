@@ -79,6 +79,7 @@ class RepositoryUtil {
     def static tryExtractInitialRemoteConfig(Object script, Closure handler) {
         try {
             def config = script.scm.userRemoteConfigs.first()
+            script.echo "Extracted initial repoUrl: $config.url, repoCredentialsId: $config.credentialsId"
             handler(config.url, config.credentialsId)
         } catch (e){
             script.echo "Cannot extract initial repository remote config: ${e.toString()}"

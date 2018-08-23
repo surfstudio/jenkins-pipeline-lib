@@ -22,8 +22,8 @@ class TagPipelineiOS extends TagPipeline {
     def init() {
         node = NodeProvider.getiOSNode()
 
-        preExecuteStageBody = getPreExecuteStageBody(script, repoUrl)
-        postExecuteStageBody = getPostExecuteStageBody(script, repoUrl)
+        preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
+        postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
 
         initializeBody = {  initBody(this) }
         propertiesProvider = { properties(this) }
