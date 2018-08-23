@@ -8,7 +8,8 @@ import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.stage.StageStrategy
 
-import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
+import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
+import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 
 abstract class UiTestPipeline extends ScmPipeline {
 
@@ -77,32 +78,29 @@ abstract class UiTestPipeline extends ScmPipeline {
         //Выбираем значения веток, прогона и тд из параметров, Установка их в параметры происходит
         // если триггером был webhook или если стартанули Job вручную
 
-        applyParameterIfNotEmpty(script, NODE_PARAMETER, script.params[NODE_PARAMETER]) { value ->
+        extractValueFromParamsAndRun(script, NODE_PARAMETER) { value ->
             ctx.node = value
             script.echo "Using node from params: ${ctx.node}"
         }
 
         //scm
-        applyParameterIfNotEmpty(script, SOURCE_BRANCH_PARAMETER, script.params[SOURCE_BRANCH_PARAMETER], {
+        extractValueFromParamsAndRun(script, SOURCE_BRANCH_PARAMETER) {
             value -> ctx.sourceBranch = value
-        })
-        applyParameterIfNotEmpty(script, TEST_BRANCH_PARAMETER, script.env.testBranch, {
+        }
+        extractValueFromParamsAndRun(script, TEST_BRANCH_PARAMETER) {
             value -> ctx.testBranch = value
-        })
-        applyParameterIfNotEmpty(script, TEST_BRANCH_PARAMETER, script.params[TEST_BRANCH_PARAMETER], {
-            value -> ctx.testBranch = value
-        })
+        }
 
         //jira
-        applyParameterIfNotEmpty(script, TASK_KEY_PARAMETER, script.params[TASK_KEY_PARAMETER], {
+        extractValueFromEnvOrParamsAndRun(script, TASK_KEY_PARAMETER) {
             value -> ctx.taskKey = value
-        })
-        applyParameterIfNotEmpty(script, TASK_NAME_PARAMETER, script.params[TASK_NAME_PARAMETER], {
+        }
+        extractValueFromEnvOrParamsAndRun(script, TASK_NAME_PARAMETER) {
             value -> ctx.taskName = value
-        })
-        applyParameterIfNotEmpty(script, USER_EMAIL_PARAMETER, script.params[USER_EMAIL_PARAMETER], {
+        }
+        extractValueFromEnvOrParamsAndRun(script, USER_EMAIL_PARAMETER) {
             value -> ctx.userEmail = value
-        })
+        }
 
         if(ctx.notificationEnabled) {
             sendStartNotification(ctx)
@@ -346,10 +344,6 @@ abstract class UiTestPipeline extends ScmPipeline {
                         name: NODE_PARAMETER,
                         defaultValue: node,
                         description: 'Node на котором будет выполняться job'),
-                script.string(
-                        name: TASK_NAME_PARAMETER,
-                        description: 'Необязательный параметр, присутствует здесь для правильного разбора json из webhook'),
-
 
         ])
     }
@@ -364,6 +358,10 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.cron('0 9 * * *'),
                 script.GenericTrigger(
                         genericVariables: [
+                                [
+                                        key  : TASK_KEY_PARAMETER,
+                                        value: '$.issue.key'
+                                ],
                                 [
                                         key  : 'labelsWh',
                                         value: '$.issue.fields.labels'

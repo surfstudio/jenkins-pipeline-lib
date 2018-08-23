@@ -102,6 +102,7 @@ class CommonUtil {
         }
     }
 
+    @Deprecated
     def static applyParameterIfNotEmpty(Object script, String varName, paramValue, assignmentAction) {
         def valueNotEmpty = paramValue != null
         if (paramValue instanceof String) {
@@ -110,6 +111,49 @@ class CommonUtil {
         if (valueNotEmpty) {
             script.echo "{$varName} sets from parameters to {$paramValue}"
             assignmentAction(paramValue)
+        }
+    }
+
+    /**
+     * Firstly extract from env, if empty, extract from params
+     * Value sets to env when extracted from webhook body, so it with more priority
+     * @param actionWithValue {value -> }
+     */
+    def static extractValueFromEnvOrParamsAndRun(Object script, String key, Closure actionWithValue) {
+        runWithNotEmptyValue(script, key, script.env[key], script.params[key], actionWithValue)
+    }
+
+    /**
+     * @param actionWithValue {value -> }
+     */
+    def static extractValueFromEnvAndRun(Object script, String key, Closure actionWithValue) {
+        runWithNotEmptyValue(script, key, script.env[key], null, actionWithValue)
+    }
+
+    /**
+     * @param actionWithValue {value -> }
+     */
+    def static extractValueFromParamsAndRun(Object script, String key, Closure actionWithValue) {
+        runWithNotEmptyValue(script, key, null, script.params[key], actionWithValue)
+    }
+
+    def static runWithNotEmptyValue(script, String key, envValue, paramsValue, Closure actionWithValue) {
+        if (notEmpty(envValue)) {
+            script.echo "Value {$envValue} extracted by {$key} from env"
+            actionWithValue(envValue)
+        } else if (notEmpty(paramsValue)) {
+            script.echo "Value {$paramsValue} extracted by {$key} from params"
+            actionWithValue(paramsValue)
+        } else {
+            script.echo "Value not extracted by {$key}"
+        }
+    }
+
+    def static notEmpty(value) {
+        if (value instanceof String) {
+            return value?.trim()
+        } else {
+            return value != null
         }
     }
 

@@ -9,7 +9,7 @@ import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
 
-import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
+import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
 
 abstract class PrPipeline extends ScmPipeline {
 
@@ -40,23 +40,20 @@ abstract class PrPipeline extends ScmPipeline {
         def script = ctx.script
         CommonUtil.printInitialStageStrategies(ctx)
 
-        def params = script.params
-
-        //Выбираем значения веток и автора из параметров, Установка их в параметры происходит
+        //
         // если триггером был webhook или если стартанули Job вручную
-        applyParameterIfNotEmpty(script, SOURCE_BRANCH_PARAMETER, params[SOURCE_BRANCH_PARAMETER], {
+        extractValueFromEnvOrParamsAndRun(script, SOURCE_BRANCH_PARAMETER) {
             value -> ctx.sourceBranch = value
-        })
-        applyParameterIfNotEmpty(script, DESTINATION_BRANCH_PARAMETER, params.destinationBranch, {
+        }
+        extractValueFromEnvOrParamsAndRun(script, DESTINATION_BRANCH_PARAMETER) {
             value -> ctx.destinationBranch = value
-        })
-        applyParameterIfNotEmpty(script, AUTHOR_USERNAME_PARAMETER, params.authorUsername, {
+        }
+        extractValueFromEnvOrParamsAndRun(script, AUTHOR_USERNAME_PARAMETER) {
             value -> ctx.authorUsername = value
-        })
-
-        applyParameterIfNotEmpty(script, TARGET_BRANCH_CHANGED_PARAMETER, params.targetBranchChanged, {
+        }
+        extractValueFromEnvOrParamsAndRun(script, TARGET_BRANCH_CHANGED_PARAMETER) {
             value -> ctx.targetBranchChanged = Boolean.valueOf(value)
-        })
+        }
 
         if(ctx.targetBranchChanged) {
             script.echo "Build triggered by target branch changes, run only ${ctx.stagesForTargetBranchChangedMode} stages"
@@ -166,11 +163,7 @@ abstract class PrPipeline extends ScmPipeline {
                         description: 'Ветка, в которую будет мержиться пр, обязательный параметр'),
                 script.string(
                         name: AUTHOR_USERNAME_PARAMETER,
-                        description: 'username в bitbucket создателя пр, нужно для отправки собщений, обязательный параметр'),
-                script.booleanParam(
-                        name: TARGET_BRANCH_CHANGED_PARAMETER,
-                        defaultValue: false,
-                        description: 'Не следует указывать, параметр нужен здесь для пробрасывания его в клон билда')
+                        description: 'username в bitbucket создателя пр, нужно для отправки собщений, обязательный параметр')
         ])
     }
 

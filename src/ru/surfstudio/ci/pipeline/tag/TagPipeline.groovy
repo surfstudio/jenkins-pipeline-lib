@@ -6,10 +6,9 @@ import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.ScmPipeline
-import ru.surfstudio.ci.pipeline.pr.PrPipeline
 import ru.surfstudio.ci.stage.Stage
 
-import static ru.surfstudio.ci.CommonUtil.applyParameterIfNotEmpty
+import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
 
 abstract class TagPipeline extends ScmPipeline {
 
@@ -45,13 +44,9 @@ abstract class TagPipeline extends ScmPipeline {
                 (ctx.BETA_UPLOAD): params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
         ])
 
-        applyParameterIfNotEmpty(script,'repoTag', env[REPO_TAG_PARAMETER], { //first from webhook
+        extractValueFromEnvOrParamsAndRun(script, REPO_TAG_PARAMETER) {
             value -> ctx.repoTag = value
-        })
-
-        applyParameterIfNotEmpty(script,'repoTag', params[REPO_TAG_PARAMETER], { //else from params
-            value -> ctx.repoTag = value
-        })
+        }
 
         def buildDescription = ctx.repoTag
         CommonUtil.setBuildDescription(script, buildDescription)
