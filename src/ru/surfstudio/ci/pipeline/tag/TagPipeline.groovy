@@ -37,6 +37,7 @@ abstract class TagPipeline extends ScmPipeline {
 
         //Используем нестандартные стратегии для Stage из параметров, если они установлены
         def params = script.params
+        def env = script.env
         CommonUtil.applyStrategiesFromParams(ctx, [
                 (ctx.UNIT_TEST): params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
                 (ctx.INSTRUMENTATION_TEST): params[INSTRUMENTATION_TEST_STAGE_STRATEGY_PARAMETER],
@@ -44,7 +45,11 @@ abstract class TagPipeline extends ScmPipeline {
                 (ctx.BETA_UPLOAD): params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
         ])
 
-        applyParameterIfNotEmpty(script,'repoTag', params[REPO_TAG_PARAMETER], {
+        applyParameterIfNotEmpty(script,'repoTag', env[REPO_TAG_PARAMETER], { //first from webhook
+            value -> ctx.repoTag = value
+        })
+
+        applyParameterIfNotEmpty(script,'repoTag', params[REPO_TAG_PARAMETER], { //else from params
             value -> ctx.repoTag = value
         })
 
