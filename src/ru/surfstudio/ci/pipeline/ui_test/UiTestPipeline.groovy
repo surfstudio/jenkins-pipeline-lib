@@ -75,9 +75,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
         CommonUtil.printInitialStageStrategies(ctx)
 
-        //Выбираем значения веток, прогона и тд из параметров, Установка их в параметры происходит
-        // если триггером был webhook или если стартанули Job вручную
-
+        //если триггером был webhook параметры устанавливаются как env, если запустили вручную, то устанавливается как params
         extractValueFromParamsAndRun(script, NODE_PARAMETER) { value ->
             ctx.node = value
             script.echo "Using node from params: ${ctx.node}"

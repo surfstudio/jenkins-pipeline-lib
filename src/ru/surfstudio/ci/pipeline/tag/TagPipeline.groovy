@@ -44,6 +44,7 @@ abstract class TagPipeline extends ScmPipeline {
                 (ctx.BETA_UPLOAD): params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
         ])
 
+        //если триггером был webhook параметры устанавливаются как env, если запустили вручную, то устанавливается как params
         extractValueFromEnvOrParamsAndRun(script, REPO_TAG_PARAMETER) {
             value -> ctx.repoTag = value
         }

@@ -40,8 +40,8 @@ abstract class PrPipeline extends ScmPipeline {
         def script = ctx.script
         CommonUtil.printInitialStageStrategies(ctx)
 
-        //
-        // если триггером был webhook или если стартанули Job вручную
+
+        //если триггером был webhook параметры устанавливаются как env, если запустили вручную, то устанавливается как params
         extractValueFromEnvOrParamsAndRun(script, SOURCE_BRANCH_PARAMETER) {
             value -> ctx.sourceBranch = value
         }
