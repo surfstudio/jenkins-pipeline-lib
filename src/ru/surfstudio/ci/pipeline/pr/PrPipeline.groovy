@@ -78,8 +78,8 @@ abstract class PrPipeline extends ScmPipeline {
 
 
     def static preMergeStageBody(Object script, String url, String sourceBranch, String destinationBranch, String credentialsId) {
-        script.sh 'git config --global user.name "Jenkins"'
-        script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
+        //script.sh 'git config --global user.name "Jenkins"'
+        //script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
 
         script.sh "git reset --merge" //revert previous failed merge
 
