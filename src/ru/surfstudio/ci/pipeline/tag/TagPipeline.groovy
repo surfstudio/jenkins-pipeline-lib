@@ -112,7 +112,7 @@ abstract class TagPipeline extends ScmPipeline {
         ]
     }
 
-    private static void buildDiscarder(script) {
+    def static buildDiscarder(script) {
         return script.buildDiscarder(
                 script.logRotator(
                         artifactDaysToKeepStr: '90',
@@ -122,7 +122,7 @@ abstract class TagPipeline extends ScmPipeline {
         )
     }
 
-    private static void parameters(script) {
+    def static parameters(script) {
         return script.parameters([
                 [
                         $class     : 'GitParameterDefinition',
@@ -148,7 +148,7 @@ abstract class TagPipeline extends ScmPipeline {
         ])
     }
 
-    private static void triggers(script, String repoUrl) {
+    def static triggers(script, String repoUrl) {
         return script.pipelineTriggers([
                 script.GenericTrigger(
                         genericVariables: [
