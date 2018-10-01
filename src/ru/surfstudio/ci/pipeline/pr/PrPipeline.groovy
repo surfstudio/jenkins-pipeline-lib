@@ -81,7 +81,9 @@ abstract class PrPipeline extends ScmPipeline {
         //script.sh 'git config --global user.name "Jenkins"'
         //script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
 
-        script.sh "git reset --merge" //revert previous failed merge
+        CommonUtil.safe(script) {
+            script.sh "git reset --merge" //revert previous failed merge
+        }
 
         script.git(
                 url: url,
