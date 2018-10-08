@@ -224,4 +224,8 @@ class CommonUtil {
         allParams.addAll(extraParams)
         script.build job: script.env.JOB_NAME, parameters: allParams, wait: wait
     }
+
+    def static encodeUrl(string) {
+        java.net.URLEncoder.encode(string, "UTF-8")
+    }
 }

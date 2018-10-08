@@ -3,7 +3,7 @@
 
 Содержит: 
 
-* базовые классы для удобной работы со scripted pipeline
+* Базовые классы для удобной работы со scripted pipeline
 * Готовые pipelines для внутреннего процесса Surf
 * Утилиты для распростаненных задач ci разработки Android и iOS приложений
 
@@ -62,19 +62,19 @@ pipeline.getStage(pipeline.INSTRUMENTATION_TEST).body = {
 pipeline.run()
 ```
 
-###Шаблоны
+### Шаблоны
 В папке templates находятся стандартные Jenkins скрипты для разных типов проектов (android, ios, ui_test)
 
-#Разработка
+# Разработка
 Основными ветками являются ветки вида **version-X.Y.Z-SNAPSHOT**
 Изменение библиотеки следует производить в feature-branch, чтобы не затронуть работающие проекты. Когда новая функциональность будет закончена, следует слить ветку с ней в master. 
 Для тестирования изменений в пайплайн скрипте следует импортировать библиотеку следующим образом `@Library('surf-lib@feature-branch')`. Не забываем поддерживать обратную совместимость Api библиотеки.
-###Инструменты
+### Инструменты
 Для работы с библиотекой удобно использовать [IntelliJ IDEA](https://www.jetbrains.com/idea/) c установленным [Groovy](http://groovy-lang.org/install.html).
 В ProjectStructure на вкладке Modules директорию "src" следует пометить как "Sources" 
 
-#Кофигурация Jenkins
-* Версия Jenkins <= 2.121.2
+# Кофигурация Jenkins
+* Версия Jenkins >= 2.121.2
 * nodes для Android сборок с меткой "android"
 * nodes для iOS сборок с меткой "ios"
 * ui test (todo)
