@@ -74,7 +74,7 @@ pipeline.run()
 В ProjectStructure на вкладке Modules директорию "src" следует пометить как "Sources" 
 
 # Кофигурация Jenkins
-* Версия Jenkins <= 2.121.2
+* Версия Jenkins >= 2.121.2
 * nodes для Android сборок с меткой "android"
 * nodes для iOS сборок с меткой "ios"
 * ui test (todo)
