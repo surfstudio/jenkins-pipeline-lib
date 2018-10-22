@@ -24,15 +24,8 @@ import ru.surfstudio.ci.CommonUtil
 class AndroidPipelineHelper {
     def static buildStageBodyAndroid(Object script, String buildGradleTask) {
         script.sh "./gradlew ${buildGradleTask}"
-        CommonUtil.safe(script) {
-            script.step([$class: 'ArtifactArchiver', artifacts: '**/*.apk'])
-        }
-        CommonUtil.safe(script) {
-            script.step([$class: 'ArtifactArchiver', artifacts: '**/mapping.txt', allowEmptyArchive: true])
-        }
-        CommonUtil.safe(script) {
-            script.step([$class: 'ArtifactArchiver', artifacts: '**/*.aar'])
-        }
+        script.step([$class: 'ArtifactArchiver', artifacts: '**/*.apk', allowEmptyArchive: true])
+        script.step([$class: 'ArtifactArchiver', artifacts: '**/mapping.txt', allowEmptyArchive: true]) 
     }
 
     def static buildWithCredentialsStageBodyAndroid(Object script,
