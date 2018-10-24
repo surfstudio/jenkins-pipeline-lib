@@ -36,6 +36,7 @@ abstract class TagPipeline extends ScmPipeline {
     public static final String BETA_UPLOAD = 'Beta Upload'
 
     //scm
+    public tagRegexp = /(.*)?\d{1,4}\.\d{1,4}\.\d{1,4}(.*)?/
     public repoTag = ""
 
     TagPipeline(Object script) {
@@ -123,7 +124,7 @@ abstract class TagPipeline extends ScmPipeline {
         return [
                 buildDiscarder(script),
                 parameters(script),
-                triggers(script, ctx.repoUrl)
+                triggers(script, ctx.repoUrl, ctx.tagRegexp)
         ]
     }
 
@@ -163,7 +164,7 @@ abstract class TagPipeline extends ScmPipeline {
         ])
     }
 
-    def static triggers(script, String repoUrl) {
+    def static triggers(script, String repoUrl, String tagRegexp) {
         return script.pipelineTriggers([
                 script.GenericTrigger(
                         genericVariables: [
@@ -179,7 +180,7 @@ abstract class TagPipeline extends ScmPipeline {
                         printContributedVariables: true,
                         printPostContent: true,
                         causeString: 'Triggered by Bitbucket',
-                        regexpFilterExpression: /$repoUrl (.*)?(v)?\d{1,4}\.\d{1,4}\.\d{1,4}(\-rc\d{1,4})?/,
+                        regexpFilterExpression: /$repoUrl $tagRegexp/,
                         regexpFilterText: '$repoUrl $repoTag_0'
                 ),
                 script.pollSCM('')
