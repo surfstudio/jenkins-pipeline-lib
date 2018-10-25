@@ -15,6 +15,10 @@
  */
 package ru.surfstudio.ci
 
+import java.util.function.Predicate
+import java.util.stream.Collectors
+import java.util.stream.Stream
+
 class AndroidUtil {
 
     def static onEmulator(Object script, String avdName, Closure body) {
@@ -84,5 +88,17 @@ class AndroidUtil {
                 body()
             }
         }
+    }
+
+    def static String getGradleVariable(Object script, String file, String varName) {
+        def String fileBody = script.readFile(file)
+        def lines = fileBody.split("\n")
+        for (line in lines) {
+            def words = line.split(/(;| |\t|=)/).findAll({!it?.trim()})
+            if(words[0] == varName){
+                return words[1]
+            }
+        }
+        throw error("groovy variable with name: $varName not exist in file: $file")
     }
 }
