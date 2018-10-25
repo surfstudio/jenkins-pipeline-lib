@@ -99,6 +99,6 @@ class AndroidUtil {
                 return words[1]
             }
         }
-        throw error("groovy variable with name: $varName not exist in file: $file")
+        throw script.error("groovy variable with name: $varName not exist in file: $file")
     }
 }
