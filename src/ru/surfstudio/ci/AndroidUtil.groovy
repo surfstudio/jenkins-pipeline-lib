@@ -93,8 +93,10 @@ class AndroidUtil {
     def static String getGradleVariable(Object script, String file, String varName) {
         def String fileBody = script.readFile(file)
         def lines = fileBody.split("\n")
+        script.echo "$lines"
         for (line in lines) {
             def words = line.split(/(;| |\t|=)/).findAll({!it?.trim()})
+            script.echo "$words"
             if(words[0] == varName){
                 return words[1]
             }
