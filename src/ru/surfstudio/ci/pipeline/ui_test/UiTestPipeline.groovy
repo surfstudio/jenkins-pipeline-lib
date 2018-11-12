@@ -177,9 +177,9 @@ abstract class UiTestPipeline extends ScmPipeline {
                                        String outputsDir,
                                        String outputJsonFile,
                                        String outputHtmlFile,
-                                       String outputrerunTxtFile,
                                        String jiraAuthenticationName,
-                                       String htmlReportName) {
+                                       String htmlReportName,
+                                       String outputrerunTxtFile) {
         script.dir(outputsDir) {
             //def testResult = script.readFile file: outputJsonFile
             //script.echo "Test result json: $testResult"
