@@ -111,7 +111,9 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                                     String featuresDir,
                                     String artifactForTest,
                                     String featureFile,
-                                    String outputHtmlFile) {
+                                    String outputHtmlFile,
+                                    String outputrerunTxtFile
+                                    ) {
 
 
         script.echo "Tests started"
