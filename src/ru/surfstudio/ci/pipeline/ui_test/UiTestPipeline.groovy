@@ -54,6 +54,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public featureForTest = "for_test.feature"
     public outputJsonFile = "report.json"
     public outputHtmlFile = "report.html"
+    public outputrerunTxtFile = "rerun.txt"
 
     //credentials
     public jiraAuthenticationName = 'Jarvis_Jira'
@@ -176,6 +177,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                                        String outputsDir,
                                        String outputJsonFile,
                                        String outputHtmlFile,
+                                       String outputrerunTxtFile,
                                        String jiraAuthenticationName,
                                        String htmlReportName) {
         script.dir(outputsDir) {
