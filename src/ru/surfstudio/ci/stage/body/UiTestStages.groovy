@@ -64,7 +64,8 @@ class UiTestStages {
                                     String artifactForTest,
                                     String featureFile,
                                     String outputHtmlFile,
-                                    String outputJsonFile) {
+                                    String outputJsonFile,
+                                    String outputrerunTxtFile) {
         UiTestPipelineAndroid.testStageBodyAndroid(
                 script,
                 taskKey,
@@ -72,7 +73,8 @@ class UiTestStages {
                 featuresDir,
                 artifactForTest,
                 featureFile,
-                outputHtmlFile)
+                outputHtmlFile,
+                outputrerunTxtFile)
 
     }
 
