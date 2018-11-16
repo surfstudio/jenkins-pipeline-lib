@@ -84,8 +84,8 @@ abstract class PrPipeline extends ScmPipeline {
         }
 
         def buildDescription = ctx.targetBranchChanged ?
-                        "$ctx.sourceBranch: target branch changed" :
-                        ctx.sourceBranch
+                        "$ctx.sourceBranch to $ctx.destinationBranch: target branch changed" :
+                        "$ctx.sourceBranch to $ctx.destinationBranch"
 
         CommonUtil.setBuildDescription(script, buildDescription)
         CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.ANOTHER, buildDescription)
