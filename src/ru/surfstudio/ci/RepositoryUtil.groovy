@@ -102,7 +102,9 @@ class RepositoryUtil {
     }
 
     def static String getCurrentCommitMessage(Object script){
-        return script.sh("git log -1 --pretty=%B")
+        def message = script.sh("git log -1 --pretty=%B")
+        script.echo "extracted message: $message"
+        return message
     }
 
     def static isContainsSkipCi(String text){
