@@ -49,6 +49,8 @@ abstract class ScmPipeline extends Pipeline {
 
     def static initAndCheckRepositoryConfiguration(ScmPipeline ctx) {
         def script = ctx.script
+        script.sh 'git config --global user.name "Jenkins"'
+        script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
         RepositoryUtil.tryExtractInitialRemoteConfig(script) { url, credentialsId ->
             ctx.repoUrl = url
             ctx.repoCredentialsId = credentialsId
