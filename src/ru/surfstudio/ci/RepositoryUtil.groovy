@@ -17,6 +17,10 @@ package ru.surfstudio.ci
 
 class RepositoryUtil {
 
+    def static SKIP_CI_LABEL1 = "[skip ci]"
+    def static SKIP_CI_LABEL2 = "[ci skip]"
+    def static VERSION_LABEL1 = "[version]"
+
     def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName){
         def bitbucketStatus = 'INPROGRESS'
         def slug = getCurrentBitbucketRepoSlug(script, repoUrl)
@@ -108,11 +112,15 @@ class RepositoryUtil {
     }
 
     def static isContainsSkipCi(String text){
-        return text.contains("[skip ci]") || text.contains("[ci skip]")
+        return text.contains(SKIP_CI_LABEL1) || text.contains(SKIP_CI_LABEL2)
     }
 
-    def static isCurrentCommitMessageContainsSkipCi(Object script){
+    def static isCurrentCommitMessageContainsSkipCiLabel(Object script){
         return isContainsSkipCi(getCurrentCommitMessage(script))
+    }
+
+    def static isCurrentCommitMessageContainsVersionLabel(Object script){
+        return getCurrentCommitMessage(script).contains(VERSION_LABEL1)
     }
 
     def static setDefaultJenkinsGitUser(Object script) {
