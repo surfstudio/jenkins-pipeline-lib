@@ -130,7 +130,7 @@ class RepositoryUtil {
         return getCurrentCommitMessage(script).contains(VERSION_LABEL1)
     }
 
-    def static setDefaultJenkinsGitUser(Object script) { //todo передавать credentialsid и пытаться доставать оттуда username
+    def static setDefaultJenkinsGitUser(Object script) {
         script.sh 'git config --global user.name "Surf_Builder"'
         script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
     }
