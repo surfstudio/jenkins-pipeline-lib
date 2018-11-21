@@ -228,4 +228,12 @@ class CommonUtil {
     def static encodeUrl(string) {
         java.net.URLEncoder.encode(string, "UTF-8")
     }
+
+    def static String removeQuotesFromTheEnds(String string) {
+        return string.substring(1, string.length()-1)
+    }
+
+    def static isJobStartedByUser(Object script) {
+        return script.currentBuild.rawBuild.getCauses()[0].toString().contains('UserIdCause')
+    }
 }

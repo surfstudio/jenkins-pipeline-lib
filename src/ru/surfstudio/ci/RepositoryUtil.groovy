@@ -100,4 +100,16 @@ class RepositoryUtil {
             script.echo "Cannot extract initial repository remote config: ${e.toString()}"
         }
     }
+
+    def static String getCurrentCommitMessage(Object script){
+        return script.sh("git log -1 --pretty=%B")
+    }
+
+    def static isContainsSkipCi(String text){
+        return text.contains("[skip ci]") || text.contains("[ci skip]")
+    }
+
+    def static isCurrentCommitMessageContainsSkipCi(Object script){
+        return isContainsSkipCi(getCurrentCommitMessage(script))
+    }
 }

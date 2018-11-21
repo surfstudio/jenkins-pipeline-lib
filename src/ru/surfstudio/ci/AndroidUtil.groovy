@@ -103,4 +103,22 @@ class AndroidUtil {
         }
         throw script.error("groovy variable with name: $varName not exist in file: $file")
     }
+
+    def static String changeGradleVariable(Object script, String file, String varName, String newVarValue) {
+        String oldVarValue = getGradleVariable(script, file, varName)
+        String fileBody = script.readFile(file)
+        String newFileBody = ""
+        def lines = fileBody.split("\n")
+        for (line in lines) {
+            def words = line.split(/(;| |\t|=)/).findAll({it?.trim()})
+            if(words[0] == varName) {
+                String updatedLine = line.replace(oldVarValue, newVarValue)
+                newFileBody += updatedLine
+            } else {
+                newFileBody += line
+            }
+            newFileBody += "\n"
+        }
+        script.writeFile file: file, text: newFileBody
+    }
 }
