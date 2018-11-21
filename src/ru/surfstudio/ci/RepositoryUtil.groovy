@@ -114,4 +114,9 @@ class RepositoryUtil {
     def static isCurrentCommitMessageContainsSkipCi(Object script){
         return isContainsSkipCi(getCurrentCommitMessage(script))
     }
+
+    def static setDefaultJenkinsGitUser(Object script) {
+        script.sh 'git config --global user.name "Jenkins"'
+        script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
+    }
 }
