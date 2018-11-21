@@ -124,7 +124,7 @@ class RepositoryUtil {
     }
 
     def static setDefaultJenkinsGitUser(Object script) {
-        script.sh 'git config --global user.name "Jenkins"'
+        script.sh 'git config --global user.name "Surf_Builder"'
         script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
     }
 }
