@@ -105,6 +105,13 @@ class RepositoryUtil {
         }
     }
 
+    def static String[] getRefsForCurrentCommitMessage(Object script){
+        def String rawRefs = script.sh(script: "git log -1 --pretty=%D", returnStdout: true)
+        String result = rawRefs.split(/(, | -> |)/)
+        script.echo "extracted refs for current commit message: $rawRefs"
+        return result
+    }
+
     def static String getCurrentCommitMessage(Object script){
         def message = script.sh(script: "git log -1 --pretty=%B", returnStdout: true)
         script.echo "extracted current commit message: $message"
@@ -123,8 +130,16 @@ class RepositoryUtil {
         return getCurrentCommitMessage(script).contains(VERSION_LABEL1)
     }
 
-    def static setDefaultJenkinsGitUser(Object script) {
+    def static setDefaultJenkinsGitUser(Object script) { //todo передавать credentialsid и пытаться доставать оттуда username
         script.sh 'git config --global user.name "Surf_Builder"'
         script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
+    }
+
+    def static setRemoteOriginUrlWithUsername(Object script, String url, String credentialsId) { //todo support only clear https bitbucket url and usernamePassword credentials now (e.g. https://bitbucket.org/surfstudio/android-standard )
+        script.withCredentials([script.usernamePassword(credentialsId: credentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+            def newUrl = url.replace("https://", "https://$script.USERNAME@")
+            script.sh "git remote set-url origin $newUrl"
+        }
+
     }
 }
