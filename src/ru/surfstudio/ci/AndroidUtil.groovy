@@ -97,7 +97,7 @@ class AndroidUtil {
             def words = line.split(/(;| |\t|=)/).findAll({it?.trim()})
             if(words[0] == varName && words.size() > 1) {
                 def value = words[1]
-                script.echo "$varName = $value in file $file"
+                script.echo "$varName = $value found in file $file"
                 return value
             }
         }
@@ -120,5 +120,6 @@ class AndroidUtil {
             newFileBody += "\n"
         }
         script.writeFile file: file, text: newFileBody
+        script.echo "$varName value changed to $newVarValue in file $file"
     }
 }

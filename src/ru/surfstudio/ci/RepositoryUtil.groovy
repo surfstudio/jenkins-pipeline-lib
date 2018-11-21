@@ -103,7 +103,7 @@ class RepositoryUtil {
 
     def static String getCurrentCommitMessage(Object script){
         def message = script.sh(script: "git log -1 --pretty=%B", returnStdout: true)
-        script.echo "extracted message: $message"
+        script.echo "extracted current commit message: $message"
         return message
     }
 
