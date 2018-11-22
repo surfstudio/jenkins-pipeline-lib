@@ -89,7 +89,7 @@ abstract class TagPipeline extends ScmPipeline {
         )
         script.sh "git checkout tags/$repoTag"
 
-        RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(scrip)
+        RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
 
         RepositoryUtil.saveCurrentGitCommitHash(script)
     }
