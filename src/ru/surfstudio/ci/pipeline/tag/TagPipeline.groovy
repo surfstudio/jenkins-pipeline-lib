@@ -135,6 +135,8 @@ abstract class TagPipeline extends ScmPipeline {
         }
         script.sh "git checkout -B $branchForSetVersion"
 
+        RepositoryUtil.setDefaultJenkinsGitUser(script)
+
         //commit and push new version
         def versionName = CommonUtil.removeQuotesFromTheEnds(
                 AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionNameGradleVar))

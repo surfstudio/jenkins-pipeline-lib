@@ -113,7 +113,7 @@ class RepositoryUtil {
 
     def static Collection<String> getRefsForCurrentCommitMessage(Object script){
         def String rawRefs = script.sh(script: "git log -1 --pretty=%D", returnStdout: true)
-        def result = rawRefs.split(/(-|>| |,|\t)/).findAll({it?.trim()})
+        def result = rawRefs.split(/(->|, )/).findAll({it?.trim()})
         script.echo "extracted refs for current commit message: $result"
         return result
     }
