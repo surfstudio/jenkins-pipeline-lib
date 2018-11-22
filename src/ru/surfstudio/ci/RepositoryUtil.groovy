@@ -15,6 +15,12 @@
  */
 package ru.surfstudio.ci
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.IdCredentials;
+import com.cloudbees.plugins.credentials.common.StandardCredentials;
+import org.eclipse.jgit.transport.URIish
+import org.jenkinsci.plugins.gitclient.Git
+
 class RepositoryUtil {
 
     def static SKIP_CI_LABEL1 = "[skip ci]"
@@ -135,11 +141,18 @@ class RepositoryUtil {
         script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
     }
 
-    def static setRemoteOriginUrlWithUsername(Object script, String url, String credentialsId) { //todo support only clear https bitbucket url and usernamePassword credentials now (e.g. https://bitbucket.org/surfstudio/android-standard )
-        script.withCredentials([script.usernamePassword(credentialsId: credentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-            def newUrl = url.replace("https://", "https://$script.USERNAME@")
-            script.sh "git remote set-url origin $newUrl"
-        }
-
+    def static push(Object script, String repoUrl, String repoCredentialsId) {
+        def gitClient = Git
+                .with(
+                    script.getContext(hudson.model.TaskListener),
+                    script.getContext(hudson.EnvVars))
+                .in(script.getContext(hudson.FilePath))
+                .using("git")
+                .getClient()
+        def cred = CredentialsProvider.findCredentialById(repoCredentialsId, IdCredentials.class, script.currentBuild.rawBuild);
+        gitClient.addDefaultCredentials(cred)
+        gitClient.push()
+                .to(new URIish(repoUrl))
+                .execute()
     }
 }
