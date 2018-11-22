@@ -107,7 +107,7 @@ abstract class TagPipeline extends ScmPipeline {
                                     String gradleConfigFile,
                                     String appVersionNameGradleVar,
                                     String appVersionCodeGradleVar,
-                                    branchesPatternsForAutoSetVersion,
+                                    Collection<String> branchesPatternsForAutoSetVersion,
                                     String repoUrl,
                                     String repoCredentialsId) {
         //find branch for set version
