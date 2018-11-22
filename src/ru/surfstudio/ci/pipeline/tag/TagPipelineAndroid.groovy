@@ -102,13 +102,13 @@ class TagPipelineAndroid extends TagPipeline {
                 },
                 createStage(VERSION_PUSH, StageStrategy.SKIP_STAGE) {
                     versionPushStageBody(script,
-                             repoTag,
-                             gradleConfigFile,
-                             appVersionNameGradleVar,
-                             appVersionCodeGradleVar,
-                             branchesPatternsForAutoSetVersion,
-                             repoUrl,
-                             repoCredentialsId)
+                            repoTag,
+                            gradleConfigFile,
+                            appVersionNameGradleVar,
+                            appVersionCodeGradleVar,
+                            branchesPatternsForAutoSetVersion,
+                            repoUrl,
+                            repoCredentialsId)
                 },
         ]
         finalizeBody = { finalizeStageBody(this) }

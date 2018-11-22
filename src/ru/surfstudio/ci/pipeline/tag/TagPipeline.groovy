@@ -89,7 +89,7 @@ abstract class TagPipeline extends ScmPipeline {
         )
         script.sh "git checkout tags/$repoTag"
 
-        RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
+        RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(scrip)
 
         RepositoryUtil.saveCurrentGitCommitHash(script)
     }
@@ -107,7 +107,7 @@ abstract class TagPipeline extends ScmPipeline {
                                     String gradleConfigFile,
                                     String appVersionNameGradleVar,
                                     String appVersionCodeGradleVar,
-                                    String[] branchesPatternsForAutoSetVersion,
+                                    branchesPatternsForAutoSetVersion,
                                     String repoUrl,
                                     String repoCredentialsId) {
         //find branch for set version
