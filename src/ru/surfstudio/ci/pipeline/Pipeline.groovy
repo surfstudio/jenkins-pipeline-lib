@@ -16,6 +16,7 @@
  */
 package ru.surfstudio.ci.pipeline
 
+import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
@@ -117,6 +118,7 @@ abstract class Pipeline implements Serializable {
                     script.echo("Stage ${stage.name} success")
                 } catch (e) {
                     script.echo "Error: ${e.toString()}"
+                    CommonUtil.printStackTrace(script, e)
                     if(e.getCause()!=null) {
                         script.echo "Cause error: ${e.getCause().toString()}"
                     }

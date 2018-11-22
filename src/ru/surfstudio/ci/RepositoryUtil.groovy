@@ -15,7 +15,17 @@
  */
 package ru.surfstudio.ci
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.IdCredentials;
+import com.cloudbees.plugins.credentials.common.StandardCredentials;
+import org.eclipse.jgit.transport.URIish
+import org.jenkinsci.plugins.gitclient.Git
+
 class RepositoryUtil {
+
+    def static SKIP_CI_LABEL1 = "[skip ci]"
+    def static SKIP_CI_LABEL2 = "[ci skip]"
+    def static VERSION_LABEL1 = "[version]"
 
     def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName){
         def bitbucketStatus = 'INPROGRESS'
@@ -101,6 +111,13 @@ class RepositoryUtil {
         }
     }
 
+    def static String[] getRefsForCurrentCommitMessage(Object script){
+        def String rawRefs = script.sh(script: "git log -1 --pretty=%D", returnStdout: true)
+        String result = rawRefs.split(/(, | -> |)/)
+        script.echo "extracted refs for current commit message: $rawRefs"
+        return result
+    }
+
     def static String getCurrentCommitMessage(Object script){
         def message = script.sh(script: "git log -1 --pretty=%B", returnStdout: true)
         script.echo "extracted current commit message: $message"
@@ -108,15 +125,34 @@ class RepositoryUtil {
     }
 
     def static isContainsSkipCi(String text){
-        return text.contains("[skip ci]") || text.contains("[ci skip]")
+        return text.contains(SKIP_CI_LABEL1) || text.contains(SKIP_CI_LABEL2)
     }
 
-    def static isCurrentCommitMessageContainsSkipCi(Object script){
+    def static isCurrentCommitMessageContainsSkipCiLabel(Object script){
         return isContainsSkipCi(getCurrentCommitMessage(script))
     }
 
+    def static isCurrentCommitMessageContainsVersionLabel(Object script){
+        return getCurrentCommitMessage(script).contains(VERSION_LABEL1)
+    }
+
     def static setDefaultJenkinsGitUser(Object script) {
-        script.sh 'git config --global user.name "Jenkins"'
+        script.sh 'git config --global user.name "Surf_Builder"'
         script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
+    }
+
+    def static push(Object script, String repoUrl, String repoCredentialsId) {
+        def gitClient = Git
+                .with(
+                    script.getContext(hudson.model.TaskListener),
+                    script.getContext(hudson.EnvVars))
+                .in(script.getContext(hudson.FilePath))
+                .using("git")
+                .getClient()
+        def cred = CredentialsProvider.findCredentialById(repoCredentialsId, IdCredentials.class, script.currentBuild.rawBuild);
+        gitClient.addDefaultCredentials(cred)
+        gitClient.push()
+                .to(new URIish(repoUrl))
+                .execute()
     }
 }
