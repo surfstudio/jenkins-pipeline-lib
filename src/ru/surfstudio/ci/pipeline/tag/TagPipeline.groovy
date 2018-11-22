@@ -38,7 +38,7 @@ abstract class TagPipeline extends ScmPipeline {
     public static final String UNIT_TEST = 'Unit Test'
     public static final String INSTRUMENTATION_TEST = 'Instrumentation Test'
     public static final String STATIC_CODE_ANALYSIS = 'Static Code Analysis'
-    public static final String VERSION_UPDATE = 'Version Increase'
+    public static final String VERSION_UPDATE = 'Version Update'
     public static final String BETA_UPLOAD = 'Beta Upload'
     public static final String VERSION_PUSH = 'Version Push'
 
@@ -127,7 +127,7 @@ abstract class TagPipeline extends ScmPipeline {
         }
 
         if(!branchForSetVersion){
-            script.echo "WARN: Do not find suitable branch for set version. It serched for branches: $branchesPatternsForAutoSetVersion"
+            script.echo "WARN: Do not find suitable branch for setting version. Branches serched for patterns: $branchesPatternsForAutoSetVersion"
             throw new UnstableStateThrowable()
         }
         script.sh "git checkout -B $branchForSetVersion"
