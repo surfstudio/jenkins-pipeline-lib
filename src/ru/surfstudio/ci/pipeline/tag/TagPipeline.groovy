@@ -25,6 +25,8 @@ import ru.surfstudio.ci.error.UnstableStateThrowable
 import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
+import java.util.regex.Pattern
+import java.util.regex.Matcher
 
 import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
 
