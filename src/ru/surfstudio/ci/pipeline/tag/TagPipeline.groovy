@@ -16,7 +16,6 @@
 package ru.surfstudio.ci.pipeline.tag
 
 import ru.surfstudio.ci.AbortDuplicateStrategy
-import ru.surfstudio.ci.AndroidUtil
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.RepositoryUtil
@@ -26,7 +25,6 @@ import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
 import java.util.regex.Pattern
-import java.util.regex.Matcher
 
 import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
 
@@ -45,8 +43,8 @@ abstract class TagPipeline extends ScmPipeline {
     //scm
     public tagRegexp = /(.*)?\d{1,4}\.\d{1,4}\.\d{1,4}(.*)?/
     public repoTag = ""
-    public setVersionFromTag = true
-    public branchesPatternsForAutoSetVersion = [/^origin\/dev\/.*/, /^origin\/feature\/.*/]
+    public changeVersionAsTag = true
+    public branchesPatternsForAutoChangeVersion = [/^origin\/dev\/.*/, /^origin\/feature\/.*/] //будет выбрана первая подходящая ветка
 
     TagPipeline(Object script) {
         super(script)
@@ -57,8 +55,8 @@ abstract class TagPipeline extends ScmPipeline {
     def static initBody(TagPipeline ctx) {
         def script = ctx.script
 
-        ctx.getStage(VERSION_UPDATE).strategy = ctx.setVersionFromTag ? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE
-        ctx.getStage(VERSION_PUSH).strategy = ctx.setVersionFromTag ? StageStrategy.UNSTABLE_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE
+        ctx.getStage(VERSION_UPDATE).strategy = ctx.changeVersionAsTag ? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE
+        ctx.getStage(VERSION_PUSH).strategy = ctx.changeVersionAsTag ? StageStrategy.UNSTABLE_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE
 
         CommonUtil.printInitialStageStrategies(ctx)
 
@@ -104,44 +102,39 @@ abstract class TagPipeline extends ScmPipeline {
 
     def static versionPushStageBody(Object script,
                                     String repoTag,
-                                    String gradleConfigFile,
-                                    String appVersionNameGradleVar,
-                                    String appVersionCodeGradleVar,
-                                    Collection<String> branchesPatternsForAutoSetVersion,
+                                    Collection<String> branchesPatternsForAutoChangeVersion,
                                     String repoUrl,
-                                    String repoCredentialsId) {
-        //find branch for set version
+                                    String repoCredentialsId,
+                                    String changeVersionCommitMessage) {
+        //find branch for change version
         def branches = RepositoryUtil.getRefsForCurrentCommitMessage(script)
-        def branchForSetVersion = null
-        for (branchRegexp in branchesPatternsForAutoSetVersion) {
+        def branchForChangeVersion = null
+        for (branchRegexp in branchesPatternsForAutoChangeVersion) {
             script.echo "regexp: $branchRegexp"
             Pattern pattern = Pattern.compile(branchRegexp)
             for(branch in branches){
                 script.echo "branch: $branch"
                 if (pattern.matcher(branch).matches()){
                     script.echo "branch found"
-                    branchForSetVersion = branch
+                    branchForChangeVersion = branch
                     break
                 }
             }
-            if (branchForSetVersion) {
+            if (branchForChangeVersion) {
                 break
             }
         }
 
-        if(!branchForSetVersion){
-            script.echo "WARN: Do not find suitable branch for setting version. Branches serched for patterns: $branchesPatternsForAutoSetVersion"
+        if(!branchForChangeVersion){
+            script.echo "WARN: Do not find suitable branch for setting version. Branches serched for patterns: $branchesPatternsForAutoChangeVersion"
             throw new UnstableStateThrowable()
         }
-        script.sh "git checkout -B $branchForSetVersion"
+        script.sh "git checkout -B $branchForChangeVersion"
 
         RepositoryUtil.setDefaultJenkinsGitUser(script)
 
         //commit and push new version
-        def versionName = CommonUtil.removeQuotesFromTheEnds(
-                AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionNameGradleVar))
-        def versionCode = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
-        script.sh "git commit -a -m \"Set version to $versionName ($versionCode) $RepositoryUtil.SKIP_CI_LABEL1 $RepositoryUtil.VERSION_LABEL1\""
+        script.sh "git commit -a -m \"$changeVersionCommitMessage\""
         RepositoryUtil.push(script, repoUrl, repoCredentialsId)
 
         //reset tag to new commit and push

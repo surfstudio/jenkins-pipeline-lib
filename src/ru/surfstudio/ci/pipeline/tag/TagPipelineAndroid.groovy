@@ -19,7 +19,6 @@ import ru.surfstudio.ci.AndroidUtil
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
-import ru.surfstudio.ci.error.UnstableStateThrowable
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 
@@ -103,12 +102,15 @@ class TagPipelineAndroid extends TagPipeline {
                 createStage(VERSION_PUSH, StageStrategy.SKIP_STAGE) {
                     versionPushStageBody(script,
                             repoTag,
-                            gradleConfigFile,
-                            appVersionNameGradleVar,
-                            appVersionCodeGradleVar,
-                            branchesPatternsForAutoSetVersion,
+                            branchesPatternsForAutoChangeVersion,
                             repoUrl,
-                            repoCredentialsId)
+                            repoCredentialsId,
+                            prepareChangeVersionCommitMessage(
+                                    script,
+                                    gradleConfigFile,
+                                    appVersionNameGradleVar,
+                                    appVersionCodeGradleVar,
+                            ))
                 },
         ]
         finalizeBody = { finalizeStageBody(this) }
@@ -134,6 +136,17 @@ class TagPipelineAndroid extends TagPipeline {
         def codeStr = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
         def newCodeStr = String.valueOf(Integer.valueOf(codeStr) + 1)
         AndroidUtil.changeGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar, newCodeStr)
+
+    }
+
+    def static prepareChangeVersionCommitMessage(Object script,
+                                                 String gradleConfigFile,
+                                                 String appVersionNameGradleVar,
+                                                 String appVersionCodeGradleVar){
+        def versionName = CommonUtil.removeQuotesFromTheEnds(
+                AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionNameGradleVar))
+        def versionCode = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
+        return "Change version to $versionName ($versionCode) $RepositoryUtil.SKIP_CI_LABEL1 $RepositoryUtil.VERSION_LABEL1"
 
     }
 

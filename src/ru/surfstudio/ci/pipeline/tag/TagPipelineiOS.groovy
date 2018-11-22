@@ -35,7 +35,7 @@ class TagPipelineiOS extends TagPipeline {
 
     @Override
     def init() {
-        setVersionFromTag = false
+        changeVersionAsTag = false //todo temp
 
         node = NodeProvider.getiOSNode()
 
@@ -65,7 +65,7 @@ class TagPipelineiOS extends TagPipeline {
                     iOSPipelineHelper.staticCodeAnalysisStageBodyiOS(script)
                 },
                 createStage(VERSION_UPDATE, StageStrategy.SKIP_STAGE) {
-                    script.echo "stage not specified" //todo
+                    script.echo "stage not specified" //todo temp
                 },
                 createStage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     betaUploadStageBodyiOS(script,
@@ -76,7 +76,7 @@ class TagPipelineiOS extends TagPipeline {
                     )
                 },
                 createStage(VERSION_PUSH, StageStrategy.SKIP_STAGE) {
-                    script.echo "stage not specified" //todo
+                    script.echo "stage not specified" //todo temp
                 },
 
         ]
