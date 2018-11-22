@@ -17,6 +17,8 @@ package ru.surfstudio.ci
 
 import ru.surfstudio.ci.pipeline.Pipeline
 import ru.surfstudio.ci.stage.Stage
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 class CommonUtil {
     static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50
@@ -235,5 +237,12 @@ class CommonUtil {
 
     def static isJobStartedByUser(Object script) {
         return script.currentBuild.rawBuild.getCauses()[0].toString().contains('UserIdCause')
+    }
+
+    static def printStackTrace(Object script, Exception e) {
+        StringWriter sw = new StringWriter()
+        e.printStackTrace(new PrintWriter(sw))
+        String exceptionAsString = sw.toString()
+        script.echo "Stacktrace: \n $exceptionAsString"
     }
 }
