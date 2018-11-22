@@ -114,9 +114,12 @@ abstract class TagPipeline extends ScmPipeline {
         def branches = RepositoryUtil.getRefsForCurrentCommitMessage(script)
         def branchForSetVersion = null
         for (branchRegexp in branchesPatternsForAutoSetVersion) {
+            script.echo "regexp: $branchRegexp"
             Pattern pattern = Pattern.compile(branchRegexp)
             for(branch in branches){
+                script.echo "branch: $branch"
                 if (pattern.matcher(branch).matches()){
+                    script.echo "branch found"
                     branchForSetVersion = branch
                     break
                 }
