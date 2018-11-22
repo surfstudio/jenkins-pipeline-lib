@@ -18,6 +18,8 @@ package ru.surfstudio.ci.pipeline
 
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Result
+import ru.surfstudio.ci.error.StateThrowable
+import ru.surfstudio.ci.error.UnstableStateThrowable
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
 
@@ -119,9 +121,6 @@ abstract class Pipeline implements Serializable {
                 } catch (e) {
                     script.echo "Error: ${e.toString()}"
                     CommonUtil.printStackTrace(script, e)
-                    if(e.getCause()!=null) {
-                        script.echo "Cause error: ${e.getCause().toString()}"
-                    }
 
                     if(e instanceof InterruptedException || //отменено из другого процесса
                             e instanceof hudson.AbortException && e.getMessage() == "script returned exit code 143") { //отменено пользователем
@@ -129,6 +128,11 @@ abstract class Pipeline implements Serializable {
                         stage.result = Result.ABORTED
                         jobResult = Result.ABORTED
                         throw e
+                    } else if (e instanceof UnstableStateThrowable) {
+                        stage.result = Result.UNSTABLE
+                        if (jobResult != Result.FAILURE) {
+                            jobResult = Result.UNSTABLE
+                        }
                     } else {
                         script.echo("Stage ${stage.name} fail")
                         script.echo("Apply stage strategy: ${stage.strategy}")

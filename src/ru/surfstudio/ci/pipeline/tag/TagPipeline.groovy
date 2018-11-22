@@ -16,10 +16,12 @@
 package ru.surfstudio.ci.pipeline.tag
 
 import ru.surfstudio.ci.AbortDuplicateStrategy
+import ru.surfstudio.ci.AndroidUtil
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
+import ru.surfstudio.ci.error.UnstableStateThrowable
 import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
@@ -42,6 +44,7 @@ abstract class TagPipeline extends ScmPipeline {
     public tagRegexp = /(.*)?\d{1,4}\.\d{1,4}\.\d{1,4}(.*)?/
     public repoTag = ""
     public setVersionFromTag = true
+    public branchesPatternsForAutoSetVersion = [/^origin\/dev\/.*/, /^origin\/feature\/.*/]
 
     TagPipeline(Object script) {
         super(script)
@@ -51,6 +54,9 @@ abstract class TagPipeline extends ScmPipeline {
 
     def static initBody(TagPipeline ctx) {
         def script = ctx.script
+
+        ctx.getStage(VERSION_UPDATE).strategy = ctx.setVersionFromTag ? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE
+        ctx.getStage(VERSION_PUSH).strategy = ctx.setVersionFromTag ? StageStrategy.UNSTABLE_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE
 
         CommonUtil.printInitialStageStrategies(ctx)
 
@@ -69,9 +75,6 @@ abstract class TagPipeline extends ScmPipeline {
             value -> ctx.repoTag = value
         }
 
-        ctx.getStage(VERSION_UPDATE).strategy = ctx.setVersionFromTag ? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE
-        ctx.getStage(VERSION_PUSH).strategy = ctx.setVersionFromTag ? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE
-
         def buildDescription = ctx.repoTag
         CommonUtil.setBuildDescription(script, buildDescription)
         CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.ANOTHER, buildDescription)
@@ -83,6 +86,9 @@ abstract class TagPipeline extends ScmPipeline {
                 credentialsId: credentialsId
         )
         script.sh "git checkout tags/$repoTag"
+
+        RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel()
+
         RepositoryUtil.saveCurrentGitCommitHash(script)
     }
 
@@ -92,6 +98,48 @@ abstract class TagPipeline extends ScmPipeline {
             def message = "Завершена сборка по тэгу: ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlMarkdownLink(ctx.script)}"
             handler(message)
         }
+    }
+
+    def static versionPushStageBody(Object script,
+                                    String repoTag,
+                                    String gradleConfigFile,
+                                    String appVersionNameGradleVar,
+                                    String appVersionCodeGradleVar,
+                                    String[] branchesPatternsForAutoSetVersion,
+                                    String repoUrl,
+                                    String repoCredentialsId) {
+        //find branch for set version
+        def branches = RepositoryUtil.getRefsForCurrentCommitMessage(script)
+        def branchForSetVersion = null
+        for (branchRegexp in branchesPatternsForAutoSetVersion) {
+            Pattern pattern = Pattern.compile(branchRegexp)
+            for(branch in branches){
+                if (pattern.matcher(branch).matches()){
+                    branchForSetVersion = branch
+                    break
+                }
+            }
+            if (branchForSetVersion) {
+                break
+            }
+        }
+
+        if(!branchForSetVersion){
+            script.echo "WARN: Do not find suitable branch for set version. It serched for branches: $branchesPatternsForAutoSetVersion"
+            throw new UnstableStateThrowable()
+        }
+        script.sh "git checkout -B $branchForSetVersion"
+
+        //commit and push new version
+        def versionName = CommonUtil.removeQuotesFromTheEnds(
+                AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionNameGradleVar))
+        def versionCode = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
+        script.sh "git commit -a -m \"Set version to $versionName ($versionCode) $RepositoryUtil.SKIP_CI_LABEL1 $RepositoryUtil.VERSION_LABEL1\""
+        RepositoryUtil.push(script, repoUrl, repoCredentialsId)
+
+        //reset tag to new commit and push
+        script.sh "git tag -f $repoTag"
+        RepositoryUtil.pushForceTag(script, repoUrl, repoCredentialsId)
     }
 
     def static finalizeStageBody(TagPipeline ctx){

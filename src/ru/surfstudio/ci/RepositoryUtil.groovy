@@ -142,17 +142,41 @@ class RepositoryUtil {
     }
 
     def static push(Object script, String repoUrl, String repoCredentialsId) {
+        def gitClient = prepareGitClient(script, repoCredentialsId)
+        gitClient.push()
+                .to(new URIish(repoUrl))
+                .execute()
+    }
+
+    def static pushForceTag(Object script, String repoUrl, String repoCredentialsId) {
+        def gitClient = prepareGitClient(script, repoCredentialsId)
+        gitClient.push()
+                .to(new URIish(repoUrl))
+                .force()
+                .tags(true)
+                .execute()
+    }
+
+    def static prepareGitClient(Object script, String repoCredentialsId) {
         def gitClient = Git
                 .with(
-                    script.getContext(hudson.model.TaskListener),
-                    script.getContext(hudson.EnvVars))
+                script.getContext(hudson.model.TaskListener),
+                script.getContext(hudson.EnvVars))
                 .in(script.getContext(hudson.FilePath))
                 .using("git")
                 .getClient()
         def cred = CredentialsProvider.findCredentialById(repoCredentialsId, IdCredentials.class, script.currentBuild.rawBuild);
         gitClient.addDefaultCredentials(cred)
-        gitClient.push()
-                .to(new URIish(repoUrl))
-                .execute()
+        return gitClient
     }
+
+    def static checkLastCommitMessageContainsSkipCiLabel(Object script){
+        script.echo "Checking $RepositoryUtil.SKIP_CI_LABEL1 label in last commit message for automatic builds"
+        if (isCurrentCommitMessageContainsSkipCiLabel(script) && !CommonUtil.isJobStartedByUser(script)){
+            throw new InterruptedException("Job aborted, because it triggered automatically and last commit message contains $RepositoryUtil.SKIP_CI_LABEL1 label")
+        }
+    }
+
+
+
 }

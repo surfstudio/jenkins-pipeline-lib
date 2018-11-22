@@ -35,6 +35,8 @@ class TagPipelineiOS extends TagPipeline {
 
     @Override
     def init() {
+        setVersionFromTag = false
+
         node = NodeProvider.getiOSNode()
 
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
@@ -62,6 +64,9 @@ class TagPipelineiOS extends TagPipeline {
                 createStage(STATIC_CODE_ANALYSIS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     iOSPipelineHelper.staticCodeAnalysisStageBodyiOS(script)
                 },
+                createStage(VERSION_UPDATE, StageStrategy.SKIP_STAGE) {
+                    script.echo "stage not specified" //todo
+                },
                 createStage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     betaUploadStageBodyiOS(script,
                         iOSKeychainCredenialId,
@@ -69,6 +74,9 @@ class TagPipelineiOS extends TagPipeline {
                         betaUploadConfigArgument,
                         getBuildConfigValue()
                     )
+                },
+                createStage(VERSION_PUSH, StageStrategy.SKIP_STAGE) {
+                    script.echo "stage not specified" //todo
                 },
 
         ]

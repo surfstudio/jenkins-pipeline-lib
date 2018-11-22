@@ -18,6 +18,8 @@ package ru.surfstudio.ci.pipeline.tag
 import ru.surfstudio.ci.AndroidUtil
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
+import ru.surfstudio.ci.RepositoryUtil
+import ru.surfstudio.ci.error.UnstableStateThrowable
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 
@@ -100,26 +102,16 @@ class TagPipelineAndroid extends TagPipeline {
                 },
                 createStage(VERSION_PUSH, StageStrategy.SKIP_STAGE) {
                     versionPushStageBody(script,
-                            gradleConfigFile,
-                            appVersionNameGradleVar,
-                            appVersionCodeGradleVar)
+                             repoTag,
+                             gradleConfigFile,
+                             appVersionNameGradleVar,
+                             appVersionCodeGradleVar,
+                             branchesPatternsForAutoSetVersion,
+                             repoUrl,
+                             repoCredentialsId)
                 },
-
-
         ]
         finalizeBody = { finalizeStageBody(this) }
-    }
-
-    private void versionPushStageBody(Object script,
-                                      String gradleConfigFile,
-                                      String appVersionNameGradleVar,
-                                      String appVersionCodeGradleVar) {
-        def versionName = CommonUtil.removeQuotesFromTheEnds(
-                AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionNameGradleVar))
-        def versionCode = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
-
-        script.sh "git commit -a -m \"[skip ci] Increase version to $version\""
-        script.sh "git push"
     }
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ ======================================================
