@@ -16,6 +16,7 @@
 package ru.surfstudio.ci.pipeline.tag
 
 import ru.surfstudio.ci.AndroidUtil
+import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
@@ -26,6 +27,10 @@ class TagPipelineAndroid extends TagPipeline {
     public keystoreCredentials = "no_credentials"
     public keystorePropertiesCredentials = "no_credentials"
 
+    //other
+    def gradleConfigFile = "config.gradle"
+    def appVersionNameGradleVar = "versionName"
+    def appVersionCodeGradleVar = "versionCode"
 
     public buildGradleTask = "clean assembleQa assembleRelease"
     public betaUploadGradleTask = "crashlyticsUploadDistributionQa"
@@ -80,17 +85,42 @@ class TagPipelineAndroid extends TagPipeline {
                 createStage(STATIC_CODE_ANALYSIS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
+                createStage(VERSION_UPDATE, StageStrategy.SKIP_STAGE) {
+                    versionUpdateStageBodyAndroid(script,
+                            repoTag,
+                            gradleConfigFile,
+                            appVersionNameGradleVar,
+                            appVersionCodeGradleVar)
+                },
                 createStage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     betaUploadWithKeystoreStageBodyAndroid(script,
                             betaUploadGradleTask,
                             keystoreCredentials,
                             keystorePropertiesCredentials)
                 },
+                createStage(VERSION_PUSH, StageStrategy.SKIP_STAGE) {
+                    versionPushStageBody(script,
+                            gradleConfigFile,
+                            appVersionNameGradleVar,
+                            appVersionCodeGradleVar)
+                },
+
 
         ]
         finalizeBody = { finalizeStageBody(this) }
     }
 
+    private void versionPushStageBody(Object script,
+                                      String gradleConfigFile,
+                                      String appVersionNameGradleVar,
+                                      String appVersionCodeGradleVar) {
+        def versionName = CommonUtil.removeQuotesFromTheEnds(
+                AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionNameGradleVar))
+        def versionCode = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
+
+        script.sh "git commit -a -m \"[skip ci] Increase version to $version\""
+        script.sh "git push"
+    }
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ ======================================================
 
@@ -101,6 +131,18 @@ class TagPipelineAndroid extends TagPipeline {
         AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
             betaUploadStageBodyAndroid(script, betaUploadGradleTask)
         }
+    }
+
+    def static versionUpdateStageBodyAndroid(Object script,
+                                             String repoTag,
+                                             String gradleConfigFile,
+                                             String appVersionNameGradleVar,
+                                             String appVersionCodeGradleVar) {
+        AndroidUtil.changeGradleVariable(script, gradleConfigFile, appVersionNameGradleVar, "\"$repoTag\"")
+        def codeStr = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
+        def newCodeStr = String.valueOf(Integer.valueOf(codeStr) + 1)
+        AndroidUtil.changeGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar, newCodeStr)
+
     }
 
     def static betaUploadStageBodyAndroid(Object script, String betaUploadGradleTask) {

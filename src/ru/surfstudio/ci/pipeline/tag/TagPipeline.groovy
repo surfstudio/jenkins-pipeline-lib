@@ -22,6 +22,7 @@ import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.stage.Stage
+import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
 
@@ -33,11 +34,14 @@ abstract class TagPipeline extends ScmPipeline {
     public static final String UNIT_TEST = 'Unit Test'
     public static final String INSTRUMENTATION_TEST = 'Instrumentation Test'
     public static final String STATIC_CODE_ANALYSIS = 'Static Code Analysis'
+    public static final String VERSION_UPDATE = 'Version Increase'
     public static final String BETA_UPLOAD = 'Beta Upload'
+    public static final String VERSION_PUSH = 'Version Push'
 
     //scm
     public tagRegexp = /(.*)?\d{1,4}\.\d{1,4}\.\d{1,4}(.*)?/
     public repoTag = ""
+    public setVersionFromTag = true
 
     TagPipeline(Object script) {
         super(script)
@@ -64,6 +68,9 @@ abstract class TagPipeline extends ScmPipeline {
         extractValueFromEnvOrParamsAndRun(script, REPO_TAG_PARAMETER) {
             value -> ctx.repoTag = value
         }
+
+        ctx.getStage(VERSION_UPDATE).strategy = ctx.setVersionFromTag ? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE
+        ctx.getStage(VERSION_PUSH).strategy = ctx.setVersionFromTag ? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE
 
         def buildDescription = ctx.repoTag
         CommonUtil.setBuildDescription(script, buildDescription)
