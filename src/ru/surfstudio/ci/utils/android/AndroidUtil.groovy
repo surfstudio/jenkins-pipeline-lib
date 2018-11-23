@@ -24,7 +24,10 @@ class AndroidUtil {
      * @param finishBody действия, которые должны быть выполнены по завершении инструментальных тестов
      */
     def static runInstrumentalTests(Object script, AndroidTestConfig androidTestConfig, Closure finishBody) {
-
+        script.echo "${androidTestConfig.avdName}"
+        AndroidTestUtil.exportAndroidTestEnvironmentVariables(script)
+        script.echo "\$AVDMANAGER_HOME avdmanager"
+        script.sh "avdmanager list avd"
     }
 
     def static onEmulator(Object script, String avdName, Closure body) {

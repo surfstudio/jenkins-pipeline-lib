@@ -15,8 +15,8 @@
  */
 package ru.surfstudio.ci.pipeline.helper
 
+import ru.surfstudio.ci.utils.android.AndroidTestConfig
 import ru.surfstudio.ci.utils.android.AndroidUtil
-import ru.surfstudio.ci.pipeline.pr.utils.AndroidTestConfig
 
 /**
  *
@@ -62,7 +62,10 @@ class AndroidPipelineHelper {
             String testResultPathDirHtml
     ) {
         AndroidUtil.runInstrumentalTests(script, androidTestConfig) {
-            //todo
+            script.echo "Start running instrumental tests!"
+            AndroidUtil.runInstrumentalTests(script, androidTestConfig) {
+
+            }
         }
     }
 

@@ -40,8 +40,20 @@ class CommonUtil {
         return "[${taskKey}](${Constants.JIRA_URL}browse/${taskKey})"
     }
 
+    def static getAndroidHome(Object script) {
+        return script.env.ANDROID_HOME
+    }
+
+    def static getShCommandOutput(Object script, String command) {
+        return script.sh(returnStdout: true, script: command)
+    }
+
     def static shWithRuby(Object script, String command, String version = "2.3.5") {
         script.sh "hostname; set +x; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use $version; $command"
+    }
+
+    def static exportEnvironmentVariable(Object script, String name, String value) {
+        script.sh "export $name=$value"
     }
 
     @Deprecated
