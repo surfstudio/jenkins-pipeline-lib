@@ -65,6 +65,13 @@ class TagPipelineAndroid extends TagPipeline {
                 createStage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
+                createStage(VERSION_UPDATE, StageStrategy.SKIP_STAGE) {
+                    versionUpdateStageBodyAndroid(script,
+                            repoTag,
+                            gradleConfigFile,
+                            appVersionNameGradleVar,
+                            appVersionCodeGradleVar)
+                },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
                             buildGradleTask,
@@ -85,13 +92,6 @@ class TagPipelineAndroid extends TagPipeline {
                 },
                 createStage(STATIC_CODE_ANALYSIS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
-                },
-                createStage(VERSION_UPDATE, StageStrategy.SKIP_STAGE) {
-                    versionUpdateStageBodyAndroid(script,
-                            repoTag,
-                            gradleConfigFile,
-                            appVersionNameGradleVar,
-                            appVersionCodeGradleVar)
                 },
                 createStage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     betaUploadWithKeystoreStageBodyAndroid(script,

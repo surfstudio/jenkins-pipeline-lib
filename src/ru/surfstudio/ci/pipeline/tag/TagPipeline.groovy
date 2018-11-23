@@ -32,11 +32,11 @@ abstract class TagPipeline extends ScmPipeline {
 
     //stage names
     public static final String CHECKOUT = 'Checkout'
+    public static final String VERSION_UPDATE = 'Version Update'
     public static final String BUILD = 'Build'
     public static final String UNIT_TEST = 'Unit Test'
     public static final String INSTRUMENTATION_TEST = 'Instrumentation Test'
     public static final String STATIC_CODE_ANALYSIS = 'Static Code Analysis'
-    public static final String VERSION_UPDATE = 'Version Update'
     public static final String BETA_UPLOAD = 'Beta Upload'
     public static final String VERSION_PUSH = 'Version Push'
 

@@ -49,6 +49,9 @@ class TagPipelineiOS extends TagPipeline {
                 createStage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
+                createStage(VERSION_UPDATE, StageStrategy.SKIP_STAGE) {
+                    script.echo "stage not specified" //todo
+                },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     iOSPipelineHelper.buildStageBodyiOS(script,
                         iOSKeychainCredenialId,
@@ -63,9 +66,6 @@ class TagPipelineiOS extends TagPipeline {
                 },
                 createStage(STATIC_CODE_ANALYSIS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     iOSPipelineHelper.staticCodeAnalysisStageBodyiOS(script)
-                },
-                createStage(VERSION_UPDATE, StageStrategy.SKIP_STAGE) {
-                    script.echo "stage not specified" //todo temp
                 },
                 createStage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     betaUploadStageBodyiOS(script,
