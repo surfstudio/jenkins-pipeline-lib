@@ -132,8 +132,12 @@ abstract class TagPipeline extends ScmPipeline {
             throw new UnstableStateThrowable()
         }
 
+        script.sh "git stash"
+
         def localBranch = branchForChangeVersion.replace("origin/", "")
         script.sh "git checkout -B $localBranch $branchForChangeVersion"
+
+        script.sh "git stash apply"
 
         RepositoryUtil.setDefaultJenkinsGitUser(script)
 
