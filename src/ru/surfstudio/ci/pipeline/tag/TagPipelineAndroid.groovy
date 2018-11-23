@@ -105,7 +105,6 @@ class TagPipelineAndroid extends TagPipeline {
                             branchesPatternsForAutoChangeVersion,
                             repoUrl,
                             repoCredentialsId,
-                            remotePrefix,
                             prepareChangeVersionCommitMessageAndroid(
                                     script,
                                     gradleConfigFile,

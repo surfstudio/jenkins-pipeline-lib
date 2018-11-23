@@ -45,9 +45,7 @@ abstract class TagPipeline extends ScmPipeline {
     public tagRegexp = /(.*)?\d{1,4}\.\d{1,4}\.\d{1,4}(.*)?/
     public repoTag = ""
     public changeVersionAsTag = true
-    public branchesPatternsForAutoChangeVersion = [/^dev\/.*/, /^feature\/.*/] //будет выбрана первая подходящая ветка
-    public remotePrefix = "origin/"
-
+    public branchesPatternsForAutoChangeVersion = [/^origin\/dev\/.*/, /^origin\/feature\/.*/] //будет выбрана первая подходящая ветка
 
 
     TagPipeline(Object script) {
@@ -112,7 +110,6 @@ abstract class TagPipeline extends ScmPipeline {
                                     Collection<String> branchesPatternsForAutoChangeVersion,
                                     String repoUrl,
                                     String repoCredentialsId,
-                                    String remotePrefix,
                                     String changeVersionCommitMessage) {
         //find branch for change version
         def branches = RepositoryUtil.getRefsForCurrentCommitMessage(script)
@@ -120,7 +117,7 @@ abstract class TagPipeline extends ScmPipeline {
         for (branchRegexp in branchesPatternsForAutoChangeVersion) {
             Pattern pattern = Pattern.compile(branchRegexp)
             for(branch in branches){
-                if (pattern.matcher(remotePrefix + branch).matches()){
+                if (pattern.matcher(branch).matches()){
                     branchForChangeVersion = branch
                     break
                 }
@@ -135,7 +132,8 @@ abstract class TagPipeline extends ScmPipeline {
             throw new UnstableStateThrowable()
         }
 
-        script.sh "git checkout -B $branchForChangeVersion $remotePrefix$branchForChangeVersion"
+        def localBranch = branchForChangeVersion.replace("origin/", "")
+        script.sh "git checkout -B $localBranch $branchForChangeVersion"
 
         RepositoryUtil.setDefaultJenkinsGitUser(script)
 
