@@ -16,7 +16,7 @@
 package ru.surfstudio.ci.pipeline.helper
 
 import ru.surfstudio.ci.AndroidUtil
-import ru.surfstudio.ci.CommonUtil
+import ru.surfstudio.ci.pipeline.pr.utils.AvdConfig
 
 /**
  *
@@ -53,7 +53,14 @@ class AndroidPipelineHelper {
         }
     }
 
-    def static instrumentationTestStageBodyAndroid(Object script, String testGradleTask, String testResultPathXml, String testResultPathDirHtml) {
+    def static instrumentationTestStageBodyAndroid(
+            Object script,
+            AvdConfig avdConfig,
+            String testGradleTask,
+            String testResultPathXml,
+            String testResultPathDirHtml
+    ) {
+        //todo create or open emulator with avd config
         AndroidUtil.onEmulator(script, "avd-main"){
             try {
                 script.sh "./gradlew uninstallAll ${testGradleTask}"

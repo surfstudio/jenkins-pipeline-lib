@@ -15,10 +15,6 @@
  */
 package ru.surfstudio.ci
 
-import java.util.function.Predicate
-import java.util.stream.Collectors
-import java.util.stream.Stream
-
 class AndroidUtil {
 
     def static onEmulator(Object script, String avdName, Closure body) {

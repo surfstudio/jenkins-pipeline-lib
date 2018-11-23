@@ -17,6 +17,7 @@ package ru.surfstudio.ci.pipeline.pr
 
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
+import ru.surfstudio.ci.pipeline.pr.utils.AvdConfig
 import ru.surfstudio.ci.stage.StageStrategy
 
 class PrPipelineAndroid extends PrPipeline {
@@ -25,17 +26,18 @@ class PrPipelineAndroid extends PrPipeline {
     public keystoreCredentials = "no_credentials"
     public keystorePropertiesCredentials = "no_credentials"
 
-
     public buildGradleTask = "clean assembleQa"
 
     public unitTestGradleTask = "testQaUnitTest"
     public unitTestResultPathXml = "**/test-results/testQaUnitTest/*.xml"
     public unitTestResultPathDirHtml = "app/build/reports/tests/testQaUnitTest/"
 
+    //todo change all dirs
     public instrumentedTestGradleTask = "connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.size=small"
     public instrumentedTestResultPathXml = "**/outputs/androidTest-results/connected/*.xml"
     public instrumentedTestResultPathDirHtml = "app/build/reports/androidTests/connected/"
 
+    public AvdConfig avdConfig = AvdConfig()
 
     PrPipelineAndroid(Object script) {
         super(script)
@@ -68,6 +70,7 @@ class PrPipelineAndroid extends PrPipeline {
                 },
                 createStage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.instrumentationTestStageBodyAndroid(script,
+                            avdConfig,
                             instrumentedTestGradleTask,
                             instrumentedTestResultPathXml,
                             instrumentedTestResultPathDirHtml)
