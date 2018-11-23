@@ -15,7 +15,19 @@
  */
 package ru.surfstudio.ci
 
+import ru.surfstudio.ci.pipeline.pr.utils.AndroidTestConfig
+
 class AndroidUtil {
+
+    /**
+     * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
+     * @param script контекст вызова
+     * @param androidTestConfig конфигурация запуска инструментальных тестов
+     * @param finishBody действия, которые должны быть выполнены по завершении инструментальных тестов
+     */
+    def static runInstrumentalTests(Object script, AndroidTestConfig androidTestConfig, Closure finishBody) {
+
+    }
 
     def static onEmulator(Object script, String avdName, Closure body) {
         script.timeout(time: 7*60*60, unit: 'SECONDS') { //7 hours

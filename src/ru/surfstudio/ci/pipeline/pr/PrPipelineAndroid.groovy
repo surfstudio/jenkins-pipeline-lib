@@ -17,7 +17,7 @@ package ru.surfstudio.ci.pipeline.pr
 
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
-import ru.surfstudio.ci.pipeline.pr.utils.AvdConfig
+import ru.surfstudio.ci.pipeline.pr.utils.AndroidTestConfig
 import ru.surfstudio.ci.stage.StageStrategy
 
 class PrPipelineAndroid extends PrPipeline {
@@ -37,7 +37,7 @@ class PrPipelineAndroid extends PrPipeline {
     public instrumentedTestResultPathXml = "**/outputs/androidTest-results/connected/*.xml"
     public instrumentedTestResultPathDirHtml = "app/build/reports/androidTests/connected/"
 
-    public AvdConfig avdConfig = AvdConfig()
+    public AndroidTestConfig avdConfig = AvdConfig()
 
     PrPipelineAndroid(Object script) {
         super(script)

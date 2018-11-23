@@ -1,9 +1,12 @@
 package ru.surfstudio.ci.pipeline.pr.utils
 
 /**
- * Класс, конфигурирующий эмулятор для запуска инструментальных тестов
+ * Класс, содержащий параметры конфигурации запуска инструментальных тестов
  */
-class AvdConfig {
+class AndroidTestConfig {
+
+    // buildType, для которого будут выполняться инструментальные тесты
+    String testBuildType = "qa"
 
     // имя AVD
     String avdName = "avd-androidTest"
