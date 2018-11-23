@@ -17,8 +17,8 @@ package ru.surfstudio.ci.pipeline.pr
 
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
-import ru.surfstudio.ci.pipeline.pr.utils.AndroidTestConfig
 import ru.surfstudio.ci.stage.StageStrategy
+import ru.surfstudio.ci.utils.android.AndroidTestConfig
 
 class PrPipelineAndroid extends PrPipeline {
 

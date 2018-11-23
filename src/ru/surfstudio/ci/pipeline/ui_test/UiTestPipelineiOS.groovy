@@ -15,7 +15,7 @@
  */
 package ru.surfstudio.ci.pipeline.ui_test
 
-import ru.surfstudio.ci.CommonUtil
+import ru.surfstudio.ci.utils.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
 

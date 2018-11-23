@@ -16,15 +16,15 @@
 package ru.surfstudio.ci.pipeline.pr
 
 import ru.surfstudio.ci.AbortDuplicateStrategy
-import ru.surfstudio.ci.CommonUtil
-import ru.surfstudio.ci.JarvisUtil
-import ru.surfstudio.ci.RepositoryUtil
+import ru.surfstudio.ci.utils.CommonUtil
+import ru.surfstudio.ci.utils.JarvisUtil
+import ru.surfstudio.ci.utils.RepositoryUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
 
-import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
+import static ru.surfstudio.ci.utils.CommonUtil.extractValueFromEnvOrParamsAndRun
 
 abstract class PrPipeline extends ScmPipeline {
 

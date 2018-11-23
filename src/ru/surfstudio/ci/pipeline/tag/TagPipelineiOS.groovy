@@ -15,7 +15,7 @@
  */
 package ru.surfstudio.ci.pipeline.tag
 
-import ru.surfstudio.ci.CommonUtil
+import ru.surfstudio.ci.utils.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.pipeline.helper.iOSPipelineHelper

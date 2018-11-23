@@ -15,9 +15,9 @@
  */
 package ru.surfstudio.ci.pipeline
 
-import ru.surfstudio.ci.CommonUtil
+import ru.surfstudio.ci.utils.CommonUtil
 import ru.surfstudio.ci.Constants
-import ru.surfstudio.ci.RepositoryUtil
+import ru.surfstudio.ci.utils.RepositoryUtil
 
 /**
  * Базовый pipeline для Jobs, которые используют исходный код из удаленного репозитория

@@ -13,8 +13,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
  */
-package ru.surfstudio.ci
+package ru.surfstudio.ci.utils
 
+import ru.surfstudio.ci.AbortDuplicateStrategy
+import ru.surfstudio.ci.Constants
+import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.Pipeline
 import ru.surfstudio.ci.stage.Stage
 

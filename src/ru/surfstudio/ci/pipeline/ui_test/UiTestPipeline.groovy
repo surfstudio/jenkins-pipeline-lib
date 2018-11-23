@@ -16,15 +16,15 @@
 package ru.surfstudio.ci.pipeline.ui_test
 
 import ru.surfstudio.ci.AbortDuplicateStrategy
-import ru.surfstudio.ci.CommonUtil
+import ru.surfstudio.ci.utils.CommonUtil
 import ru.surfstudio.ci.Constants
-import ru.surfstudio.ci.JarvisUtil
+import ru.surfstudio.ci.utils.JarvisUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.stage.StageStrategy
 
-import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
-import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
+import static ru.surfstudio.ci.utils.CommonUtil.extractValueFromEnvOrParamsAndRun
+import static ru.surfstudio.ci.utils.CommonUtil.extractValueFromParamsAndRun
 
 abstract class UiTestPipeline extends ScmPipeline {
 
