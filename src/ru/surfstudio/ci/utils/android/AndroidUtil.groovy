@@ -28,6 +28,18 @@ class AndroidUtil {
         AndroidTestUtil.exportAndroidTestEnvironmentVariables(script)
         script.echo "\$AVDMANAGER_HOME avdmanager"
         script.sh "avdmanager list avd"
+
+        if (androidTestConfig.reuse) {
+            // проверка, существует ли эмулятор
+            if (AndroidTestUtil.findAvdName(script, androidTestConfig.avdName) != null) {
+                script.echo "launch reused emulator"
+                //todo check if emulator is running
+            } else {
+
+            }
+        } else {
+
+        }
     }
 
     def static onEmulator(Object script, String avdName, Closure body) {

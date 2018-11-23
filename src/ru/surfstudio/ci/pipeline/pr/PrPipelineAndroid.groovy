@@ -33,11 +33,11 @@ class PrPipelineAndroid extends PrPipeline {
     public unitTestResultPathDirHtml = "app/build/reports/tests/testQaUnitTest/"
 
     //todo change all dirs
-    public instrumentedTestGradleTask = "connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.size=small"
+    public instrumentedTestGradleTask = "assembleAndroidTest"
     public instrumentedTestResultPathXml = "**/outputs/androidTest-results/connected/*.xml"
     public instrumentedTestResultPathDirHtml = "app/build/reports/androidTests/connected/"
 
-    public AndroidTestConfig avdConfig = AvdConfig()
+    public AndroidTestConfig avdConfig = new AndroidTestConfig()
 
     PrPipelineAndroid(Object script) {
         super(script)

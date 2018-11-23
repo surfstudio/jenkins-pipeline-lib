@@ -57,15 +57,18 @@ class AndroidPipelineHelper {
     def static instrumentationTestStageBodyAndroid(
             Object script,
             AndroidTestConfig androidTestConfig,
-            String testGradleTask,
-            String testResultPathXml,
-            String testResultPathDirHtml
+            String androidTestGradleTask,
+            String androidTestResultPathXml,
+            String androidTestResultPathDirHtml
     ) {
-        AndroidUtil.runInstrumentalTests(script, androidTestConfig) {
+        try {
+            //script.sh "./gradlew $androidTestGradleTask"
             script.echo "Start running instrumental tests!"
             AndroidUtil.runInstrumentalTests(script, androidTestConfig) {
-
+                //todo
             }
+        } finally {
+
         }
     }
 
@@ -73,5 +76,4 @@ class AndroidPipelineHelper {
         script.echo "empty"
         //todo
     }
-
 }

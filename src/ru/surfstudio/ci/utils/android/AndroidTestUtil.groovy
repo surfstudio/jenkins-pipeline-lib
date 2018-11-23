@@ -43,7 +43,15 @@ class AndroidTestUtil {
         CommonUtil.exportEnvironmentVariable(script, AVDMANAGER_HOME, "$androidHome/tools/bin")
     }
 
-    def static getEmulatorNames(Object script) {
+    def static getAvdNames(Object script) {
         return CommonUtil.getShCommandOutput(script, "avdmanager list avd | grep Name | awk '{ print \$2 }'")
+    }
+
+    def static getEmulatorName(Object script) {
+
+    }
+
+    def static findAvdName(Object script, String avdName) {
+        return getAvdNames(script).find { it == avdName }
     }
 }
