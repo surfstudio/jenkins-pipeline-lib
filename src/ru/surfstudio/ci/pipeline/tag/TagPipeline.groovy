@@ -83,10 +83,11 @@ abstract class TagPipeline extends ScmPipeline {
     def static checkoutStageBody(Object script,  String url, String repoTag, String credentialsId) {
         script.git(
                 url: url,
-                credentialsId: credentialsId
+                credentialsId: credentialsId,
+                poll: true
         )
 
-        script.sh "git fetch -f"
+        //script.sh "git fetch -f"
         script.sh "git checkout tags/$repoTag"
 
         RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
