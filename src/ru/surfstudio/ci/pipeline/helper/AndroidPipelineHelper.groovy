@@ -56,18 +56,19 @@ class AndroidPipelineHelper {
 
     def static instrumentationTestStageBodyAndroid(
             Object script,
-            AndroidTestConfig androidTestConfig,
+            AndroidTestConfig config,
             String androidTestGradleTask,
             String androidTestResultPathXml,
             String androidTestResultPathDirHtml
     ) {
         try {
             //script.sh "./gradlew $androidTestGradleTask"
-            AndroidUtil.runInstrumentalTests(script, androidTestConfig) {
+            script.sh "sdkmanager \"${config.sdkId}\""
+            AndroidUtil.runInstrumentalTests(script, config) {
                 //todo
             }
         } finally {
-            AndroidUtil.cleanup(script, androidTestConfig)
+            //AndroidUtil.cleanup(script, config)
         }
     }
 

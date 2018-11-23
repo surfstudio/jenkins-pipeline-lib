@@ -30,7 +30,7 @@ class AndroidTestConfig {
     String deviceName = "Nexus 5X"
 
     // SDK ID для запуска эмулятора
-    String sdkId = "system-images;android-28;google_apis;x86"
+    String sdkId = "system-images;android-28;google_apis;x86_64"
 
     // размер объема sdcard эмулятора
     String sdcardSize = "3072M"

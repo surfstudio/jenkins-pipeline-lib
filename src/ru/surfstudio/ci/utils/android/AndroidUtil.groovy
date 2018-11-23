@@ -25,13 +25,16 @@ class AndroidUtil {
      */
     def static runInstrumentalTests(Object script, AndroidTestConfig config, Closure finishBody) {
         AndroidTestUtil.exportAndroidTestEnvironmentVariables(script)
-
+        //script.sh "cd ${CommonUtil.getAndroidHome(script)}/emulator; ls -la"
+        script.sh "adb devices"
+        script.sh "avdmanager list avd"
         def currentTimeoutSeconds = AndroidTestUtil.LONG_TIMEOUT_SECONDS
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
 
         if (config.reuse) {
             // проверка, существует ли AVD
-            if (AndroidTestUtil.findAvdName(script, config.avdName) != null) {
+            //todo check if AVD params have not changed
+            if (AndroidTestUtil.findAvdName(script, config.avdName) != "") {
                 script.echo "launch reused emulator"
                 // проверка, запущен ли эмулятор
                 if (emulatorName != "") {
@@ -51,6 +54,7 @@ class AndroidUtil {
 
         script.echo "waiting $currentTimeoutSeconds seconds..."
         script.sh "sleep $currentTimeoutSeconds"
+        script.sh "adb devices"
 
         script.echo "end"
     }
