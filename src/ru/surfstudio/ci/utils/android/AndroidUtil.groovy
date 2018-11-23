@@ -20,26 +20,43 @@ class AndroidUtil {
     /**
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
      * @param script контекст вызова
-     * @param androidTestConfig конфигурация запуска инструментальных тестов
+     * @param config конфигурация запуска инструментальных тестов
      * @param finishBody действия, которые должны быть выполнены по завершении инструментальных тестов
      */
-    def static runInstrumentalTests(Object script, AndroidTestConfig androidTestConfig, Closure finishBody) {
-        script.echo "${androidTestConfig.avdName}"
+    def static runInstrumentalTests(Object script, AndroidTestConfig config, Closure finishBody) {
         AndroidTestUtil.exportAndroidTestEnvironmentVariables(script)
-        script.echo "\$AVDMANAGER_HOME avdmanager"
-        script.sh "avdmanager list avd"
 
-        if (androidTestConfig.reuse) {
-            // проверка, существует ли эмулятор
-            if (AndroidTestUtil.findAvdName(script, androidTestConfig.avdName) != null) {
+        def currentTimeoutSeconds = AndroidTestUtil.LONG_TIMEOUT_SECONDS
+        def emulatorName = AndroidTestUtil.getEmulatorName(script)
+
+        if (config.reuse) {
+            // проверка, существует ли AVD
+            if (AndroidTestUtil.findAvdName(script, config.avdName) != null) {
                 script.echo "launch reused emulator"
-                //todo check if emulator is running
-            } else {
-
+                // проверка, запущен ли эмулятор
+                if (emulatorName != "") {
+                    currentTimeoutSeconds = 0
+                    script.echo "emulator have been launched already"
+                } else {
+                    currentTimeoutSeconds = AndroidTestUtil.SMALL_TIMEOUT_SECONDS
+                    AndroidTestUtil.launchEmulator(script, config)
+                }
+            } else { // if AVD is not exists
+                AndroidTestUtil.createAndLaunchNewEmulator(script, config)
             }
-        } else {
-
+        } else { // if not reuse
+            AndroidTestUtil.closeRunningEmulator(script, config)
+            AndroidTestUtil.createAndLaunchNewEmulator(script, config)
         }
+
+        script.echo "waiting $currentTimeoutSeconds seconds..."
+        script.sh "sleep $currentTimeoutSeconds"
+
+        script.echo "end"
+    }
+
+    def static cleanup(Object script, AndroidTestConfig config) {
+        AndroidTestUtil.closeRunningEmulator(script, config)
     }
 
     def static onEmulator(Object script, String avdName, Closure body) {

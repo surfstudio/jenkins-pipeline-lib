@@ -37,7 +37,7 @@ class PrPipelineAndroid extends PrPipeline {
     public instrumentedTestResultPathXml = "**/outputs/androidTest-results/connected/*.xml"
     public instrumentedTestResultPathDirHtml = "app/build/reports/androidTests/connected/"
 
-    public AndroidTestConfig avdConfig = new AndroidTestConfig()
+    public AndroidTestConfig androidTestConfig = new AndroidTestConfig()
 
     PrPipelineAndroid(Object script) {
         super(script)
@@ -70,7 +70,7 @@ class PrPipelineAndroid extends PrPipeline {
                 },
                 createStage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.instrumentationTestStageBodyAndroid(script,
-                            avdConfig,
+                            androidTestConfig,
                             instrumentedTestGradleTask,
                             instrumentedTestResultPathXml,
                             instrumentedTestResultPathDirHtml)

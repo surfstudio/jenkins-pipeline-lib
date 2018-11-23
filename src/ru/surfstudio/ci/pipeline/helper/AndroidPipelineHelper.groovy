@@ -63,12 +63,11 @@ class AndroidPipelineHelper {
     ) {
         try {
             //script.sh "./gradlew $androidTestGradleTask"
-            script.echo "Start running instrumental tests!"
             AndroidUtil.runInstrumentalTests(script, androidTestConfig) {
                 //todo
             }
         } finally {
-
+            AndroidUtil.cleanup(script, androidTestConfig)
         }
     }
 

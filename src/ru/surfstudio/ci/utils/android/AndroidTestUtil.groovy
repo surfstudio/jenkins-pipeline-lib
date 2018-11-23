@@ -22,18 +22,26 @@ import ru.surfstudio.ci.utils.CommonUtil
  */
 class AndroidTestUtil {
 
+    //region Timeouts
     // значение таймаута для создания и загрузки нового эмулятора
-    Integer longTimeoutSeconds = 20
+    static Integer LONG_TIMEOUT_SECONDS = 20
 
     // значение таймаута для запуска ранее созданного эмулятора
-    Integer smallTimeoutSeconds = 7
+    static Integer SMALL_TIMEOUT_SECONDS = 7
+    //endregion
 
     //region Названия переменных окружения для инструментальных тестов
-
     private static String ADB_HOME = "ADB_HOME"
     private static String EMULATOR_HOME = "EMULATOR_HOME"
     private static String AVDMANAGER_HOME = "AVDMANAGER_HOME"
+    //endregion
 
+    //region Основные shell-команды
+    private static String GET_AVD_NAMES_COMMAND = "avdmanager list avd | grep Name | awk '{ print \$2 }'"
+    private static String GET_EMULATOR_NAME_COMMAND = "adb devices | grep emulator | cut -f1"
+
+    private static String LAUNCH_EMULATOR_STAY_COMMAND = "emulator -avd \"\$1\" -skin \"\$2\" &"
+    private static String LAUNCH_EMULATOR_NOT_STAY_COMMAND = "emulator -avd \"\$1\" -skin \"\$2\" -no-snapshot-save &"
     //endregion
 
     def static exportAndroidTestEnvironmentVariables(Object script) {
@@ -44,14 +52,49 @@ class AndroidTestUtil {
     }
 
     def static getAvdNames(Object script) {
-        return CommonUtil.getShCommandOutput(script, "avdmanager list avd | grep Name | awk '{ print \$2 }'")
+        return CommonUtil.getShCommandOutput(script, GET_AVD_NAMES_COMMAND)
     }
 
     def static getEmulatorName(Object script) {
-
+        return CommonUtil.getShCommandOutput(script, GET_EMULATOR_NAME_COMMAND)
     }
 
     def static findAvdName(Object script, String avdName) {
         return getAvdNames(script).find { it == avdName }
+    }
+
+    def static closeRunningEmulator(Object script, AndroidTestConfig config) {
+        // Закрытие запущенного эмулятора, если он существует
+        def emulatorName = getEmulatorName(script)
+        script.echo "emulatorName $emulatorName"
+        if (emulatorName != "") {
+            script.echo "close running emulator"
+            script.sh "adb -s $emulatorName emu kill"
+        }
+        // Удаление AVD, если необходимо
+        if (!config.stay) {
+            script.echo "delete avd"
+            script.sh "avdmanager delete avd -n \"${config.avdName}\""
+        }
+    }
+
+    def static createAndLaunchNewEmulator(Object script, AndroidTestConfig config) {
+        script.echo "create new emulator"
+        script.sh "avdmanager create avd -f \
+            -n \"${config.avdName}\" \
+            -d \"${config.deviceName}\" \
+            -k \"${config.sdkId}\" \
+            -c \"${config.sdcardSize}\""
+        launchEmulator(script, config)
+    }
+
+    def static launchEmulator(Object script, AndroidTestConfig config) {
+        if (config.stay) {
+            script.echo "stay"
+            script.sh LAUNCH_EMULATOR_STAY_COMMAND
+        } else {
+            script.echo "not stay"
+            script.sh LAUNCH_EMULATOR_NOT_STAY_COMMAND
+        }
     }
 }
