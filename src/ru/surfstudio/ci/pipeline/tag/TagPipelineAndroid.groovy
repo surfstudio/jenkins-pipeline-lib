@@ -105,7 +105,8 @@ class TagPipelineAndroid extends TagPipeline {
                             branchesPatternsForAutoChangeVersion,
                             repoUrl,
                             repoCredentialsId,
-                            prepareChangeVersionCommitMessage(
+                            remotePrefix,
+                            prepareChangeVersionCommitMessageAndroid(
                                     script,
                                     gradleConfigFile,
                                     appVersionNameGradleVar,
@@ -139,10 +140,10 @@ class TagPipelineAndroid extends TagPipeline {
 
     }
 
-    def static prepareChangeVersionCommitMessage(Object script,
-                                                 String gradleConfigFile,
-                                                 String appVersionNameGradleVar,
-                                                 String appVersionCodeGradleVar){
+    def static prepareChangeVersionCommitMessageAndroid(Object script,
+                                                        String gradleConfigFile,
+                                                        String appVersionNameGradleVar,
+                                                        String appVersionCodeGradleVar){
         def versionName = CommonUtil.removeQuotesFromTheEnds(
                 AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionNameGradleVar))
         def versionCode = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)

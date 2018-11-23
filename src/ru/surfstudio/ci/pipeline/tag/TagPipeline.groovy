@@ -41,10 +41,14 @@ abstract class TagPipeline extends ScmPipeline {
     public static final String VERSION_PUSH = 'Version Push'
 
     //scm
+
     public tagRegexp = /(.*)?\d{1,4}\.\d{1,4}\.\d{1,4}(.*)?/
     public repoTag = ""
     public changeVersionAsTag = true
-    public branchesPatternsForAutoChangeVersion = [/^origin\/dev\/.*/, /^origin\/feature\/.*/] //будет выбрана первая подходящая ветка
+    public branchesPatternsForAutoChangeVersion = [/^dev\/.*/, /^feature\/.*/] //будет выбрана первая подходящая ветка
+    public remotePrefix = "origin/"
+
+
 
     TagPipeline(Object script) {
         super(script)
@@ -108,6 +112,7 @@ abstract class TagPipeline extends ScmPipeline {
                                     Collection<String> branchesPatternsForAutoChangeVersion,
                                     String repoUrl,
                                     String repoCredentialsId,
+                                    String remotePrefix,
                                     String changeVersionCommitMessage) {
         //find branch for change version
         def branches = RepositoryUtil.getRefsForCurrentCommitMessage(script)
@@ -115,7 +120,7 @@ abstract class TagPipeline extends ScmPipeline {
         for (branchRegexp in branchesPatternsForAutoChangeVersion) {
             Pattern pattern = Pattern.compile(branchRegexp)
             for(branch in branches){
-                if (pattern.matcher(branch).matches()){
+                if (pattern.matcher(remotePrefix + branch).matches()){
                     branchForChangeVersion = branch
                     break
                 }
@@ -129,7 +134,8 @@ abstract class TagPipeline extends ScmPipeline {
             script.echo "WARN: Do not find suitable branch for setting version. Branches serched for patterns: $branchesPatternsForAutoChangeVersion"
             throw new UnstableStateThrowable()
         }
-        script.sh "git checkout -B $branchForChangeVersion"
+
+        script.sh "git checkout -B $branchForChangeVersion $remotePrefix$branchForChangeVersion"
 
         RepositoryUtil.setDefaultJenkinsGitUser(script)
 
