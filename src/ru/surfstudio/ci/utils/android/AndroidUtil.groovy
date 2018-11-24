@@ -25,9 +25,8 @@ class AndroidUtil {
      */
     def static runInstrumentalTests(Object script, AndroidTestConfig config, Closure finishBody) {
         AndroidTestUtil.exportAndroidTestEnvironmentVariables(script)
-        //script.sh "cd ${CommonUtil.getAndroidHome(script)}/emulator; ls -la"
+        script.sh "sdkmanager \"${config.sdkId}\""
         script.sh "adb devices"
-        script.sh "avdmanager list avd"
         def currentTimeoutSeconds = AndroidTestUtil.LONG_TIMEOUT_SECONDS
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
 
@@ -57,10 +56,6 @@ class AndroidUtil {
         script.sh "adb devices"
 
         script.echo "end"
-    }
-
-    def static cleanup(Object script, AndroidTestConfig config) {
-        AndroidTestUtil.closeRunningEmulator(script, config)
     }
 
     def static onEmulator(Object script, String avdName, Closure body) {

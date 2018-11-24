@@ -42,6 +42,9 @@ class AndroidTestUtil {
     private static String GET_EMULATOR_NAME_COMMAND = "adb devices | grep emulator | cut -f1"
     //endregion
 
+    /**
+     * Функция, экспортирующая переменные окружения, необходимые для инструментальных тестов
+     */
     def static exportAndroidTestEnvironmentVariables(Object script) {
         def androidHome = CommonUtil.getAndroidHome(script)
         CommonUtil.exportEnvironmentVariable(script, ADB_HOME, "$androidHome/platform-tools/adb")
@@ -50,18 +53,30 @@ class AndroidTestUtil {
         CommonUtil.exportEnvironmentVariable(script, PATH, "\$PATH:\$EMULATOR_HOME:\$ADB_HOME:\$AVDMANAGER_HOME")
     }
 
+    /**
+     * Функция, возвращающая список имен AVD
+     */
     def static getAvdNames(Object script) {
         return CommonUtil.getShCommandOutput(script, GET_AVD_NAMES_COMMAND)
     }
 
+    /**
+     * Функция, возвращающая имя запущенного эмулятора
+     */
     def static getEmulatorName(Object script) {
         return CommonUtil.getShCommandOutput(script, GET_EMULATOR_NAME_COMMAND)
     }
 
+    /**
+     * Функция, проверяющая, существует ли AVD с заданным именем
+     */
     def static findAvdName(Object script, String avdName) {
         return getAvdNames(script).find { it == avdName }
     }
 
+    /**
+     * Функция, выполняющая закрытие запущенного эмулятора
+     */
     def static closeRunningEmulator(Object script, AndroidTestConfig config) {
         // Закрытие запущенного эмулятора, если он существует
         def emulatorName = getEmulatorName(script)
@@ -76,6 +91,9 @@ class AndroidTestUtil {
         }
     }
 
+    /**
+     * Функция для создания и запуска нового эмулятора
+     */
     def static createAndLaunchNewEmulator(Object script, AndroidTestConfig config) {
         script.echo "create new emulator"
         script.sh "avdmanager create avd -f \
@@ -86,18 +104,21 @@ class AndroidTestUtil {
         launchEmulator(script, config)
     }
 
+    /**
+     * Функция, выполняющая запуск эмулятора, параметры которого заданы конфигом
+     */
     def static launchEmulator(Object script, AndroidTestConfig config) {
         def androidHome = CommonUtil.getAndroidHome(script)
         if (config.stay) {
             script.echo "stay"
             script.sh "$androidHome/emulator/emulator \
                 -avd \"${config.avdName}\" \
-                -skin \"${config.skinSize}\" -no-window &"
+                -skin \"${config.skinSize}\" -no-window -no-boot-anim &"
         } else {
             script.echo "not stay"
             script.sh "$androidHome/emulator/emulator \
                 -avd \"${config.avdName}\" \
-                -skin \"${config.skinSize}\" -no-window -no-snapshot-save &"
+                -skin \"${config.skinSize}\" -no-window -no-boot-anim -no-snapshot-save &"
         }
     }
 }

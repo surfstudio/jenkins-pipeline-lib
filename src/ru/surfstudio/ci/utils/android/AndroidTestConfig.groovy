@@ -38,9 +38,6 @@ class AndroidTestConfig {
     // разрешение эмулятора
     String skinSize = "1440x2560"
 
-    // имя skin для эмулятора
-    String skinName = "nexus_5x"
-
     // флаг, показывающий, будет ли запущен ранее созданный эмулятор
     Boolean reuse = true
 

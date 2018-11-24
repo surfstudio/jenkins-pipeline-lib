@@ -26,19 +26,26 @@ class AndroidPipelineHelper {
     def static buildStageBodyAndroid(Object script, String buildGradleTask) {
         script.sh "./gradlew ${buildGradleTask}"
         script.step([$class: 'ArtifactArchiver', artifacts: '**/*.apk', allowEmptyArchive: true])
-        script.step([$class: 'ArtifactArchiver', artifacts: '**/mapping.txt', allowEmptyArchive: true]) 
+        script.step([$class: 'ArtifactArchiver', artifacts: '**/mapping.txt', allowEmptyArchive: true])
     }
 
-    def static buildWithCredentialsStageBodyAndroid(Object script,
-                                                    String buildGradleTask,
-                                                    String keystoreCredentials,
-                                                    String keystorePropertiesCredentials) {
-        AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials){
+    def static buildWithCredentialsStageBodyAndroid(
+            Object script,
+            String buildGradleTask,
+            String keystoreCredentials,
+            String keystorePropertiesCredentials
+    ) {
+        AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
             buildStageBodyAndroid(script, buildGradleTask)
         }
     }
 
-    def static unitTestStageBodyAndroid(Object script, String unitTestGradleTask, String testResultPathXml, String testResultPathDirHtml) {
+    def static unitTestStageBodyAndroid(
+            Object script,
+            String unitTestGradleTask,
+            String testResultPathXml,
+            String testResultPathDirHtml
+    ) {
         try {
             script.sh "./gradlew ${unitTestGradleTask}"
         } finally {
@@ -63,12 +70,11 @@ class AndroidPipelineHelper {
     ) {
         try {
             //script.sh "./gradlew $androidTestGradleTask"
-            script.sh "sdkmanager \"${config.sdkId}\""
             AndroidUtil.runInstrumentalTests(script, config) {
                 //todo
             }
         } finally {
-            //AndroidUtil.cleanup(script, config)
+            //todo
         }
     }
 
