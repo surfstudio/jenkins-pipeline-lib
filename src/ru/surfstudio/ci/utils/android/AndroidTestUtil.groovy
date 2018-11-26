@@ -22,6 +22,7 @@ import ru.surfstudio.ci.CommonUtil
  */
 class AndroidTestUtil {
 
+    static String ANDROID_TEST_APK_SUFFIX = "androidTest"
     private static String EMPTY_STRING = ""
 
     //region Timeouts
@@ -37,16 +38,6 @@ class AndroidTestUtil {
      */
     static Boolean isNameDefined(String emulatorName) {
         return emulatorName != EMPTY_STRING
-    }
-
-    /**
-     * Функция, возвращающая список APK-файлов с заданным суффиксом
-     */
-    def static getApkList(Object script, String apkPrefix) {
-        return CommonUtil.getShCommandOutput(
-                script,
-                "grep -r --include \"*-${apkPrefix}.apk\" . | cut -d ' ' -f3"
-        ).split()
     }
 
     //region Emulator utils
@@ -101,6 +92,76 @@ class AndroidTestUtil {
     }
     //endregion
 
+    //region APK utils
+    /**
+     * Функция, возвращающая список APK-файлов с заданным суффиксом
+     */
+    def static getApkList(Object script, String apkPrefix) {
+        return CommonUtil.getShCommandOutput(
+                script,
+                "grep -r --include \"*-${apkPrefix}.apk\" . | cut -d ' ' -f3"
+        ).split()
+    }
+
+    /**
+     * Функция, возвращающая имя директории для APK-файла
+     */
+    static String getApkFolderName(Object script, String apkFullName) {
+        return getApkInfo(script, apkFullName, 1)
+    }
+
+    /**
+     * Функция, возвращающая краткое имя APK-файла без учета директории
+     */
+    static String getApkFileName(Object script, String apkFullName) {
+        return CommonUtil.getShCommandOutput(
+                script,
+                "echo $apkFullName | rev | cut -d '/' -f1 | rev"
+        )
+    }
+
+    /**
+     * Функция, возвращающая префикс для APK-файла
+     */
+    static String getApkPrefix(Object script, String apkFullName, AndroidTestConfig config) {
+        // Проверка, содержит ли проект модули
+        def apkModuleName = getApkModuleName(script, apkFullName)
+        return (apkModuleName != "build") ? apkModuleName : CommonUtil.getShCommandOutput(
+                script,
+                "echo $apkFullName | awk -F ${getApkSuffix(config)} '{ print \$1 }'"
+        )
+    }
+
+    /**
+     * Функция, возвращающая имя модуля, в котором содержится APK-файл.
+     *
+     * В большинстве случаев, APK-файл находится в папке APK_FOLDER/build,
+     * но если проект содержит вложенный многомодульный проект,
+     * например, template в android-standard,
+     * то имя модуля будет отличаться от имени директории APK-файла.
+     */
+    private static String getApkModuleName(Object script, String apkFullName) {
+        return getApkInfo(script, apkFullName, 2)
+    }
+
+    /**
+     * Функция, возвращающая суффикс для APK-файла
+     */
+    private static String getApkSuffix(AndroidTestConfig config) {
+        return "-${config.testBuildType}-${ANDROID_TEST_APK_SUFFIX}.apk"
+    }
+
+    /**
+     * Функция, возвращающая информацию по заданному индексу о APK
+     */
+    private static String getApkInfo(Object script, String apkFullName, Integer index) {
+        return CommonUtil.getShCommandOutput(
+                script,
+                "echo $apkFullName | cut -d '/' -f$index"
+        )
+    }
+    //endregion
+
     //region Functions for manipulation of emulator
     /**
      * Функция, выполняющая закрытие запущенного эмулятора
@@ -139,7 +200,7 @@ class AndroidTestUtil {
         def launchEmulatorCommand = "${CommonUtil.getEmulatorHome(script)} \
                 -avd \"${config.avdName}\" \
                 -skin \"${config.skinSize}\" -no-window -no-boot-anim "
-        launchEmulatorCommand+=(config.reuse) ? " &" : " -no-snapshot-save &"
+        launchEmulatorCommand += (config.reuse) ? " &" : " -no-snapshot-save &"
         script.sh(launchEmulatorCommand)
     }
     //endregion

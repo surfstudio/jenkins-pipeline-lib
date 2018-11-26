@@ -20,8 +20,6 @@ import ru.surfstudio.ci.utils.android.AndroidTestUtil
 
 class AndroidUtil {
 
-    private static String ANDROID_TEST_APK_SUFFIX = "androidTest"
-
     /**
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
      * @param script контекст вызова
@@ -86,8 +84,17 @@ class AndroidUtil {
 
     private static void runTests(Object script, AndroidTestConfig config) {
         script.echo "start running tests"
-        AndroidTestUtil.getApkList(script, ANDROID_TEST_APK_SUFFIX).each {
-            script.echo "$it"
+        AndroidTestUtil.getApkList(script, AndroidTestUtil.ANDROID_TEST_APK_SUFFIX).each {
+            def currentApkName = "$it"
+            def apkMainFolder = AndroidTestUtil.getApkFolderName(script, currentApkName)
+            def apkFileName = AndroidTestUtil.getApkFileName(script, currentApkName)
+            def apkPrefix = AndroidTestUtil.getApkPrefix(script, currentApkName, config)
+            CommonUtil.print(script, currentApkName, apkMainFolder, apkFileName, apkPrefix)
+
+            // Находим APK для testBuildType, заданного в конфиге, и имя тестового пакета
+            script.dir(apkMainFolder) {
+                script.echo "${AndroidTestUtil.getApkList(script, config.testBuildType)}"
+            }
         }
     }
     //endregion

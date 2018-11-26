@@ -58,6 +58,12 @@ class CommonUtil {
     }
     //endregion
 
+    def static print(Object script, String... args) {
+        args.each {
+            script.echo "$it"
+        }
+    }
+
     def static getShCommandOutput(Object script, String command) {
         return script.sh(returnStdout: true, script: command)
     }
