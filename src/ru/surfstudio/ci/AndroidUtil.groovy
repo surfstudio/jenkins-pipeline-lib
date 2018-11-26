@@ -21,6 +21,7 @@ import ru.surfstudio.ci.utils.android.AndroidTestUtil
 class AndroidUtil {
 
     private static String TEMP_GRADLE_OUTPUT_FILENAME = "result"
+    private static String NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME = "null"
 
     /**
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
@@ -129,8 +130,18 @@ class AndroidUtil {
                         script,
                         "$currentInstrumentationGradleTaskRunnerName > $TEMP_GRADLE_OUTPUT_FILENAME"
                 )
-                def currentInstrumentationRunnerName = AndroidTestUtil.getInstrumentationRunnerName(script, TEMP_GRADLE_OUTPUT_FILENAME)
+                def currentInstrumentationRunnerName = AndroidTestUtil.getInstrumentationRunnerName(
+                        script,
+                        TEMP_GRADLE_OUTPUT_FILENAME
+                )
                 script.echo currentInstrumentationRunnerName
+
+                // Проверка, определен ли testInstrumentationRunner для текущего модуля
+                if (currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {
+                    def testPackageName = AndroidTestUtil.getPackageNameFromApk(script, currentApkName)
+                    def testBuildTypePackageName = AndroidTestUtil.getPackageNameFromApk(script, testBuildTypeApkName)
+                    CommonUtil.print(script, testPackageName, testBuildTypePackageName)
+                }
             }
         }
     }

@@ -23,6 +23,7 @@ import ru.surfstudio.ci.CommonUtil
 class AndroidTestUtil {
 
     static String ANDROID_TEST_APK_SUFFIX = "androidTest"
+    private static String ANDROID_MANIFEST_FILE_NAME = "AndroidManifest.xml"
 
     //region Timeouts
     // значение таймаута для создания и загрузки нового эмулятора
@@ -125,6 +126,18 @@ class AndroidTestUtil {
     }
 
     /**
+     * Функция, возвращающая имя пакета для приложения, считывая его из манифеста,
+     * который можно получить из APK-файла, имя которого передается параметром
+     */
+    static String getPackageNameFromApk(Object script, String apkFullName) {
+        //todo sudo apt install aapt
+        return CommonUtil.getShCommandOutput(
+                script,
+                "aapt dump xmltree $apkFullName ${ANDROID_MANIFEST_FILE_NAME} | grep package | cut -d '\"' -f2"
+        )
+    }
+
+    /**
      * Функция, возвращающая имя модуля, в котором содержится APK-файл.
      *
      * В большинстве случаев, APK-файл находится в папке APK_FOLDER/build,
@@ -154,6 +167,7 @@ class AndroidTestUtil {
     }
     //endregion
 
+    //region InstrumentationRunner utils
     /**
      * Функция, возвращающая имя gradle task для текущего модуля, префикс которого передается параметром
      */
@@ -172,6 +186,7 @@ class AndroidTestUtil {
                 "cat $gradleOutputFileName | tail -4 | head -1"
         )
     }
+    //endregion
 
     //region Functions for manipulation of emulator
     /**
