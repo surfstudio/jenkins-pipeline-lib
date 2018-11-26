@@ -23,7 +23,6 @@ import ru.surfstudio.ci.CommonUtil
 class AndroidTestUtil {
 
     static String ANDROID_TEST_APK_SUFFIX = "androidTest"
-    private static String EMPTY_STRING = ""
 
     //region Timeouts
     // значение таймаута для создания и загрузки нового эмулятора
@@ -32,13 +31,6 @@ class AndroidTestUtil {
     // значение таймаута для запуска ранее созданного эмулятора
     static Integer SMALL_TIMEOUT_SECONDS = 7
     //endregion
-
-    /**
-     * Функция, проверяющая, определено ли имя, которое передано параметром
-     */
-    static Boolean isNameDefined(String emulatorName) {
-        return emulatorName != EMPTY_STRING
-    }
 
     //region Emulator utils
     /**
@@ -96,7 +88,7 @@ class AndroidTestUtil {
     /**
      * Функция, возвращающая список APK-файлов с заданным суффиксом
      */
-    def static getApkList(Object script, String apkPrefix) {
+    static String[] getApkList(Object script, String apkPrefix) {
         return CommonUtil.getShCommandOutput(
                 script,
                 "grep -r --include \"*-${apkPrefix}.apk\" . | cut -d ' ' -f3"
@@ -162,6 +154,13 @@ class AndroidTestUtil {
     }
     //endregion
 
+    /**
+     * Функция, возвращающая имя gradle task для текущего модуля, префикс которого передается параметром
+     */
+    static String getInstrumentationRunnerName(String prefix, AndroidTestConfig config) {
+        return ":$prefix:${config.instrumentationRunnerGradleTaskName}"
+    }
+
     //region Functions for manipulation of emulator
     /**
      * Функция, выполняющая закрытие запущенного эмулятора
@@ -169,7 +168,7 @@ class AndroidTestUtil {
     static void closeRunningEmulator(Object script, AndroidTestConfig config) {
         // Закрытие запущенного эмулятора, если он существует
         def emulatorName = getEmulatorName(script)
-        if (isNameDefined(emulatorName)) {
+        if (CommonUtil.isNameDefined(emulatorName)) {
             script.echo "close running emulator"
             script.sh "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\" emu kill"
         }

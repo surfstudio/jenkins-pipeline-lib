@@ -15,14 +15,13 @@
  */
 package ru.surfstudio.ci
 
-import ru.surfstudio.ci.AbortDuplicateStrategy
-import ru.surfstudio.ci.Constants
-import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.Pipeline
 import ru.surfstudio.ci.stage.Stage
 
 class CommonUtil {
+
     static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50
+    static String EMPTY_STRING = ""
 
     def static getBuildUrlHtmlLink(Object script){
         return  "<a href=\"${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline\">build</a>"
@@ -38,6 +37,13 @@ class CommonUtil {
 
     def static getJiraTaskMarkdownLink(String taskKey){
         return "[${taskKey}](${Constants.JIRA_URL}browse/${taskKey})"
+    }
+
+    /**
+     * Функция, проверяющая, определено ли имя, которое передано параметром
+     */
+    static Boolean isNameDefined(String name) {
+        return name != EMPTY_STRING
     }
 
     //region Environment variables

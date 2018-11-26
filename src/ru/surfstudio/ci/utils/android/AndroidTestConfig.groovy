@@ -23,6 +23,9 @@ class AndroidTestConfig {
     // buildType, для которого будут выполняться инструментальные тесты
     String testBuildType = "qa"
 
+    // имя gradle task, который возвращает имя текущего instrumentation runner
+    String instrumentationRunnerGradleTaskName = "getTestInstrumentationRunnerName"
+
     // имя AVD
     String avdName = "avd-androidTest"
 

@@ -52,10 +52,10 @@ class AndroidUtil {
             // проверка, существует ли AVD
             //todo check if AVD params have not changed
             def avdName = AndroidTestUtil.findAvdName(script, config.avdName)
-            if (AndroidTestUtil.isNameDefined(avdName)) {
+            if (CommonUtil.isNameDefined(avdName)) {
                 script.echo "launch reused emulator"
                 // проверка, запущен ли эмулятор
-                if (AndroidTestUtil.isNameDefined(emulatorName)) {
+                if (CommonUtil.isNameDefined(emulatorName)) {
                     currentTimeoutSeconds = 0
                     script.echo "emulator have been launched already"
                 } else {
@@ -74,7 +74,7 @@ class AndroidUtil {
 
     private static void checkEmulatorStatus(Object script, AndroidTestConfig config) {
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
-        if (AndroidTestUtil.isEmulatorOffline(script) || !AndroidTestUtil.isNameDefined(emulatorName)) {
+        if (AndroidTestUtil.isEmulatorOffline(script) || !CommonUtil.isNameDefined(emulatorName)) {
             closeAndCreateEmulator(script, config, "emulator is offline")
             sleep(script, AndroidTestUtil.LONG_TIMEOUT_SECONDS)
         } else {
@@ -91,9 +91,37 @@ class AndroidUtil {
             def apkPrefix = AndroidTestUtil.getApkPrefix(script, currentApkName, config)
             CommonUtil.print(script, currentApkName, apkMainFolder, apkFileName, apkPrefix)
 
+            // Получение директорий, которые будут содержать отчеты о проведенных инструментальных тестах,
+            // а также имя testRunner для текущего модуля
+            def testReportFolder = apkMainFolder
+            def testReportFileNameSuffix = apkMainFolder
+            def currentInstrumentationRunnerName
+
+            if (apkMainFolder != apkPrefix) {
+                currentInstrumentationRunnerName = AndroidTestUtil.getInstrumentationRunnerName(
+                        "$apkMainFolder:$apkPrefix",
+                        config
+                )
+                testReportFileNameSuffix += "-$apkPrefix"
+                testReportFolder += "/$apkPrefix"
+            } else {
+                currentInstrumentationRunnerName = AndroidTestUtil.getInstrumentationRunnerName(
+                        apkMainFolder,
+                        config
+                )
+            }
+
+            CommonUtil.print(script, testReportFolder, testReportFileNameSuffix, currentInstrumentationRunnerName)
+
             // Находим APK для testBuildType, заданного в конфиге, и имя тестового пакета
+            def testBuildTypeApkName = CommonUtil.EMPTY_STRING
             script.dir(apkMainFolder) {
-                script.echo "${AndroidTestUtil.getApkList(script, config.testBuildType)[0]}"
+                testBuildTypeApkName = AndroidTestUtil.getApkList(script, config.testBuildType)[0]
+            }
+            
+            // Проверка, существует ли APK с заданным testBuildType
+            if (CommonUtil.isNameDefined(testBuildTypeApkName)) {
+                //todo
             }
         }
     }
@@ -114,7 +142,7 @@ class AndroidUtil {
     //endregion
 
     def static onEmulator(Object script, String avdName, Closure body) {
-        script.timeout(time: 7*60*60, unit: 'SECONDS') { //7 hours
+        script.timeout(time: 7 * 60 * 60, unit: 'SECONDS') { //7 hours
             def ADB = "${script.env.ANDROID_HOME}/platform-tools/adb"
             def EMULATOR = "${script.env.ANDROID_HOME}/tools/emulator"
             script.sh "$ADB devices"
@@ -148,8 +176,7 @@ class AndroidUtil {
      * ```
      * AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials){
      *     sh "./gradlew assembleRelease"
-     * }
-     * ````
+     *}* ````
      * How configure gradle to use this variables see here https://bitbucket.org/surfstudio/android-standard/src/snapshot-0.3.0/template/keystore/
      *
      */
@@ -172,7 +199,7 @@ class AndroidUtil {
                     }
                 }
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             if (bodyStarted) {
                 throw e
             } else {
@@ -186,8 +213,8 @@ class AndroidUtil {
         def String fileBody = script.readFile(file)
         def lines = fileBody.split("\n")
         for (line in lines) {
-            def words = line.split(/(;| |\t|=)/).findAll({it?.trim()})
-            if(words[0] == varName && words.size() > 1) {
+            def words = line.split(/(;| |\t|=)/).findAll({ it?.trim() })
+            if (words[0] == varName && words.size() > 1) {
                 def value = words[1]
                 script.echo "$varName = $value found in file $file"
                 return value
@@ -202,8 +229,8 @@ class AndroidUtil {
         String newFileBody = ""
         def lines = fileBody.split("\n")
         for (line in lines) {
-            def words = line.split(/(;| |\t|=)/).findAll({it?.trim()})
-            if(words[0] == varName) {
+            def words = line.split(/(;| |\t|=)/).findAll({ it?.trim() })
+            if (words[0] == varName) {
                 String updatedLine = line.replace(oldVarValue, newVarValue)
                 newFileBody += updatedLine
             } else {
