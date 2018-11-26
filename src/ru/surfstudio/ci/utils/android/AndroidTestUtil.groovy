@@ -176,6 +176,22 @@ class AndroidTestUtil {
     }
 
     /**
+     * Функция для запуска инструментальных тестов
+     * @param script контекст вызова
+     * @param emulatorName имя эмулятора, на котором будут запущены тесты
+     * @param testPackageWithRunner test.package.name/AndroidInstrumentalRunnerName для запуска тестов
+     */
+    static void runInstrumentalTests(
+            Object script,
+            String emulatorName,
+            String testPackageWithRunner,
+            AndroidTestConfig config
+    ) {
+        script.sh "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\" shell \
+            am instrument -w -r -e debug false -e listener ${config.testRunnerListenerName} \"$testPackageWithRunner\""
+    }
+
+    /**
      * Функция, возвращающая имя модуля, в котором содержится APK-файл.
      *
      * В большинстве случаев, APK-файл находится в папке APK_FOLDER/build,

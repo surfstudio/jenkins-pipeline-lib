@@ -34,6 +34,7 @@ class AndroidUtil {
         launchEmulator(script, config)
         checkEmulatorStatus(script, config)
         runTests(script, config)
+        finishBody()
         script.echo "end"
     }
 
@@ -165,6 +166,14 @@ class AndroidUtil {
 
                     AndroidTestUtil.push(script, emulatorName, "$projectRootDir$currentApkName", testApkPackageName)
                     AndroidTestUtil.installApk(script, emulatorName, testApkPackageName)
+
+                    AndroidTestUtil.runInstrumentalTests(
+                            script,
+                            emulatorName,
+                            "$testPackageName/$currentInstrumentationRunnerName",
+                            config
+                    )
+                    //todo pull test report
                 }
             }
         }
@@ -253,8 +262,8 @@ class AndroidUtil {
         }
     }
 
-    def static String getGradleVariable(Object script, String file, String varName) {
-        def String fileBody = script.readFile(file)
+    static String getGradleVariable(Object script, String file, String varName) {
+        String fileBody = script.readFile(file)
         def lines = fileBody.split("\n")
         for (line in lines) {
             def words = line.split(/(;| |\t|=)/).findAll({ it?.trim() })
@@ -267,7 +276,7 @@ class AndroidUtil {
         throw script.error("groovy variable with name: $varName not exist in file: $file")
     }
 
-    def static String changeGradleVariable(Object script, String file, String varName, String newVarValue) {
+    static String changeGradleVariable(Object script, String file, String varName, String newVarValue) {
         String oldVarValue = getGradleVariable(script, file, varName)
         String fileBody = script.readFile(file)
         String newFileBody = ""
