@@ -15,6 +15,7 @@
  */
 package ru.surfstudio.ci.pipeline.helper
 
+import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.utils.android.AndroidTestConfig
 import ru.surfstudio.ci.AndroidUtil
 
@@ -69,10 +70,15 @@ class AndroidPipelineHelper {
             String androidTestResultPathDirHtml
     ) {
         try {
-            //script.sh "./gradlew $androidTestGradleTask"
-            script.sh "./gradlew clean \
-                :template:app-injector:assembleDebug :template:app-injector:assembleDebugAndroidTest \
-                :easyadapter-sample:assembleDebug :easyadapter-sample:assembleDebugAndroidTest"
+            //CommonUtil.gradlew(script, androidTestGradleTask)
+            CommonUtil.gradlew(
+                    script,
+                    "clean",
+                    ":template:app-injector:assembleDebug",
+                    ":template:app-injector:assembleDebugAndroidTest",
+                    ":easyadapter-sample:assembleDebug",
+                    ":easyadapter-sample:assembleDebugAndroidTest"
+            )
             AndroidUtil.runInstrumentalTests(script, config) {
                 //todo
             }

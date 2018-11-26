@@ -20,6 +20,8 @@ import ru.surfstudio.ci.utils.android.AndroidTestUtil
 
 class AndroidUtil {
 
+    private static String TEMP_GRADLE_OUTPUT_FILENAME = "result"
+
     /**
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
      * @param script контекст вызова
@@ -118,10 +120,12 @@ class AndroidUtil {
             script.dir(apkMainFolder) {
                 testBuildTypeApkName = AndroidTestUtil.getApkList(script, config.testBuildType)[0]
             }
-            
+
             // Проверка, существует ли APK с заданным testBuildType
             if (CommonUtil.isNameDefined(testBuildTypeApkName)) {
-                //todo
+                testBuildTypeApkName = "$apkMainFolder/$testBuildTypeApkName"
+                script.echo testBuildTypeApkName
+                //todo gradlew
             }
         }
     }

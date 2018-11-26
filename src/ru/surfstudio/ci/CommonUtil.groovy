@@ -46,25 +46,32 @@ class CommonUtil {
         return name != EMPTY_STRING
     }
 
+    /**
+     * Функция, выполняющая список gradle tasks, имена которых передаются в параметрах
+     */
+    static gradlew(Object script, String... gradleTaskNames) {
+        script.sh "./gradlew ${gradleTaskNames.join(' ')}"
+    }
+
     //region Environment variables
-    def static getAndroidHome(Object script) {
+    static String getAndroidHome(Object script) {
         return script.env.ANDROID_HOME
     }
 
-    def static getAvdManagerHome(Object script) {
+    static String getAvdManagerHome(Object script) {
         return "${getAndroidHome(script)}/tools/bin"
     }
 
-    def static getAdbHome(Object script) {
+    static String getAdbHome(Object script) {
         return "${getAndroidHome(script)}/platform-tools/adb"
     }
 
-    def static getEmulatorHome(Object script) {
+    static String getEmulatorHome(Object script) {
         return "${getAndroidHome(script)}/emulator/emulator"
     }
     //endregion
 
-    def static print(Object script, String... args) {
+    static void print(Object script, String... args) {
         args.each {
             script.echo "$it"
         }
