@@ -156,7 +156,7 @@ class AndroidUtil {
                         AndroidTestUtil.uninstallApk(script, emulatorName, testBuildTypePackageName)
                     }
 
-                    // Установка APK и запуск тестов
+                    // Установка APK
                     def testBuildTypeApkPackageName = "$TMP_PACKAGE_NAME$testBuildTypePackageName"
                     def testApkPackageName = "$TMP_PACKAGE_NAME$testPackageName"
 
@@ -167,13 +167,18 @@ class AndroidUtil {
                     AndroidTestUtil.push(script, emulatorName, "$projectRootDir$currentApkName", testApkPackageName)
                     AndroidTestUtil.installApk(script, emulatorName, testApkPackageName)
 
+                    // Запуск тестов и получение отчетов
                     AndroidTestUtil.runInstrumentalTests(
                             script,
                             emulatorName,
-                            "$testPackageName/$currentInstrumentationRunnerName",
-                            config
+                            "$testPackageName/$currentInstrumentationRunnerName"
                     )
-                    //todo pull test report
+                    AndroidTestUtil.pullTestReport(
+                            script,
+                            emulatorName,
+                            testBuildTypePackageName,
+                            "$testReportFolder/report-${testReportFileNameSuffix}.xml"
+                    )
                 }
             }
         }

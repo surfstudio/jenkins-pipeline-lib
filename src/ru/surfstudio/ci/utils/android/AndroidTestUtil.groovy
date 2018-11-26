@@ -25,6 +25,9 @@ class AndroidTestUtil {
     static String ANDROID_TEST_APK_SUFFIX = "androidTest"
     private static String ANDROID_MANIFEST_FILE_NAME = "AndroidManifest.xml"
 
+    private static String TEST_RUNNER_LISTENER_NAME = "de.schroepf.androidxmlrunlistener.XmlRunListener"
+    private static String DEFAULT_TEST_REPORT_FILENAME = "report-0.xml"
+
     //region Timeouts
     // значение таймаута для создания и загрузки нового эмулятора
     static Integer LONG_TIMEOUT_SECONDS = 20
@@ -181,14 +184,14 @@ class AndroidTestUtil {
      */
     static void uninstallApk(Object script, String emulatorName, String packageName) {
         // Проверка, был ли установлен APK с заданным именем пакета на текущий эмулятор
-        def adbCommand = "${CommonUtil.getAdbHome(script)} -s -s $emulatorName"
+        def adbCommand = "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\""
         def searchResultCode = CommonUtil.getShCommandResultCode(
                 script,
-                "$adbCommand shell pm list packages | grep $packageName"
+                "$adbCommand shell pm list packages | grep \"$packageName\""
         )
         if (searchResultCode == 0) {
             script.echo "uninstall previous app"
-            script.sh "$adbCommand uninstall $packageName"
+            script.sh "$adbCommand uninstall \"$packageName\""
         }
     }
 
@@ -212,14 +215,33 @@ class AndroidTestUtil {
      * @param emulatorName имя эмулятора, на котором будут запущены тесты
      * @param testPackageWithRunner test.package.name/AndroidInstrumentalRunnerName для запуска тестов
      */
-    static void runInstrumentalTests(
-            Object script,
-            String emulatorName,
-            String testPackageWithRunner,
-            AndroidTestConfig config
-    ) {
+    static void runInstrumentalTests(Object script, String emulatorName, String testPackageWithRunner) {
         script.sh "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\" shell \
-            am instrument -w -r -e debug false -e listener ${config.testRunnerListenerName} \"$testPackageWithRunner\""
+            am instrument -w -r -e debug false -e listener $TEST_RUNNER_LISTENER_NAME \"$testPackageWithRunner\""
+    }
+
+    /**
+     * Функция, извлекающая отчет о результатах выполнения инструментальных тестов
+     * с эмулятора в локальный файл
+     */
+    static void pullTestReport(Object script, String emulatorName, String appPackageName, String reportFileName) {
+        def testReportFileName = getTestReportFileName(appPackageName)
+        def adbCommand = "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\" shell"
+        def searchReportResultCode = CommonUtil.getShCommandResultCode(
+                script,
+                "$adbCommand ls \"$testReportFileName\""
+        )
+        if (searchReportResultCode == 0) {
+            script.sh "$adbCommand cat $testReportFileName > $reportFileName"
+        }
+    }
+
+    /**
+     * Функция, возвращающая полное имя файла с отчетом о результатах инструментального теста
+     * для конкретного приложения, имя пакета которого передается параметром
+     */
+    private static String getTestReportFileName(String appPackageName) {
+        return "/sdcard/Android/data/$appPackageName/files/$DEFAULT_TEST_REPORT_FILENAME"
     }
     //endregion
 

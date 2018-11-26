@@ -26,9 +26,6 @@ class AndroidTestConfig {
     // имя gradle task, который возвращает имя текущего instrumentation runner
     String instrumentationRunnerGradleTaskName = "getTestInstrumentationRunnerName"
 
-    // листенер для запуска инструментальных тестов, который будет генерировать отчеты о результатах
-    String testRunnerListenerName = "de.schroepf.androidxmlrunlistener.XmlRunListener"
-
     // имя AVD
     String avdName = "avd-androidTest"
 
