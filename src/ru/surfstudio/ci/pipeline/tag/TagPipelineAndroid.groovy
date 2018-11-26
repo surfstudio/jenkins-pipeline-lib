@@ -15,10 +15,10 @@
  */
 package ru.surfstudio.ci.pipeline.tag
 
-import ru.surfstudio.ci.utils.android.AndroidUtil
-import ru.surfstudio.ci.utils.CommonUtil
+import ru.surfstudio.ci.AndroidUtil
+import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
-import ru.surfstudio.ci.utils.RepositoryUtil
+import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 

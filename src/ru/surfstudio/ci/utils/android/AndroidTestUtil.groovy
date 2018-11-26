@@ -15,7 +15,7 @@
  */
 package ru.surfstudio.ci.utils.android
 
-import ru.surfstudio.ci.utils.CommonUtil
+import ru.surfstudio.ci.CommonUtil
 
 /**
  * Утилиты для инструментальных тестов Android

@@ -13,7 +13,10 @@
   See the License for the specific language governing permissions and
   limitations under the License.
  */
-package ru.surfstudio.ci.utils.android
+package ru.surfstudio.ci
+
+import ru.surfstudio.ci.utils.android.AndroidTestConfig
+import ru.surfstudio.ci.utils.android.AndroidTestUtil
 
 class AndroidUtil {
 

@@ -13,9 +13,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
  */
-package ru.surfstudio.ci.utils
+package ru.surfstudio.ci
 
-import ru.surfstudio.ci.Constants
+
 import ru.surfstudio.ci.pipeline.tag.TagPipeline
 
 class JarvisUtil {

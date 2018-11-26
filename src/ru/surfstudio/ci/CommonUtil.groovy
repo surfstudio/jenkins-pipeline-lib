@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
  */
-package ru.surfstudio.ci.utils
+package ru.surfstudio.ci
 
 import ru.surfstudio.ci.AbortDuplicateStrategy
 import ru.surfstudio.ci.Constants

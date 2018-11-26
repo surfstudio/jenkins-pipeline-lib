@@ -13,13 +13,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
  */
-package ru.surfstudio.ci.utils
+package ru.surfstudio.ci
 
 import com.cloudbees.plugins.credentials.CredentialsProvider
 import com.cloudbees.plugins.credentials.common.IdCredentials
 import org.eclipse.jgit.transport.URIish
 import org.jenkinsci.plugins.gitclient.Git
-import ru.surfstudio.ci.Result
 
 class RepositoryUtil {
 

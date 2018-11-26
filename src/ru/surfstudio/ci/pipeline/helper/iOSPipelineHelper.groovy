@@ -15,7 +15,7 @@
  */
 package ru.surfstudio.ci.pipeline.helper
 
-import ru.surfstudio.ci.utils.CommonUtil
+import ru.surfstudio.ci.CommonUtil
 
 /**
  *
