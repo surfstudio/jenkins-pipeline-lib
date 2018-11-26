@@ -20,6 +20,8 @@ import ru.surfstudio.ci.utils.android.AndroidTestUtil
 
 class AndroidUtil {
 
+    private static String ANDROID_TEST_APK_SUFFIX = "androidTest"
+
     /**
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
      * @param script контекст вызова
@@ -29,6 +31,7 @@ class AndroidUtil {
     static void runInstrumentalTests(Object script, AndroidTestConfig config, Closure finishBody) {
         launchEmulator(script, config)
         checkEmulatorStatus(script, config)
+        runTests(script, config)
         script.echo "end"
     }
 
@@ -39,6 +42,7 @@ class AndroidUtil {
         AndroidTestUtil.closeRunningEmulator(script, config)
     }
 
+    //region Stages of instrumental tests running
     private static void launchEmulator(Object script, AndroidTestConfig config) {
         script.sh "sdkmanager \"${config.sdkId}\""
         script.sh "adb devices"
@@ -80,6 +84,15 @@ class AndroidUtil {
         }
     }
 
+    private static void runTests(Object script, AndroidTestConfig config) {
+        script.echo "start running tests"
+        AndroidTestUtil.getApkList(script, ANDROID_TEST_APK_SUFFIX).each {
+            script.echo "$it"
+        }
+    }
+    //endregion
+
+    //region Helpful functions
     private static void closeAndCreateEmulator(Object script, AndroidTestConfig config, String message) {
         script.echo message
         AndroidTestUtil.closeRunningEmulator(script, config)
@@ -91,6 +104,7 @@ class AndroidUtil {
         script.sh "sleep $timeout"
         script.sh "adb devices"
     }
+    //endregion
 
     def static onEmulator(Object script, String avdName, Closure body) {
         script.timeout(time: 7*60*60, unit: 'SECONDS') { //7 hours

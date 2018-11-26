@@ -40,6 +40,17 @@ class AndroidTestUtil {
     }
 
     /**
+     * Функция, возвращающая список APK-файлов с заданным суффиксом
+     */
+    def static getApkList(Object script, String apkPrefix) {
+        return CommonUtil.getShCommandOutput(
+                script,
+                "grep -r --include \"*-${apkPrefix}.apk\" . | cut -d ' ' -f3"
+        ).split()
+    }
+
+    //region Emulator utils
+    /**
      * Функция, возвращающая имя запущенного эмулятора
      */
     static String getEmulatorName(Object script) {
@@ -69,7 +80,9 @@ class AndroidTestUtil {
     static Boolean isEmulatorOffline(Object script) {
         return getEmulatorStatus(script) == "offline"
     }
+    //endregion
 
+    //region AVD utils
     /**
      * Функция, проверяющая, существует ли AVD с заданным именем
      */
@@ -86,7 +99,9 @@ class AndroidTestUtil {
                 "${CommonUtil.getAvdManagerHome(script)} list avd | grep Name | awk '{ print \$2 }'"
         )
     }
+    //endregion
 
+    //region Functions for manipulation of emulator
     /**
      * Функция, выполняющая закрытие запущенного эмулятора
      */
@@ -127,4 +142,5 @@ class AndroidTestUtil {
         launchEmulatorCommand+=(config.reuse) ? " &" : " -no-snapshot-save &"
         script.sh(launchEmulatorCommand)
     }
+    //endregion
 }
