@@ -158,6 +158,13 @@ class AndroidUtil {
                     // Установка APK и запуск тестов
                     def testBuildTypeApkPackageName = "$TMP_PACKAGE_NAME$testBuildTypePackageName"
                     def testApkPackageName = "$TMP_PACKAGE_NAME$testPackageName"
+
+                    def projectRootDir = CommonUtil.getShCommandOutput(script, "pwd")
+                    AndroidTestUtil.push(script, emulatorName, "$projectRootDir$testBuildTypeApkName", testBuildTypeApkPackageName)
+                    AndroidTestUtil.installApk(script, emulatorName, testBuildTypeApkPackageName)
+
+                    AndroidTestUtil.push(script, emulatorName, "$projectRootDir$currentApkName", testApkPackageName)
+                    AndroidTestUtil.installApk(script, emulatorName, testApkPackageName)
                 }
             }
         }

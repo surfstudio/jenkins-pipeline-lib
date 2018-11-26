@@ -165,14 +165,14 @@ class AndroidTestUtil {
      * Функция для установки APK-файла в заданный пакет
      */
     static void push(Object script, String emulatorName, String apkFullName, String apkDestPackage) {
-        script.sh "${CommonUtil.getAdbHome(script)} -s $emulatorName push $apkFullName $apkDestPackage"
+        script.sh "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\" push \"$apkFullName\" \"$apkDestPackage\""
     }
 
     /**
      * Функция для установка APK, который задается с помощью имени пакета, на эмулятор
      */
     static void installApk(Object script, String emulatorName, String apkPackageName) {
-        script.sh "${CommonUtil.getAdbHome(script)} -s $emulatorName shell pm install -t -r $apkPackageName"
+        script.sh "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\" shell pm install -t -r \"$apkPackageName\""
     }
 
     /**
