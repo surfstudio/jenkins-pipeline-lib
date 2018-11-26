@@ -154,6 +154,20 @@ class AndroidTestUtil {
     }
 
     /**
+     * Функция для установки APK-файла в заданный пакет
+     */
+    static void push(Object script, String emulatorName, String apkFullName, String apkDestPackage) {
+
+    }
+
+    /**
+     * Функция для установка APK, который задается с помощью имени пакета, на эмулятор
+     */
+    static void installApk(Object script, String emulatorName, String apkPackageName) {
+
+    }
+
+    /**
      * Функция, возвращающая имя модуля, в котором содержится APK-файл.
      *
      * В большинстве случаев, APK-файл находится в папке APK_FOLDER/build,

@@ -58,16 +58,24 @@ class CommonUtil {
         return script.env.ANDROID_HOME
     }
 
-    static String getAvdManagerHome(Object script) {
-        return "${getAndroidHome(script)}/tools/bin"
-    }
-
     static String getAdbHome(Object script) {
         return "${getAndroidHome(script)}/platform-tools/adb"
     }
 
     static String getEmulatorHome(Object script) {
         return "${getAndroidHome(script)}/emulator/emulator"
+    }
+
+    private static String getAndroidToolsHome(Object script) {
+        return "${getAndroidHome(script)}/tools/bin"
+    }
+
+    static String getAvdManagerHome(Object script) {
+        return "${getAndroidToolsHome(script)}/avdmanager"
+    }
+
+    static String getSdkManagerHome(Object script) {
+        return "${getAndroidToolsHome(script)}/sdkmanager"
     }
     //endregion
 

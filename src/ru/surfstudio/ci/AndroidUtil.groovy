@@ -22,6 +22,7 @@ class AndroidUtil {
 
     private static String TEMP_GRADLE_OUTPUT_FILENAME = "result"
     private static String NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME = "null"
+    private static String TMP_PACKAGE_NAME = "/data/local/tmp/"
 
     /**
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
@@ -45,8 +46,8 @@ class AndroidUtil {
 
     //region Stages of instrumental tests running
     private static void launchEmulator(Object script, AndroidTestConfig config) {
-        script.sh "sdkmanager \"${config.sdkId}\""
-        script.sh "adb devices"
+        script.sh "${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
+        script.sh "${CommonUtil.getAdbHome(script)} devices"
         def currentTimeoutSeconds = AndroidTestUtil.LONG_TIMEOUT_SECONDS
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
 
@@ -91,6 +92,7 @@ class AndroidUtil {
 
         AndroidTestUtil.getApkList(script, AndroidTestUtil.ANDROID_TEST_APK_SUFFIX).each {
             def currentApkName = "$it"
+            script.echo currentApkName
             def apkMainFolder = AndroidTestUtil.getApkFolderName(script, currentApkName)
             def apkFileName = AndroidTestUtil.getApkFileName(script, currentApkName)
             def apkPrefix = AndroidTestUtil.getApkPrefix(script, currentApkName, config)
@@ -128,6 +130,7 @@ class AndroidUtil {
             if (CommonUtil.isNameDefined(testBuildTypeApkName)) {
                 testBuildTypeApkName = "$apkMainFolder/$testBuildTypeApkName"
                 script.echo testBuildTypeApkName
+                script.echo "pwd"
                 CommonUtil.gradlew(
                         script,
                         "$currentInstrumentationGradleTaskRunnerName > $TEMP_GRADLE_OUTPUT_FILENAME"
@@ -148,6 +151,10 @@ class AndroidUtil {
                     if (config.reuse) {
                         AndroidTestUtil.uninstallApk(script, emulatorName, testBuildTypePackageName)
                     }
+
+                    // Установка APK и запуск тестов
+                    def testBuildTypeApkPackageName = "$TMP_PACKAGE_NAME$testBuildTypePackageName"
+                    def testApkPackageName = "$TMP_PACKAGE_NAME$testPackageName"
                 }
             }
         }
@@ -164,7 +171,7 @@ class AndroidUtil {
     private static void sleep(Object script, Integer timeout) {
         script.echo "waiting $timeout seconds..."
         script.sh "sleep $timeout"
-        script.sh "adb devices"
+        script.sh "${CommonUtil.getAdbHome(script)} devices"
     }
     //endregion
 
