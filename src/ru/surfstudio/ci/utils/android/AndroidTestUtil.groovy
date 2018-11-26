@@ -30,28 +30,10 @@ class AndroidTestUtil {
     static Integer SMALL_TIMEOUT_SECONDS = 7
     //endregion
 
-    //region Названия переменных окружения для инструментальных тестов
-    private static String PATH = "PATH"
-    private static String ADB_HOME = "ADB_HOME"
-    private static String EMULATOR_HOME = "EMULATOR_HOME"
-    private static String AVDMANAGER_HOME = "AVDMANAGER_HOME"
-    //endregion
-
     //region Основные shell-команды
     private static String GET_AVD_NAMES_COMMAND = "avdmanager list avd | grep Name | awk '{ print \$2 }'"
     private static String GET_EMULATOR_NAME_COMMAND = "adb devices | grep emulator | cut -f1"
     //endregion
-
-    /**
-     * Функция, экспортирующая переменные окружения, необходимые для инструментальных тестов
-     */
-    def static exportAndroidTestEnvironmentVariables(Object script) {
-        def androidHome = CommonUtil.getAndroidHome(script)
-        CommonUtil.exportEnvironmentVariable(script, ADB_HOME, "$androidHome/platform-tools/adb")
-        CommonUtil.exportEnvironmentVariable(script, EMULATOR_HOME, "$androidHome/emulator")
-        CommonUtil.exportEnvironmentVariable(script, AVDMANAGER_HOME, "$androidHome/tools/bin")
-        CommonUtil.exportEnvironmentVariable(script, PATH, "\$PATH:\$EMULATOR_HOME:\$ADB_HOME:\$AVDMANAGER_HOME")
-    }
 
     /**
      * Функция, возвращающая список имен AVD
@@ -82,12 +64,12 @@ class AndroidTestUtil {
         def emulatorName = getEmulatorName(script)
         if (emulatorName != "") {
             script.echo "close running emulator"
-            script.sh "adb -s \"$emulatorName\" emu kill"
+            script.sh "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\" emu kill"
         }
         // Удаление AVD, если необходимо
         if (!config.stay) {
             script.echo "delete avd"
-            script.sh "avdmanager delete avd -n \"${config.avdName}\""
+            script.sh "${CommonUtil.getAvdManagerHome(script)} delete avd -n \"${config.avdName}\""
         }
     }
 
@@ -96,7 +78,7 @@ class AndroidTestUtil {
      */
     def static createAndLaunchNewEmulator(Object script, AndroidTestConfig config) {
         script.echo "create new emulator"
-        script.sh "avdmanager create avd -f \
+        script.sh "${CommonUtil.getAvdManagerHome(script)} create avd -f \
             -n \"${config.avdName}\" \
             -d \"${config.deviceName}\" \
             -k \"${config.sdkId}\" \
@@ -108,15 +90,14 @@ class AndroidTestUtil {
      * Функция, выполняющая запуск эмулятора, параметры которого заданы конфигом
      */
     def static launchEmulator(Object script, AndroidTestConfig config) {
-        def androidHome = CommonUtil.getAndroidHome(script)
         if (config.stay) {
             script.echo "stay"
-            script.sh "$androidHome/emulator/emulator \
+            script.sh "${CommonUtil.getEmulatorHome(script)} \
                 -avd \"${config.avdName}\" \
                 -skin \"${config.skinSize}\" -no-window -no-boot-anim &"
         } else {
             script.echo "not stay"
-            script.sh "$androidHome/emulator/emulator \
+            script.sh "${CommonUtil.getEmulatorHome(script)} \
                 -avd \"${config.avdName}\" \
                 -skin \"${config.skinSize}\" -no-window -no-boot-anim -no-snapshot-save &"
         }

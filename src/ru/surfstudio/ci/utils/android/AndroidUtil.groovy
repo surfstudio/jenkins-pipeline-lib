@@ -24,7 +24,6 @@ class AndroidUtil {
      * @param finishBody действия, которые должны быть выполнены по завершении инструментальных тестов
      */
     def static runInstrumentalTests(Object script, AndroidTestConfig config, Closure finishBody) {
-        AndroidTestUtil.exportAndroidTestEnvironmentVariables(script)
         script.sh "sdkmanager \"${config.sdkId}\""
         script.sh "adb devices"
         def currentTimeoutSeconds = AndroidTestUtil.LONG_TIMEOUT_SECONDS
