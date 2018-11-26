@@ -70,6 +70,9 @@ class AndroidPipelineHelper {
     ) {
         try {
             //script.sh "./gradlew $androidTestGradleTask"
+            script.sh "./gradlew clean \
+                :template:app-injector:assembleDebug :template:app-injector:assembleDebugAndroidTest \
+                :easyadapter-sample:assembleDebug :easyadapter-sample:assembleDebugAndroidTest"
             AndroidUtil.runInstrumentalTests(script, config) {
                 //todo
             }

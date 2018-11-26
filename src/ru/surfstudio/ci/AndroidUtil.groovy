@@ -93,7 +93,7 @@ class AndroidUtil {
 
             // Находим APK для testBuildType, заданного в конфиге, и имя тестового пакета
             script.dir(apkMainFolder) {
-                script.echo "${AndroidTestUtil.getApkList(script, config.testBuildType)}"
+                script.echo "${AndroidTestUtil.getApkList(script, config.testBuildType)[0]}"
             }
         }
     }
