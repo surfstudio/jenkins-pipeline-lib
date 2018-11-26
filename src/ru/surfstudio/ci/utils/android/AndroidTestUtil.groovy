@@ -30,23 +30,24 @@ class AndroidTestUtil {
     static Integer SMALL_TIMEOUT_SECONDS = 7
     //endregion
 
-    //region Основные shell-команды
-    private static String GET_AVD_NAMES_COMMAND = "avdmanager list avd | grep Name | awk '{ print \$2 }'"
-    private static String GET_EMULATOR_NAME_COMMAND = "adb devices | grep emulator | cut -f1"
-    //endregion
-
     /**
      * Функция, возвращающая список имен AVD
      */
     def static getAvdNames(Object script) {
-        return CommonUtil.getShCommandOutput(script, GET_AVD_NAMES_COMMAND)
+        return CommonUtil.getShCommandOutput(
+                script,
+                "${CommonUtil.getAvdManagerHome(script)} list avd | grep Name | awk '{ print \$2 }'"
+        )
     }
 
     /**
      * Функция, возвращающая имя запущенного эмулятора
      */
     def static getEmulatorName(Object script) {
-        return CommonUtil.getShCommandOutput(script, GET_EMULATOR_NAME_COMMAND)
+        return CommonUtil.getShCommandOutput(
+                script,
+                "${CommonUtil.getAdbHome(script)} devices | grep emulator | cut -f1"
+        )
     }
 
     /**
