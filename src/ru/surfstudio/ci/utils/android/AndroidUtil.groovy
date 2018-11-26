@@ -58,6 +58,13 @@ class AndroidUtil {
         script.echo "end"
     }
 
+    /**
+     * Функция, которая должна быть вызвана по завершении инструментальных тестов
+     */
+    def static cleanup(Object script, AndroidTestConfig config) {
+        AndroidTestUtil.closeRunningEmulator(script, config)
+    }
+
     def static onEmulator(Object script, String avdName, Closure body) {
         script.timeout(time: 7*60*60, unit: 'SECONDS') { //7 hours
             def ADB = "${script.env.ANDROID_HOME}/platform-tools/adb"

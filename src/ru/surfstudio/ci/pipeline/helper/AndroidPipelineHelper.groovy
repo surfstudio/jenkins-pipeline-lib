@@ -74,7 +74,7 @@ class AndroidPipelineHelper {
                 //todo
             }
         } finally {
-            //todo
+            AndroidUtil.cleanup(script, config)
         }
     }
 
