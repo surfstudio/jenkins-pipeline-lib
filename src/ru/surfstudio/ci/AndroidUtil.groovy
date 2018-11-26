@@ -97,23 +97,23 @@ class AndroidUtil {
             // а также имя testRunner для текущего модуля
             def testReportFolder = apkMainFolder
             def testReportFileNameSuffix = apkMainFolder
-            def currentInstrumentationRunnerName
+            def currentInstrumentationGradleTaskRunnerName
 
             if (apkMainFolder != apkPrefix) {
-                currentInstrumentationRunnerName = AndroidTestUtil.getInstrumentationRunnerName(
+                currentInstrumentationGradleTaskRunnerName = AndroidTestUtil.getInstrumentationGradleTaskRunnerName(
                         "$apkMainFolder:$apkPrefix",
                         config
                 )
                 testReportFileNameSuffix += "-$apkPrefix"
                 testReportFolder += "/$apkPrefix"
             } else {
-                currentInstrumentationRunnerName = AndroidTestUtil.getInstrumentationRunnerName(
+                currentInstrumentationGradleTaskRunnerName = AndroidTestUtil.getInstrumentationGradleTaskRunnerName(
                         apkMainFolder,
                         config
                 )
             }
 
-            CommonUtil.print(script, testReportFolder, testReportFileNameSuffix, currentInstrumentationRunnerName)
+            CommonUtil.print(script, testReportFolder, testReportFileNameSuffix, currentInstrumentationGradleTaskRunnerName)
 
             // Находим APK для testBuildType, заданного в конфиге, и имя тестового пакета
             def testBuildTypeApkName = CommonUtil.EMPTY_STRING
@@ -125,7 +125,12 @@ class AndroidUtil {
             if (CommonUtil.isNameDefined(testBuildTypeApkName)) {
                 testBuildTypeApkName = "$apkMainFolder/$testBuildTypeApkName"
                 script.echo testBuildTypeApkName
-                //todo gradlew
+                CommonUtil.gradlew(
+                        script,
+                        "$currentInstrumentationGradleTaskRunnerName > $TEMP_GRADLE_OUTPUT_FILENAME"
+                )
+                def currentInstrumentationRunnerName = AndroidTestUtil.getInstrumentationRunnerName(script, TEMP_GRADLE_OUTPUT_FILENAME)
+                script.echo currentInstrumentationRunnerName
             }
         }
     }

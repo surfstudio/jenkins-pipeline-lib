@@ -157,8 +157,20 @@ class AndroidTestUtil {
     /**
      * Функция, возвращающая имя gradle task для текущего модуля, префикс которого передается параметром
      */
-    static String getInstrumentationRunnerName(String prefix, AndroidTestConfig config) {
+    static String getInstrumentationGradleTaskRunnerName(String prefix, AndroidTestConfig config) {
         return ":$prefix:${config.instrumentationRunnerGradleTaskName}"
+    }
+
+    /**
+     * Функция, возвращающая имя testInstrumentationRunner на основе результата после выполнения соотв. gradle task
+     * @param gradleOutputFileName
+     * @return
+     */
+    static String getInstrumentationRunnerName(Object script, String gradleOutputFileName) {
+        return CommonUtil.getShCommandOutput(
+                script,
+                "cat $gradleOutputFileName | tail -4 | head -1"
+        )
     }
 
     //region Functions for manipulation of emulator

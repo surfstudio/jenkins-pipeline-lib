@@ -71,6 +71,7 @@ class AndroidPipelineHelper {
     ) {
         try {
             //CommonUtil.gradlew(script, androidTestGradleTask)
+            script.echo config.testBuildType
             CommonUtil.gradlew(
                     script,
                     "clean",
