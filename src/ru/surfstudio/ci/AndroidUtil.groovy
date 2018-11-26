@@ -87,6 +87,8 @@ class AndroidUtil {
 
     private static void runTests(Object script, AndroidTestConfig config) {
         script.echo "start running tests"
+        def emulatorName = AndroidTestUtil.getEmulatorName(script)
+
         AndroidTestUtil.getApkList(script, AndroidTestUtil.ANDROID_TEST_APK_SUFFIX).each {
             def currentApkName = "$it"
             def apkMainFolder = AndroidTestUtil.getApkFolderName(script, currentApkName)
@@ -141,6 +143,11 @@ class AndroidUtil {
                     def testPackageName = AndroidTestUtil.getPackageNameFromApk(script, currentApkName)
                     def testBuildTypePackageName = AndroidTestUtil.getPackageNameFromApk(script, testBuildTypeApkName)
                     CommonUtil.print(script, testPackageName, testBuildTypePackageName)
+
+                    // Для переиспользуемого эмулятора необходимо удалить предыдущую версию APK для текущего модуля
+                    if (config.reuse) {
+                        AndroidTestUtil.uninstallApk(script, emulatorName, testBuildTypePackageName)
+                    }
                 }
             }
         }

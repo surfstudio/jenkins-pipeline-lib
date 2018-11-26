@@ -77,6 +77,11 @@ class CommonUtil {
         }
     }
 
+    //region Shell utils
+    static Integer getShCommandResultCode(Object script, String command) {
+        return script.sh(returnStatus: true, script: command)
+    }
+
     def static getShCommandOutput(Object script, String command) {
         return script.sh(returnStdout: true, script: command)
     }
@@ -84,6 +89,7 @@ class CommonUtil {
     def static shWithRuby(Object script, String command, String version = "2.3.5") {
         script.sh "hostname; set +x; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use $version; $command"
     }
+    //endregion
 
     @Deprecated
     def static abortDuplicateBuilds(Object script, String buildIdentifier) {

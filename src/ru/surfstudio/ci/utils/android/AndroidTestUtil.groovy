@@ -138,6 +138,22 @@ class AndroidTestUtil {
     }
 
     /**
+     * Функция для удаления APK из переиспользуемого эмулятора
+     */
+    static void uninstallApk(Object script, String emulatorName, String packageName) {
+        // Проверка, был ли установлен APK с заданным именем пакета на текущий эмулятор
+        def adbCommand = "${CommonUtil.getAdbHome(script)} -s -s $emulatorName"
+        def searchResultCode = CommonUtil.getShCommandResultCode(
+                script,
+                "$adbCommand shell pm list packages | grep $packageName"
+        )
+        if (searchResultCode == 0) {
+            script.echo "uninstall previous app"
+            script.sh "$adbCommand uninstall $packageName"
+        }
+    }
+
+    /**
      * Функция, возвращающая имя модуля, в котором содержится APK-файл.
      *
      * В большинстве случаев, APK-файл находится в папке APK_FOLDER/build,
