@@ -68,7 +68,7 @@ class AndroidTestUtil {
             script.sh "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\" emu kill"
         }
         // Удаление AVD, если необходимо
-        if (!config.stay) {
+        if (!config.reuse) {
             script.echo "delete avd"
             script.sh "${CommonUtil.getAvdManagerHome(script)} delete avd -n \"${config.avdName}\""
         }
@@ -91,16 +91,10 @@ class AndroidTestUtil {
      * Функция, выполняющая запуск эмулятора, параметры которого заданы конфигом
      */
     def static launchEmulator(Object script, AndroidTestConfig config) {
-        if (config.stay) {
-            script.echo "stay"
-            script.sh "${CommonUtil.getEmulatorHome(script)} \
+        def launchEmulatorCommand = "${CommonUtil.getEmulatorHome(script)} \
                 -avd \"${config.avdName}\" \
-                -skin \"${config.skinSize}\" -no-window -no-boot-anim &"
-        } else {
-            script.echo "not stay"
-            script.sh "${CommonUtil.getEmulatorHome(script)} \
-                -avd \"${config.avdName}\" \
-                -skin \"${config.skinSize}\" -no-window -no-boot-anim -no-snapshot-save &"
-        }
+                -skin \"${config.skinSize}\" -no-window -no-boot-anim "
+        launchEmulatorCommand+=(config.reuse) ? " &" : " -no-snapshot-save &"
+        script.sh(launchEmulatorCommand)
     }
 }

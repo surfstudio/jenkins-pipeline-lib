@@ -15,7 +15,6 @@
  */
 package ru.surfstudio.ci
 
-
 import ru.surfstudio.ci.pipeline.tag.TagPipeline
 
 class JarvisUtil {

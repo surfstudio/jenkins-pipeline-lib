@@ -33,6 +33,7 @@ class AndroidUtil {
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
 
         if (config.reuse) {
+            script.echo "try to reuse"
             // проверка, существует ли AVD
             //todo check if AVD params have not changed
             if (AndroidTestUtil.findAvdName(script, config.avdName) != "") {
@@ -49,6 +50,7 @@ class AndroidUtil {
                 AndroidTestUtil.createAndLaunchNewEmulator(script, config)
             }
         } else { // if not reuse
+            script.echo "not reuse"
             AndroidTestUtil.closeRunningEmulator(script, config)
             AndroidTestUtil.createAndLaunchNewEmulator(script, config)
         }
