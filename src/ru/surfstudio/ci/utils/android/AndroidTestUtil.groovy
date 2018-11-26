@@ -146,6 +146,37 @@ class AndroidTestUtil {
     }
 
     /**
+     * Функция, возвращающая имя модуля, в котором содержится APK-файл.
+     *
+     * В большинстве случаев, APK-файл находится в папке APK_FOLDER/build,
+     * но если проект содержит вложенный многомодульный проект,
+     * например, template в android-standard,
+     * то имя модуля будет отличаться от имени директории APK-файла.
+     */
+    static String getApkModuleName(Object script, String apkFullName) {
+        return getApkInfo(script, apkFullName, 2)
+    }
+
+    /**
+     * Функция, возвращающая суффикс для APK-файла
+     */
+    private static String getApkSuffix(AndroidTestConfig config) {
+        return "-${config.testBuildType}-${ANDROID_TEST_APK_SUFFIX}.apk"
+    }
+
+    /**
+     * Функция, возвращающая информацию по заданному индексу о APK
+     */
+    private static String getApkInfo(Object script, String apkFullName, Integer index) {
+        return CommonUtil.getShCommandOutput(
+                script,
+                "echo \"$apkFullName\" | cut -d '/' -f${index.toString()}"
+        )
+    }
+    //endregion
+
+    //region Utils for running of instrumental tests
+    /**
      * Функция для удаления APK из переиспользуемого эмулятора
      */
     static void uninstallApk(Object script, String emulatorName, String packageName) {
@@ -189,35 +220,6 @@ class AndroidTestUtil {
     ) {
         script.sh "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\" shell \
             am instrument -w -r -e debug false -e listener ${config.testRunnerListenerName} \"$testPackageWithRunner\""
-    }
-
-    /**
-     * Функция, возвращающая имя модуля, в котором содержится APK-файл.
-     *
-     * В большинстве случаев, APK-файл находится в папке APK_FOLDER/build,
-     * но если проект содержит вложенный многомодульный проект,
-     * например, template в android-standard,
-     * то имя модуля будет отличаться от имени директории APK-файла.
-     */
-    static String getApkModuleName(Object script, String apkFullName) {
-        return getApkInfo(script, apkFullName, 2)
-    }
-
-    /**
-     * Функция, возвращающая суффикс для APK-файла
-     */
-    private static String getApkSuffix(AndroidTestConfig config) {
-        return "-${config.testBuildType}-${ANDROID_TEST_APK_SUFFIX}.apk"
-    }
-
-    /**
-     * Функция, возвращающая информацию по заданному индексу о APK
-     */
-    private static String getApkInfo(Object script, String apkFullName, Integer index) {
-        return CommonUtil.getShCommandOutput(
-                script,
-                "echo \"$apkFullName\" | cut -d '/' -f${index.toString()}"
-        )
     }
     //endregion
 
