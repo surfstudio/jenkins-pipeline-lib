@@ -26,7 +26,20 @@ class AndroidUtil {
      * @param config конфигурация запуска инструментальных тестов
      * @param finishBody действия, которые должны быть выполнены по завершении инструментальных тестов
      */
-    def static runInstrumentalTests(Object script, AndroidTestConfig config, Closure finishBody) {
+    static void runInstrumentalTests(Object script, AndroidTestConfig config, Closure finishBody) {
+        launchEmulator(script, config)
+        checkEmulatorStatus(script, config)
+        script.echo "end"
+    }
+
+    /**
+     * Функция, которая должна быть вызвана по завершении инструментальных тестов
+     */
+    static void cleanup(Object script, AndroidTestConfig config) {
+        AndroidTestUtil.closeRunningEmulator(script, config)
+    }
+
+    private static void launchEmulator(Object script, AndroidTestConfig config) {
         script.sh "sdkmanager \"${config.sdkId}\""
         script.sh "adb devices"
         def currentTimeoutSeconds = AndroidTestUtil.LONG_TIMEOUT_SECONDS
@@ -36,10 +49,11 @@ class AndroidUtil {
             script.echo "try to reuse"
             // проверка, существует ли AVD
             //todo check if AVD params have not changed
-            if (AndroidTestUtil.findAvdName(script, config.avdName) != "") {
+            def avdName = AndroidTestUtil.findAvdName(script, config.avdName)
+            if (AndroidTestUtil.isNameDefined(avdName)) {
                 script.echo "launch reused emulator"
                 // проверка, запущен ли эмулятор
-                if (emulatorName != "") {
+                if (AndroidTestUtil.isNameDefined(emulatorName)) {
                     currentTimeoutSeconds = 0
                     script.echo "emulator have been launched already"
                 } else {
@@ -50,23 +64,32 @@ class AndroidUtil {
                 AndroidTestUtil.createAndLaunchNewEmulator(script, config)
             }
         } else { // if not reuse
-            script.echo "not reuse"
-            AndroidTestUtil.closeRunningEmulator(script, config)
-            AndroidTestUtil.createAndLaunchNewEmulator(script, config)
+            closeAndCreateEmulator(script, config, "not reuse")
         }
 
-        script.echo "waiting $currentTimeoutSeconds seconds..."
-        script.sh "sleep $currentTimeoutSeconds"
-        script.sh "adb devices"
-
-        script.echo "end"
+        sleep(script, currentTimeoutSeconds)
     }
 
-    /**
-     * Функция, которая должна быть вызвана по завершении инструментальных тестов
-     */
-    def static cleanup(Object script, AndroidTestConfig config) {
+    private static void checkEmulatorStatus(Object script, AndroidTestConfig config) {
+        def emulatorName = AndroidTestUtil.getEmulatorName(script)
+        if (AndroidTestUtil.isEmulatorOffline(script) || !AndroidTestUtil.isNameDefined(emulatorName)) {
+            closeAndCreateEmulator(script, config, "emulator is offline")
+            sleep(script, AndroidTestUtil.LONG_TIMEOUT_SECONDS)
+        } else {
+            script.echo "emulator is online"
+        }
+    }
+
+    private static void closeAndCreateEmulator(Object script, AndroidTestConfig config, String message) {
+        script.echo message
         AndroidTestUtil.closeRunningEmulator(script, config)
+        AndroidTestUtil.createAndLaunchNewEmulator(script, config)
+    }
+
+    private static void sleep(Object script, Integer timeout) {
+        script.echo "waiting $timeout seconds..."
+        script.sh "sleep $timeout"
+        script.sh "adb devices"
     }
 
     def static onEmulator(Object script, String avdName, Closure body) {
