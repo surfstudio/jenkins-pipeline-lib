@@ -97,6 +97,16 @@ class AndroidTestUtil {
     }
 
     /**
+     * Функция, возвращающая список APK-файлов с заданным суффиксом в заданной директории
+     */
+    static String[] getApkList(Object script, String apkPrefix, String folderName) {
+        return CommonUtil.getShCommandOutput(
+                script,
+                "grep -r --include \"*-${apkPrefix}.apk\" \"$folderName/\" | cut -d ' ' -f3"
+        ).split()
+    }
+
+    /**
      * Функция, возвращающая имя директории для APK-файла
      */
     static String getApkFolderName(Object script, String apkFullName) {
@@ -109,20 +119,18 @@ class AndroidTestUtil {
     static String getApkFileName(Object script, String apkFullName) {
         return CommonUtil.getShCommandOutput(
                 script,
-                "echo $apkFullName | rev | cut -d '/' -f1 | rev"
+                "echo \"$apkFullName\" | rev | cut -d '/' -f1 | rev"
         )
     }
 
     /**
-     * Функция, возвращающая префикс для APK-файла
+     * Функция, возвращающая префикс для APK-файла.
      */
-    static String getApkPrefix(Object script, String apkFullName, AndroidTestConfig config) {
-        // Проверка, содержит ли проект модули
-        def apkModuleName = getApkModuleName(script, apkFullName)
-        return (apkModuleName != "build") ? apkModuleName : CommonUtil.getShCommandOutput(
+    static String getApkPrefix(Object script, String apkFileName, AndroidTestConfig config) {
+        return CommonUtil.getShCommandOutput(
                 script,
-                "echo $apkFullName | awk -F ${getApkSuffix(config)} '{ print \$1 }'"
-        )
+                "echo \"$apkFileName\" | awk -F ${getApkSuffix(config)} '{ print \$1 }'"
+        ).toString()
     }
 
     /**
@@ -130,10 +138,10 @@ class AndroidTestUtil {
      * который можно получить из APK-файла, имя которого передается параметром
      */
     static String getPackageNameFromApk(Object script, String apkFullName) {
-        //todo sudo apt install aapt
         return CommonUtil.getShCommandOutput(
                 script,
-                "aapt dump xmltree $apkFullName ${ANDROID_MANIFEST_FILE_NAME} | grep package | cut -d '\"' -f2"
+                "aapt dump xmltree \"$apkFullName\" \"${ANDROID_MANIFEST_FILE_NAME}\" \
+                            | grep package | cut -d '\"' -f2"
         )
     }
 
@@ -157,14 +165,14 @@ class AndroidTestUtil {
      * Функция для установки APK-файла в заданный пакет
      */
     static void push(Object script, String emulatorName, String apkFullName, String apkDestPackage) {
-
+        script.sh "${CommonUtil.getAdbHome(script)} -s $emulatorName push $apkFullName $apkDestPackage"
     }
 
     /**
      * Функция для установка APK, который задается с помощью имени пакета, на эмулятор
      */
     static void installApk(Object script, String emulatorName, String apkPackageName) {
-
+        script.sh "${CommonUtil.getAdbHome(script)} -s $emulatorName shell pm install -t -r $apkPackageName"
     }
 
     /**
@@ -175,7 +183,7 @@ class AndroidTestUtil {
      * например, template в android-standard,
      * то имя модуля будет отличаться от имени директории APK-файла.
      */
-    private static String getApkModuleName(Object script, String apkFullName) {
+    static String getApkModuleName(Object script, String apkFullName) {
         return getApkInfo(script, apkFullName, 2)
     }
 
@@ -192,7 +200,7 @@ class AndroidTestUtil {
     private static String getApkInfo(Object script, String apkFullName, Integer index) {
         return CommonUtil.getShCommandOutput(
                 script,
-                "echo $apkFullName | cut -d '/' -f$index"
+                "echo \"$apkFullName\" | cut -d '/' -f${index.toString()}"
         )
     }
     //endregion

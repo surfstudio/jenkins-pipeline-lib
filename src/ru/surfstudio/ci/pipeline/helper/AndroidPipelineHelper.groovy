@@ -75,10 +75,8 @@ class AndroidPipelineHelper {
             CommonUtil.gradlew(
                     script,
                     "clean",
-                    ":template:app-injector:assembleDebug",
-                    ":template:app-injector:assembleDebugAndroidTest",
-                    ":easyadapter-sample:assembleDebug",
-                    ":easyadapter-sample:assembleDebugAndroidTest"
+                    ":template:app-injector:assembleDebug", ":template:app-injector:assembleDebugAndroidTest",
+                    //":easyadapter-sample:assembleDebug", ":easyadapter-sample:assembleDebugAndroidTest"
             )
             AndroidUtil.runInstrumentalTests(script, config) {
                 //todo

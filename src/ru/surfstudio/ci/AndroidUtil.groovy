@@ -63,7 +63,8 @@ class AndroidUtil {
                     currentTimeoutSeconds = 0
                     script.echo "emulator have been launched already"
                 } else {
-                    currentTimeoutSeconds = AndroidTestUtil.SMALL_TIMEOUT_SECONDS
+                    //currentTimeoutSeconds = AndroidTestUtil.SMALL_TIMEOUT_SECONDS
+                    currentTimeoutSeconds = 0
                     AndroidTestUtil.launchEmulator(script, config)
                 }
             } else { // if AVD is not exists
@@ -92,11 +93,18 @@ class AndroidUtil {
 
         AndroidTestUtil.getApkList(script, AndroidTestUtil.ANDROID_TEST_APK_SUFFIX).each {
             def currentApkName = "$it"
-            script.echo currentApkName
             def apkMainFolder = AndroidTestUtil.getApkFolderName(script, currentApkName)
             def apkFileName = AndroidTestUtil.getApkFileName(script, currentApkName)
-            def apkPrefix = AndroidTestUtil.getApkPrefix(script, currentApkName, config)
-            CommonUtil.print(script, currentApkName, apkMainFolder, apkFileName, apkPrefix)
+
+            // Проверка, содержит ли проект модули
+            def apkModuleName = AndroidTestUtil.getApkModuleName(script, currentApkName)
+            def apkPrefix = (apkModuleName != "build") ? apkModuleName : AndroidTestUtil.getApkPrefix(
+                    script,
+                    apkFileName,
+                    config
+            )
+
+            CommonUtil.print(script, "results", currentApkName, apkMainFolder, apkFileName, apkPrefix)
 
             // Получение директорий, которые будут содержать отчеты о проведенных инструментальных тестах,
             // а также имя testRunner для текущего модуля
@@ -113,28 +121,23 @@ class AndroidUtil {
                 testReportFolder += "/$apkPrefix"
             } else {
                 currentInstrumentationGradleTaskRunnerName = AndroidTestUtil.getInstrumentationGradleTaskRunnerName(
-                        apkMainFolder,
+                        "$apkMainFolder",
                         config
                 )
             }
 
-            CommonUtil.print(script, testReportFolder, testReportFileNameSuffix, currentInstrumentationGradleTaskRunnerName)
+            CommonUtil.print(script, "test report dirs", testReportFolder, testReportFileNameSuffix, currentInstrumentationGradleTaskRunnerName)
 
             // Находим APK для testBuildType, заданного в конфиге, и имя тестового пакета
-            def testBuildTypeApkName = CommonUtil.EMPTY_STRING
-            script.dir(apkMainFolder) {
-                testBuildTypeApkName = AndroidTestUtil.getApkList(script, config.testBuildType)[0]
-            }
+            script.sh "grep -r --include \"*-${config.testBuildType}.apk\" \"$apkMainFolder/\""
+            def testBuildTypeApkName = AndroidTestUtil.getApkList(script, config.testBuildType, apkMainFolder)[0]
 
             // Проверка, существует ли APK с заданным testBuildType
             if (CommonUtil.isNameDefined(testBuildTypeApkName)) {
                 testBuildTypeApkName = "$apkMainFolder/$testBuildTypeApkName"
                 script.echo testBuildTypeApkName
-                script.echo "pwd"
-                CommonUtil.gradlew(
-                        script,
-                        "$currentInstrumentationGradleTaskRunnerName > $TEMP_GRADLE_OUTPUT_FILENAME"
-                )
+                script.sh "./gradlew '${currentInstrumentationGradleTaskRunnerName.replaceAll('\n', '')}' \
+                    > $TEMP_GRADLE_OUTPUT_FILENAME"
                 def currentInstrumentationRunnerName = AndroidTestUtil.getInstrumentationRunnerName(
                         script,
                         TEMP_GRADLE_OUTPUT_FILENAME
@@ -171,7 +174,7 @@ class AndroidUtil {
     private static void sleep(Object script, Integer timeout) {
         script.echo "waiting $timeout seconds..."
         script.sh "sleep $timeout"
-        script.sh "${CommonUtil.getAdbHome(script)} devices"
+        //script.sh "${CommonUtil.getAdbHome(script)} devices"
     }
     //endregion
 
