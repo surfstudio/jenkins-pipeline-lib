@@ -23,6 +23,13 @@ class CommonUtil {
     static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50
     static String EMPTY_STRING = ""
 
+    /**
+     * Версия build tools для получения корректного пути к актуальной утилите aapt.
+     *
+     * todo Обновить эту константу при обновлении build tools
+     */
+    private static String BUILD_TOOLS_VERSION = "28.0.3"
+
     def static getBuildUrlHtmlLink(Object script){
         return  "<a href=\"${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline\">build</a>"
     }
@@ -68,6 +75,10 @@ class CommonUtil {
 
     private static String getAndroidToolsHome(Object script) {
         return "${getAndroidHome(script)}/tools/bin"
+    }
+
+    static String getAaptHome(Object script) {
+        return "${getAndroidHome(script)}/build-tools/$BUILD_TOOLS_VERSION/aapt"
     }
 
     static String getAvdManagerHome(Object script) {

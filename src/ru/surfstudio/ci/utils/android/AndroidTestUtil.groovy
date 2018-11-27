@@ -122,7 +122,7 @@ class AndroidTestUtil {
     static String getApkFileName(Object script, String apkFullName) {
         return CommonUtil.getShCommandOutput(
                 script,
-                "echo \"$apkFullName\" | rev | cut -d '/' -f1 | rev"
+                "${CommonUtil.getAaptHome(script)} \"$apkFullName\" | rev | cut -d '/' -f1 | rev"
         )
     }
 
