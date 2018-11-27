@@ -46,6 +46,10 @@ class CommonUtil {
         return "[${taskKey}](${Constants.JIRA_URL}browse/${taskKey})"
     }
 
+    static String formatString(String string) {
+        return string.replaceAll('\n', '')
+    }
+
     /**
      * Функция, проверяющая, определено ли имя, которое передано параметром
      */

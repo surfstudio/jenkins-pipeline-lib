@@ -135,9 +135,8 @@ class AndroidUtil {
 
             // Проверка, существует ли APK с заданным testBuildType
             if (CommonUtil.isNameDefined(testBuildTypeApkName)) {
-                testBuildTypeApkName = "$apkMainFolder/$testBuildTypeApkName"
                 script.echo testBuildTypeApkName
-                script.sh "./gradlew '${currentInstrumentationGradleTaskRunnerName.replaceAll('\n', '')}' \
+                script.sh "./gradlew '${CommonUtil.formatString(currentInstrumentationGradleTaskRunnerName)}' \
                     > $TEMP_GRADLE_OUTPUT_FILENAME"
                 def currentInstrumentationRunnerName = AndroidTestUtil.getInstrumentationRunnerName(
                         script,
@@ -160,7 +159,7 @@ class AndroidUtil {
                     def testBuildTypeApkPackageName = "$TMP_PACKAGE_NAME$testBuildTypePackageName"
                     def testApkPackageName = "$TMP_PACKAGE_NAME$testPackageName"
 
-                    def projectRootDir = CommonUtil.getShCommandOutput(script, "pwd")
+                    def projectRootDir = "${CommonUtil.getShCommandOutput(script, "pwd")}/"
                     AndroidTestUtil.push(script, emulatorName, "$projectRootDir$testBuildTypeApkName", testBuildTypeApkPackageName)
                     AndroidTestUtil.installApk(script, emulatorName, testBuildTypeApkPackageName)
 

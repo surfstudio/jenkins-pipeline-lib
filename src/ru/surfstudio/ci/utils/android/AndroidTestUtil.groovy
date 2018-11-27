@@ -122,7 +122,7 @@ class AndroidTestUtil {
     static String getApkFileName(Object script, String apkFullName) {
         return CommonUtil.getShCommandOutput(
                 script,
-                "${CommonUtil.getAaptHome(script)} \"$apkFullName\" | rev | cut -d '/' -f1 | rev"
+                "echo \"$apkFullName\" | rev | cut -d '/' -f1 | rev"
         )
     }
 
@@ -143,7 +143,7 @@ class AndroidTestUtil {
     static String getPackageNameFromApk(Object script, String apkFullName) {
         return CommonUtil.getShCommandOutput(
                 script,
-                "aapt dump xmltree \"$apkFullName\" \"${ANDROID_MANIFEST_FILE_NAME}\" \
+                "${CommonUtil.getAaptHome(script)} dump xmltree \"$apkFullName\" ${ANDROID_MANIFEST_FILE_NAME} \
                             | grep package | cut -d '\"' -f2"
         )
     }
@@ -183,15 +183,15 @@ class AndroidTestUtil {
      * Функция для удаления APK из переиспользуемого эмулятора
      */
     static void uninstallApk(Object script, String emulatorName, String packageName) {
+        def trimmedPackageName = packageName.trim()
         // Проверка, был ли установлен APK с заданным именем пакета на текущий эмулятор
-        def adbCommand = "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\""
         def searchResultCode = CommonUtil.getShCommandResultCode(
                 script,
-                "$adbCommand shell pm list packages | grep \"$packageName\""
+                "${getEmulatorShellCommand(script, emulatorName)} pm list packages | grep $trimmedPackageName"
         )
         if (searchResultCode == 0) {
-            script.echo "uninstall previous app"
-            script.sh "$adbCommand uninstall \"$packageName\""
+            script.echo "uninstall previous app $packageName"
+            script.sh "${getEmulatorCommand(script, emulatorName)} uninstall $trimmedPackageName"
         }
     }
 
@@ -199,16 +199,15 @@ class AndroidTestUtil {
      * Функция для установки APK-файла в заданный пакет
      */
     static void push(Object script, String emulatorName, String apkFullName, String apkDestPackage) {
-        script.sh "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\" \
-            push ${apkFullName} ${apkDestPackage}"
+        script.sh "${getEmulatorCommand(script, emulatorName)} \
+            push \"${CommonUtil.formatString(apkFullName)}\" \"${CommonUtil.formatString(apkDestPackage)}\""
     }
 
     /**
      * Функция для установка APK, который задается с помощью имени пакета, на эмулятор
      */
     static void installApk(Object script, String emulatorName, String apkPackageName) {
-        script.sh "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\" \
-            shell pm install -t -r ${apkPackageName}"
+        script.sh "${getEmulatorShellCommand(script, emulatorName)} pm install -t -r ${apkPackageName.trim()}"
     }
 
     /**
@@ -218,8 +217,9 @@ class AndroidTestUtil {
      * @param testPackageWithRunner test.package.name/AndroidInstrumentalRunnerName для запуска тестов
      */
     static void runInstrumentalTests(Object script, String emulatorName, String testPackageWithRunner) {
-        script.sh "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\" \
-            shell am instrument -w -r -e debug false -e listener $TEST_RUNNER_LISTENER_NAME \"$testPackageWithRunner\""
+        script.sh "${getEmulatorShellCommand(script, emulatorName)} \
+            am instrument -w -r -e debug false -e listener $TEST_RUNNER_LISTENER_NAME \
+            ${CommonUtil.formatString(testPackageWithRunner)}"
     }
 
     /**
@@ -228,14 +228,29 @@ class AndroidTestUtil {
      */
     static void pullTestReport(Object script, String emulatorName, String appPackageName, String reportFileName) {
         def testReportFileName = getTestReportFileName(appPackageName)
-        def adbCommand = "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\" shell"
+        def emulatorShellCommand = getEmulatorShellCommand(script, emulatorName)
         def searchReportResultCode = CommonUtil.getShCommandResultCode(
                 script,
-                "$adbCommand ls \"$testReportFileName\""
+                "$emulatorShellCommand ls \"$testReportFileName\""
         )
         if (searchReportResultCode == 0) {
-            script.sh "$adbCommand cat $testReportFileName > $reportFileName"
+            script.sh "$emulatorShellCommand cat $testReportFileName > $reportFileName"
         }
+    }
+
+    /**
+     * Вспомогательная функция, возвращающая команду для обращения к конкретному эмулятору
+     */
+    private static String getEmulatorCommand(Object script, String emulatorName) {
+        return "${CommonUtil.getAdbHome(script)} -s ${emulatorName.trim()}"
+    }
+
+    /**
+     * Вспомогательная функция, возвращающая команду для обращения
+     * к командной оболочке конкретного эмулятора
+     */
+    private static String getEmulatorShellCommand(Object script, String emulatorName) {
+        return "${getEmulatorCommand(script, emulatorName)} shell"
     }
 
     /**
