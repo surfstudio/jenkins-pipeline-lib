@@ -35,7 +35,6 @@ class AndroidUtil {
         checkEmulatorStatus(script, config)
         runTests(script, config)
         finishBody()
-        script.echo "end"
     }
 
     /**
@@ -53,7 +52,7 @@ class AndroidUtil {
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
 
         if (config.reuse) {
-            script.echo "try to reuse"
+            script.echo "try to reuse emulator"
             // проверка, существует ли AVD
             //todo check if AVD params have not changed
             def avdName = AndroidTestUtil.findAvdName(script, config.avdName)
@@ -94,18 +93,13 @@ class AndroidUtil {
 
         AndroidTestUtil.getApkList(script, AndroidTestUtil.ANDROID_TEST_APK_SUFFIX).each {
             def currentApkName = "$it"
-            def apkMainFolder = AndroidTestUtil.getApkFolderName(script, currentApkName)
-            def apkFileName = AndroidTestUtil.getApkFileName(script, currentApkName)
+            def apkMainFolder = AndroidTestUtil.getApkFolderName(script, currentApkName).trim()
+            script.echo "apkMainFolder $apkMainFolder"
+            //def apkFileName = AndroidTestUtil.getApkFileName(script, currentApkName).trim()
 
             // Проверка, содержит ли проект модули
-            def apkModuleName = AndroidTestUtil.getApkModuleName(script, currentApkName)
-            def apkPrefix = (apkModuleName != "build") ? apkModuleName : AndroidTestUtil.getApkPrefix(
-                    script,
-                    apkFileName,
-                    config
-            )
-
-            CommonUtil.print(script, "results", currentApkName, apkMainFolder, apkFileName, apkPrefix)
+            def apkModuleName = AndroidTestUtil.getApkModuleName(script, currentApkName).trim()
+            def apkPrefix = (apkModuleName != "build") ? apkModuleName : apkMainFolder
 
             // Получение директорий, которые будут содержать отчеты о проведенных инструментальных тестах,
             // а также имя testRunner для текущего модуля
@@ -127,10 +121,10 @@ class AndroidUtil {
                 )
             }
 
-            CommonUtil.print(script, "test report dirs", testReportFolder, testReportFileNameSuffix, currentInstrumentationGradleTaskRunnerName)
+            script.echo "test report dirs $testReportFolder $testReportFileNameSuffix $currentInstrumentationGradleTaskRunnerName"
 
             // Находим APK для testBuildType, заданного в конфиге, и имя тестового пакета
-            script.sh "grep -r --include \"*-${config.testBuildType}.apk\" \"$apkMainFolder/\""
+            script.echo "testBuildTypeApkName ${AndroidTestUtil.getApkList(script, config.testBuildType, apkMainFolder)}"
             def testBuildTypeApkName = AndroidTestUtil.getApkList(script, config.testBuildType, apkMainFolder)[0]
 
             // Проверка, существует ли APK с заданным testBuildType
@@ -192,9 +186,10 @@ class AndroidUtil {
     }
 
     private static void sleep(Object script, Integer timeout) {
-        script.echo "waiting $timeout seconds..."
-        script.sh "sleep $timeout"
-        //script.sh "${CommonUtil.getAdbHome(script)} devices"
+        if (timeout > 0) {
+            script.echo "waiting $timeout seconds..."
+            script.sh "sleep $timeout"
+        }
     }
     //endregion
 

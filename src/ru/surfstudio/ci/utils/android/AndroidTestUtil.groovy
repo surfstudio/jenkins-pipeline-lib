@@ -30,7 +30,7 @@ class AndroidTestUtil {
 
     //region Timeouts
     // значение таймаута для создания и загрузки нового эмулятора
-    static Integer LONG_TIMEOUT_SECONDS = 20
+    static Integer LONG_TIMEOUT_SECONDS = 0
 
     // значение таймаута для запуска ранее созданного эмулятора
     static Integer SMALL_TIMEOUT_SECONDS = 7
@@ -105,7 +105,7 @@ class AndroidTestUtil {
     static String[] getApkList(Object script, String apkPrefix, String folderName) {
         return CommonUtil.getShCommandOutput(
                 script,
-                "grep -r --include \"*-${apkPrefix}.apk\" \"$folderName/\" | cut -d ' ' -f3"
+                "grep -r --include \"*-${apkPrefix}.apk\" \"$folderName\" | cut -d ' ' -f3"
         ).split()
     }
 
@@ -289,15 +289,15 @@ class AndroidTestUtil {
      */
     static void closeRunningEmulator(Object script, AndroidTestConfig config) {
         // Закрытие запущенного эмулятора, если он существует
-        def emulatorName = getEmulatorName(script)
+        def emulatorName = getEmulatorName(script).trim()
         if (CommonUtil.isNameDefined(emulatorName)) {
             script.echo "close running emulator"
-            script.sh "${CommonUtil.getAdbHome(script)} -s \"$emulatorName\" emu kill"
+            script.sh "${CommonUtil.getAdbHome(script)} -s $emulatorName emu kill"
         }
         // Удаление AVD, если необходимо
         if (!config.reuse) {
             script.echo "delete avd"
-            script.sh "${CommonUtil.getAvdManagerHome(script)} delete avd -n \"${config.avdName}\""
+            script.sh "${CommonUtil.getAvdManagerHome(script)} delete avd -n ${config.avdName} || true"
         }
     }
 

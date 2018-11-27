@@ -71,12 +71,11 @@ class AndroidPipelineHelper {
     ) {
         try {
             //CommonUtil.gradlew(script, androidTestGradleTask)
-            script.echo config.testBuildType
             CommonUtil.gradlew(
                     script,
                     "clean",
                     ":template:app-injector:assembleDebug", ":template:app-injector:assembleDebugAndroidTest",
-                    //":easyadapter-sample:assembleDebug", ":easyadapter-sample:assembleDebugAndroidTest"
+                    ":easyadapter-sample:assembleDebug", ":easyadapter-sample:assembleDebugAndroidTest"
             )
             AndroidUtil.runInstrumentalTests(script, config) {
                 //todo
