@@ -24,6 +24,8 @@ import ru.surfstudio.ci.AndroidUtil
  */
 class AndroidPipelineHelper {
 
+    private static String DEFAULT_HTML_RESULT_FILENAME = "index.html"
+
     def static buildStageBodyAndroid(Object script, String buildGradleTask) {
         script.sh "./gradlew ${buildGradleTask}"
         script.step([$class: 'ArtifactArchiver', artifacts: '**/*.apk', allowEmptyArchive: true])
@@ -50,15 +52,7 @@ class AndroidPipelineHelper {
         try {
             script.sh "./gradlew ${unitTestGradleTask}"
         } finally {
-            script.junit allowEmptyResults: true, testResults: testResultPathXml
-            script.publishHTML(target: [
-                    allowMissing         : true,
-                    alwaysLinkToLastBuild: false,
-                    keepAll              : true,
-                    reportDir            : testResultPathDirHtml,
-                    reportFiles          : 'index.html',
-                    reportName           : "Unit Tests"
-            ])
+            publishTestResults(script, testResultPathXml, testResultPathDirHtml, "Unit Tests")
         }
     }
 
@@ -81,11 +75,29 @@ class AndroidPipelineHelper {
             AndroidUtil.runInstrumentalTests(script, config)
         } finally {
             AndroidUtil.cleanup(script, config)
+            publishTestResults(script, androidTestResultPathXml, androidTestResultPathDirHtml, "Instrumental tests")
         }
     }
 
     def static staticCodeAnalysisStageBody(Object script) {
         script.echo "empty"
         //todo
+    }
+
+    private static void publishTestResults(
+            Object script,
+            String testResultPathXml,
+            String testResultPathDirHtml,
+            String reportName
+    ) {
+        script.junit allowEmptyResults: true, testResults: testResultPathXml
+        script.publishHTML(target: [
+                allowMissing         : true,
+                alwaysLinkToLastBuild: false,
+                keepAll              : true,
+                reportDir            : testResultPathDirHtml,
+                reportFiles          : DEFAULT_HTML_RESULT_FILENAME,
+                reportName           : reportName
+        ])
     }
 }
