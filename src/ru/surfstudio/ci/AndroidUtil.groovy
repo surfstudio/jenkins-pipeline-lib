@@ -48,7 +48,7 @@ class AndroidUtil {
     private static void launchEmulator(Object script, AndroidTestConfig config) {
         script.sh "${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
         script.sh "${CommonUtil.getAdbHome(script)} devices"
-        def currentTimeoutSeconds = AndroidTestUtil.LONG_TIMEOUT_SECONDS
+        def currentTimeoutSeconds = AndroidTestUtil.TIMEOUT_FOR_CREATION_OF_EMULATOR
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
 
         if (config.reuse) {
@@ -81,7 +81,7 @@ class AndroidUtil {
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
         if (AndroidTestUtil.isEmulatorOffline(script) || !CommonUtil.isNameDefined(emulatorName)) {
             closeAndCreateEmulator(script, config, "emulator is offline")
-            sleep(script, AndroidTestUtil.LONG_TIMEOUT_SECONDS)
+            sleep(script, AndroidTestUtil.TIMEOUT_FOR_CREATION_OF_EMULATOR)
         } else {
             script.echo "emulator is online"
         }

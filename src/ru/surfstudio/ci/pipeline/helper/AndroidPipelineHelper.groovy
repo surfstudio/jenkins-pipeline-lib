@@ -75,7 +75,8 @@ class AndroidPipelineHelper {
                     script,
                     "clean",
                     ":template:app-injector:assembleDebug", ":template:app-injector:assembleDebugAndroidTest",
-                    ":easyadapter-sample:assembleDebug", ":easyadapter-sample:assembleDebugAndroidTest"
+                    ":easyadapter-sample:assembleDebug", ":easyadapter-sample:assembleDebugAndroidTest",
+                    ":custom-view-sample:assembleDebug", ":custom-view-sample:assembleDebugAndroidTest"
             )
             AndroidUtil.runInstrumentalTests(script, config) {
                 //todo

@@ -28,13 +28,8 @@ class AndroidTestUtil {
     private static String TEST_RUNNER_LISTENER_NAME = "de.schroepf.androidxmlrunlistener.XmlRunListener"
     private static String DEFAULT_TEST_REPORT_FILENAME = "report-0.xml"
 
-    //region Timeouts
     // значение таймаута для создания и загрузки нового эмулятора
-    static Integer LONG_TIMEOUT_SECONDS = 0
-
-    // значение таймаута для запуска ранее созданного эмулятора
-    static Integer SMALL_TIMEOUT_SECONDS = 7
-    //endregion
+    static Integer TIMEOUT_FOR_CREATION_OF_EMULATOR = 3
 
     //region Emulator utils
     /**
@@ -90,12 +85,12 @@ class AndroidTestUtil {
 
     //region APK utils
     /**
-     * Функция, возвращающая список APK-файлов с заданным суффиксом
+     * Функция, возвращающая список APK-файлов с заданным суффиксом в текущей директории
      */
     static String[] getApkList(Object script, String apkPrefix) {
         return CommonUtil.getShCommandOutput(
                 script,
-                "grep -r --include \"*-${apkPrefix}.apk\" . | cut -d ' ' -f3"
+                "find . -name \"*-${apkPrefix}.apk\" | cut -c 3-"
         ).split()
     }
 
@@ -105,7 +100,7 @@ class AndroidTestUtil {
     static String[] getApkList(Object script, String apkPrefix, String folderName) {
         return CommonUtil.getShCommandOutput(
                 script,
-                "grep -r --include \"*-${apkPrefix}.apk\" \"$folderName\" | cut -d ' ' -f3"
+                "find \"$folderName\" -name \"*-${apkPrefix}.apk\""
         ).split()
     }
 
