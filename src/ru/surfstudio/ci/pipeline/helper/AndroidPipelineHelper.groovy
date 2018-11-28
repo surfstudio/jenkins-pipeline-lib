@@ -78,9 +78,7 @@ class AndroidPipelineHelper {
                     ":easyadapter-sample:assembleDebug", ":easyadapter-sample:assembleDebugAndroidTest",
                     ":custom-view-sample:assembleDebug", ":custom-view-sample:assembleDebugAndroidTest"
             )
-            AndroidUtil.runInstrumentalTests(script, config) {
-                //todo
-            }
+            AndroidUtil.runInstrumentalTests(script, config)
         } finally {
             AndroidUtil.cleanup(script, config)
         }

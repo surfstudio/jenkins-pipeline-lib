@@ -222,7 +222,7 @@ class AndroidTestUtil {
      * с эмулятора в локальный файл
      */
     static void pullTestReport(Object script, String emulatorName, String appPackageName, String reportFileName) {
-        def testReportFileName = getTestReportFileName(appPackageName)
+        def testReportFileName = CommonUtil.formatString(getTestReportFileName(appPackageName))
         def emulatorShellCommand = getEmulatorShellCommand(script, emulatorName)
         def searchReportResultCode = CommonUtil.getShCommandResultCode(
                 script,

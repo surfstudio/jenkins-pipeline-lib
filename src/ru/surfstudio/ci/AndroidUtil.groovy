@@ -28,13 +28,12 @@ class AndroidUtil {
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
      * @param script контекст вызова
      * @param config конфигурация запуска инструментальных тестов
-     * @param finishBody действия, которые должны быть выполнены по завершении инструментальных тестов
      */
-    static void runInstrumentalTests(Object script, AndroidTestConfig config, Closure finishBody) {
+    static void runInstrumentalTests(Object script, AndroidTestConfig config) {
         launchEmulator(script, config)
         checkEmulatorStatus(script, config)
         runTests(script, config)
-        finishBody()
+        showTestResults(script)
     }
 
     /**
@@ -94,7 +93,6 @@ class AndroidUtil {
         AndroidTestUtil.getApkList(script, AndroidTestUtil.ANDROID_TEST_APK_SUFFIX).each {
             def currentApkName = "$it"
             def apkMainFolder = AndroidTestUtil.getApkFolderName(script, currentApkName).trim()
-            script.echo "apkMainFolder $apkMainFolder"
             //def apkFileName = AndroidTestUtil.getApkFileName(script, currentApkName).trim()
 
             // Проверка, содержит ли проект модули
@@ -124,19 +122,16 @@ class AndroidUtil {
             script.echo "test report dirs $testReportFolder $testReportFileNameSuffix $currentInstrumentationGradleTaskRunnerName"
 
             // Находим APK для testBuildType, заданного в конфиге, и имя тестового пакета
-            script.echo "testBuildTypeApkName ${AndroidTestUtil.getApkList(script, config.testBuildType, apkMainFolder)}"
             def testBuildTypeApkName = AndroidTestUtil.getApkList(script, config.testBuildType, apkMainFolder)[0]
 
             // Проверка, существует ли APK с заданным testBuildType
             if (CommonUtil.isNameDefined(testBuildTypeApkName)) {
-                script.echo testBuildTypeApkName
                 script.sh "./gradlew '${CommonUtil.formatString(currentInstrumentationGradleTaskRunnerName)}' \
                     > $TEMP_GRADLE_OUTPUT_FILENAME"
                 def currentInstrumentationRunnerName = AndroidTestUtil.getInstrumentationRunnerName(
                         script,
                         TEMP_GRADLE_OUTPUT_FILENAME
                 )
-                script.echo currentInstrumentationRunnerName
 
                 // Проверка, определен ли testInstrumentationRunner для текущего модуля
                 if (currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {
@@ -175,6 +170,12 @@ class AndroidUtil {
                 }
             }
         }
+    }
+
+    private static void showTestResults(Object script) {
+        script.sh "rm $TEMP_GRADLE_OUTPUT_FILENAME"
+        script.sh "cat */report* && cat template/*/report*"
+        script.sh "rm -rf */report* && rm -rf template/*/report*"
     }
     //endregion
 
