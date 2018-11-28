@@ -32,10 +32,10 @@ class PrPipelineAndroid extends PrPipeline {
     public unitTestResultPathXml = "**/test-results/testQaUnitTest/*.xml"
     public unitTestResultPathDirHtml = "app/build/reports/tests/testQaUnitTest/"
 
-    //todo change all dirs
-    public instrumentedTestGradleTask = "assembleAndroidTest"
-    public instrumentedTestResultPathXml = "**/outputs/androidTest-results/connected/*.xml"
-    public instrumentedTestResultPathDirHtml = "app/build/reports/androidTests/connected/"
+    public instrumentalTestGradleTask = "assembleAndroidTest"
+    public instrumentalTestResultPathDirXml = "build/outputs/androidTest-results/instrumental"
+    public instrumentalTestResultPathXml = "$instrumentalTestResultPathDirXml/*.xml"
+    public instrumentalTestResultPathDirHtml = "build/reports/androidTests/instrumental"
 
     public AndroidTestConfig androidTestConfig = new AndroidTestConfig()
 
@@ -71,9 +71,10 @@ class PrPipelineAndroid extends PrPipeline {
                 createStage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.instrumentationTestStageBodyAndroid(script,
                             androidTestConfig,
-                            instrumentedTestGradleTask,
-                            instrumentedTestResultPathXml,
-                            instrumentedTestResultPathDirHtml)
+                            instrumentalTestGradleTask,
+                            instrumentalTestResultPathDirXml,
+                            instrumentalTestResultPathXml,
+                            instrumentalTestResultPathDirHtml)
                 },
                 createStage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)

@@ -28,12 +28,13 @@ class AndroidUtil {
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
      * @param script контекст вызова
      * @param config конфигурация запуска инструментальных тестов
+     * @param androidTestResultPathXml путь для сохранения отчетов о результатах тестов
      */
-    static void runInstrumentalTests(Object script, AndroidTestConfig config) {
+    static void runInstrumentalTests(Object script, AndroidTestConfig config, String androidTestResultPathXml) {
         launchEmulator(script, config)
         checkEmulatorStatus(script, config)
-        runTests(script, config)
-        showTestResults(script)
+        runTests(script, config, androidTestResultPathXml)
+        finishTests(script)
     }
 
     /**
@@ -86,23 +87,20 @@ class AndroidUtil {
         }
     }
 
-    private static void runTests(Object script, AndroidTestConfig config) {
+    private static void runTests(Object script, AndroidTestConfig config, String androidTestResultPathXml) {
         script.echo "start running tests"
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
 
         AndroidTestUtil.getApkList(script, AndroidTestUtil.ANDROID_TEST_APK_SUFFIX).each {
             def currentApkName = "$it"
             def apkMainFolder = AndroidTestUtil.getApkFolderName(script, currentApkName).trim()
-            //def apkFileName = AndroidTestUtil.getApkFileName(script, currentApkName).trim()
 
             // Проверка, содержит ли проект модули
             def apkModuleName = AndroidTestUtil.getApkModuleName(script, currentApkName).trim()
             def apkPrefix = (apkModuleName != "build") ? apkModuleName : apkMainFolder
 
-            // Получение директорий, которые будут содержать отчеты о проведенных инструментальных тестах,
-            // а также имя testRunner для текущего модуля
-            def testReportFolder = apkMainFolder
             def testReportFileNameSuffix = apkMainFolder
+            // Получение имени testInstrumentationRunner для запусков тестов текущего модуля
             def currentInstrumentationGradleTaskRunnerName
 
             if (apkMainFolder != apkPrefix) {
@@ -111,7 +109,6 @@ class AndroidUtil {
                         config
                 )
                 testReportFileNameSuffix += "-$apkPrefix"
-                testReportFolder += "/$apkPrefix"
             } else {
                 currentInstrumentationGradleTaskRunnerName = AndroidTestUtil.getInstrumentationGradleTaskRunnerName(
                         "$apkMainFolder",
@@ -119,7 +116,7 @@ class AndroidUtil {
                 )
             }
 
-            script.echo "test report dirs $testReportFolder $testReportFileNameSuffix $currentInstrumentationGradleTaskRunnerName"
+            script.echo "test report dirs $testReportFileNameSuffix $currentInstrumentationGradleTaskRunnerName"
 
             // Находим APK для testBuildType, заданного в конфиге, и имя тестового пакета
             def testBuildTypeApkName = AndroidTestUtil.getApkList(script, config.testBuildType, apkMainFolder)[0]
@@ -165,17 +162,15 @@ class AndroidUtil {
                             script,
                             emulatorName,
                             testBuildTypePackageName,
-                            "$testReportFolder/report-${testReportFileNameSuffix}.xml"
+                            "$androidTestResultPathXml/report-${testReportFileNameSuffix}.xml"
                     )
                 }
             }
         }
     }
 
-    private static void showTestResults(Object script) {
+    private static void finishTests(Object script) {
         script.sh "rm $TEMP_GRADLE_OUTPUT_FILENAME"
-        script.sh "cat */report* && cat template/*/report*"
-        script.sh "rm -rf */report* && rm -rf template/*/report*"
     }
     //endregion
 
