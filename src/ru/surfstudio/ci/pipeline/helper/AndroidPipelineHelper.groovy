@@ -73,8 +73,7 @@ class AndroidPipelineHelper {
                     ":easyadapter-sample:assembleDebug", ":easyadapter-sample:assembleDebugAndroidTest",
                     ":custom-view-sample:assembleDebug", ":custom-view-sample:assembleDebugAndroidTest"
             )
-            script.sh "mkdir -p $androidTestResultPathDirXml; mkdir -p $androidTestResultPathDirHtml"
-            AndroidUtil.runInstrumentalTests(script, config, androidTestResultPathDirXml)
+            AndroidUtil.runInstrumentalTests(script, config, androidTestResultPathDirXml, androidTestResultPathDirHtml)
         } finally {
             AndroidUtil.cleanup(script, config)
             publishTestResults(script, androidTestResultPathXml, androidTestResultPathDirHtml, "Instrumental tests")

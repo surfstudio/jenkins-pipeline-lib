@@ -28,13 +28,18 @@ class AndroidUtil {
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
      * @param script контекст вызова
      * @param config конфигурация запуска инструментальных тестов
-     * @param androidTestResultPathXml путь для сохранения отчетов о результатах тестов
+     * @param androidTestResultPathDirXml путь для сохранения отчетов о результатах тестов
+     * @param androidTestResultPathDirHtml путь для сохраненения html-отчетов о результатах тестов
      */
-    static void runInstrumentalTests(Object script, AndroidTestConfig config, String androidTestResultPathXml) {
+    static void runInstrumentalTests(
+            Object script,
+            AndroidTestConfig config,
+            String androidTestResultPathDirXml,
+            String androidTestResultPathDirHtml
+    ) {
         launchEmulator(script, config)
         checkEmulatorStatus(script, config)
-        runTests(script, config, androidTestResultPathXml)
-        finishTests(script)
+        runTests(script, config, androidTestResultPathDirXml, androidTestResultPathDirHtml)
     }
 
     /**
@@ -87,7 +92,12 @@ class AndroidUtil {
         }
     }
 
-    private static void runTests(Object script, AndroidTestConfig config, String androidTestResultPathXml) {
+    private static void runTests(
+            Object script,
+            AndroidTestConfig config,
+            String androidTestResultPathDirXml,
+            String androidTestResultPathDirHtml
+    ) {
         script.echo "start running tests"
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
 
@@ -118,16 +128,20 @@ class AndroidUtil {
 
             script.echo "test report dirs $testReportFileNameSuffix $currentInstrumentationGradleTaskRunnerName"
 
+            def xmlReportDir = "$apkMainFolder/$androidTestResultPathDirXml"
+            def gradleOutputFileName = "$xmlReportDir/$TEMP_GRADLE_OUTPUT_FILENAME"
+            script.sh "mkdir -p $xmlReportDir; mkdir -p $apkMainFolder/$androidTestResultPathDirHtml"
+
             // Находим APK для testBuildType, заданного в конфиге, и имя тестового пакета
             def testBuildTypeApkName = AndroidTestUtil.getApkList(script, config.testBuildType, apkMainFolder)[0]
 
             // Проверка, существует ли APK с заданным testBuildType
             if (CommonUtil.isNameDefined(testBuildTypeApkName)) {
                 script.sh "./gradlew '${CommonUtil.formatString(currentInstrumentationGradleTaskRunnerName)}' \
-                    > $TEMP_GRADLE_OUTPUT_FILENAME"
+                    > $gradleOutputFileName"
                 def currentInstrumentationRunnerName = AndroidTestUtil.getInstrumentationRunnerName(
                         script,
-                        TEMP_GRADLE_OUTPUT_FILENAME
+                        gradleOutputFileName
                 )
 
                 // Проверка, определен ли testInstrumentationRunner для текущего модуля
@@ -162,15 +176,11 @@ class AndroidUtil {
                             script,
                             emulatorName,
                             testBuildTypePackageName,
-                            "$androidTestResultPathXml/report-${testReportFileNameSuffix}.xml"
+                            "$xmlReportDir/report-${testReportFileNameSuffix}.xml"
                     )
                 }
             }
         }
-    }
-
-    private static void finishTests(Object script) {
-        script.sh "rm $TEMP_GRADLE_OUTPUT_FILENAME"
     }
     //endregion
 
