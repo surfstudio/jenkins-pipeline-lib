@@ -229,7 +229,6 @@ class AndroidTestUtil {
                 "$emulatorShellCommand ls \"$testReportFileName\""
         )
         if (searchReportResultCode == 0) {
-            script.sh "$emulatorShellCommand cat $testReportFileName"
             script.sh "$emulatorShellCommand cat $testReportFileName > $reportFileName"
         }
     }

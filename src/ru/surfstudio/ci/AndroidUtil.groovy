@@ -34,7 +34,6 @@ class AndroidUtil {
         launchEmulator(script, config)
         checkEmulatorStatus(script, config)
         runTests(script, config, androidTestResultPathXml)
-        finishTests(script)
     }
 
     /**
@@ -42,12 +41,12 @@ class AndroidUtil {
      */
     static void cleanup(Object script, AndroidTestConfig config) {
         AndroidTestUtil.closeRunningEmulator(script, config)
+        script.sh "rm $TEMP_GRADLE_OUTPUT_FILENAME || true"
     }
 
     //region Stages of instrumental tests running
     private static void launchEmulator(Object script, AndroidTestConfig config) {
         script.sh "${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
-        script.sh "${CommonUtil.getAdbHome(script)} devices"
         def currentTimeoutSeconds = AndroidTestUtil.TIMEOUT_FOR_CREATION_OF_EMULATOR
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
 
@@ -119,58 +118,63 @@ class AndroidUtil {
             script.echo "test report dirs $testReportFileNameSuffix $currentInstrumentationGradleTaskRunnerName"
 
             // Находим APK для testBuildType, заданного в конфиге, и имя тестового пакета
-            def testBuildTypeApkName = AndroidTestUtil.getApkList(script, config.testBuildType, apkMainFolder)[0]
+            def testBuildTypeApkList = AndroidTestUtil.getApkList(script, config.testBuildType, apkMainFolder)
+
+            script.echo "testBuildTypeApkList $testBuildTypeApkList ${testBuildTypeApkList.size()}"
 
             // Проверка, существует ли APK с заданным testBuildType
-            if (CommonUtil.isNameDefined(testBuildTypeApkName)) {
-                script.sh "./gradlew '${CommonUtil.formatString(currentInstrumentationGradleTaskRunnerName)}' \
+            if (testBuildTypeApkList.size() > 0) {
+                def testBuildTypeApkName = testBuildTypeApkList[0]
+                if (CommonUtil.isNameDefined(testBuildTypeApkName)) {
+                    script.sh "./gradlew '${CommonUtil.formatString(currentInstrumentationGradleTaskRunnerName)}' \
                     > $TEMP_GRADLE_OUTPUT_FILENAME"
-                def currentInstrumentationRunnerName = AndroidTestUtil.getInstrumentationRunnerName(
-                        script,
-                        TEMP_GRADLE_OUTPUT_FILENAME
-                )
+                    def currentInstrumentationRunnerName = CommonUtil.formatString(
+                            AndroidTestUtil.getInstrumentationRunnerName(
+                                    script,
+                                    TEMP_GRADLE_OUTPUT_FILENAME
+                            )
+                    )
 
-                // Проверка, определен ли testInstrumentationRunner для текущего модуля
-                if (currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {
-                    def testPackageName = AndroidTestUtil.getPackageNameFromApk(script, currentApkName)
-                    def testBuildTypePackageName = AndroidTestUtil.getPackageNameFromApk(script, testBuildTypeApkName)
-                    CommonUtil.print(script, testPackageName, testBuildTypePackageName)
+                    script.echo "currentInstrumentationRunnerName $currentInstrumentationRunnerName"
 
-                    // Для переиспользуемого эмулятора необходимо удалить предыдущую версию APK для текущего модуля
-                    if (config.reuse) {
-                        AndroidTestUtil.uninstallApk(script, emulatorName, testBuildTypePackageName)
+                    // Проверка, определен ли testInstrumentationRunner для текущего модуля
+                    if (currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {
+                        def testPackageName = AndroidTestUtil.getPackageNameFromApk(script, currentApkName)
+                        def testBuildTypePackageName = AndroidTestUtil.getPackageNameFromApk(script, testBuildTypeApkName)
+                        CommonUtil.print(script, testPackageName, testBuildTypePackageName)
+
+                        // Для переиспользуемого эмулятора необходимо удалить предыдущую версию APK для текущего модуля
+                        if (config.reuse) {
+                            AndroidTestUtil.uninstallApk(script, emulatorName, testBuildTypePackageName)
+                        }
+
+                        // Установка APK
+                        def testBuildTypeApkPackageName = "$TMP_PACKAGE_NAME$testBuildTypePackageName"
+                        def testApkPackageName = "$TMP_PACKAGE_NAME$testPackageName"
+
+                        def projectRootDir = "${CommonUtil.getShCommandOutput(script, "pwd")}/"
+                        AndroidTestUtil.push(script, emulatorName, "$projectRootDir$testBuildTypeApkName", testBuildTypeApkPackageName)
+                        AndroidTestUtil.installApk(script, emulatorName, testBuildTypeApkPackageName)
+
+                        AndroidTestUtil.push(script, emulatorName, "$projectRootDir$currentApkName", testApkPackageName)
+                        AndroidTestUtil.installApk(script, emulatorName, testApkPackageName)
+
+                        // Запуск тестов и получение отчетов
+                        AndroidTestUtil.runInstrumentalTests(
+                                script,
+                                emulatorName,
+                                "$testPackageName/$currentInstrumentationRunnerName"
+                        )
+                        AndroidTestUtil.pullTestReport(
+                                script,
+                                emulatorName,
+                                testBuildTypePackageName,
+                                "$androidTestResultPathXml/report-${testReportFileNameSuffix}.xml"
+                        )
                     }
-
-                    // Установка APK
-                    def testBuildTypeApkPackageName = "$TMP_PACKAGE_NAME$testBuildTypePackageName"
-                    def testApkPackageName = "$TMP_PACKAGE_NAME$testPackageName"
-
-                    def projectRootDir = "${CommonUtil.getShCommandOutput(script, "pwd")}/"
-                    AndroidTestUtil.push(script, emulatorName, "$projectRootDir$testBuildTypeApkName", testBuildTypeApkPackageName)
-                    AndroidTestUtil.installApk(script, emulatorName, testBuildTypeApkPackageName)
-
-                    AndroidTestUtil.push(script, emulatorName, "$projectRootDir$currentApkName", testApkPackageName)
-                    AndroidTestUtil.installApk(script, emulatorName, testApkPackageName)
-
-                    // Запуск тестов и получение отчетов
-                    AndroidTestUtil.runInstrumentalTests(
-                            script,
-                            emulatorName,
-                            "$testPackageName/$currentInstrumentationRunnerName"
-                    )
-                    AndroidTestUtil.pullTestReport(
-                            script,
-                            emulatorName,
-                            testBuildTypePackageName,
-                            "$androidTestResultPathXml/report-${testReportFileNameSuffix}.xml"
-                    )
                 }
             }
         }
-    }
-
-    private static void finishTests(Object script) {
-        script.sh "rm $TEMP_GRADLE_OUTPUT_FILENAME"
     }
     //endregion
 
