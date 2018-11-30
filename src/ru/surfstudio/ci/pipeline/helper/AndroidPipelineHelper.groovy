@@ -65,14 +65,16 @@ class AndroidPipelineHelper {
             String androidTestResultPathDirHtml
     ) {
         try {
-            //CommonUtil.gradlew(script, androidTestGradleTask)
+            CommonUtil.gradlew(script, androidTestGradleTask)
+            /**
             CommonUtil.gradlew(
                     script,
                     "clean",
-                    ":template:app-injector:assembleDebug", ":template:app-injector:assembleDebugAndroidTest",
-                    ":easyadapter-sample:assembleDebug", ":easyadapter-sample:assembleDebugAndroidTest",
-                    ":custom-view-sample:assembleDebug", ":custom-view-sample:assembleDebugAndroidTest"
-            )
+                    //":connection:assembleDebugAndroidTest",
+                    ":template:assembleDebug", ":template:assembleDebugAndroidTest",
+                    //":network-sample:assembleDebug", ":network-sample:assembleDebugAndroidTest",
+                    //":custom-view-sample:assembleDebug", ":custom-view-sample:assembleDebugAndroidTest"
+            )**/
             script.sh "mkdir -p $androidTestResultPathDirXml; mkdir -p $androidTestResultPathDirHtml"
             AndroidUtil.runInstrumentalTests(script, config, androidTestResultPathDirXml)
         } finally {

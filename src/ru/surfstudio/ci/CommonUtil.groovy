@@ -54,7 +54,7 @@ class CommonUtil {
      * Функция, проверяющая, определено ли имя, которое передано параметром
      */
     static Boolean isNameDefined(String name) {
-        return name != EMPTY_STRING
+        return name != null && name != EMPTY_STRING
     }
 
     /**

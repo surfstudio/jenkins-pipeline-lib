@@ -29,7 +29,7 @@ class AndroidTestUtil {
     private static String DEFAULT_TEST_REPORT_FILENAME = "report-0.xml"
 
     // значение таймаута для создания и загрузки нового эмулятора
-    static Integer TIMEOUT_FOR_CREATION_OF_EMULATOR = 3
+    static Integer TIMEOUT_FOR_CREATION_OF_EMULATOR = 5g
 
     //region Emulator utils
     /**
@@ -228,9 +228,9 @@ class AndroidTestUtil {
                 script,
                 "$emulatorShellCommand ls \"$testReportFileName\""
         )
+        script.sh "sleep 2"
         if (searchReportResultCode == 0) {
-            script.sh "$emulatorShellCommand cat $testReportFileName"
-            script.sh "$emulatorShellCommand cat $testReportFileName > $reportFileName"
+            script.sh "$emulatorShellCommand cat \"$testReportFileName\" > \"$reportFileName\""
         }
     }
 
