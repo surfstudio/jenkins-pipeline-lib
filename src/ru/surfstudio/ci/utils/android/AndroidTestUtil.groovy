@@ -193,23 +193,21 @@ class AndroidTestUtil {
     /**
      * Функция для установки APK-файла в заданный пакет
      */
-    static void push(Object script, String emulatorName, String apkFullName, String apkDestPackage) {
-        CommonUtil.shTimeoutAndRetry(
+    static Integer push(Object script, String emulatorName, String apkFullName, String apkDestPackage) {
+        return CommonUtil.getShTimeoutAndRetryResultCode(
                 script,
                 "${getEmulatorCommand(script, emulatorName)} \
-                    push \"${CommonUtil.formatString(apkFullName)}\" \"${CommonUtil.formatString(apkDestPackage)}\"",
-                "continue"
+                    push \"${CommonUtil.formatString(apkFullName)}\" \"${CommonUtil.formatString(apkDestPackage)}\""
         )
     }
 
     /**
      * Функция для установка APK, который задается с помощью имени пакета, на эмулятор
      */
-    static void installApk(Object script, String emulatorName, String apkPackageName) {
-        CommonUtil.shTimeoutAndRetry(
+    static Integer installApk(Object script, String emulatorName, String apkPackageName) {
+        return CommonUtil.getShTimeoutAndRetryResultCode(
                 script,
-                "${getEmulatorShellCommand(script, emulatorName)} pm install -t -r ${apkPackageName.trim()}",
-                "continue"
+                "${getEmulatorShellCommand(script, emulatorName)} pm install -t -r ${apkPackageName.trim()}"
         )
     }
 
@@ -219,13 +217,12 @@ class AndroidTestUtil {
      * @param emulatorName имя эмулятора, на котором будут запущены тесты
      * @param testPackageWithRunner test.package.name/AndroidInstrumentalRunnerName для запуска тестов
      */
-    static void runInstrumentalTests(Object script, String emulatorName, String testPackageWithRunner) {
-        CommonUtil.shTimeoutAndRetry(
+    static Integer runInstrumentalTests(Object script, String emulatorName, String testPackageWithRunner) {
+        return CommonUtil.getShTimeoutAndRetryResultCode(
                 script,
                 "${getEmulatorShellCommand(script, emulatorName)} \
                     am instrument -w -r -e debug false -e listener $TEST_RUNNER_LISTENER_NAME \
-                    ${CommonUtil.formatString(testPackageWithRunner)}",
-                "continue"
+                    ${CommonUtil.formatString(testPackageWithRunner)}"
         )
     }
 

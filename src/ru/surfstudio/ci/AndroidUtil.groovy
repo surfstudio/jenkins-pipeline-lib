@@ -55,6 +55,7 @@ class AndroidUtil {
             // проверка, существует ли AVD
             //todo check if AVD params have not changed
             def avdName = AndroidTestUtil.findAvdName(script, config.avdName)
+            script.echo "avdName $avdName"
             if (CommonUtil.isNameDefined(avdName)) {
                 script.echo "launch reused emulator"
                 // проверка, запущен ли эмулятор
@@ -153,11 +154,41 @@ class AndroidUtil {
                         def testApkPackageName = "$TMP_PACKAGE_NAME$testPackageName"
 
                         def projectRootDir = "${CommonUtil.getShCommandOutput(script, "pwd")}/"
-                        AndroidTestUtil.push(script, emulatorName, "$projectRootDir$testBuildTypeApkName", testBuildTypeApkPackageName)
-                        AndroidTestUtil.installApk(script, emulatorName, testBuildTypeApkPackageName)
 
-                        AndroidTestUtil.push(script, emulatorName, "$projectRootDir$currentApkName", testApkPackageName)
-                        AndroidTestUtil.installApk(script, emulatorName, testApkPackageName)
+                        if (isFailed(
+                                AndroidTestUtil.push(
+                                        script,
+                                        emulatorName,
+                                        "$projectRootDir$testBuildTypeApkName",
+                                        testBuildTypeApkPackageName))
+                        ) {
+                            return
+                        }
+
+                        if (isFailed(
+                                AndroidTestUtil.installApk(
+                                        script,
+                                        emulatorName,
+                                        testBuildTypeApkPackageName))
+                        ) {
+                            return
+                        }
+
+                        if (isFailed(
+                                AndroidTestUtil.push(
+                                        script,
+                                        emulatorName,
+                                        "$projectRootDir$currentApkName",
+                                        testApkPackageName))
+                        ) {
+                            return
+                        }
+
+                        if (isFailed(
+                                AndroidTestUtil.installApk(script, emulatorName, testApkPackageName))
+                        ) {
+                            return 
+                        }
 
                         // Запуск тестов и получение отчетов
                         AndroidTestUtil.runInstrumentalTests(
@@ -175,6 +206,10 @@ class AndroidUtil {
                 }
             }
         }
+    }
+
+    private static Boolean isFailed(Integer resultCode) {
+        return resultCode != 0
     }
     //endregion
 
@@ -226,8 +261,7 @@ class AndroidUtil {
      *
      * Example usage:
      * ```
-     * AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials){
-     *     sh "./gradlew assembleRelease"
+     * AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials){*     sh "./gradlew assembleRelease"
      *}* ````
      * How configure gradle to use this variables see here https://bitbucket.org/surfstudio/android-standard/src/snapshot-0.3.0/template/keystore/
      *

@@ -103,6 +103,16 @@ class CommonUtil {
     }
 
     //region Shell utils
+    private static String getShTimeoutAndRetryCommand(
+            Object script,
+            String command,
+            String afterRetryCommand = ":",
+            Integer timeout = DEFAULT_TIMEOUT_VALUE
+    ) {
+        def commandWithTimeout = "timeout $timeout $command"
+        return "$commandWithTimeout || echo retry && $commandWithTimeout"
+    }
+
     /**
      * Функция, выполняющая команду и задающая для нее таймаут.
      *
@@ -116,8 +126,16 @@ class CommonUtil {
             String afterRetryCommand = ":",
             Integer timeout = DEFAULT_TIMEOUT_VALUE
     ) {
-        def commandWithTimeout = "timeout $timeout $command"
-        script.sh "$commandWithTimeout || echo retry && $commandWithTimeout || $afterRetryCommand"
+        script.sh "${getShTimeoutAndRetryCommand(script, command)}"
+    }
+
+    static Integer getShTimeoutAndRetryResultCode(
+            Object script,
+            String command,
+            String afterRetryCommand = ":",
+            Integer timeout = DEFAULT_TIMEOUT_VALUE
+    ) {
+        return getShCommandResultCode(script, getShTimeoutAndRetryCommand(script, command))
     }
 
     static Integer getShCommandResultCode(Object script, String command) {
