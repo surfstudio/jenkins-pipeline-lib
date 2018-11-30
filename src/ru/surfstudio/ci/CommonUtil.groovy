@@ -20,6 +20,8 @@ import ru.surfstudio.ci.stage.Stage
 
 class CommonUtil {
 
+    private static int DEFAULT_TIMEOUT_VALUE = 30
+
     static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50
     static String EMPTY_STRING = ""
 
@@ -101,6 +103,23 @@ class CommonUtil {
     }
 
     //region Shell utils
+    /**
+     * Функция, выполняющая команду и задающая для нее таймаут.
+     *
+     * Если команда не была выполнена по истечении отведенного для нее таймаута,
+     * произойдет повторная попытка выполнения команды,
+     * после которой команда либо выполнится успешно, либо вернется ошибка.
+     */
+    static void shTimeoutAndRetry(
+            Object script,
+            String command,
+            String afterRetryCommand = ":",
+            Integer timeout = DEFAULT_TIMEOUT_VALUE
+    ) {
+        def commandWithTimeout = "timeout $timeout $command"
+        script.sh "$commandWithTimeout || echo retry && $commandWithTimeout || $afterRetryCommand"
+    }
+
     static Integer getShCommandResultCode(Object script, String command) {
         return script.sh(returnStatus: true, script: command)
     }
