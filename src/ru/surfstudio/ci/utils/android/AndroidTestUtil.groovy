@@ -29,7 +29,7 @@ class AndroidTestUtil {
     private static String DEFAULT_TEST_REPORT_FILENAME = "report-0.xml"
 
     // значение таймаута для создания и загрузки нового эмулятора
-    static Integer TIMEOUT_FOR_CREATION_OF_EMULATOR = 3
+    static Integer TIMEOUT_FOR_CREATION_OF_EMULATOR = 5
 
     //region Emulator utils
     /**
@@ -194,15 +194,23 @@ class AndroidTestUtil {
      * Функция для установки APK-файла в заданный пакет
      */
     static void push(Object script, String emulatorName, String apkFullName, String apkDestPackage) {
-        script.sh "${getEmulatorCommand(script, emulatorName)} \
-            push \"${CommonUtil.formatString(apkFullName)}\" \"${CommonUtil.formatString(apkDestPackage)}\""
+        CommonUtil.shTimeoutAndRetry(
+                script,
+                "${getEmulatorCommand(script, emulatorName)} \
+                    push \"${CommonUtil.formatString(apkFullName)}\" \"${CommonUtil.formatString(apkDestPackage)}\"",
+                "continue"
+        )
     }
 
     /**
      * Функция для установка APK, который задается с помощью имени пакета, на эмулятор
      */
     static void installApk(Object script, String emulatorName, String apkPackageName) {
-        script.sh "${getEmulatorShellCommand(script, emulatorName)} pm install -t -r ${apkPackageName.trim()}"
+        CommonUtil.shTimeoutAndRetry(
+                script,
+                "${getEmulatorShellCommand(script, emulatorName)} pm install -t -r ${apkPackageName.trim()}",
+                "continue"
+        )
     }
 
     /**
@@ -212,9 +220,13 @@ class AndroidTestUtil {
      * @param testPackageWithRunner test.package.name/AndroidInstrumentalRunnerName для запуска тестов
      */
     static void runInstrumentalTests(Object script, String emulatorName, String testPackageWithRunner) {
-        script.sh "${getEmulatorShellCommand(script, emulatorName)} \
-            am instrument -w -r -e debug false -e listener $TEST_RUNNER_LISTENER_NAME \
-            ${CommonUtil.formatString(testPackageWithRunner)}"
+        CommonUtil.shTimeoutAndRetry(
+                script,
+                "${getEmulatorShellCommand(script, emulatorName)} \
+                    am instrument -w -r -e debug false -e listener $TEST_RUNNER_LISTENER_NAME \
+                    ${CommonUtil.formatString(testPackageWithRunner)}",
+                "continue"
+        )
     }
 
     /**
