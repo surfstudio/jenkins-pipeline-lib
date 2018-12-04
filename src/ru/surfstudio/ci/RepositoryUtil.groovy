@@ -82,6 +82,62 @@ class RepositoryUtil {
     }
 
     /**
+     * GitLab adaptation
+     */
+
+    def static notifyGitlabAboutStageStart(Object script, String repoUrl, String stageName){
+        def gitlabStatus = 'running'
+        def slug = getCurrentGitlabRepoSlug(script, repoUrl)
+        def commit = getSavedGitCommitHash(script)
+        if (!commit) {
+            script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
+        }
+        script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $gitlabStatus"
+        script.updateGitlabCommitStatus(
+                name: stageName,
+                state: 'running'
+        )
+    }
+
+    def static notifyGitlabAboutStageFinish(Object script, String repoUrl, String stageName, String result){
+        def gitlabStatus = ""
+
+        switch (result){
+            case Result.SUCCESS:
+                bitbucketStatus = 'success'
+                break
+            case Result.ABORTED:
+                bitbucketStatus = 'canceled'
+                break
+            case Result.FAILURE:
+            case Result.UNSTABLE:
+                bitbucketStatus = 'failed'
+                break
+            default:
+                script.error "Unsupported Result: ${result}"
+        }
+        def slug = getCurrentGitlabRepoSlug(script, repoUrl)
+        def commit = getSavedGitCommitHash(script)
+        if (!commit) {
+            script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
+        }
+        script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $gitlabStatus"
+        script.updateGitlabCommitStatus(
+                name: stageName,
+                state: 'running'
+        )
+    }
+
+    def static getCurrentGitlabRepoSlug(Object script, String repoUrl){
+        def splittedUrl = repoUrl.split("/")
+        return splittedUrl[splittedUrl.length - 1]
+    }
+
+    /**
+     * GitLab adaptation ^^
+     */
+
+    /**
      * call this after checkout for save source commit hash
      */
     def static saveCurrentGitCommitHash(Object script) {
