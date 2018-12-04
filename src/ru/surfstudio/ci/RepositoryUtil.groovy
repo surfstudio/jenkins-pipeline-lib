@@ -104,14 +104,14 @@ class RepositoryUtil {
 
         switch (result){
             case Result.SUCCESS:
-                bitbucketStatus = 'success'
+                gitlabStatus = 'success'
                 break
             case Result.ABORTED:
-                bitbucketStatus = 'canceled'
+                gitlabStatus = 'canceled'
                 break
             case Result.FAILURE:
             case Result.UNSTABLE:
-                bitbucketStatus = 'failed'
+                gitlabStatus = 'failed'
                 break
             default:
                 script.error "Unsupported Result: ${result}"
