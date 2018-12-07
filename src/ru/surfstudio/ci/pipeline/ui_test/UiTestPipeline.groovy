@@ -372,6 +372,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                         description: 'Ветка, с исходным кодом приложения, из которой нужно собрать сборку. Необязательный параметр, если не указана, будет использоваться MainBranch repo '),
                 script.string(
                         name: USER_EMAIL_PARAMETER,
+                        defaultValue: "qa@surfstudio.ru",
                         description: 'почта пользователя, которому будут отсылаться уведомления о результатах тестирования. Если не указано. то сообщения будут отсылаться в группу проекта'),
                 script.string(
                         name: NODE_PARAMETER,
