@@ -60,6 +60,8 @@ abstract class UiTestPipeline extends ScmPipeline {
     public jiraAuthenticationName = 'Jarvis_Jira'
 
     //scm
+    public UNDEFINED_BRANCH = "<undefined>"
+    public defaultSourceBranch = UNDEFINED_BRANCH
     public sourceBranch = ""
 
     //jira
@@ -121,7 +123,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         }
 
         //Достаем main branch для sourceRepo, если не указали в параметрах
-        if (!ctx.sourceBranch || ctx.sourceBranch == "<undefined>") {
+        if (!ctx.sourceBranch || ctx.sourceBranch == UNDEFINED_BRANCH) {
             ctx.sourceBranch = JarvisUtil.getMainBranch(ctx.script, ctx.sourceRepoUrl)
         }
 
@@ -351,7 +353,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                         description: 'Ветка в репозитории с тестами, обязательный параметр'),
                 script.string(
                         name: SOURCE_BRANCH_PARAMETER,
-                        defaultValue: "<undefined>",
+                        defaultValue: defaultSourceBranch,
                         description: 'Ветка, с исходным кодом приложения, из которой нужно собрать сборку. Необязательный параметр, если не указана, будет использоваться MainBranch repo '),
                 script.string(
                         name: USER_EMAIL_PARAMETER,
