@@ -371,7 +371,7 @@ abstract class UiTestPipeline extends ScmPipeline {
      */
     private static void triggers(script, String jiraProjectKey, String platform) {
         return script.pipelineTriggers([
-                script.cron('59 08 * * *'),
+                script.cron('00 09 * * *'),
                 script.GenericTrigger(
                         genericVariables: [
                                 [
