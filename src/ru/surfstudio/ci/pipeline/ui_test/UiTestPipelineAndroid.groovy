@@ -42,10 +42,10 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
         stages = [
                 createStage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, repoCredentialsId)
+                    checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, sourceRepoCredentialsId)
                 },
                 createStage(CHECKOUT_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    checkoutTestsStageBody(script, repoUrl, testBranch, repoCredentialsId)
+                    checkoutTestsStageBody(script, repoUrl, testBranch, testRepoCredentialsId)
                 },
                 createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     buildStageBodyAndroid(script, sourcesDir, buildGradleTask)
