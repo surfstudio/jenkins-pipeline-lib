@@ -121,7 +121,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         }
 
         //Достаем main branch для sourceRepo, если не указали в параметрах
-        if (!ctx.sourceBranch || sourceBranch == "<undefined>") {
+        if (!ctx.sourceBranch || ctx.sourceBranch == "<undefined>") {
             ctx.sourceBranch = JarvisUtil.getMainBranch(ctx.script, ctx.sourceRepoUrl)
         }
 
