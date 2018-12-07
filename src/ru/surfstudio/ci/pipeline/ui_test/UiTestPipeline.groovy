@@ -72,6 +72,9 @@ abstract class UiTestPipeline extends ScmPipeline {
     public taskKey = ""
     public taskName = ""
     public userEmail = ""
+    
+    //cron
+    public cronTimeTrigger = '00 09 * * *'
 
     //notification
     public notificationEnabled = true
@@ -322,7 +325,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                 buildDiscarder(script),
                 environments(script, ctx.testBranch),
                 parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.node),
-                triggers(script, ctx.jiraProjectKey, ctx.platform)
+                triggers(script, ctx.jiraProjectKey, ctx.platform, ctx.cronTimeTrigger)
         ]
     }
 
@@ -383,9 +386,9 @@ abstract class UiTestPipeline extends ScmPipeline {
      * @param jiraProjectKey
      * @param platform "android" or "ios"
      */
-    private static void triggers(script, String jiraProjectKey, String platform) {
+    private static void triggers(script, String jiraProjectKey, String platform, String cronTimeTrigger) {
         return script.pipelineTriggers([
-                script.cron('00 09 * * *'),
+                script.cron(cronTimeTrigger),
                 script.GenericTrigger(
                         genericVariables: [
                                 [
