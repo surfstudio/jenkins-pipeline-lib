@@ -351,6 +351,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                         description: 'Ветка в репозитории с тестами, обязательный параметр'),
                 script.string(
                         name: SOURCE_BRANCH_PARAMETER,
+                        defaultValue: "*/master",
                         description: 'Ветка, с исходным кодом приложения, из которой нужно собрать сборку. Необязательный параметр, если не указана, будет использоваться MainBranch repo '),
                 script.string(
                         name: USER_EMAIL_PARAMETER,
