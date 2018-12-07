@@ -63,6 +63,10 @@ abstract class UiTestPipeline extends ScmPipeline {
     public UNDEFINED_BRANCH = "<undefined>"
     public defaultSourceBranch = UNDEFINED_BRANCH
     public sourceBranch = ""
+    
+    public UNDEFINED_CREDENTIALS = "<undefined_cred>"
+    public sourceRepoCredentialsId = UNDEFINED_CREDENTIALS 
+    public testRepoCredentialsId = UNDEFINED_CREDENTIALS 
 
     //jira
     public taskKey = ""
@@ -120,6 +124,14 @@ abstract class UiTestPipeline extends ScmPipeline {
 
         if(ctx.notificationEnabled) {
             sendStartNotification(ctx)
+        }
+        
+        //устанавливаем credentialsId по умолчанию, если они не были установлены ранее
+        if(ctx.sourceRepoCredentialsId == ctx.UNDEFINED_CREDENTIALS){
+            ctx.sourceRepoCredentialsId = ctx.repoCredentialsId
+        }
+        if(ctx.testRepoCredentialsId == ctx.UNDEFINED_CREDENTIALS){
+            ctx.testRepoCredentialsId = ctx.repoCredentialsId
         }
 
         //Достаем main branch для sourceRepo, если не указали в параметрах
