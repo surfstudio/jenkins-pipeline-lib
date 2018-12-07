@@ -309,7 +309,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         return [
                 buildDiscarder(script),
                 environments(script, ctx.testBranch),
-                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.node),
+                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.node),
                 triggers(script, ctx.jiraProjectKey, ctx.platform)
         ]
     }
@@ -341,7 +341,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     }
 
-    private static void parameters(script, String defaultTaskKey, String testBranch, String node) {
+    private static void parameters(script, String defaultTaskKey, String testBranch, String defaultSourceBranch, String node) {
         return script.parameters([
                 script.string(
                         name: TASK_KEY_PARAMETER,
