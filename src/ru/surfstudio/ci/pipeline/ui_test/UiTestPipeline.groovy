@@ -121,7 +121,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         }
 
         //Достаем main branch для sourceRepo, если не указали в параметрах
-        if (!ctx.sourceBranch) {
+        if (!ctx.sourceBranch || sourceBranch == "<undefined>") {
             ctx.sourceBranch = JarvisUtil.getMainBranch(ctx.script, ctx.sourceRepoUrl)
         }
 
@@ -351,7 +351,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                         description: 'Ветка в репозитории с тестами, обязательный параметр'),
                 script.string(
                         name: SOURCE_BRANCH_PARAMETER,
-                        defaultValue: "*/master",
+                        defaultValue: "<undefined>",
                         description: 'Ветка, с исходным кодом приложения, из которой нужно собрать сборку. Необязательный параметр, если не указана, будет использоваться MainBranch repo '),
                 script.string(
                         name: USER_EMAIL_PARAMETER,
