@@ -20,7 +20,7 @@ import ru.surfstudio.ci.utils.android.AndroidTestUtil
 
 class AndroidUtil {
 
-    private static String SPOONER_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
+    private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
 
     /**
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
@@ -94,8 +94,6 @@ class AndroidUtil {
             // Находим APK для testBuildType, заданного в конфиге, и имя тестового пакета
             def testBuildTypeApkList = AndroidTestUtil.getApkList(script, config.testBuildType, apkMainFolder)
 
-            script.echo "testBuildTypeApkList $testBuildTypeApkList ${testBuildTypeApkList.size()}"
-
             // Проверка, существует ли APK с заданным testBuildType
             if (testBuildTypeApkList.size() > 0) {
                 def testBuildTypeApkName = testBuildTypeApkList[0]
@@ -107,16 +105,15 @@ class AndroidUtil {
                     }
 
                     def projectRootDir = "${CommonUtil.getShCommandOutput(script, "pwd")}/"
-                    def spoonOutputDir = "${CommonUtil.formatString(projectRootDir)}spoon-output"
+                    def spoonOutputDir = "${CommonUtil.formatString(projectRootDir, apkMainFolder)}/build/outputs/spoon-output"
                     script.sh "mkdir -p $spoonOutputDir"
 
-                    script.sh "java -jar $SPOONER_JAR_NAME \
-                            --apk $projectRootDir$testBuildTypeApkName \
-                            --test-apk $projectRootDir$currentApkName \
-                            --output $spoonOutputDir \
-                            -serial $emulatorName"
+                    script.sh "java -jar $SPOON_JAR_NAME \
+                            --apk \"${CommonUtil.formatString(projectRootDir, testBuildTypeApkName)}\" \
+                            --test-apk \"${CommonUtil.formatString(projectRootDir, currentApkName)}\" \
+                            --output \"${CommonUtil.formatString(spoonOutputDir)}\" \
+                            -serial \"${CommonUtil.formatString(emulatorName)}\""
 
-                    script.sh "cat $spoonOutputDir/junit-reports/*.xml"
                     script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
                 }
             }

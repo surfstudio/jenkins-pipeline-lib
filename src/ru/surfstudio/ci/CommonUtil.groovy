@@ -46,8 +46,12 @@ class CommonUtil {
         return "[${taskKey}](${Constants.JIRA_URL}browse/${taskKey})"
     }
 
-    static String formatString(String string) {
-        return string.replaceAll('\n', '')
+    static String formatString(String... args) {
+        String result = ""
+        args.each {
+            result += it.replaceAll('\n', '')
+        }
+        return result
     }
 
     /**
