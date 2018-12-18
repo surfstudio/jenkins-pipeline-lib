@@ -24,7 +24,6 @@ class AndroidUtil {
     private static String NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME = "null"
 
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
-    private static String SPOON_JAR_FULL_NAME = "ru/surfstudio/ci/$SPOON_JAR_NAME"
 
     /**
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
@@ -91,6 +90,11 @@ class AndroidUtil {
     private static void runTests(Object script, AndroidTestConfig config, String androidTestResultPathXml) {
         script.echo "start running tests"
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
+        
+        def spoonJarFile = script.libraryResource SPOON_JAR_NAME
+        script.echo "here"
+        script.writeFile file: SPOON_JAR_NAME, text: spoonJarFile
+        script.echo "last"
 
         AndroidTestUtil.getApkList(script, AndroidTestUtil.ANDROID_TEST_APK_SUFFIX).each {
             def currentApkName = "$it"
@@ -150,7 +154,7 @@ class AndroidUtil {
                         def spoonOutputDir = "${CommonUtil.formatString(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
                         script.sh "mkdir -p $spoonOutputDir"
 
-                        script.sh "java -jar ${CommonUtil.formatString(projectRootDir, "resources/", SPOON_JAR_FULL_NAME)} \
+                        script.sh "java -jar $SPOON_JAR_NAME \
                             --apk \"${CommonUtil.formatString(projectRootDir, testBuildTypeApkName)}\" \
                             --test-apk \"${CommonUtil.formatString(projectRootDir, currentApkName)}\" \
                             --output \"${CommonUtil.formatString(spoonOutputDir)}\" \
