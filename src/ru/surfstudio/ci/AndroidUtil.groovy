@@ -20,6 +20,8 @@ import ru.surfstudio.ci.utils.android.AndroidTestUtil
 
 class AndroidUtil {
 
+    private static String TEMP_GRADLE_OUTPUT_FILENAME = "result"
+    private static String NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME = "null"
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
 
     /**
@@ -39,6 +41,7 @@ class AndroidUtil {
      */
     static void cleanup(Object script, AndroidTestConfig config) {
         AndroidTestUtil.closeRunningEmulator(script, config)
+        script.sh "rm $TEMP_GRADLE_OUTPUT_FILENAME || true"
     }
 
     //region Stages of instrumental tests running
@@ -91,6 +94,28 @@ class AndroidUtil {
             def currentApkName = "$it"
             def apkMainFolder = AndroidTestUtil.getApkFolderName(script, currentApkName).trim()
 
+            // Проверка, содержит ли проект модули
+            def apkModuleName = AndroidTestUtil.getApkModuleName(script, currentApkName).trim()
+            def apkPrefix = (apkModuleName != "build") ? apkModuleName : apkMainFolder
+            def testReportFileNameSuffix = apkMainFolder
+
+            // Получение имени testInstrumentationRunner для запусков тестов текущего модуля
+            def currentInstrumentationGradleTaskRunnerName
+
+            if (apkMainFolder != apkPrefix) {
+                currentInstrumentationGradleTaskRunnerName = AndroidTestUtil.getInstrumentationGradleTaskRunnerName(
+                        "$apkMainFolder:$apkPrefix",
+                        config
+                )
+                testReportFileNameSuffix += "-$apkPrefix"
+            } else {
+                currentInstrumentationGradleTaskRunnerName = AndroidTestUtil.getInstrumentationGradleTaskRunnerName(
+                        "$apkMainFolder",
+                        config
+                )
+            }
+            script.echo "test report dirs $testReportFileNameSuffix $currentInstrumentationGradleTaskRunnerName"
+
             // Находим APK для testBuildType, заданного в конфиге, и имя тестового пакета
             def testBuildTypeApkList = AndroidTestUtil.getApkList(script, config.testBuildType, apkMainFolder)
 
@@ -98,23 +123,39 @@ class AndroidUtil {
             if (testBuildTypeApkList.size() > 0) {
                 def testBuildTypeApkName = testBuildTypeApkList[0]
                 if (CommonUtil.isNameDefined(testBuildTypeApkName)) {
-                    // Для переиспользуемого эмулятора необходимо удалить предыдущую версию APK для текущего модуля
-                    def testBuildTypePackageName = AndroidTestUtil.getPackageNameFromApk(script, testBuildTypeApkName)
-                    if (config.reuse) {
-                        AndroidTestUtil.uninstallApk(script, emulatorName, testBuildTypePackageName)
-                    }
+                    script.sh "./gradlew '${CommonUtil.formatString(currentInstrumentationGradleTaskRunnerName)}' \
+                    > $TEMP_GRADLE_OUTPUT_FILENAME"
 
-                    def projectRootDir = "${CommonUtil.getShCommandOutput(script, "pwd")}/"
-                    def spoonOutputDir = "${CommonUtil.formatString(projectRootDir, apkMainFolder)}/build/outputs/spoon-output"
-                    script.sh "mkdir -p $spoonOutputDir"
+                    def currentInstrumentationRunnerName = CommonUtil.formatString(
+                            AndroidTestUtil.getInstrumentationRunnerName(
+                                    script,
+                                    TEMP_GRADLE_OUTPUT_FILENAME
+                            )
+                    )
 
-                    script.sh "java -jar $SPOON_JAR_NAME \
+                    script.echo "currentInstrumentationRunnerName $currentInstrumentationRunnerName"
+
+                    // Проверка, определен ли testInstrumentationRunner для текущего модуля
+                    if (currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {
+
+                        // Для переиспользуемого эмулятора необходимо удалить предыдущую версию APK для текущего модуля
+                        def testBuildTypePackageName = AndroidTestUtil.getPackageNameFromApk(script, testBuildTypeApkName)
+                        if (config.reuse) {
+                            AndroidTestUtil.uninstallApk(script, emulatorName, testBuildTypePackageName)
+                        }
+
+                        def projectRootDir = "${CommonUtil.getShCommandOutput(script, "pwd")}/"
+                        def spoonOutputDir = "${CommonUtil.formatString(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
+                        script.sh "mkdir -p $spoonOutputDir"
+
+                        script.sh "java -jar $SPOON_JAR_NAME \
                             --apk \"${CommonUtil.formatString(projectRootDir, testBuildTypeApkName)}\" \
                             --test-apk \"${CommonUtil.formatString(projectRootDir, currentApkName)}\" \
                             --output \"${CommonUtil.formatString(spoonOutputDir)}\" \
                             -serial \"${CommonUtil.formatString(emulatorName)}\""
 
-                    script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
+                        script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
+                    }
                 }
             }
         }
