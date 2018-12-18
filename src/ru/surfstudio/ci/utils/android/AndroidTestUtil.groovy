@@ -29,7 +29,7 @@ class AndroidTestUtil {
     private static String DEFAULT_TEST_REPORT_FILENAME = "report-0.xml"
 
     // значение таймаута для создания и загрузки нового эмулятора
-    static Integer TIMEOUT_FOR_CREATION_OF_EMULATOR = 5g
+    static Integer TIMEOUT_FOR_CREATION_OF_EMULATOR = 5
 
     //region Emulator utils
     /**
