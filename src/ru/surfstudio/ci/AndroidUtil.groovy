@@ -22,7 +22,9 @@ class AndroidUtil {
 
     private static String TEMP_GRADLE_OUTPUT_FILENAME = "result"
     private static String NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME = "null"
+
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
+    private static String SPOON_JAR_FULL_NAME = "ru/surfstudio/ci/$SPOON_JAR_NAME"
 
     /**
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
@@ -148,7 +150,7 @@ class AndroidUtil {
                         def spoonOutputDir = "${CommonUtil.formatString(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
                         script.sh "mkdir -p $spoonOutputDir"
 
-                        script.sh "java -jar $SPOON_JAR_NAME \
+                        script.sh "java -jar ${CommonUtil.formatString(projectRootDir, "resources/", SPOON_JAR_FULL_NAME)} \
                             --apk \"${CommonUtil.formatString(projectRootDir, testBuildTypeApkName)}\" \
                             --test-apk \"${CommonUtil.formatString(projectRootDir, currentApkName)}\" \
                             --output \"${CommonUtil.formatString(spoonOutputDir)}\" \
