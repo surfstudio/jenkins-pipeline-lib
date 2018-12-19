@@ -42,5 +42,5 @@ class AndroidTestConfig {
     String skinSize = "1440x2560"
 
     // флаг, показывающий, будет ли переиспользован эмулятор
-    Boolean reuse = true
+    Boolean reuse = false
 }

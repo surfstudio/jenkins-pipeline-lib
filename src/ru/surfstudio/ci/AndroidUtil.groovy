@@ -26,6 +26,8 @@ class AndroidUtil {
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
     private static Integer TIMEOUT_PER_TEST = 60 * 2 // seconds
 
+    private static Boolean reusedEmulator = false
+
     /**
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
      * @param script контекст вызова
@@ -52,7 +54,8 @@ class AndroidUtil {
         def currentTimeoutSeconds = AndroidTestUtil.EMULATOR_TIMEOUT
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
 
-        if (config.reuse) {
+        reusedEmulator = config.reuse
+        if (reusedEmulator) {
             script.echo "try to reuse emulator"
             script.sh "${CommonUtil.getAvdManagerHome(script)} list avd"
             // проверка, существует ли AVD
@@ -67,6 +70,7 @@ class AndroidUtil {
                     AndroidTestUtil.launchEmulator(script, config)
                 }
             } else { // if AVD is not exists
+                reusedEmulator = false
                 AndroidTestUtil.createAndLaunchNewEmulator(script, config)
             }
         } else { // if not reuse
@@ -142,13 +146,6 @@ class AndroidUtil {
 
                     // Проверка, определен ли testInstrumentationRunner для текущего модуля
                     if (currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {
-
-                        // Для переиспользуемого эмулятора необходимо удалить предыдущую версию APK для текущего модуля
-                        def testBuildTypePackageName = AndroidTestUtil.getPackageNameFromApk(script, testBuildTypeApkName)
-                        if (config.reuse) {
-                            AndroidTestUtil.uninstallApk(script, emulatorName, testBuildTypePackageName)
-                        }
-
                         def projectRootDir = "${CommonUtil.getShCommandOutput(script, "pwd")}/"
                         def spoonOutputDir = "${CommonUtil.formatString(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
                         script.sh "mkdir -p $spoonOutputDir"
@@ -161,6 +158,12 @@ class AndroidUtil {
                             -serial \"${CommonUtil.formatString(emulatorName)}\""
 
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
+
+                        // Для переиспользуемого эмулятора необходимо удалить предыдущую версию APK для текущего модуля
+                        if (reusedEmulator) {
+                            def testBuildTypePackageName = AndroidTestUtil.getPackageNameFromApk(script, testBuildTypeApkName)
+                            AndroidTestUtil.uninstallApk(script, emulatorName, testBuildTypePackageName)
+                        }
                     }
                 }
             }

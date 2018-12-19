@@ -50,7 +50,7 @@ class AndroidPipelineHelper {
             String testResultPathDirHtml
     ) {
         try {
-            script.sh "./gradlew ${unitTestGradleTask}"
+            CommonUtil.gradlew(script, unitTestGradleTask)
         } finally {
             publishTestResults(script, testResultPathXml, testResultPathDirHtml, "Unit Tests")
         }
