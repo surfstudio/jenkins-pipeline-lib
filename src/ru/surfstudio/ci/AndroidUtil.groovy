@@ -23,7 +23,6 @@ class AndroidUtil {
     private static String TEMP_GRADLE_OUTPUT_FILENAME = "result"
     private static String NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME = "null"
 
-    private static String SPOON_ZIP_NAME = "spoon.zip"
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
 
     /**
@@ -95,19 +94,6 @@ class AndroidUtil {
         def spoonJarFile = script.libraryResource resource: SPOON_JAR_NAME, encoding: "Base64"
         script.writeFile file: SPOON_JAR_NAME, text: spoonJarFile, encoding: "Base64"
 
-        //def spoonZipFile = script.libraryResource SPOON_ZIP_NAME
-        //script.writeFile file: SPOON_ZIP_NAME, text: spoonZipFile
-
-        //script.sh "ls -la"
-        //script.sh "unzip $SPOON_ZIP_NAME -d spoon"
-        //script.sh "cd spoon; ls -la"
-
-        script.sh "unzip $SPOON_JAR_NAME -d spoon"
-        script.sh "cd spoon; ls -la"
-        
-        script.sh "java -jar spoon/$SPOON_JAR_NAME"
-
-        /*
         AndroidTestUtil.getApkList(script, AndroidTestUtil.ANDROID_TEST_APK_SUFFIX).each {
             def currentApkName = "$it"
             def apkMainFolder = AndroidTestUtil.getApkFolderName(script, currentApkName).trim()
@@ -176,7 +162,7 @@ class AndroidUtil {
                     }
                 }
             }
-        }*/
+        }
     }
     //endregion
 
