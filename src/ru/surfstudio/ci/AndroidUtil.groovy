@@ -24,6 +24,7 @@ class AndroidUtil {
     private static String NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME = "null"
 
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
+    private static Integer TIMEOUT_PER_TEST = 60 * 2 // seconds
 
     /**
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
@@ -48,7 +49,7 @@ class AndroidUtil {
     //region Stages of instrumental tests running
     private static void launchEmulator(Object script, AndroidTestConfig config) {
         script.sh "${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
-        def currentTimeoutSeconds = AndroidTestUtil.TIMEOUT_FOR_CREATION_OF_EMULATOR
+        def currentTimeoutSeconds = AndroidTestUtil.EMULATOR_TIMEOUT
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
 
         if (config.reuse) {
@@ -61,10 +62,10 @@ class AndroidUtil {
                 // проверка, запущен ли эмулятор
                 if (CommonUtil.isNameDefined(emulatorName)) {
                     script.echo "emulator have been launched already"
+                    currentTimeoutSeconds = 0
                 } else {
                     AndroidTestUtil.launchEmulator(script, config)
                 }
-                currentTimeoutSeconds = 0
             } else { // if AVD is not exists
                 AndroidTestUtil.createAndLaunchNewEmulator(script, config)
             }
@@ -79,7 +80,7 @@ class AndroidUtil {
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
         if (AndroidTestUtil.isEmulatorOffline(script) || !CommonUtil.isNameDefined(emulatorName)) {
             closeAndCreateEmulator(script, config, "emulator is offline")
-            sleep(script, AndroidTestUtil.TIMEOUT_FOR_CREATION_OF_EMULATOR)
+            sleep(script, AndroidTestUtil.EMULATOR_TIMEOUT)
         } else {
             script.echo "emulator is online"
         }
@@ -88,7 +89,9 @@ class AndroidUtil {
     private static void runTests(Object script, AndroidTestConfig config, String androidTestResultPathXml) {
         script.echo "start running tests"
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
-        
+
+        script.sh "${CommonUtil.getAdbHome(script)} devices"
+
         def spoonJarFile = script.libraryResource resource: SPOON_JAR_NAME, encoding: "Base64"
         script.writeFile file: SPOON_JAR_NAME, text: spoonJarFile, encoding: "Base64"
 
@@ -154,10 +157,9 @@ class AndroidUtil {
                             --apk \"${CommonUtil.formatString(projectRootDir, testBuildTypeApkName)}\" \
                             --test-apk \"${CommonUtil.formatString(projectRootDir, currentApkName)}\" \
                             --output \"${CommonUtil.formatString(spoonOutputDir)}\" \
+                            --adb-timeout $TIMEOUT_PER_TEST \
                             -serial \"${CommonUtil.formatString(emulatorName)}\""
 
-                        script.sh "cat $spoonOutputDir/junit-reports/*.xml"
-                        script.sh "cat $spoonOutputDir/logs/*/*/*.html"
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
                     }
                 }

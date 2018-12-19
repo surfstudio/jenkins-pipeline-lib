@@ -29,21 +29,21 @@ class AndroidTestUtil {
     private static String DEFAULT_TEST_REPORT_FILENAME = "report-0.xml"
 
     // значение таймаута для создания и загрузки нового эмулятора
-    static Integer TIMEOUT_FOR_CREATION_OF_EMULATOR = 5
+    static Integer EMULATOR_TIMEOUT = 5
 
     //region Emulator utils
     /**
      * Функция, возвращающая имя запущенного эмулятора
      */
     static String getEmulatorName(Object script) {
-        return getEmulatorInfo(script, 1)
+        return getEmulatorInfo(script, 1).trim()
     }
 
     /**
      * Функция, возвращающая статус запущенного эмулятора
      */
     static String getEmulatorStatus(Object script) {
-        return getEmulatorInfo(script, 2)
+        return getEmulatorInfo(script, 2).trim()
     }
 
     /**
@@ -52,7 +52,7 @@ class AndroidTestUtil {
     private static String getEmulatorInfo(Object script, Integer index) {
         return CommonUtil.getShCommandOutput(
                 script,
-                "${CommonUtil.getAdbHome(script)} devices | grep emulator | cut -f$index"
+                "${CommonUtil.getAdbHome(script)} devices | grep emulator | head -1 | cut -f$index"
         )
     }
 
@@ -75,11 +75,11 @@ class AndroidTestUtil {
     /**
      * Функция, возвращающая список имен AVD
      */
-    private def static getAvdNames(Object script) {
+    static String[] getAvdNames(Object script) {
         return CommonUtil.getShCommandOutput(
                 script,
                 "${CommonUtil.getAvdManagerHome(script)} list avd | grep Name | awk '{ print \$2 }'"
-        )
+        ).split()
     }
     //endregion
 
@@ -285,7 +285,7 @@ class AndroidTestUtil {
      */
     static void closeRunningEmulator(Object script, AndroidTestConfig config) {
         // Закрытие запущенного эмулятора, если он существует
-        def emulatorName = getEmulatorName(script).trim()
+        def emulatorName = getEmulatorName(script)
         if (CommonUtil.isNameDefined(emulatorName)) {
             script.echo "close running emulator"
             script.sh "${CommonUtil.getAdbHome(script)} -s $emulatorName emu kill"
@@ -318,7 +318,7 @@ class AndroidTestUtil {
                 -avd \"${config.avdName}\" \
                 -skin \"${config.skinSize}\" -no-window -no-boot-anim "
         launchEmulatorCommand += (config.reuse) ? " &" : " -no-snapshot-save &"
-        script.sh(launchEmulatorCommand)
+        script.sh launchEmulatorCommand
     }
     //endregion
 }
