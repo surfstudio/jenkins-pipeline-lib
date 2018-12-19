@@ -53,20 +53,18 @@ class AndroidUtil {
 
         if (config.reuse) {
             script.echo "try to reuse emulator"
+            script.sh "${CommonUtil.getAvdManagerHome(script)} list avd"
             // проверка, существует ли AVD
-            //todo check if AVD params have not changed
             def avdName = AndroidTestUtil.findAvdName(script, config.avdName)
             if (CommonUtil.isNameDefined(avdName)) {
                 script.echo "launch reused emulator"
                 // проверка, запущен ли эмулятор
                 if (CommonUtil.isNameDefined(emulatorName)) {
-                    currentTimeoutSeconds = 0
                     script.echo "emulator have been launched already"
                 } else {
-                    //currentTimeoutSeconds = AndroidTestUtil.SMALL_TIMEOUT_SECONDS
-                    currentTimeoutSeconds = 0
                     AndroidTestUtil.launchEmulator(script, config)
                 }
+                currentTimeoutSeconds = 0
             } else { // if AVD is not exists
                 AndroidTestUtil.createAndLaunchNewEmulator(script, config)
             }
@@ -158,6 +156,8 @@ class AndroidUtil {
                             --output \"${CommonUtil.formatString(spoonOutputDir)}\" \
                             -serial \"${CommonUtil.formatString(emulatorName)}\""
 
+                        script.sh "cat $spoonOutputDir/junit-reports/*.xml"
+                        script.sh "cat $spoonOutputDir/logs/*/*/*.html"
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
                     }
                 }
