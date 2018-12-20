@@ -67,7 +67,9 @@ class AndroidPipelineHelper {
     ) {
         try {
             CommonUtil.gradlew(script, androidTestGradleTask)
-            CommonUtil.mkdir(script, androidTestResultPathDirXml, androidTestResultPathDirHtml, instrumentalTestGradleTaskOutputPathDir)
+            script.sh "mkdir -p $androidTestResultPathDirXml; \
+                mkdir -p $androidTestResultPathDirHtml; \
+                mkdir -p $instrumentalTestGradleTaskOutputPathDir"
             AndroidUtil.runInstrumentalTests(script, config, instrumentalTestGradleTaskOutputPathDir, androidTestResultPathDirXml)
         } finally {
             AndroidUtil.cleanup(script, config)

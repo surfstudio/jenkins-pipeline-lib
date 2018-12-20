@@ -83,21 +83,9 @@ class CommonUtil {
     }
     //endregion
 
-    //region Shell utils
-    def static getShCommandOutput(Object script, String command) {
-        return script.sh(returnStdout: true, script: command)
-    }
-
     def static shWithRuby(Object script, String command, String version = "2.3.5") {
         script.sh "hostname; set +x; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use $version; $command"
     }
-
-    static void mkdir(Object script, String... dirs) {
-        dirs.each {
-            script.sh "mkdir -p $it"
-        }
-    }
-    //endregion
 
     @Deprecated
     def static abortDuplicateBuilds(Object script, String buildIdentifier) {
@@ -116,10 +104,10 @@ class CommonUtil {
                     script.echo "Aborting current build..."
                     throw new InterruptedException("Another build with identical description '$buildDescription' is running")
                 }
-                break;
+                break
             case AbortDuplicateStrategy.ANOTHER:
                 tryAbortOlderBuildsWithDescription(script, buildDescription)
-                break;
+                break
             default:
                 script.error("Unsupported AbortDuplicateStrategy: $abortStrategy")
         }

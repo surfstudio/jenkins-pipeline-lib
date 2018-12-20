@@ -52,7 +52,7 @@ class AndroidTestUtil {
      * Индекс позволяет задать номер необходимого параметра: имя или статус.
      */
     private static String getEmulatorInfo(Object script, Integer index) {
-        return CommonUtil.getShCommandOutput(
+        return getShCommandOutput(
                 script,
                 "${CommonUtil.getAdbHome(script)} devices | grep emulator | head -1 | cut -f$index"
         )
@@ -78,7 +78,7 @@ class AndroidTestUtil {
      * Функция, возвращающая список имен AVD
      */
     static String[] getAvdNames(Object script) {
-        return CommonUtil.getShCommandOutput(
+        return getShCommandOutput(
                 script,
                 "${CommonUtil.getAvdManagerHome(script)} list avd | grep Name | awk '{ print \$2 }'"
         ).split()
@@ -90,7 +90,7 @@ class AndroidTestUtil {
      * Функция, возвращающая список APK-файлов с заданным суффиксом в текущей директории
      */
     static String[] getApkList(Object script, String apkPrefix) {
-        return CommonUtil.getShCommandOutput(
+        return getShCommandOutput(
                 script,
                 "find . -name \"*-${apkPrefix}.apk\" | cut -c 3-"
         ).split()
@@ -100,7 +100,7 @@ class AndroidTestUtil {
      * Функция, возвращающая список APK-файлов с заданным суффиксом в заданной директории
      */
     static String[] getApkList(Object script, String apkPrefix, String folderName) {
-        return CommonUtil.getShCommandOutput(
+        return getShCommandOutput(
                 script,
                 "find \"$folderName\" -name \"*-${apkPrefix}.apk\""
         ).split()
@@ -117,7 +117,7 @@ class AndroidTestUtil {
      * Функция, возвращающая краткое имя APK-файла без учета директории
      */
     static String getApkFileName(Object script, String apkFullName) {
-        return CommonUtil.getShCommandOutput(
+        return getShCommandOutput(
                 script,
                 "echo \"$apkFullName\" | rev | cut -d '/' -f1 | rev"
         )
@@ -127,7 +127,7 @@ class AndroidTestUtil {
      * Функция, возвращающая префикс для APK-файла.
      */
     static String getApkPrefix(Object script, String apkFileName, AndroidTestConfig config) {
-        return CommonUtil.getShCommandOutput(
+        return getShCommandOutput(
                 script,
                 "echo \"$apkFileName\" | awk -F ${getApkSuffix(config)} '{ print \$1 }'"
         ).toString()
@@ -138,7 +138,7 @@ class AndroidTestUtil {
      * который можно получить из APK-файла, имя которого передается параметром
      */
     static String getPackageNameFromApk(Object script, String apkFullName, String buildToolsVersion) {
-        return CommonUtil.getShCommandOutput(
+        return getShCommandOutput(
                 script,
                 "${CommonUtil.getAaptHome(script, buildToolsVersion)} dump xmltree \"$apkFullName\" ${ANDROID_MANIFEST_FILE_NAME} \
                             | grep package | cut -d '\"' -f2"
@@ -168,7 +168,7 @@ class AndroidTestUtil {
      * Функция, возвращающая информацию по заданному индексу о APK
      */
     private static String getApkInfo(Object script, String apkFullName, Integer index) {
-        return CommonUtil.getShCommandOutput(
+        return getShCommandOutput(
                 script,
                 "echo \"$apkFullName\" | cut -d '/' -f${index.toString()}"
         )
@@ -243,7 +243,7 @@ class AndroidTestUtil {
      * @return
      */
     static String getInstrumentationRunnerName(Object script, String gradleOutputFileName) {
-        return CommonUtil.getShCommandOutput(
+        return getShCommandOutput(
                 script,
                 "cat $gradleOutputFileName | tail -4 | head -1"
         )
@@ -304,6 +304,10 @@ class AndroidTestUtil {
             result += it.replaceAll('\n', '')
         }
         return result
+    }
+
+    private def static getShCommandOutput(Object script, String command) {
+        return script.sh(returnStdout: true, script: command)
     }
     //endregion
 }

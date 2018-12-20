@@ -167,9 +167,9 @@ class AndroidUtil {
 
                     // Проверка, определен ли testInstrumentationRunner для текущего модуля
                     if (currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {
-                        def projectRootDir = "${CommonUtil.getShCommandOutput(script, "pwd")}/"
-                        def spoonOutputDir = "${formatArgsForShellCommand(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
-                        CommonUtil.mkdir(script, spoonOutputDir)
+                        String projectRootDir = script.sh(returnStdout: true, script: "pwd")
+                        String spoonOutputDir = "${formatArgsForShellCommand(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
+                        script.sh "mkdir -p $spoonOutputDir"
 
                         script.sh "java -jar $SPOON_JAR_NAME \
                             --apk \"${formatArgsForShellCommand(projectRootDir, testBuildTypeApkName)}\" \
@@ -178,6 +178,7 @@ class AndroidUtil {
                             --adb-timeout $TIMEOUT_PER_TEST \
                             -serial \"${formatArgsForShellCommand(emulatorName)}\""
 
+                        script.sh "cat $spoonOutputDir/logs/*/*/*.html"
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
 
                         // Для переиспользуемого эмулятора необходимо удалить предыдущую версию APK для текущего модуля
