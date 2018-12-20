@@ -116,6 +116,12 @@ class CommonUtil {
     def static shWithRuby(Object script, String command, String version = "2.3.5") {
         script.sh "hostname; set +x; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use $version; $command"
     }
+
+    static void mkdir(Object script, String... dirs) {
+        dirs.each {
+            script.sh "mkdir -p $it"
+        }
+    }
     //endregion
 
     @Deprecated

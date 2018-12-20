@@ -33,6 +33,7 @@ class PrPipelineAndroid extends PrPipeline {
     public unitTestResultPathDirHtml = "app/build/reports/tests/testQaUnitTest/"
 
     public instrumentalTestGradleTask = "assembleAndroidTest"
+    public instrumentalTestGradleTaskOutputPathDir = "build/outputs/gradle"
     public instrumentalTestResultPathDirXml = "build/outputs/androidTest-results/instrumental"
     public instrumentalTestResultPathXml = "$instrumentalTestResultPathDirXml/*.xml"
     public instrumentalTestResultPathDirHtml = "build/reports/androidTests/instrumental"
@@ -72,6 +73,7 @@ class PrPipelineAndroid extends PrPipeline {
                     AndroidPipelineHelper.instrumentationTestStageBodyAndroid(script,
                             androidTestConfig,
                             instrumentalTestGradleTask,
+                            instrumentalTestGradleTaskOutputPathDir,
                             instrumentalTestResultPathDirXml,
                             instrumentalTestResultPathXml,
                             instrumentalTestResultPathDirHtml)
