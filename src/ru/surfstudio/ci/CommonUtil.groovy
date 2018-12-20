@@ -23,13 +23,6 @@ class CommonUtil {
     static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50
     static String EMPTY_STRING = ""
 
-    /**
-     * Версия build tools для получения корректного пути к актуальной утилите aapt.
-     *
-     * todo Обновить эту константу при обновлении build tools
-     */
-    private static String BUILD_TOOLS_VERSION = "28.0.3"
-
     def static getBuildUrlHtmlLink(Object script){
         return  "<a href=\"${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline\">build</a>"
     }
@@ -46,19 +39,11 @@ class CommonUtil {
         return "[${taskKey}](${Constants.JIRA_URL}browse/${taskKey})"
     }
 
-    static String formatString(String... args) {
-        String result = ""
-        args.each {
-            result += it.replaceAll('\n', '')
-        }
-        return result
-    }
-
     /**
-     * Функция, проверяющая, определено ли имя, которое передано параметром
+     * Функция, проверяющая, что строка, переданная параметром, не равна null и не является пустой
      */
-    static Boolean isNameDefined(String name) {
-        return name != null && name != EMPTY_STRING
+    static Boolean isNotNullOrEmpty(String string) {
+        return string != null && string != EMPTY_STRING
     }
 
     /**
@@ -85,8 +70,8 @@ class CommonUtil {
         return "${getAndroidHome(script)}/tools/bin"
     }
 
-    static String getAaptHome(Object script) {
-        return "${getAndroidHome(script)}/build-tools/$BUILD_TOOLS_VERSION/aapt"
+    static String getAaptHome(Object script, String buildToolsVersion) {
+        return "${getAndroidHome(script)}/build-tools/$buildToolsVersion/aapt"
     }
 
     static String getAvdManagerHome(Object script) {
@@ -98,17 +83,7 @@ class CommonUtil {
     }
     //endregion
 
-    static void print(Object script, String... args) {
-        args.each {
-            script.echo "$it"
-        }
-    }
-
     //region Shell utils
-    static Integer getShCommandResultCode(Object script, String command) {
-        return script.sh(returnStatus: true, script: command)
-    }
-
     def static getShCommandOutput(Object script, String command) {
         return script.sh(returnStdout: true, script: command)
     }

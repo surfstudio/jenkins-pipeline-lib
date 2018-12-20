@@ -21,10 +21,10 @@ package ru.surfstudio.ci.utils.android
 class AndroidTestConfig {
 
     // buildType, для которого будут выполняться инструментальные тесты
-    String testBuildType = "qa"
+    String testBuildType = "qa" //todo pipeline param
 
     // имя gradle task, который возвращает имя текущего instrumentation runner
-    String instrumentationRunnerGradleTaskName = "getTestInstrumentationRunnerName"
+    String instrumentationRunnerGradleTaskName = "getTestInstrumentationRunnerName" //todo pipeline function
 
     // имя AVD
     String avdName = "avd-androidTest"
@@ -41,6 +41,11 @@ class AndroidTestConfig {
     // разрешение эмулятора
     String skinSize = "1440x2560"
 
-    // флаг, показывающий, будет ли переиспользован эмулятор
+    /**
+     * Флаг, показывающий, будет ли переиспользован эмулятор.
+     * переиспользование эмулятора работает нестабильно и может привести к неожиданным падениям тестов на CI
+     * из-за ошибок, связанных с эмулятором.
+     * Устанавливать значение true данного флага следует только при необходимости
+     */
     Boolean reuse = false
 }

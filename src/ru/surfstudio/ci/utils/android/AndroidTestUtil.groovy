@@ -25,9 +25,6 @@ class AndroidTestUtil {
     static String ANDROID_TEST_APK_SUFFIX = "androidTest"
     private static String ANDROID_MANIFEST_FILE_NAME = "AndroidManifest.xml"
 
-    private static String TEST_RUNNER_LISTENER_NAME = "de.schroepf.androidxmlrunlistener.XmlRunListener"
-    private static String DEFAULT_TEST_REPORT_FILENAME = "report-0.xml"
-
     // значение таймаута для создания и загрузки нового эмулятора
     static Integer EMULATOR_TIMEOUT = 5
 
@@ -47,7 +44,12 @@ class AndroidTestUtil {
     }
 
     /**
-     * Функция, возвращающая информацию по заданному индексу о запущенном эмуляторе
+     * Функция, возвращающая информацию по заданному индексу о запущенном эмуляторе.
+     *
+     * Команда "adb devices | grep emulator" возвращает информацию о запущенных эмуляторах в след. формате:
+     * emulator-name status
+     *
+     * Индекс позволяет задать номер необходимого параметра: имя или статус.
      */
     private static String getEmulatorInfo(Object script, Integer index) {
         return CommonUtil.getShCommandOutput(
@@ -68,7 +70,7 @@ class AndroidTestUtil {
     /**
      * Функция, проверяющая, существует ли AVD с заданным именем
      */
-    static String findAvdName(Object script, String avdName) {
+    static String isAvdExists(Object script, String avdName) {
         return getAvdNames(script).find { it == avdName }
     }
 
@@ -135,10 +137,10 @@ class AndroidTestUtil {
      * Функция, возвращающая имя пакета для приложения, считывая его из манифеста,
      * который можно получить из APK-файла, имя которого передается параметром
      */
-    static String getPackageNameFromApk(Object script, String apkFullName) {
+    static String getPackageNameFromApk(Object script, String apkFullName, String buildToolsVersion) {
         return CommonUtil.getShCommandOutput(
                 script,
-                "${CommonUtil.getAaptHome(script)} dump xmltree \"$apkFullName\" ${ANDROID_MANIFEST_FILE_NAME} \
+                "${CommonUtil.getAaptHome(script, buildToolsVersion)} dump xmltree \"$apkFullName\" ${ANDROID_MANIFEST_FILE_NAME} \
                             | grep package | cut -d '\"' -f2"
         )
     }
@@ -180,29 +182,24 @@ class AndroidTestUtil {
     static void uninstallApk(Object script, String emulatorName, String packageName) {
         def trimmedPackageName = packageName.trim()
         // Проверка, был ли установлен APK с заданным именем пакета на текущий эмулятор
-        def searchResultCode = CommonUtil.getShCommandResultCode(
-                script,
-                "${getEmulatorShellCommand(script, emulatorName)} pm list packages | grep $trimmedPackageName"
+        def searchResultCode = script.sh(
+                returnStatus: true,
+                script: "${getAdbShellCommand(script, emulatorName)} pm list packages | grep $trimmedPackageName"
         )
         if (searchResultCode == 0) {
             script.echo "uninstall previous app $packageName"
-            script.sh "${getEmulatorCommand(script, emulatorName)} uninstall $trimmedPackageName"
+            script.sh "${getAdbCommand(script, emulatorName)} uninstall $trimmedPackageName"
         }
     }
 
     /**
      * Функция для установки APK-файла в заданный пакет
      */
-    static void push(Object script, String emulatorName, String apkFullName, String apkDestPackage) {
-        script.sh "${getEmulatorCommand(script, emulatorName)} \
-            push \"${CommonUtil.formatString(apkFullName)}\" \"${CommonUtil.formatString(apkDestPackage)}\""
-    }
+    static void installApk(Object script, String emulatorName, String apkFullName, String apkPackageName) {
+        script.sh "${getAdbCommand(script, emulatorName)} \
+            push \"${formatArgsForShellCommand(apkFullName)}\" \"${formatArgsForShellCommand(apkPackageName)}\""
 
-    /**
-     * Функция для установка APK, который задается с помощью имени пакета, на эмулятор
-     */
-    static void installApk(Object script, String emulatorName, String apkPackageName) {
-        script.sh "${getEmulatorShellCommand(script, emulatorName)} pm install -t -r ${apkPackageName.trim()}"
+        script.sh "${getAdbShellCommand(script, emulatorName)} pm install -t -r ${apkPackageName.trim()}"
     }
 
     /**
@@ -212,49 +209,23 @@ class AndroidTestUtil {
      * @param testPackageWithRunner test.package.name/AndroidInstrumentalRunnerName для запуска тестов
      */
     static void runInstrumentalTests(Object script, String emulatorName, String testPackageWithRunner) {
-        script.sh "${getEmulatorShellCommand(script, emulatorName)} \
-            am instrument -w -r -e debug false -e listener $TEST_RUNNER_LISTENER_NAME \
-            ${CommonUtil.formatString(testPackageWithRunner)}"
+        script.sh "${getAdbShellCommand(script, emulatorName)} \
+            am instrument -w -r -e debug false ${formatArgsForShellCommand(testPackageWithRunner)}"
     }
 
     /**
-     * Функция, извлекающая отчет о результатах выполнения инструментальных тестов
-     * с эмулятора в локальный файл
+     * Вспомогательная функция, возвращающая команду для обращения к конкретному девайсу
      */
-    static void pullTestReport(Object script, String emulatorName, String appPackageName, String reportFileName) {
-        def testReportFileName = CommonUtil.formatString(getTestReportFileName(appPackageName))
-        def emulatorShellCommand = getEmulatorShellCommand(script, emulatorName)
-        def searchReportResultCode = CommonUtil.getShCommandResultCode(
-                script,
-                "$emulatorShellCommand ls \"$testReportFileName\""
-        )
-        script.sh "sleep 2"
-        if (searchReportResultCode == 0) {
-            script.sh "$emulatorShellCommand cat \"$testReportFileName\" > \"$reportFileName\""
-        }
-    }
-
-    /**
-     * Вспомогательная функция, возвращающая команду для обращения к конкретному эмулятору
-     */
-    private static String getEmulatorCommand(Object script, String emulatorName) {
-        return "${CommonUtil.getAdbHome(script)} -s ${emulatorName.trim()}"
+    private static String getAdbCommand(Object script, String deviceName) {
+        return "${CommonUtil.getAdbHome(script)} -s ${deviceName.trim()}"
     }
 
     /**
      * Вспомогательная функция, возвращающая команду для обращения
-     * к командной оболочке конкретного эмулятора
+     * к командной оболочке конкретного девайса
      */
-    private static String getEmulatorShellCommand(Object script, String emulatorName) {
-        return "${getEmulatorCommand(script, emulatorName)} shell"
-    }
-
-    /**
-     * Функция, возвращающая полное имя файла с отчетом о результатах инструментального теста
-     * для конкретного приложения, имя пакета которого передается параметром
-     */
-    private static String getTestReportFileName(String appPackageName) {
-        return "/sdcard/Android/data/$appPackageName/files/$DEFAULT_TEST_REPORT_FILENAME"
+    private static String getAdbShellCommand(Object script, String deviceName) {
+        return "${getAdbCommand(script, deviceName)} shell"
     }
     //endregion
 
@@ -268,7 +239,7 @@ class AndroidTestUtil {
 
     /**
      * Функция, возвращающая имя testInstrumentationRunner на основе результата после выполнения соотв. gradle task
-     * @param gradleOutputFileName
+     * @param gradleOutputFileName имя файла, который содержит результат выполнения gradle-таска
      * @return
      */
     static String getInstrumentationRunnerName(Object script, String gradleOutputFileName) {
@@ -286,7 +257,7 @@ class AndroidTestUtil {
     static void closeRunningEmulator(Object script, AndroidTestConfig config) {
         // Закрытие запущенного эмулятора, если он существует
         def emulatorName = getEmulatorName(script)
-        if (CommonUtil.isNameDefined(emulatorName)) {
+        if (CommonUtil.isNotNullOrEmpty(emulatorName)) {
             script.echo "close running emulator"
             script.sh "${CommonUtil.getAdbHome(script)} -s $emulatorName emu kill"
         }
@@ -319,6 +290,20 @@ class AndroidTestUtil {
                 -skin \"${config.skinSize}\" -no-window -no-boot-anim "
         launchEmulatorCommand += (config.reuse) ? " &" : " -no-snapshot-save &"
         script.sh launchEmulatorCommand
+    }
+    //endregion
+
+    //region Helpful functions
+    /**
+     * Функция, форматирующая аргументы и конкатенирующая их.
+     * Возвращает строку, которую можно безопасно подставить в shell-команду
+     */
+    private static String formatArgsForShellCommand(String... args) {
+        String result = ""
+        args.each {
+            result += it.replaceAll('\n', '')
+        }
+        return result
     }
     //endregion
 }

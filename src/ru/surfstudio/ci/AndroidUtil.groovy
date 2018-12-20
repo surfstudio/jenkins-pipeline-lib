@@ -25,9 +25,17 @@ class AndroidUtil {
     private static String NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME = "null"
 
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
+    private static String BASE64_ENCODING = "Base64"
     private static Integer TIMEOUT_PER_TEST = 60 * 2 // seconds
 
     private static Boolean reusedEmulator = false
+
+    /**
+     * Версия build tools для получения корректного пути к актуальной утилите aapt.
+     *
+     * todo Обновить эту константу при обновлении build tools
+     */
+    private static String BUILD_TOOLS_VERSION = "28.0.3"
 
     /**
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
@@ -65,11 +73,11 @@ class AndroidUtil {
             script.echo "try to reuse emulator"
             script.sh "${CommonUtil.getAvdManagerHome(script)} list avd"
             // проверка, существует ли AVD
-            def avdName = AndroidTestUtil.findAvdName(script, config.avdName)
-            if (CommonUtil.isNameDefined(avdName)) {
+            def avdName = AndroidTestUtil.isAvdExists(script, config.avdName)
+            if (CommonUtil.isNotNullOrEmpty(avdName)) {
                 script.echo "launch reused emulator"
                 // проверка, запущен ли эмулятор
-                if (CommonUtil.isNameDefined(emulatorName)) {
+                if (CommonUtil.isNotNullOrEmpty(emulatorName)) {
                     script.echo "emulator have been launched already"
                     currentTimeoutSeconds = 0
                 } else {
@@ -88,7 +96,7 @@ class AndroidUtil {
 
     private static void checkEmulatorStatus(Object script, AndroidTestConfig config) {
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
-        if (AndroidTestUtil.isEmulatorOffline(script) || !CommonUtil.isNameDefined(emulatorName)) {
+        if (AndroidTestUtil.isEmulatorOffline(script) || !CommonUtil.isNotNullOrEmpty(emulatorName)) {
             closeAndCreateEmulator(script, config, "emulator is offline")
             sleep(script, AndroidTestUtil.EMULATOR_TIMEOUT)
         } else {
@@ -107,8 +115,8 @@ class AndroidUtil {
 
         script.sh "${CommonUtil.getAdbHome(script)} devices"
 
-        def spoonJarFile = script.libraryResource resource: SPOON_JAR_NAME, encoding: "Base64"
-        script.writeFile file: SPOON_JAR_NAME, text: spoonJarFile, encoding: "Base64"
+        def spoonJarFile = script.libraryResource resource: SPOON_JAR_NAME, encoding: BASE64_ENCODING
+        script.writeFile file: SPOON_JAR_NAME, text: spoonJarFile, encoding: BASE64_ENCODING
 
         AndroidTestUtil.getApkList(script, AndroidTestUtil.ANDROID_TEST_APK_SUFFIX).each {
             def currentApkName = "$it"
@@ -144,11 +152,11 @@ class AndroidUtil {
             // Проверка, существует ли APK с заданным testBuildType
             if (testBuildTypeApkList.size() > 0) {
                 def testBuildTypeApkName = testBuildTypeApkList[0]
-                if (CommonUtil.isNameDefined(testBuildTypeApkName)) {
-                    script.sh "./gradlew '${CommonUtil.formatString(currentInstrumentationGradleTaskRunnerName)}' \
+                if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) {
+                    script.sh "./gradlew '${formatArgsForShellCommand(currentInstrumentationGradleTaskRunnerName)}' \
                     > $gradleOutputFileName"
 
-                    def currentInstrumentationRunnerName = CommonUtil.formatString(
+                    def currentInstrumentationRunnerName = formatArgsForShellCommand(
                             AndroidTestUtil.getInstrumentationRunnerName(
                                     script,
                                     gradleOutputFileName
@@ -160,21 +168,24 @@ class AndroidUtil {
                     // Проверка, определен ли testInstrumentationRunner для текущего модуля
                     if (currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {
                         def projectRootDir = "${CommonUtil.getShCommandOutput(script, "pwd")}/"
-                        def spoonOutputDir = "${CommonUtil.formatString(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
+                        def spoonOutputDir = "${formatArgsForShellCommand(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
                         CommonUtil.mkdir(script, spoonOutputDir)
 
                         script.sh "java -jar $SPOON_JAR_NAME \
-                            --apk \"${CommonUtil.formatString(projectRootDir, testBuildTypeApkName)}\" \
-                            --test-apk \"${CommonUtil.formatString(projectRootDir, currentApkName)}\" \
-                            --output \"${CommonUtil.formatString(spoonOutputDir)}\" \
+                            --apk \"${formatArgsForShellCommand(projectRootDir, testBuildTypeApkName)}\" \
+                            --test-apk \"${formatArgsForShellCommand(projectRootDir, currentApkName)}\" \
+                            --output \"${formatArgsForShellCommand(spoonOutputDir)}\" \
                             --adb-timeout $TIMEOUT_PER_TEST \
-                            -serial \"${CommonUtil.formatString(emulatorName)}\""
+                            -serial \"${formatArgsForShellCommand(emulatorName)}\""
 
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
 
                         // Для переиспользуемого эмулятора необходимо удалить предыдущую версию APK для текущего модуля
                         if (reusedEmulator) {
-                            def testBuildTypePackageName = AndroidTestUtil.getPackageNameFromApk(script, testBuildTypeApkName)
+                            def testBuildTypePackageName = AndroidTestUtil.getPackageNameFromApk(
+                                    script,
+                                    testBuildTypeApkName,
+                                    BUILD_TOOLS_VERSION)
                             AndroidTestUtil.uninstallApk(script, emulatorName, testBuildTypePackageName)
                         }
                     }
@@ -196,6 +207,18 @@ class AndroidUtil {
             script.echo "waiting $timeout seconds..."
             script.sh "sleep $timeout"
         }
+    }
+
+    /**
+     * Функция, форматирующая аргументы и конкатенирующая их.
+     * Возвращает строку, которую можно безопасно подставить в shell-команду
+     */
+    private static String formatArgsForShellCommand(String... args) {
+        String result = ""
+        args.each {
+            result += it.replaceAll('\n', '')
+        }
+        return result
     }
     //endregion
 
