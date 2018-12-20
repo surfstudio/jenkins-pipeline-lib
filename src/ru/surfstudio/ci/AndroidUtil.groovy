@@ -42,7 +42,6 @@ class AndroidUtil {
      * @param config конфигурация запуска инструментальных тестов
      * @param androidTestBuildType build type для запуска инструментальных тестов
      * @param getTestInstrumentationRunnerName функция, возвращающая имя текущего instrumentation runner
-     * @param instrumentalTestGradleTaskOutputPathDir путь для временного файла с результатом выполения gradle-таска
      * @param androidTestResultPathXml путь для сохранения отчетов о результатах тестов
      */
     static void runInstrumentalTests(
@@ -50,17 +49,14 @@ class AndroidUtil {
             AvdConfig config,
             String androidTestBuildType,
             Closure getTestInstrumentationRunnerName,
-            String instrumentalTestGradleTaskOutputPathDir,
             String androidTestResultPathXml
     ) {
         launchEmulator(script, config)
         checkEmulatorStatus(script, config)
         runTests(
                 script,
-                config,
                 androidTestBuildType,
                 getTestInstrumentationRunnerName,
-                instrumentalTestGradleTaskOutputPathDir,
                 androidTestResultPathXml
         )
     }
@@ -116,10 +112,8 @@ class AndroidUtil {
 
     private static void runTests(
             Object script,
-            AvdConfig config,
             String androidTestBuildType,
             Closure getTestInstrumentationRunnerName,
-            String instrumentalTestGradleTaskOutputPathDir,
             String androidTestResultPathXml
     ) {
         script.echo "start running tests"
@@ -150,15 +144,12 @@ class AndroidUtil {
             // Находим APK для androidTestBuildType, заданного в конфиге, и имя тестового пакета
             def testBuildTypeApkList = AndroidTestUtil.getApkList(script, androidTestBuildType, apkMainFolder)
 
-            //def gradleOutputFileName = "$instrumentalTestGradleTaskOutputPathDir/$TEMP_GRADLE_OUTPUT_FILENAME"
-
             // Проверка, существует ли APK с заданным androidTestBuildType
             if (testBuildTypeApkList.size() > 0) {
                 def testBuildTypeApkName = testBuildTypeApkList[0]
                 if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) {
                     def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, gradleTaskPrefix)
                     script.echo "currentInstrumentationRunnerName $currentInstrumentationRunnerName"
-                    return
 
                     // Проверка, определен ли testInstrumentationRunner для текущего модуля
                     if (currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {

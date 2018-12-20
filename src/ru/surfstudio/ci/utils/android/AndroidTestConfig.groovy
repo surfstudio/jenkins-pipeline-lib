@@ -22,8 +22,6 @@ class AndroidTestConfig {
 
     String instrumentalTestAssembleGradleTask
 
-    String instrumentalTestAssembleGradleTaskOutputPathDir
-
     String instrumentalTestResultPathDirXml
 
     String instrumentalTestResultPathXml
@@ -32,13 +30,11 @@ class AndroidTestConfig {
 
     AndroidTestConfig(
             String instrumentalTestAssembleGradleTask,
-            String instrumentalTestAssembleGradleTaskOutputPathDir,
             String instrumentalTestResultPathDirXml,
             String instrumentalTestResultPathXml,
             String instrumentalTestResultPathDirHtml
     ) {
         this.instrumentalTestAssembleGradleTask = instrumentalTestAssembleGradleTask
-        this.instrumentalTestAssembleGradleTaskOutputPathDir = instrumentalTestAssembleGradleTaskOutputPathDir
         this.instrumentalTestResultPathDirXml = instrumentalTestResultPathDirXml
         this.instrumentalTestResultPathXml = instrumentalTestResultPathXml
         this.instrumentalTestResultPathDirHtml = instrumentalTestResultPathDirHtml

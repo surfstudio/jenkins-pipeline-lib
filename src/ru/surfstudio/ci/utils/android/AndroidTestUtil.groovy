@@ -124,16 +124,6 @@ class AndroidTestUtil {
     }
 
     /**
-     * Функция, возвращающая префикс для APK-файла.
-     */
-    static String getApkPrefix(Object script, String apkFileName, AvdConfig config) {
-        return getShCommandOutput(
-                script,
-                "echo \"$apkFileName\" | awk -F ${getApkSuffix(config)} '{ print \$1 }'"
-        ).toString()
-    }
-
-    /**
      * Функция, возвращающая имя пакета для приложения, считывая его из манифеста,
      * который можно получить из APK-файла, имя которого передается параметром
      */
@@ -158,14 +148,13 @@ class AndroidTestUtil {
     }
 
     /**
-     * Функция, возвращающая суффикс для APK-файла
-     */
-    private static String getApkSuffix(AvdConfig config) {
-        return "-${config.androidTestBuildType}-${ANDROID_TEST_APK_SUFFIX}.apk"
-    }
-
-    /**
-     * Функция, возвращающая информацию по заданному индексу о APK
+     * Функция, возвращающая информацию по заданному индексу об имени APK-файла.
+     *
+     * Параметром передается полный путь к APK, который может иметь вид
+     * module/build/outputs/.../name.apk или module/submodule/build/outputs/.../name.apk
+     *
+     * Для проектов, содержащих дополнительные модули, может потребоваться имя модуля, которое идет после имени проекта
+     * и которое можно получить по индексу.
      */
     private static String getApkInfo(Object script, String apkFullName, Integer index) {
         return getShCommandOutput(
@@ -226,21 +215,6 @@ class AndroidTestUtil {
      */
     private static String getAdbShellCommand(Object script, String deviceName) {
         return "${getAdbCommand(script, deviceName)} shell"
-    }
-    //endregion
-
-    //region InstrumentationRunner utils
-    /**
-     * Функция, возвращающая имя testInstrumentationRunner на основе результата после выполнения соотв. gradle task
-     * @param gradleOutputFileName имя файла, который содержит результат выполнения gradle-таска
-     * todo remove
-     * @return
-     */
-    static String getInstrumentationRunnerName(Object script, String gradleOutputFileName) {
-        return getShCommandOutput(
-                script,
-                "cat $gradleOutputFileName | tail -4 | head -1"
-        )
     }
     //endregion
 

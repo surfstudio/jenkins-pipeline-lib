@@ -36,7 +36,6 @@ class PrPipelineAndroid extends PrPipeline {
     public androidTestBuildType = "qa"
 
     public instrumentalTestAssembleGradleTask = "assembleAndroidTest"
-    public instrumentalTestAssembleGradleTaskOutputPathDir = "build/outputs/gradle"
     public instrumentalTestResultPathDirXml = "build/outputs/androidTest-results/instrumental"
     public instrumentalTestResultPathXml = "$instrumentalTestResultPathDirXml/*.xml"
     public instrumentalTestResultPathDirHtml = "build/reports/androidTests/instrumental"
@@ -59,11 +58,11 @@ class PrPipelineAndroid extends PrPipeline {
      */
     public getTestInstrumentationRunnerName = { script, prefix ->
         def defaultInstrumentationRunnerName = "getTestInstrumentationRunnerName"
-        String[] gradleTaskOutput = script.sh(
+        def gradleTaskOutput = script.sh(
                 returnStdout: true,
-                script: "./gradlew :$prefix:$defaultInstrumentationRunnerName"
-        ).split("\n")
-        return gradleTaskOutput.takeRight(4).first()
+                script: "./gradlew :$prefix:$defaultInstrumentationRunnerName | tail -4 | head -1"
+        )
+        return gradleTaskOutput
     }
 
     public AvdConfig androidTestConfig = new AvdConfig()
@@ -73,7 +72,7 @@ class PrPipelineAndroid extends PrPipeline {
     }
 
     def init() {
-        node = "android-2" //NodeProvider.getAndroidNode()
+        node = "android-1" //NodeProvider.getAndroidNode()
 
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
@@ -105,7 +104,6 @@ class PrPipelineAndroid extends PrPipeline {
                             getTestInstrumentationRunnerName,
                             new AndroidTestConfig(
                                     instrumentalTestAssembleGradleTask,
-                                    instrumentalTestAssembleGradleTaskOutputPathDir,
                                     instrumentalTestResultPathDirXml,
                                     instrumentalTestResultPathXml,
                                     instrumentalTestResultPathDirHtml
