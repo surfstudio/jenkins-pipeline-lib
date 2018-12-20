@@ -158,7 +158,7 @@ class AndroidUtil {
             if (testBuildTypeApkList.size() > 0) {
                 def testBuildTypeApkName = testBuildTypeApkList[0]
                 if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) {
-                    def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, gradleTaskPrefix)
+                    def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, gradleTaskPrefix).trim()
                     script.echo "currentInstrumentationRunnerName $currentInstrumentationRunnerName"
 
                     // Проверка, определен ли testInstrumentationRunner для текущего модуля
@@ -174,7 +174,7 @@ class AndroidUtil {
                             --adb-timeout $TIMEOUT_PER_TEST \
                             -serial \"${formatArgsForShellCommand(emulatorName)}\""
 
-                        script.sh "cat $spoonOutputDir/logs/*/*/*.html"
+                        //script.sh "cat $spoonOutputDir/logs/*/*/*.html"
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
 
                         // Для переиспользуемого эмулятора необходимо удалить предыдущую версию APK для текущего модуля

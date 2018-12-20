@@ -65,8 +65,7 @@ class AndroidPipelineHelper {
             AndroidTestConfig androidTestConfig
     ) {
         try {
-            //CommonUtil.gradlew(script, androidTestConfig.instrumentalTestAssembleGradleTask)
-            CommonUtil.gradlew(script, ":app-migration-sample:assembleAndroidTest")
+            CommonUtil.gradlew(script, androidTestConfig.instrumentalTestAssembleGradleTask)
             script.sh "mkdir -p ${androidTestConfig.instrumentalTestResultPathDirXml}; \
                 mkdir -p ${androidTestConfig.instrumentalTestResultPathDirHtml}"
             AndroidUtil.runInstrumentalTests(
