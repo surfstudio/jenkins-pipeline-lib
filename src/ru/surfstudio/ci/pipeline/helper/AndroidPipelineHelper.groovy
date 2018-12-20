@@ -16,8 +16,8 @@
 package ru.surfstudio.ci.pipeline.helper
 
 import ru.surfstudio.ci.CommonUtil
-import ru.surfstudio.ci.utils.android.AndroidTestConfig
-import ru.surfstudio.ci.utils.android.AvdConfig
+import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
+import ru.surfstudio.ci.utils.android.config.AvdConfig
 import ru.surfstudio.ci.AndroidUtil
 
 /**
@@ -74,7 +74,8 @@ class AndroidPipelineHelper {
                     config,
                     androidTestBuildType,
                     getTestInstrumentationRunnerName,
-                    androidTestConfig.instrumentalTestResultPathDirXml
+                    androidTestConfig.instrumentalTestResultPathDirXml,
+                    androidTestConfig.instrumentalTestResultPathDirHtml
             )
         } finally {
             AndroidUtil.cleanup(script, config)

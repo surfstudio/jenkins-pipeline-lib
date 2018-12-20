@@ -15,18 +15,24 @@
  */
 package ru.surfstudio.ci
 
-import ru.surfstudio.ci.utils.android.AvdConfig
+import ru.surfstudio.ci.utils.android.ApkUtil
+import ru.surfstudio.ci.utils.android.AvdUtil
+import ru.surfstudio.ci.utils.android.EmulatorUtil
+import ru.surfstudio.ci.utils.android.config.AvdConfig
 import ru.surfstudio.ci.utils.android.AndroidTestUtil
 
 class AndroidUtil {
 
-    // имя временного файла с результатами выполнения gradle-таска
     private static String NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME = "null"
 
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
     private static String BASE64_ENCODING = "Base64"
     private static Integer TIMEOUT_PER_TEST = 60 * 2 // seconds
 
+    /**
+     * Флаг, показывающий, был ли переиспользован эмулятор.
+     * Несмотря на значение того же флага в конфиге, эмулятор может не быть переиспользован, если старый был удален.
+     */
     private static Boolean reusedEmulator = false
 
     /**
@@ -39,17 +45,19 @@ class AndroidUtil {
     /**
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
      * @param script контекст вызова
-     * @param config конфигурация запуска инструментальных тестов
+     * @param config конфигурация для эмулятора
      * @param androidTestBuildType build type для запуска инструментальных тестов
      * @param getTestInstrumentationRunnerName функция, возвращающая имя текущего instrumentation runner
-     * @param androidTestResultPathXml путь для сохранения отчетов о результатах тестов
+     * @param androidTestResultPathXml путь для сохранения xml-отчетов о результатах тестов
+     * @param androidTestResultPathDirHtml путь для сохранения html-отчетов о результатах тестов
      */
     static void runInstrumentalTests(
             Object script,
             AvdConfig config,
             String androidTestBuildType,
             Closure getTestInstrumentationRunnerName,
-            String androidTestResultPathXml
+            String androidTestResultPathXml,
+            String androidTestResultPathDirHtml
     ) {
         launchEmulator(script, config)
         checkEmulatorStatus(script, config)
@@ -57,7 +65,8 @@ class AndroidUtil {
                 script,
                 androidTestBuildType,
                 getTestInstrumentationRunnerName,
-                androidTestResultPathXml
+                androidTestResultPathXml,
+                androidTestResultPathDirHtml
         )
     }
 
@@ -65,21 +74,21 @@ class AndroidUtil {
      * Функция, которая должна быть вызвана по завершении инструментальных тестов
      */
     static void cleanup(Object script, AvdConfig config) {
-        AndroidTestUtil.closeRunningEmulator(script, config)
+        EmulatorUtil.closeRunningEmulator(script, config)
     }
 
     //region Stages of instrumental tests running
     private static void launchEmulator(Object script, AvdConfig config) {
         script.sh "${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
-        def currentTimeoutSeconds = AndroidTestUtil.EMULATOR_TIMEOUT
-        def emulatorName = AndroidTestUtil.getEmulatorName(script)
+        def currentTimeoutSeconds = EmulatorUtil.EMULATOR_TIMEOUT
+        def emulatorName = EmulatorUtil.getEmulatorName(script)
 
         reusedEmulator = config.reuse
         if (reusedEmulator) {
             script.echo "try to reuse emulator"
             script.sh "${CommonUtil.getAvdManagerHome(script)} list avd"
             // проверка, существует ли AVD
-            def avdName = AndroidTestUtil.isAvdExists(script, config.avdName)
+            def avdName = AvdUtil.isAvdExists(script, config.avdName)
             if (CommonUtil.isNotNullOrEmpty(avdName)) {
                 script.echo "launch reused emulator"
                 // проверка, запущен ли эмулятор
@@ -87,11 +96,11 @@ class AndroidUtil {
                     script.echo "emulator have been launched already"
                     currentTimeoutSeconds = 0
                 } else {
-                    AndroidTestUtil.launchEmulator(script, config)
+                    EmulatorUtil.launchEmulator(script, config)
                 }
             } else { // if AVD is not exists
                 reusedEmulator = false
-                AndroidTestUtil.createAndLaunchNewEmulator(script, config)
+                EmulatorUtil.createAndLaunchNewEmulator(script, config)
             }
         } else { // if not reuse
             closeAndCreateEmulator(script, config, "not reuse")
@@ -101,10 +110,10 @@ class AndroidUtil {
     }
 
     private static void checkEmulatorStatus(Object script, AvdConfig config) {
-        def emulatorName = AndroidTestUtil.getEmulatorName(script)
-        if (AndroidTestUtil.isEmulatorOffline(script) || !CommonUtil.isNotNullOrEmpty(emulatorName)) {
+        def emulatorName = EmulatorUtil.getEmulatorName(script)
+        if (EmulatorUtil.isEmulatorOffline(script) || !CommonUtil.isNotNullOrEmpty(emulatorName)) {
             closeAndCreateEmulator(script, config, "emulator is offline")
-            sleep(script, AndroidTestUtil.EMULATOR_TIMEOUT)
+            sleep(script, EmulatorUtil.EMULATOR_TIMEOUT)
         } else {
             script.echo "emulator is online"
         }
@@ -114,22 +123,23 @@ class AndroidUtil {
             Object script,
             String androidTestBuildType,
             Closure getTestInstrumentationRunnerName,
-            String androidTestResultPathXml
+            String androidTestResultPathXml,
+            String androidTestResultPathDirHtml
     ) {
         script.echo "start running tests"
-        def emulatorName = AndroidTestUtil.getEmulatorName(script)
+        def emulatorName = EmulatorUtil.getEmulatorName(script)
 
         script.sh "${CommonUtil.getAdbHome(script)} devices"
 
         def spoonJarFile = script.libraryResource resource: SPOON_JAR_NAME, encoding: BASE64_ENCODING
         script.writeFile file: SPOON_JAR_NAME, text: spoonJarFile, encoding: BASE64_ENCODING
 
-        AndroidTestUtil.getApkList(script, AndroidTestUtil.ANDROID_TEST_APK_SUFFIX).each {
+        ApkUtil.getApkList(script, AndroidTestUtil.ANDROID_TEST_APK_SUFFIX).each {
             def currentApkName = "$it"
-            def apkMainFolder = AndroidTestUtil.getApkFolderName(script, currentApkName).trim()
+            def apkMainFolder = ApkUtil.getApkFolderName(script, currentApkName).trim()
 
             // Проверка, содержит ли проект модули
-            def apkModuleName = AndroidTestUtil.getApkModuleName(script, currentApkName).trim()
+            def apkModuleName = ApkUtil.getApkModuleName(script, currentApkName).trim()
             def apkPrefix = (apkModuleName != "build") ? apkModuleName : apkMainFolder
             def testReportFileNameSuffix = apkMainFolder
 
@@ -142,7 +152,7 @@ class AndroidUtil {
             }
 
             // Находим APK для androidTestBuildType, заданного в конфиге, и имя тестового пакета
-            def testBuildTypeApkList = AndroidTestUtil.getApkList(script, androidTestBuildType, apkMainFolder)
+            def testBuildTypeApkList = ApkUtil.getApkList(script, androidTestBuildType, apkMainFolder)
 
             // Проверка, существует ли APK с заданным androidTestBuildType
             if (testBuildTypeApkList.size() > 0) {
@@ -169,7 +179,7 @@ class AndroidUtil {
 
                         // Для переиспользуемого эмулятора необходимо удалить предыдущую версию APK для текущего модуля
                         if (reusedEmulator) {
-                            def testBuildTypePackageName = AndroidTestUtil.getPackageNameFromApk(
+                            def testBuildTypePackageName = ApkUtil.getPackageNameFromApk(
                                     script,
                                     testBuildTypeApkName,
                                     BUILD_TOOLS_VERSION)
@@ -185,8 +195,8 @@ class AndroidUtil {
     //region Helpful functions
     private static void closeAndCreateEmulator(Object script, AvdConfig config, String message) {
         script.echo message
-        AndroidTestUtil.closeRunningEmulator(script, config)
-        AndroidTestUtil.createAndLaunchNewEmulator(script, config)
+        EmulatorUtil.closeRunningEmulator(script, config)
+        EmulatorUtil.createAndLaunchNewEmulator(script, config)
     }
 
     private static void sleep(Object script, Integer timeout) {

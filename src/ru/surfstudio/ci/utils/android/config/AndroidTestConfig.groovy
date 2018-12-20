@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
  */
-package ru.surfstudio.ci.utils.android
+package ru.surfstudio.ci.utils.android.config
 
 /**
  * Вспомогательный класс, содержащий параметры конфигурации запуска инструментальных тестов

@@ -1,0 +1,107 @@
+/*
+  Copyright (c) 2018-present, SurfStudio LLC.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ */
+package ru.surfstudio.ci.utils.android
+
+import ru.surfstudio.ci.CommonUtil
+
+/**
+ * Утилиты для работы с APK
+ */
+class ApkUtil {
+
+    private static String ANDROID_MANIFEST_FILE_NAME = "AndroidManifest.xml"
+
+    /**
+     * Функция, возвращающая список APK-файлов с заданным суффиксом в текущей директории
+     */
+    static String[] getApkList(Object script, String apkPrefix) {
+        return getShCommandOutput(
+                script,
+                "find . -name \"*-${apkPrefix}.apk\" | cut -c 3-"
+        ).split()
+    }
+
+    /**
+     * Функция, возвращающая список APK-файлов с заданным суффиксом в заданной директории
+     */
+    static String[] getApkList(Object script, String apkPrefix, String folderName) {
+        return getShCommandOutput(
+                script,
+                "find \"$folderName\" -name \"*-${apkPrefix}.apk\""
+        ).split()
+    }
+
+    /**
+     * Функция, возвращающая имя директории для APK-файла
+     */
+    static String getApkFolderName(Object script, String apkFullName) {
+        return getApkInfo(script, apkFullName, 1)
+    }
+
+    /**
+     * Функция, возвращающая краткое имя APK-файла без учета директории
+     */
+    static String getApkFileName(Object script, String apkFullName) {
+        return getShCommandOutput(
+                script,
+                "echo \"$apkFullName\" | rev | cut -d '/' -f1 | rev"
+        )
+    }
+
+    /**
+     * Функция, возвращающая имя пакета для приложения, считывая его из манифеста,
+     * который можно получить из APK-файла, имя которого передается параметром
+     */
+    static String getPackageNameFromApk(Object script, String apkFullName, String buildToolsVersion) {
+        return getShCommandOutput(
+                script,
+                "${CommonUtil.getAaptHome(script, buildToolsVersion)} dump xmltree \"$apkFullName\" ${ANDROID_MANIFEST_FILE_NAME} \
+                            | grep package | cut -d '\"' -f2"
+        )
+    }
+
+    /**
+     * Функция, возвращающая имя модуля, в котором содержится APK-файл.
+     *
+     * В большинстве случаев, APK-файл находится в папке APK_FOLDER/build,
+     * но если проект содержит вложенный многомодульный проект,
+     * например, template в android-standard,
+     * то имя модуля будет отличаться от имени директории APK-файла.
+     */
+    static String getApkModuleName(Object script, String apkFullName) {
+        return getApkInfo(script, apkFullName, 2)
+    }
+
+    /**
+     * Функция, возвращающая информацию по заданному индексу об имени APK-файла.
+     *
+     * Параметром передается полный путь к APK, который может иметь вид
+     * module/build/outputs/.../name.apk или module/submodule/build/outputs/.../name.apk
+     *
+     * Для проектов, содержащих дополнительные модули, может потребоваться имя модуля, которое идет после имени проекта
+     * и которое можно получить по индексу.
+     */
+    private static String getApkInfo(Object script, String apkFullName, Integer index) {
+        return getShCommandOutput(
+                script,
+                "echo \"$apkFullName\" | cut -d '/' -f${index.toString()}"
+        )
+    }
+
+    private def static getShCommandOutput(Object script, String command) {
+        return script.sh(returnStdout: true, script: command)
+    }
+}
