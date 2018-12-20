@@ -15,13 +15,12 @@
  */
 package ru.surfstudio.ci
 
-import ru.surfstudio.ci.utils.android.AndroidTestConfig
+import ru.surfstudio.ci.utils.android.AvdConfig
 import ru.surfstudio.ci.utils.android.AndroidTestUtil
 
 class AndroidUtil {
 
     // имя временного файла с результатами выполнения gradle-таска
-    private static String TEMP_GRADLE_OUTPUT_FILENAME = "result"
     private static String NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME = "null"
 
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
@@ -41,29 +40,40 @@ class AndroidUtil {
      * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
      * @param script контекст вызова
      * @param config конфигурация запуска инструментальных тестов
+     * @param androidTestBuildType build type для запуска инструментальных тестов
+     * @param getTestInstrumentationRunnerName функция, возвращающая имя текущего instrumentation runner
      * @param instrumentalTestGradleTaskOutputPathDir путь для временного файла с результатом выполения gradle-таска
      * @param androidTestResultPathXml путь для сохранения отчетов о результатах тестов
      */
     static void runInstrumentalTests(
             Object script,
-            AndroidTestConfig config,
+            AvdConfig config,
+            String androidTestBuildType,
+            Closure getTestInstrumentationRunnerName,
             String instrumentalTestGradleTaskOutputPathDir,
             String androidTestResultPathXml
     ) {
         launchEmulator(script, config)
         checkEmulatorStatus(script, config)
-        runTests(script, config, instrumentalTestGradleTaskOutputPathDir, androidTestResultPathXml)
+        runTests(
+                script,
+                config,
+                androidTestBuildType,
+                getTestInstrumentationRunnerName,
+                instrumentalTestGradleTaskOutputPathDir,
+                androidTestResultPathXml
+        )
     }
 
     /**
      * Функция, которая должна быть вызвана по завершении инструментальных тестов
      */
-    static void cleanup(Object script, AndroidTestConfig config) {
+    static void cleanup(Object script, AvdConfig config) {
         AndroidTestUtil.closeRunningEmulator(script, config)
     }
 
     //region Stages of instrumental tests running
-    private static void launchEmulator(Object script, AndroidTestConfig config) {
+    private static void launchEmulator(Object script, AvdConfig config) {
         script.sh "${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
         def currentTimeoutSeconds = AndroidTestUtil.EMULATOR_TIMEOUT
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
@@ -94,7 +104,7 @@ class AndroidUtil {
         sleep(script, currentTimeoutSeconds)
     }
 
-    private static void checkEmulatorStatus(Object script, AndroidTestConfig config) {
+    private static void checkEmulatorStatus(Object script, AvdConfig config) {
         def emulatorName = AndroidTestUtil.getEmulatorName(script)
         if (AndroidTestUtil.isEmulatorOffline(script) || !CommonUtil.isNotNullOrEmpty(emulatorName)) {
             closeAndCreateEmulator(script, config, "emulator is offline")
@@ -106,7 +116,9 @@ class AndroidUtil {
 
     private static void runTests(
             Object script,
-            AndroidTestConfig config,
+            AvdConfig config,
+            String androidTestBuildType,
+            Closure getTestInstrumentationRunnerName,
             String instrumentalTestGradleTaskOutputPathDir,
             String androidTestResultPathXml
     ) {
@@ -127,47 +139,30 @@ class AndroidUtil {
             def apkPrefix = (apkModuleName != "build") ? apkModuleName : apkMainFolder
             def testReportFileNameSuffix = apkMainFolder
 
-            // Получение имени testInstrumentationRunner для запусков тестов текущего модуля
-            def currentInstrumentationGradleTaskRunnerName
+            // Получение префикса модуля для запуска gradle-таска
+            def gradleTaskPrefix = apkMainFolder
 
             if (apkMainFolder != apkPrefix) {
-                currentInstrumentationGradleTaskRunnerName = AndroidTestUtil.getInstrumentationGradleTaskRunnerName(
-                        "$apkMainFolder:$apkPrefix",
-                        config
-                )
+                gradleTaskPrefix = "$apkMainFolder:$apkPrefix"
                 testReportFileNameSuffix += "-$apkPrefix"
-            } else {
-                currentInstrumentationGradleTaskRunnerName = AndroidTestUtil.getInstrumentationGradleTaskRunnerName(
-                        "$apkMainFolder",
-                        config
-                )
             }
-            script.echo "test report dirs $testReportFileNameSuffix $currentInstrumentationGradleTaskRunnerName"
 
-            // Находим APK для testBuildType, заданного в конфиге, и имя тестового пакета
-            def testBuildTypeApkList = AndroidTestUtil.getApkList(script, config.testBuildType, apkMainFolder)
+            // Находим APK для androidTestBuildType, заданного в конфиге, и имя тестового пакета
+            def testBuildTypeApkList = AndroidTestUtil.getApkList(script, androidTestBuildType, apkMainFolder)
 
-            def gradleOutputFileName = "$instrumentalTestGradleTaskOutputPathDir/$TEMP_GRADLE_OUTPUT_FILENAME"
+            //def gradleOutputFileName = "$instrumentalTestGradleTaskOutputPathDir/$TEMP_GRADLE_OUTPUT_FILENAME"
 
-            // Проверка, существует ли APK с заданным testBuildType
+            // Проверка, существует ли APK с заданным androidTestBuildType
             if (testBuildTypeApkList.size() > 0) {
                 def testBuildTypeApkName = testBuildTypeApkList[0]
                 if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) {
-                    script.sh "./gradlew '${formatArgsForShellCommand(currentInstrumentationGradleTaskRunnerName)}' \
-                    > $gradleOutputFileName"
-
-                    def currentInstrumentationRunnerName = formatArgsForShellCommand(
-                            AndroidTestUtil.getInstrumentationRunnerName(
-                                    script,
-                                    gradleOutputFileName
-                            )
-                    )
-
+                    def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, gradleTaskPrefix)
                     script.echo "currentInstrumentationRunnerName $currentInstrumentationRunnerName"
+                    return
 
                     // Проверка, определен ли testInstrumentationRunner для текущего модуля
                     if (currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {
-                        String projectRootDir = script.sh(returnStdout: true, script: "pwd")
+                        String projectRootDir = "${script.sh(returnStdout: true, script: "pwd")}/"
                         String spoonOutputDir = "${formatArgsForShellCommand(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
                         script.sh "mkdir -p $spoonOutputDir"
 
@@ -197,7 +192,7 @@ class AndroidUtil {
     //endregion
 
     //region Helpful functions
-    private static void closeAndCreateEmulator(Object script, AndroidTestConfig config, String message) {
+    private static void closeAndCreateEmulator(Object script, AvdConfig config, String message) {
         script.echo message
         AndroidTestUtil.closeRunningEmulator(script, config)
         AndroidTestUtil.createAndLaunchNewEmulator(script, config)

@@ -15,10 +15,10 @@
  */
 package ru.surfstudio.ci.pipeline.pr
 
-import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.android.AndroidTestConfig
+import ru.surfstudio.ci.utils.android.AvdConfig
 
 class PrPipelineAndroid extends PrPipeline {
 
@@ -32,13 +32,41 @@ class PrPipelineAndroid extends PrPipeline {
     public unitTestResultPathXml = "**/test-results/testQaUnitTest/*.xml"
     public unitTestResultPathDirHtml = "app/build/reports/tests/testQaUnitTest/"
 
-    public instrumentalTestGradleTask = "assembleAndroidTest"
-    public instrumentalTestGradleTaskOutputPathDir = "build/outputs/gradle"
+    // buildType, для которого будут выполняться инструментальные тесты
+    public androidTestBuildType = "qa"
+
+    public instrumentalTestAssembleGradleTask = "assembleAndroidTest"
+    public instrumentalTestAssembleGradleTaskOutputPathDir = "build/outputs/gradle"
     public instrumentalTestResultPathDirXml = "build/outputs/androidTest-results/instrumental"
     public instrumentalTestResultPathXml = "$instrumentalTestResultPathDirXml/*.xml"
     public instrumentalTestResultPathDirHtml = "build/reports/androidTests/instrumental"
 
-    public AndroidTestConfig androidTestConfig = new AndroidTestConfig()
+    /**
+     * Функция, возвращающая имя текущего instrumentation runner, которое будет получено с помощью gradle-таска.
+     *
+     * Пример такого gradle-таска:
+     *
+     * task getTestInstrumentationRunnerName {
+     *     doLast {
+     *         println "$android.defaultConfig.testInstrumentationRunner"
+     *     }
+     * }
+     *
+     * Если для всех модулей проекта используется одинаковый instrumentation runner,
+     * то функцию можно переопределить следующим образом:
+     *
+     * pipeline.getTestInstrumentationRunnerName = { script, prefix -> return "androidx.test.runner.AndroidJUnitRunner" }
+     */
+    public getTestInstrumentationRunnerName = { script, prefix ->
+        def defaultInstrumentationRunnerName = "getTestInstrumentationRunnerName"
+        String[] gradleTaskOutput = script.sh(
+                returnStdout: true,
+                script: "./gradlew :$prefix:$defaultInstrumentationRunnerName"
+        ).split("\n")
+        return gradleTaskOutput.takeRight(4).first()
+    }
+
+    public AvdConfig androidTestConfig = new AvdConfig()
 
     PrPipelineAndroid(Object script) {
         super(script)
@@ -70,13 +98,19 @@ class PrPipelineAndroid extends PrPipeline {
                             unitTestResultPathDirHtml)
                 },
                 createStage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    AndroidPipelineHelper.instrumentationTestStageBodyAndroid(script,
+                    AndroidPipelineHelper.instrumentationTestStageBodyAndroid(
+                            script,
                             androidTestConfig,
-                            instrumentalTestGradleTask,
-                            instrumentalTestGradleTaskOutputPathDir,
-                            instrumentalTestResultPathDirXml,
-                            instrumentalTestResultPathXml,
-                            instrumentalTestResultPathDirHtml)
+                            androidTestBuildType,
+                            getTestInstrumentationRunnerName,
+                            new AndroidTestConfig(
+                                    instrumentalTestAssembleGradleTask,
+                                    instrumentalTestAssembleGradleTaskOutputPathDir,
+                                    instrumentalTestResultPathDirXml,
+                                    instrumentalTestResultPathXml,
+                                    instrumentalTestResultPathDirHtml
+                            )
+                    )
                 },
                 createStage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)

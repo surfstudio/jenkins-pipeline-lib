@@ -126,7 +126,7 @@ class AndroidTestUtil {
     /**
      * Функция, возвращающая префикс для APK-файла.
      */
-    static String getApkPrefix(Object script, String apkFileName, AndroidTestConfig config) {
+    static String getApkPrefix(Object script, String apkFileName, AvdConfig config) {
         return getShCommandOutput(
                 script,
                 "echo \"$apkFileName\" | awk -F ${getApkSuffix(config)} '{ print \$1 }'"
@@ -160,8 +160,8 @@ class AndroidTestUtil {
     /**
      * Функция, возвращающая суффикс для APK-файла
      */
-    private static String getApkSuffix(AndroidTestConfig config) {
-        return "-${config.testBuildType}-${ANDROID_TEST_APK_SUFFIX}.apk"
+    private static String getApkSuffix(AvdConfig config) {
+        return "-${config.androidTestBuildType}-${ANDROID_TEST_APK_SUFFIX}.apk"
     }
 
     /**
@@ -231,15 +231,9 @@ class AndroidTestUtil {
 
     //region InstrumentationRunner utils
     /**
-     * Функция, возвращающая имя gradle task для текущего модуля, префикс которого передается параметром
-     */
-    static String getInstrumentationGradleTaskRunnerName(String prefix, AndroidTestConfig config) {
-        return ":$prefix:${config.instrumentationRunnerGradleTaskName}"
-    }
-
-    /**
      * Функция, возвращающая имя testInstrumentationRunner на основе результата после выполнения соотв. gradle task
      * @param gradleOutputFileName имя файла, который содержит результат выполнения gradle-таска
+     * todo remove
      * @return
      */
     static String getInstrumentationRunnerName(Object script, String gradleOutputFileName) {
@@ -254,7 +248,7 @@ class AndroidTestUtil {
     /**
      * Функция, выполняющая закрытие запущенного эмулятора
      */
-    static void closeRunningEmulator(Object script, AndroidTestConfig config) {
+    static void closeRunningEmulator(Object script, AvdConfig config) {
         // Закрытие запущенного эмулятора, если он существует
         def emulatorName = getEmulatorName(script)
         if (CommonUtil.isNotNullOrEmpty(emulatorName)) {
@@ -271,7 +265,7 @@ class AndroidTestUtil {
     /**
      * Функция для создания и запуска нового эмулятора
      */
-    static void createAndLaunchNewEmulator(Object script, AndroidTestConfig config) {
+    static void createAndLaunchNewEmulator(Object script, AvdConfig config) {
         script.echo "create new emulator"
         script.sh "${CommonUtil.getAvdManagerHome(script)} create avd -f \
             -n \"${config.avdName}\" \
@@ -284,7 +278,7 @@ class AndroidTestUtil {
     /**
      * Функция, выполняющая запуск эмулятора, параметры которого заданы конфигом
      */
-    static void launchEmulator(Object script, AndroidTestConfig config) {
+    static void launchEmulator(Object script, AvdConfig config) {
         def launchEmulatorCommand = "${CommonUtil.getEmulatorHome(script)} \
                 -avd \"${config.avdName}\" \
                 -skin \"${config.skinSize}\" -no-window -no-boot-anim "

@@ -17,6 +17,7 @@ package ru.surfstudio.ci.pipeline.helper
 
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.utils.android.AndroidTestConfig
+import ru.surfstudio.ci.utils.android.AvdConfig
 import ru.surfstudio.ci.AndroidUtil
 
 /**
@@ -58,22 +59,33 @@ class AndroidPipelineHelper {
 
     def static instrumentationTestStageBodyAndroid(
             Object script,
-            AndroidTestConfig config,
-            String androidTestGradleTask,
-            String instrumentalTestGradleTaskOutputPathDir,
-            String androidTestResultPathDirXml,
-            String androidTestResultPathXml,
-            String androidTestResultPathDirHtml
+            AvdConfig config,
+            String androidTestBuildType,
+            Closure getTestInstrumentationRunnerName,
+            AndroidTestConfig androidTestConfig
     ) {
         try {
-            CommonUtil.gradlew(script, androidTestGradleTask)
-            script.sh "mkdir -p $androidTestResultPathDirXml; \
-                mkdir -p $androidTestResultPathDirHtml; \
-                mkdir -p $instrumentalTestGradleTaskOutputPathDir"
-            AndroidUtil.runInstrumentalTests(script, config, instrumentalTestGradleTaskOutputPathDir, androidTestResultPathDirXml)
+            //CommonUtil.gradlew(script, androidTestConfig.instrumentalTestAssembleGradleTask)
+            CommonUtil.gradlew(script, ":app-migration-sample:assembleAndroidTest")
+            script.sh "mkdir -p ${androidTestConfig.instrumentalTestResultPathDirXml}; \
+                mkdir -p ${androidTestConfig.instrumentalTestResultPathDirHtml}; \
+                mkdir -p ${androidTestConfig.instrumentalTestAssembleGradleTaskOutputPathDir}"
+            AndroidUtil.runInstrumentalTests(
+                    script,
+                    config,
+                    androidTestBuildType,
+                    getTestInstrumentationRunnerName,
+                    androidTestConfig.instrumentalTestAssembleGradleTaskOutputPathDir,
+                    androidTestConfig.instrumentalTestResultPathDirXml
+            )
         } finally {
             AndroidUtil.cleanup(script, config)
-            publishTestResults(script, androidTestResultPathXml, androidTestResultPathDirHtml, "Instrumental tests")
+            publishTestResults(
+                    script,
+                    androidTestConfig.instrumentalTestResultPathXml,
+                    androidTestConfig.instrumentalTestResultPathDirHtml,
+                    "Instrumental tests"
+            )
         }
     }
 

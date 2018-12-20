@@ -16,36 +16,31 @@
 package ru.surfstudio.ci.utils.android
 
 /**
- * Класс, содержащий параметры конфигурации запуска инструментальных тестов
+ * Вспомогательный класс, содержащий параметры конфигурации запуска инструментальных тестов
  */
 class AndroidTestConfig {
 
-    // buildType, для которого будут выполняться инструментальные тесты
-    String testBuildType = "qa" //todo pipeline param
+    String instrumentalTestAssembleGradleTask
 
-    // имя gradle task, который возвращает имя текущего instrumentation runner
-    String instrumentationRunnerGradleTaskName = "getTestInstrumentationRunnerName" //todo pipeline function
+    String instrumentalTestAssembleGradleTaskOutputPathDir
 
-    // имя AVD
-    String avdName = "avd-androidTest"
+    String instrumentalTestResultPathDirXml
 
-    // имя девайса для запуска AVD
-    String deviceName = "Nexus 5X"
+    String instrumentalTestResultPathXml
 
-    // SDK ID для запуска эмулятора
-    String sdkId = "system-images;android-28;google_apis;x86_64"
+    String instrumentalTestResultPathDirHtml
 
-    // размер объема sdcard эмулятора
-    String sdcardSize = "3072M"
-
-    // разрешение эмулятора
-    String skinSize = "1440x2560"
-
-    /**
-     * Флаг, показывающий, будет ли переиспользован эмулятор.
-     * переиспользование эмулятора работает нестабильно и может привести к неожиданным падениям тестов на CI
-     * из-за ошибок, связанных с эмулятором.
-     * Устанавливать значение true данного флага следует только при необходимости
-     */
-    Boolean reuse = false
+    AndroidTestConfig(
+            String instrumentalTestAssembleGradleTask,
+            String instrumentalTestAssembleGradleTaskOutputPathDir,
+            String instrumentalTestResultPathDirXml,
+            String instrumentalTestResultPathXml,
+            String instrumentalTestResultPathDirHtml
+    ) {
+        this.instrumentalTestAssembleGradleTask = instrumentalTestAssembleGradleTask
+        this.instrumentalTestAssembleGradleTaskOutputPathDir = instrumentalTestAssembleGradleTaskOutputPathDir
+        this.instrumentalTestResultPathDirXml = instrumentalTestResultPathDirXml
+        this.instrumentalTestResultPathXml = instrumentalTestResultPathXml
+        this.instrumentalTestResultPathDirHtml = instrumentalTestResultPathDirHtml
+    }
 }
