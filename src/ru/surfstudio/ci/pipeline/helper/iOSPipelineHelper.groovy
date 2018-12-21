@@ -28,6 +28,7 @@ class iOSPipelineHelper {
                 script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
         ]) {
 
+            script.sh('security default-keychain -s /Users/jenkins/Library/Keychains/login.keychain-db')
             script.sh('security -v unlock-keychain -p $KEYCHAIN_PASS')
             script.sh('security import "$DEVELOPER_P12_KEY" -P "" -T /usr/bin/codesign -T /usr/bin/security')
             script.sh('security set-key-partition-list -S apple-tool:,apple: -s -k $KEYCHAIN_PASS ~/Library/Keychains/login.keychain-db')
