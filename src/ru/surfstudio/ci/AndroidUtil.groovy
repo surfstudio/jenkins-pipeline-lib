@@ -15,47 +15,29 @@
  */
 package ru.surfstudio.ci
 
-import ru.surfstudio.ci.utils.android.config.AvdConfig
-
+/**
+ * @Deprecated see {@link ru.surfstudio.ci.utils.android.AndroidUtil}
+ */
 @Deprecated
 class AndroidUtil {
 
-    /**
-     * Функция, запускающая существующий или новый эмулятор для выполнения инструментальных тестов
-     * @param script контекст вызова
-     * @param config конфигурация для эмулятора
-     * @param androidTestBuildType build type для запуска инструментальных тестов
-     * @param getTestInstrumentationRunnerName функция, возвращающая имя текущего instrumentation runner
-     * @param androidTestResultPathXml путь для сохранения xml-отчетов о результатах тестов
-     * @param androidTestResultPathDirHtml путь для сохранения html-отчетов о результатах тестов
-     */
-    static void runInstrumentalTests(
-            Object script,
-            AvdConfig config,
-            String androidTestBuildType,
-            Closure getTestInstrumentationRunnerName,
-            String androidTestResultPathXml,
-            String androidTestResultPathDirHtml
-    ) {
-        ru.surfstudio.ci.utils.AndroidUtil.runInstrumentalTests(
-                script,
-                config,
-                androidTestBuildType,
-                getTestInstrumentationRunnerName,
-                androidTestResultPathXml,
-                androidTestResultPathDirHtml
-        )
-    }
-
-    /**
-     * Функция, которая должна быть вызвана по завершении инструментальных тестов
-     */
-    static void cleanup(Object script, AvdConfig config) {
-        ru.surfstudio.ci.utils.AndroidUtil.cleanup(script, config)
-    }
-
+    @Deprecated
     def static onEmulator(Object script, String avdName, Closure body) {
-        ru.surfstudio.ci.utils.AndroidUtil.onEmulator(script, avdName, body)
+        script.timeout(time: 7 * 60 * 60, unit: 'SECONDS') { //7 hours
+            def ADB = "${script.env.ANDROID_HOME}/platform-tools/adb"
+            def EMULATOR = "${script.env.ANDROID_HOME}/tools/emulator"
+            script.sh "$ADB devices"
+            script.sh "$EMULATOR -list-avds"
+            script.lock(avdName) { //блокируем эмулятор
+                script.sh "$EMULATOR -avd avd-main -no-window -skin 1440x2560 &"
+                script.timeout(time: 120, unit: 'SECONDS') { //2мин ждем запуск девайса
+                    script.sh "$ADB wait-for-device"
+                }
+                //нажимаем кнопку домой
+                script.sh "$ADB shell input keyevent 3 &"
+                body()
+            }
+        }
     }
 
     /**
@@ -79,15 +61,68 @@ class AndroidUtil {
      * How configure gradle to use this variables see here https://bitbucket.org/surfstudio/android-standard/src/snapshot-0.3.0/template/keystore/
      *
      */
+    @Deprecated
     def static withKeystore(Object script, String keystoreCredentials, String keystorePropertiesCredentials, Closure body) {
-        ru.surfstudio.ci.utils.AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials, body)
+        def bodyStarted = false
+        try {
+            script.echo "start extract keystoreCredentials: $keystoreCredentials " +
+                    "and keystorePropertiesCredentials: $keystorePropertiesCredentials"
+            script.withCredentials([
+                    script.file(credentialsId: keystoreCredentials, variable: 'KEYSTORE'),
+                    script.file(credentialsId: keystorePropertiesCredentials, variable: 'KEYSTORE_PROPERTIES')
+            ]) {
+                String properties = script.readFile(script.KEYSTORE_PROPERTIES)
+                script.echo "extracted keystore properties: \n$properties"
+                def vars = properties.tokenize('\n')
+                script.withEnv(vars) {
+                    script.withEnv(["storeFile=$script.KEYSTORE"]) {
+                        bodyStarted = true
+                        body()
+                    }
+                }
+            }
+        } catch (Exception e) {
+            if (bodyStarted) {
+                throw e
+            } else {
+                script.echo "^^^^ Ignored exception for read keystore credentials: ${e.toString()} ^^^^"
+                body()
+            }
+        }
     }
 
+    @Deprecated
     static String getGradleVariable(Object script, String file, String varName) {
-        return ru.surfstudio.ci.utils.AndroidUtil.getGradleVariable(script, file, varName)
+        String fileBody = script.readFile(file)
+        def lines = fileBody.split("\n")
+        for (line in lines) {
+            def words = line.split(/(;| |\t|=)/).findAll({ it?.trim() })
+            if (words[0] == varName && words.size() > 1) {
+                def value = words[1]
+                script.echo "$varName = $value found in file $file"
+                return value
+            }
+        }
+        throw script.error("groovy variable with name: $varName not exist in file: $file")
     }
 
+    @Deprecated
     static String changeGradleVariable(Object script, String file, String varName, String newVarValue) {
-        ru.surfstudio.ci.utils.AndroidUtil.changeGradleVariable(script, file, varName, newVarValue)
+        String oldVarValue = getGradleVariable(script, file, varName)
+        String fileBody = script.readFile(file)
+        String newFileBody = ""
+        def lines = fileBody.split("\n")
+        for (line in lines) {
+            def words = line.split(/(;| |\t|=)/).findAll({ it?.trim() })
+            if (words[0] == varName) {
+                String updatedLine = line.replace(oldVarValue, newVarValue)
+                newFileBody += updatedLine
+            } else {
+                newFileBody += line
+            }
+            newFileBody += "\n"
+        }
+        script.writeFile file: file, text: newFileBody
+        script.echo "$varName value changed to $newVarValue in file $file"
     }
 }

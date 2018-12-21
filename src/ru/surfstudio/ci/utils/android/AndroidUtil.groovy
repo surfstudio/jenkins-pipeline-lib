@@ -13,13 +13,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
  */
-package ru.surfstudio.ci.utils
+package ru.surfstudio.ci.utils.android
 
 import ru.surfstudio.ci.CommonUtil
-import ru.surfstudio.ci.utils.android.AndroidTestUtil
-import ru.surfstudio.ci.utils.android.ApkUtil
-import ru.surfstudio.ci.utils.android.AvdUtil
-import ru.surfstudio.ci.utils.android.EmulatorUtil
 import ru.surfstudio.ci.utils.android.config.AvdConfig
 
 class AndroidUtil {
@@ -175,7 +171,6 @@ class AndroidUtil {
                             --adb-timeout $TIMEOUT_PER_TEST \
                             -serial \"${formatArgsForShellCommand(emulatorName)}\""
 
-                        //script.sh "cat $spoonOutputDir/logs/*/*/*.html"
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
                         script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkMainFolder}"
 

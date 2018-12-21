@@ -16,7 +16,7 @@
 package ru.surfstudio.ci.pipeline.helper
 
 import ru.surfstudio.ci.CommonUtil
-import ru.surfstudio.ci.utils.AndroidUtil
+import ru.surfstudio.ci.utils.android.AndroidUtil
 import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
 import ru.surfstudio.ci.utils.android.config.AvdConfig
 
@@ -24,6 +24,9 @@ import ru.surfstudio.ci.utils.android.config.AvdConfig
  *
  */
 class AndroidPipelineHelper {
+
+    private static String UNIT_TEST_REPORT_NAME = "Unit Tests"
+    private static String INSTRUMENTAL_TEST_REPORT_NAME = "Instrumental tests"
 
     private static String DEFAULT_HTML_RESULT_FILENAME = "index.html"
 
@@ -53,7 +56,7 @@ class AndroidPipelineHelper {
         try {
             CommonUtil.gradlew(script, unitTestGradleTask)
         } finally {
-            publishTestResults(script, testResultPathXml, testResultPathDirHtml, "Unit Tests")
+            publishTestResults(script, testResultPathXml, testResultPathDirHtml, UNIT_TEST_REPORT_NAME)
         }
     }
 
@@ -82,7 +85,7 @@ class AndroidPipelineHelper {
                     script,
                     "${androidTestConfig.instrumentalTestResultPathDirXml}/*.xml",
                     androidTestConfig.instrumentalTestResultPathDirHtml,
-                    "Instrumental tests"
+                    INSTRUMENTAL_TEST_REPORT_NAME
             )
         }
     }
