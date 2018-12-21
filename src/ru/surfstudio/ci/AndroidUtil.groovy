@@ -176,6 +176,7 @@ class AndroidUtil {
 
                         //script.sh "cat $spoonOutputDir/logs/*/*/*.html"
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
+                        script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkMainFolder}"
 
                         // Для переиспользуемого эмулятора необходимо удалить предыдущую версию APK для текущего модуля
                         if (reusedEmulator) {
