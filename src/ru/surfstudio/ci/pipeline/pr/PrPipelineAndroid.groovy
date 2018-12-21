@@ -65,7 +65,7 @@ class PrPipelineAndroid extends PrPipeline {
         return gradleTaskOutput
     }
 
-    public AvdConfig androidTestConfig = new AvdConfig()
+    public AvdConfig avdConfig = new AvdConfig()
 
     PrPipelineAndroid(Object script) {
         super(script)
@@ -99,7 +99,7 @@ class PrPipelineAndroid extends PrPipeline {
                 createStage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.instrumentationTestStageBodyAndroid(
                             script,
-                            androidTestConfig,
+                            avdConfig,
                             androidTestBuildType,
                             getTestInstrumentationRunnerName,
                             new AndroidTestConfig(

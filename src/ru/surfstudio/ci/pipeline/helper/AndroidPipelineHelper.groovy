@@ -16,9 +16,9 @@
 package ru.surfstudio.ci.pipeline.helper
 
 import ru.surfstudio.ci.CommonUtil
+import ru.surfstudio.ci.utils.AndroidUtil
 import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
 import ru.surfstudio.ci.utils.android.config.AvdConfig
-import ru.surfstudio.ci.AndroidUtil
 
 /**
  *
