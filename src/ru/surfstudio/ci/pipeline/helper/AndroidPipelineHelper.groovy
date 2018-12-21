@@ -80,8 +80,8 @@ class AndroidPipelineHelper {
             AndroidUtil.cleanup(script, config)
             publishTestResults(
                     script,
-                    androidTestConfig.instrumentalTestResultPathXml,
-                    "${androidTestConfig.instrumentalTestResultPathDirHtml}",
+                    "${androidTestConfig.instrumentalTestResultPathDirXml}/*.xml",
+                    androidTestConfig.instrumentalTestResultPathDirHtml,
                     "Instrumental tests"
             )
         }

@@ -20,23 +20,22 @@ package ru.surfstudio.ci.utils.android.config
  */
 class AndroidTestConfig {
 
+    // имя gradle-тска для сборки APK для инструментальных тестов
     String instrumentalTestAssembleGradleTask
 
+    // путь, в котором будут храниться отчеты о тестах в xml-формате
     String instrumentalTestResultPathDirXml
 
-    String instrumentalTestResultPathXml
-
+    // путь, в котором будут храниться отчеты о тестах в html-формате
     String instrumentalTestResultPathDirHtml
 
     AndroidTestConfig(
             String instrumentalTestAssembleGradleTask,
             String instrumentalTestResultPathDirXml,
-            String instrumentalTestResultPathXml,
             String instrumentalTestResultPathDirHtml
     ) {
         this.instrumentalTestAssembleGradleTask = instrumentalTestAssembleGradleTask
         this.instrumentalTestResultPathDirXml = instrumentalTestResultPathDirXml
-        this.instrumentalTestResultPathXml = instrumentalTestResultPathXml
         this.instrumentalTestResultPathDirHtml = instrumentalTestResultPathDirHtml
     }
 }

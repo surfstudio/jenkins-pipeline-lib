@@ -47,7 +47,6 @@ class TagPipelineAndroid extends TagPipeline {
 
     public instrumentalTestAssembleGradleTask = "assembleAndroidTest"
     public instrumentalTestResultPathDirXml = "build/outputs/androidTest-results/instrumental"
-    public instrumentalTestResultPathXml = "$instrumentalTestResultPathDirXml/*.xml"
     public instrumentalTestResultPathDirHtml = "build/reports/androidTests/instrumental"
 
     /**
@@ -116,7 +115,6 @@ class TagPipelineAndroid extends TagPipeline {
                             new AndroidTestConfig(
                                     instrumentalTestAssembleGradleTask,
                                     instrumentalTestResultPathDirXml,
-                                    instrumentalTestResultPathXml,
                                     instrumentalTestResultPathDirHtml
                             )
                     )

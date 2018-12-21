@@ -37,7 +37,6 @@ class PrPipelineAndroid extends PrPipeline {
 
     public instrumentalTestAssembleGradleTask = "assembleAndroidTest"
     public instrumentalTestResultPathDirXml = "build/outputs/androidTest-results/instrumental"
-    public instrumentalTestResultPathXml = "$instrumentalTestResultPathDirXml/*.xml"
     public instrumentalTestResultPathDirHtml = "build/reports/androidTests/instrumental"
 
     /**
@@ -105,7 +104,6 @@ class PrPipelineAndroid extends PrPipeline {
                             new AndroidTestConfig(
                                     instrumentalTestAssembleGradleTask,
                                     instrumentalTestResultPathDirXml,
-                                    instrumentalTestResultPathXml,
                                     instrumentalTestResultPathDirHtml
                             )
                     )
