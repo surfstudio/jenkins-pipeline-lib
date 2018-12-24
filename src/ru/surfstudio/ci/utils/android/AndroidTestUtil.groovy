@@ -156,7 +156,8 @@ class AndroidTestUtil {
                     script.echo "currentInstrumentationRunnerName $currentInstrumentationRunnerName"
 
                     // Проверка, определен ли testInstrumentationRunner для текущего модуля
-                    if (currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {
+                    if (currentInstrumentationRunnerName != CommonUtil.EMPTY_STRING &&
+                            currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {
                         String projectRootDir = "${script.sh(returnStdout: true, script: "pwd")}/"
                         String spoonOutputDir = "${formatArgsForShellCommand(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
                         script.sh "mkdir -p $spoonOutputDir"
