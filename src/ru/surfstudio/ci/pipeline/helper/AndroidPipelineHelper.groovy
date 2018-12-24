@@ -15,46 +15,59 @@
  */
 package ru.surfstudio.ci.pipeline.helper
 
-import ru.surfstudio.ci.AndroidUtil
-import ru.surfstudio.ci.CommonUtil
+import ru.surfstudio.ci.utils.android.AndroidTestUtil
+import ru.surfstudio.ci.utils.android.AndroidUtil
+import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
+import ru.surfstudio.ci.utils.android.config.AvdConfig
 
 /**
  *
  */
 class AndroidPipelineHelper {
+
+    private static String UNIT_TEST_REPORT_NAME = "Unit Tests"
+    private static String INSTRUMENTAL_TEST_REPORT_NAME = "Instrumental tests"
+
+    private static String DEFAULT_HTML_RESULT_FILENAME = "index.html"
+
     def static buildStageBodyAndroid(Object script, String buildGradleTask) {
         script.sh "./gradlew ${buildGradleTask}"
         script.step([$class: 'ArtifactArchiver', artifacts: '**/*.apk', allowEmptyArchive: true])
-        script.step([$class: 'ArtifactArchiver', artifacts: '**/mapping.txt', allowEmptyArchive: true]) 
+        script.step([$class: 'ArtifactArchiver', artifacts: '**/mapping.txt', allowEmptyArchive: true])
     }
 
-    def static buildWithCredentialsStageBodyAndroid(Object script,
-                                                    String buildGradleTask,
-                                                    String keystoreCredentials,
-                                                    String keystorePropertiesCredentials) {
-        AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials){
+    def static buildWithCredentialsStageBodyAndroid(
+            Object script,
+            String buildGradleTask,
+            String keystoreCredentials,
+            String keystorePropertiesCredentials
+    ) {
+        AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
             buildStageBodyAndroid(script, buildGradleTask)
         }
     }
 
-    def static unitTestStageBodyAndroid(Object script, String unitTestGradleTask, String testResultPathXml, String testResultPathDirHtml) {
+    def static unitTestStageBodyAndroid(
+            Object script,
+            String unitTestGradleTask,
+            String testResultPathXml,
+            String testResultPathDirHtml
+    ) {
         try {
-            script.sh "./gradlew ${unitTestGradleTask}"
+            script.sh "./gradlew $unitTestGradleTask"
         } finally {
-            script.junit allowEmptyResults: true, testResults: testResultPathXml
-            script.publishHTML(target: [
-                    allowMissing         : true,
-                    alwaysLinkToLastBuild: false,
-                    keepAll              : true,
-                    reportDir            : testResultPathDirHtml,
-                    reportFiles          : 'index.html',
-                    reportName           : "Unit Tests"
-            ])
+            publishTestResults(script, testResultPathXml, testResultPathDirHtml, UNIT_TEST_REPORT_NAME)
         }
     }
 
-    def static instrumentationTestStageBodyAndroid(Object script, String testGradleTask, String testResultPathXml, String testResultPathDirHtml) {
-        AndroidUtil.onEmulator(script, "avd-main"){
+    @Deprecated
+    def static instrumentationTestStageBodyAndroid(
+            Object script,
+            String testGradleTask,
+            String testResultPathXml,
+            String testResultPathDirHtml
+    ) {
+        ru.surfstudio.ci.AndroidUtil.onEmulator(script, "avd-main") {
             try {
                 script.sh "./gradlew uninstallAll ${testGradleTask}"
             } finally {
@@ -65,8 +78,39 @@ class AndroidPipelineHelper {
                                             reportDir            : testResultPathDirHtml,
                                             reportFiles          : 'index.html',
                                             reportName           : "Instrumental Tests"
+
                 ])
             }
+        }
+    }
+
+    def static instrumentationTestStageBodyAndroid(
+            Object script,
+            AvdConfig config,
+            String androidTestBuildType,
+            Closure getTestInstrumentationRunnerName,
+            AndroidTestConfig androidTestConfig
+    ) {
+        try {
+            script.sh "./gradlew ${androidTestConfig.instrumentalTestAssembleGradleTask}"
+            script.sh "mkdir -p ${androidTestConfig.instrumentalTestResultPathDirXml}; \
+                mkdir -p ${androidTestConfig.instrumentalTestResultPathDirHtml}"
+            AndroidTestUtil.runInstrumentalTests(
+                    script,
+                    config,
+                    androidTestBuildType,
+                    getTestInstrumentationRunnerName,
+                    androidTestConfig.instrumentalTestResultPathDirXml,
+                    androidTestConfig.instrumentalTestResultPathDirHtml
+            )
+        } finally {
+            AndroidTestUtil.cleanup(script, config)
+            publishTestResults(
+                    script,
+                    "${androidTestConfig.instrumentalTestResultPathDirXml}/*.xml",
+                    androidTestConfig.instrumentalTestResultPathDirHtml,
+                    INSTRUMENTAL_TEST_REPORT_NAME
+            )
         }
     }
 
@@ -75,4 +119,20 @@ class AndroidPipelineHelper {
         //todo
     }
 
+    private static void publishTestResults(
+            Object script,
+            String testResultPathXml,
+            String testResultPathDirHtml,
+            String reportName
+    ) {
+        script.junit allowEmptyResults: true, testResults: testResultPathXml
+        script.publishHTML(target: [
+                allowMissing         : true,
+                alwaysLinkToLastBuild: false,
+                keepAll              : true,
+                reportDir            : testResultPathDirHtml,
+                reportFiles          : "*/$DEFAULT_HTML_RESULT_FILENAME",
+                reportName           : reportName
+        ])
+    }
 }

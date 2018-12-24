@@ -15,9 +15,8 @@
  */
 package ru.surfstudio.ci
 
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.IdCredentials;
-import com.cloudbees.plugins.credentials.common.StandardCredentials;
+import com.cloudbees.plugins.credentials.CredentialsProvider
+import com.cloudbees.plugins.credentials.common.IdCredentials
 import org.eclipse.jgit.transport.URIish
 import org.jenkinsci.plugins.gitclient.Git
 

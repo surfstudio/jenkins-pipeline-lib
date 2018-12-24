@@ -15,14 +15,15 @@
  */
 package ru.surfstudio.ci
 
-import java.util.function.Predicate
-import java.util.stream.Collectors
-import java.util.stream.Stream
-
+/**
+ * @Deprecated see {@link ru.surfstudio.ci.utils.android.AndroidUtil}
+ */
+@Deprecated
 class AndroidUtil {
 
+    @Deprecated
     def static onEmulator(Object script, String avdName, Closure body) {
-        script.timeout(time: 7*60*60, unit: 'SECONDS') { //7 hours
+        script.timeout(time: 7 * 60 * 60, unit: 'SECONDS') { //7 hours
             def ADB = "${script.env.ANDROID_HOME}/platform-tools/adb"
             def EMULATOR = "${script.env.ANDROID_HOME}/tools/emulator"
             script.sh "$ADB devices"
@@ -56,11 +57,11 @@ class AndroidUtil {
      * ```
      * AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials){
      *     sh "./gradlew assembleRelease"
-     * }
-     * ````
+     *}* ````
      * How configure gradle to use this variables see here https://bitbucket.org/surfstudio/android-standard/src/snapshot-0.3.0/template/keystore/
      *
      */
+    @Deprecated
     def static withKeystore(Object script, String keystoreCredentials, String keystorePropertiesCredentials, Closure body) {
         def bodyStarted = false
         try {
@@ -80,7 +81,7 @@ class AndroidUtil {
                     }
                 }
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             if (bodyStarted) {
                 throw e
             } else {
@@ -90,12 +91,13 @@ class AndroidUtil {
         }
     }
 
-    def static String getGradleVariable(Object script, String file, String varName) {
-        def String fileBody = script.readFile(file)
+    @Deprecated
+    static String getGradleVariable(Object script, String file, String varName) {
+        String fileBody = script.readFile(file)
         def lines = fileBody.split("\n")
         for (line in lines) {
-            def words = line.split(/(;| |\t|=)/).findAll({it?.trim()})
-            if(words[0] == varName && words.size() > 1) {
+            def words = line.split(/(;| |\t|=)/).findAll({ it?.trim() })
+            if (words[0] == varName && words.size() > 1) {
                 def value = words[1]
                 script.echo "$varName = $value found in file $file"
                 return value
@@ -104,14 +106,15 @@ class AndroidUtil {
         throw script.error("groovy variable with name: $varName not exist in file: $file")
     }
 
-    def static String changeGradleVariable(Object script, String file, String varName, String newVarValue) {
+    @Deprecated
+    static String changeGradleVariable(Object script, String file, String varName, String newVarValue) {
         String oldVarValue = getGradleVariable(script, file, varName)
         String fileBody = script.readFile(file)
         String newFileBody = ""
         def lines = fileBody.split("\n")
         for (line in lines) {
-            def words = line.split(/(;| |\t|=)/).findAll({it?.trim()})
-            if(words[0] == varName) {
+            def words = line.split(/(;| |\t|=)/).findAll({ it?.trim() })
+            if (words[0] == varName) {
                 String updatedLine = line.replace(oldVarValue, newVarValue)
                 newFileBody += updatedLine
             } else {

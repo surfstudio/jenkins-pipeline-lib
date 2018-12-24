@@ -18,7 +18,6 @@ package ru.surfstudio.ci.pipeline
 
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Result
-import ru.surfstudio.ci.error.StateThrowable
 import ru.surfstudio.ci.error.UnstableStateThrowable
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy

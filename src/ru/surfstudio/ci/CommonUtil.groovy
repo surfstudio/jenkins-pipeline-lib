@@ -17,11 +17,11 @@ package ru.surfstudio.ci
 
 import ru.surfstudio.ci.pipeline.Pipeline
 import ru.surfstudio.ci.stage.Stage
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 class CommonUtil {
+
     static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50
+    static String EMPTY_STRING = ""
 
     def static getBuildUrlHtmlLink(Object script){
         return  "<a href=\"${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline\">build</a>"
@@ -38,6 +38,43 @@ class CommonUtil {
     def static getJiraTaskMarkdownLink(String taskKey){
         return "[${taskKey}](${Constants.JIRA_URL}browse/${taskKey})"
     }
+
+    /**
+     * Функция, проверяющая, что строка, переданная параметром, не равна null и не является пустой
+     */
+    static Boolean isNotNullOrEmpty(String string) {
+        return string != null && string != EMPTY_STRING
+    }
+
+    //region Environment variables
+    static String getAndroidHome(Object script) {
+        return script.env.ANDROID_HOME
+    }
+
+    static String getAdbHome(Object script) {
+        return "${getAndroidHome(script)}/platform-tools/adb"
+    }
+
+    static String getEmulatorHome(Object script) {
+        return "${getAndroidHome(script)}/emulator/emulator"
+    }
+
+    private static String getAndroidToolsHome(Object script) {
+        return "${getAndroidHome(script)}/tools/bin"
+    }
+
+    static String getAaptHome(Object script, String buildToolsVersion) {
+        return "${getAndroidHome(script)}/build-tools/$buildToolsVersion/aapt"
+    }
+
+    static String getAvdManagerHome(Object script) {
+        return "${getAndroidToolsHome(script)}/avdmanager"
+    }
+
+    static String getSdkManagerHome(Object script) {
+        return "${getAndroidToolsHome(script)}/sdkmanager"
+    }
+    //endregion
 
     def static shWithRuby(Object script, String command, String version = "2.3.5") {
         script.sh "hostname; set +x; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use $version; $command"
@@ -60,10 +97,10 @@ class CommonUtil {
                     script.echo "Aborting current build..."
                     throw new InterruptedException("Another build with identical description '$buildDescription' is running")
                 }
-                break;
+                break
             case AbortDuplicateStrategy.ANOTHER:
                 tryAbortOlderBuildsWithDescription(script, buildDescription)
-                break;
+                break
             default:
                 script.error("Unsupported AbortDuplicateStrategy: $abortStrategy")
         }

@@ -1,7 +1,6 @@
 package ru.surfstudio.ci.stage.body
 
-import ru.surfstudio.ci.AndroidUtil
-import ru.surfstudio.ci.CommonUtil
+
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 
 /**
