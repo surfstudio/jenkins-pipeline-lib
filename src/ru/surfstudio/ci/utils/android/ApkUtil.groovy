@@ -86,6 +86,33 @@ class ApkUtil {
     }
 
     /**
+     * Функция для удаления APK из переиспользуемого эмулятора
+     */
+    static void uninstallApk(Object script, String emulatorName, String packageName) {
+        def trimmedPackageName = packageName.trim()
+        // Проверка, был ли установлен APK с заданным именем пакета на текущий эмулятор
+        def searchResultCode = script.sh(
+                returnStatus: true,
+                script: "${AdbUtil.getAdbShellCommand(script, emulatorName)} pm list packages | grep $trimmedPackageName"
+        )
+        if (searchResultCode == 0) {
+            script.echo "uninstall previous app $packageName"
+            script.sh "${AdbUtil.getAdbCommand(script, emulatorName)} uninstall $trimmedPackageName"
+        }
+    }
+
+    /**
+     * Функция для установки APK-файла
+     */
+    static void installApk(Object script, String emulatorName, String apkFullName) {
+        def tempApkFileName = UUID.randomUUID().toString()
+        script.sh "${AdbUtil.getAdbCommand(script, emulatorName)} \
+            push \"${formatArgsForShellCommand(apkFullName)}\" \"$tempApkFileName\""
+
+        script.sh "${AdbUtil.getAdbShellCommand(script, emulatorName)} pm install -t -r $tempApkFileName"
+    }
+
+    /**
      * Функция, возвращающая информацию по заданному индексу об имени APK-файла.
      *
      * Параметром передается полный путь к APK, который может иметь вид
@@ -99,6 +126,18 @@ class ApkUtil {
                 script,
                 "echo \"$apkFullName\" | cut -d '/' -f${index.toString()}"
         )
+    }
+
+    /**
+     * Функция, форматирующая аргументы и конкатенирующая их.
+     * Возвращает строку, которую можно безопасно подставить в shell-команду
+     */
+    private static String formatArgsForShellCommand(String... args) {
+        String result = ""
+        args.each {
+            result += it.replaceAll('\n', '')
+        }
+        return result
     }
 
     private def static getShCommandOutput(Object script, String command) {

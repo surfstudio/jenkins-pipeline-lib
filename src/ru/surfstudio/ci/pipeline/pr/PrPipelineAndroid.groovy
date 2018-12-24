@@ -40,31 +40,6 @@ class PrPipelineAndroid extends PrPipeline {
     public instrumentalTestResultPathDirXml = "build/outputs/androidTest-results/instrumental"
     public instrumentalTestResultPathDirHtml = "build/reports/androidTests/instrumental"
 
-    /**
-     * Функция, возвращающая имя текущего instrumentation runner, которое будет получено с помощью gradle-таска.
-     *
-     * Пример такого gradle-таска:
-     *
-     * task getTestInstrumentationRunnerName {
-     *     doLast {
-     *         println "$android.defaultConfig.testInstrumentationRunner"
-     *     }
-     * }
-     *
-     * Если для всех модулей проекта используется одинаковый instrumentation runner,
-     * то функцию можно переопределить следующим образом:
-     *
-     * pipeline.getTestInstrumentationRunnerName = { script, prefix -> return "androidx.test.runner.AndroidJUnitRunner" }
-     */
-    public getTestInstrumentationRunnerName = { script, prefix ->
-        def defaultInstrumentationRunnerName = "getTestInstrumentationRunnerName"
-        def gradleTaskOutput = script.sh(
-                returnStdout: true,
-                script: "./gradlew :$prefix:$defaultInstrumentationRunnerName | tail -4 | head -1"
-        )
-        return gradleTaskOutput
-    }
-
     public AvdConfig avdConfig = new AvdConfig()
 
     PrPipelineAndroid(Object script) {
@@ -115,5 +90,30 @@ class PrPipelineAndroid extends PrPipeline {
 
         ]
         finalizeBody = { finalizeStageBody(this) }
+    }
+
+    /**
+     * Функция, возвращающая имя текущего instrumentation runner, которое будет получено с помощью gradle-таска.
+     *
+     * Пример такого gradle-таска:
+     *
+     * task getTestInstrumentationRunnerName {
+     *     doLast {
+     *         println "$android.defaultConfig.testInstrumentationRunner"
+     *     }
+     * }
+     *
+     * Если для всех модулей проекта используется одинаковый instrumentation runner,
+     * то функцию можно переопределить следующим образом:
+     *
+     * pipeline.getTestInstrumentationRunnerName = { script, prefix -> return "androidx.test.runner.AndroidJUnitRunner" }
+     */
+    public getTestInstrumentationRunnerName = { script, prefix ->
+        def defaultInstrumentationRunnerName = "getTestInstrumentationRunnerName"
+        def gradleTaskOutput = script.sh(
+                returnStdout: true,
+                script: "./gradlew :$prefix:$defaultInstrumentationRunnerName | tail -4 | head -1"
+        )
+        return gradleTaskOutput
     }
 }

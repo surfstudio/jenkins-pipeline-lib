@@ -53,7 +53,7 @@ pipeline.init()
 pipeline.buildGradleTask = "clean assembleQa"
 pipeline.getStage(pipeline.STATIC_CODE_ANALYSIS).strategy = StageStrategy.SKIP_STAGE
 pipeline.getStage(pipeline.INSTRUMENTATION_TEST).body = {
-	ru.surfstudio.ci.utils.android.AndroidUtil.onEmulator(this, "your avd") {
+	AndroidUtil.onEmulator(this, "your avd") {
 		sh "./gradlew connectedTest"
 	}
 }

@@ -15,7 +15,7 @@
  */
 package ru.surfstudio.ci.pipeline.helper
 
-import ru.surfstudio.ci.CommonUtil
+import ru.surfstudio.ci.utils.android.AndroidTestUtil
 import ru.surfstudio.ci.utils.android.AndroidUtil
 import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
 import ru.surfstudio.ci.utils.android.config.AvdConfig
@@ -54,9 +54,33 @@ class AndroidPipelineHelper {
             String testResultPathDirHtml
     ) {
         try {
-            CommonUtil.gradlew(script, unitTestGradleTask)
+            script.sh "./gradlew $unitTestGradleTask"
         } finally {
             publishTestResults(script, testResultPathXml, testResultPathDirHtml, UNIT_TEST_REPORT_NAME)
+        }
+    }
+
+    @Deprecated
+    def static instrumentationTestStageBodyAndroid(
+            Object script,
+            String testGradleTask,
+            String testResultPathXml,
+            String testResultPathDirHtml
+    ) {
+        ru.surfstudio.ci.AndroidUtil.onEmulator(script, "avd-main") {
+            try {
+                script.sh "./gradlew uninstallAll ${testGradleTask}"
+            } finally {
+                script.junit allowEmptyResults: true, testResults: testResultPathXml
+                script.publishHTML(target: [allowMissing         : true,
+                                            alwaysLinkToLastBuild: false,
+                                            keepAll              : true,
+                                            reportDir            : testResultPathDirHtml,
+                                            reportFiles          : 'index.html',
+                                            reportName           : "Instrumental Tests"
+
+                ])
+            }
         }
     }
 
@@ -68,10 +92,10 @@ class AndroidPipelineHelper {
             AndroidTestConfig androidTestConfig
     ) {
         try {
-            CommonUtil.gradlew(script, androidTestConfig.instrumentalTestAssembleGradleTask)
+            script.sh "./gradlew ${androidTestConfig.instrumentalTestAssembleGradleTask}"
             script.sh "mkdir -p ${androidTestConfig.instrumentalTestResultPathDirXml}; \
                 mkdir -p ${androidTestConfig.instrumentalTestResultPathDirHtml}"
-            AndroidUtil.runInstrumentalTests(
+            AndroidTestUtil.runInstrumentalTests(
                     script,
                     config,
                     androidTestBuildType,
@@ -80,7 +104,7 @@ class AndroidPipelineHelper {
                     androidTestConfig.instrumentalTestResultPathDirHtml
             )
         } finally {
-            AndroidUtil.cleanup(script, config)
+            AndroidTestUtil.cleanup(script, config)
             publishTestResults(
                     script,
                     "${androidTestConfig.instrumentalTestResultPathDirXml}/*.xml",

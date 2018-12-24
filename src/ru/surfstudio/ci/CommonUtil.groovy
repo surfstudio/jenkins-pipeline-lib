@@ -46,13 +46,6 @@ class CommonUtil {
         return string != null && string != EMPTY_STRING
     }
 
-    /**
-     * Функция, выполняющая список gradle tasks, имена которых передаются в параметрах
-     */
-    static gradlew(Object script, String... gradleTaskNames) {
-        script.sh "./gradlew ${gradleTaskNames.join(' ')}"
-    }
-
     //region Environment variables
     static String getAndroidHome(Object script) {
         return script.env.ANDROID_HOME

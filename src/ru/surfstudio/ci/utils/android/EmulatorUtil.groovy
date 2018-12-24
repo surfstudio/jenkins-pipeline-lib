@@ -103,5 +103,14 @@ class EmulatorUtil {
         launchEmulatorCommand += (config.reuse) ? " &" : " -no-snapshot-save &"
         script.sh launchEmulatorCommand
     }
+
+    /**
+     * Вспомогательная функция, закрывающая запущенный эмулятор и создающая новый
+     */
+    static void closeAndCreateEmulator(Object script, AvdConfig config, String message) {
+        script.echo message
+        closeRunningEmulator(script, config)
+        createAndLaunchNewEmulator(script, config)
+    }
     //endregion
 }
