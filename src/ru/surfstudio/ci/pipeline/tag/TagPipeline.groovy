@@ -150,11 +150,15 @@ abstract class TagPipeline extends ScmPipeline {
     }
 
     def static finalizeStageBody(TagPipeline ctx){
-        JarvisUtil.createVersionAndNotify(ctx)
+        if (ctx.getStage(ctx.CHECKOUT).result != Result.ABORTED) { //do not handle builds skipped via [skip ci] label
+            JarvisUtil.createVersionAndNotify(ctx)
+        }
     }
 
     def static debugFinalizeStageBody(TagPipeline ctx) {
-        JarvisUtil.createVersionAndNotify(ctx)
+        if (ctx.getStage(ctx.CHECKOUT).result != Result.ABORTED) { //do not handle builds skipped via [skip ci] label
+            JarvisUtil.createVersionAndNotify(ctx)
+        }
         prepareMessageForPipeline(ctx, { message ->
             JarvisUtil.sendMessageToGroup(ctx.script, message, "9d0c617e-d14a-490e-9914-83820b135cfc", "stride", false)
         })
