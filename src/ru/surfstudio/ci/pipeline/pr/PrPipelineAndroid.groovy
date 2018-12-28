@@ -57,7 +57,7 @@ class PrPipelineAndroid extends PrPipeline {
     }
 
     def init() {
-        node = NodeProvider.getAndroidNode()
+        node = "android-1" //NodeProvider.getAndroidNode()
 
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }

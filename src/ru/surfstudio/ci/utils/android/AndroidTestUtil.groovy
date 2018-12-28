@@ -29,7 +29,7 @@ class AndroidTestUtil {
 
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
     private static String BASE64_ENCODING = "Base64"
-    private static Integer TIMEOUT_PER_TEST = 60 * 2 // seconds
+    private static Integer TIMEOUT_PER_TEST = 60 * 3 // seconds
 
     /**
      * Версия build tools для получения корректного пути к актуальной утилите aapt.
@@ -110,6 +110,7 @@ class AndroidTestUtil {
             sleep(script, EmulatorUtil.EMULATOR_TIMEOUT)
         } else {
             script.echo "emulator is online"
+            script.sh "${AdbUtil.getAdbShellCommand(script, emulatorName)} input keyevent 82 &"
         }
     }
 
@@ -128,7 +129,9 @@ class AndroidTestUtil {
         def spoonJarFile = script.libraryResource resource: SPOON_JAR_NAME, encoding: BASE64_ENCODING
         script.writeFile file: SPOON_JAR_NAME, text: spoonJarFile, encoding: BASE64_ENCODING
 
-        ApkUtil.getApkList(script, AndroidTestUtil.ANDROID_TEST_APK_SUFFIX).each {
+        boolean allTestsPasses = true
+
+        ApkUtil.getApkList(script, "$androidTestBuildType-$ANDROID_TEST_APK_SUFFIX*").each {
             def currentApkName = "$it"
             def apkMainFolder = ApkUtil.getApkFolderName(script, currentApkName).trim()
 
@@ -145,8 +148,13 @@ class AndroidTestUtil {
                 testReportFileNameSuffix += "-$apkPrefix"
             }
 
-            // Находим APK для androidTestBuildType, заданного в конфиге, и имя тестового пакета
-            def testBuildTypeApkList = ApkUtil.getApkList(script, androidTestBuildType, apkMainFolder)
+            // Находим APK для androidTestBuildType, заданного в конфиге
+            def testBuildTypeApkList = ApkUtil.getApkList(
+                    script,
+                    "$androidTestBuildType*",
+                    ANDROID_TEST_APK_SUFFIX,
+                    apkMainFolder
+            )
 
             // Проверка, существует ли APK с заданным androidTestBuildType
             if (testBuildTypeApkList.size() > 0) {
@@ -173,18 +181,29 @@ class AndroidTestUtil {
                             script.echo "error while unistalling apk $testBuildTypeApkName"
                         }
 
-                        script.sh "java -jar $SPOON_JAR_NAME \
-                            --apk \"${formatArgsForShellCommand(projectRootDir, testBuildTypeApkName)}\" \
-                            --test-apk \"${formatArgsForShellCommand(projectRootDir, currentApkName)}\" \
-                            --output \"${formatArgsForShellCommand(spoonOutputDir)}\" \
-                            --adb-timeout $TIMEOUT_PER_TEST \
-                            -serial \"${formatArgsForShellCommand(emulatorName)}\""
+                        script.echo "run tests for $apkMainFolder"
+                        def testResultCode = script.sh(
+                                returnStatus: true,
+                                script: "java -jar $SPOON_JAR_NAME \
+                                    --apk \"${formatArgsForShellCommand(projectRootDir, testBuildTypeApkName)}\" \
+                                    --test-apk \"${formatArgsForShellCommand(projectRootDir, currentApkName)}\" \
+                                    --output \"${formatArgsForShellCommand(spoonOutputDir)}\" \
+                                    --adb-timeout $TIMEOUT_PER_TEST \
+                                    --debug --fail-on-failure --grant-all \
+                                    -serial \"${formatArgsForShellCommand(emulatorName)}\""
+                        )
+                        allTestsPasses = allTestsPasses && (testResultCode == 0)
 
+                        //script.sh "cat $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
                         script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkMainFolder}"
                     }
-                }
-            }
+                } // if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) ...
+            } // if (testBuildTypeApkList.size() > 0)...
+        } // ApkUtil.getApkList...
+
+        if (!allTestsPasses) {
+            throw new Exception("Instrumentation test failed")
         }
     }
     //endregion

@@ -45,6 +45,18 @@ class ApkUtil {
     }
 
     /**
+     * Функция, возвращающая список APK-файлов с заданным суффиксом в заданной директории,
+     * предоставляющая возможность фильтра найденных APK-файлов:
+     * исключить те файлы, которые содержат конкретный префикс.
+     */
+    static String[] getApkList(Object script, String searchedApkPrefix, String excludedApkPrefix, String folderName) {
+        return getShCommandOutput(
+                script,
+                "find \"$folderName\" -name \"*-${searchedApkPrefix}.apk\" ! -name \"*-${excludedApkPrefix}.apk\""
+        ).split()
+    }
+
+    /**
      * Функция, возвращающая имя директории для APK-файла
      */
     static String getApkFolderName(Object script, String apkFullName) {
