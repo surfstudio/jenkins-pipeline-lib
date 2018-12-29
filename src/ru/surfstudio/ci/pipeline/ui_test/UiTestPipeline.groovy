@@ -334,7 +334,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.logRotator(
                         artifactDaysToKeepStr: '3',
                         artifactNumToKeepStr: '10',
-                        daysToKeepStr: '180',
+                        daysToKeepStr: '90',
                         numToKeepStr: '')
         )
     }
