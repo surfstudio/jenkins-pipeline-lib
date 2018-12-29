@@ -95,14 +95,32 @@ class AndroidPipelineHelper {
             script.sh "./gradlew ${androidTestConfig.instrumentalTestAssembleGradleTask}"
             script.sh "mkdir -p ${androidTestConfig.instrumentalTestResultPathDirXml}; \
                 mkdir -p ${androidTestConfig.instrumentalTestResultPathDirHtml}"
-            AndroidTestUtil.runInstrumentalTests(
-                    script,
-                    config,
-                    androidTestBuildType,
-                    getTestInstrumentationRunnerName,
-                    androidTestConfig.instrumentalTestResultPathDirXml,
-                    androidTestConfig.instrumentalTestResultPathDirHtml
-            )
+
+            int countOfLaunch = 0
+            while (countOfLaunch <= androidTestConfig.instrumentationStageRetryCount) {
+                try {
+                    if (countOfLaunch > 0) {
+                        printInfoForRelaunch(script)
+                    }
+                    AndroidTestUtil.runInstrumentalTests(
+                            script,
+                            config,
+                            androidTestBuildType,
+                            getTestInstrumentationRunnerName,
+                            androidTestConfig.instrumentalTestResultPathDirXml,
+                            androidTestConfig.instrumentalTestResultPathDirHtml,
+                            androidTestConfig.generateUniqueAvdNameForJob
+                    )
+                    countOfLaunch++
+                } catch (e) {
+                    if (++countOfLaunch <= androidTestConfig.instrumentationStageRetryCount) {
+                        script.echo "^^^^ Ignored exception: ${e.toString()} ^^^^"
+                        script.echo "Try to repeat instrumentation tests"
+                    } else {
+                        throw e
+                    }
+                }
+            }
         } finally {
             AndroidTestUtil.cleanup(script, config)
             publishTestResults(
@@ -134,5 +152,9 @@ class AndroidPipelineHelper {
                 reportFiles          : "*/$DEFAULT_HTML_RESULT_FILENAME",
                 reportName           : reportName
         ])
+    }
+
+    private static void printInfoForRelaunch(Object script, String stageName = "Instrumentation tests") {
+        script.echo "---------------------------------- REPEAT STAGE: $stageName ----------------------------------"
     }
 }

@@ -46,6 +46,7 @@ class AndroidTestUtil {
      * @param getTestInstrumentationRunnerName функция, возвращающая имя текущего instrumentation runner
      * @param androidTestResultPathXml путь для сохранения xml-отчетов о результатах тестов
      * @param androidTestResultPathDirHtml путь для сохранения html-отчетов о результатах тестов
+     * @param generateUniqueAvdNameForJob флаг, показывающий, должно ли имя AVD быть уникальным для текущего job'a
      */
     static void runInstrumentalTests(
             Object script,
@@ -53,17 +54,25 @@ class AndroidTestUtil {
             String androidTestBuildType,
             Closure getTestInstrumentationRunnerName,
             String androidTestResultPathXml,
-            String androidTestResultPathDirHtml
+            String androidTestResultPathDirHtml,
+            Boolean generateUniqueAvdNameForJob
     ) {
-        launchEmulator(script, config)
-        checkEmulatorStatus(script, config)
-        runTests(
-                script,
-                androidTestBuildType,
-                getTestInstrumentationRunnerName,
-                androidTestResultPathXml,
-                androidTestResultPathDirHtml
-        )
+        if (generateUniqueAvdNameForJob) {
+            config.avdName = "avd-${script.env.JOB_NAME}"
+            script.echo "avdName = ${config.avdName}"
+        }
+        script.echo "waiting for emulator ${config.avdName}"
+        script.lock(config.avdName) {
+            launchEmulator(script, config)
+            checkEmulatorStatus(script, config)
+            runTests(
+                    script,
+                    androidTestBuildType,
+                    getTestInstrumentationRunnerName,
+                    androidTestResultPathXml,
+                    androidTestResultPathDirHtml
+            )
+        }
     }
 
     /**
