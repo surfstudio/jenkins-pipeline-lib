@@ -29,13 +29,23 @@ class AndroidTestConfig {
     // путь, в котором будут храниться отчеты о тестах в html-формате
     String instrumentalTestResultPathDirHtml
 
+    // флаг, показывающий, должно ли имя AVD быть уникальным для текущего job'a
+    Boolean generateUniqueAvdNameForJob
+
+    // количество попыток перезапуска этапа инструментальных тестов
+    Integer instrumentationStageRetryCount
+
     AndroidTestConfig(
             String instrumentalTestAssembleGradleTask,
             String instrumentalTestResultPathDirXml,
-            String instrumentalTestResultPathDirHtml
+            String instrumentalTestResultPathDirHtml,
+            Boolean generateUniqueAvdNameForJob,
+            Integer instrumentationStageRetryCount
     ) {
         this.instrumentalTestAssembleGradleTask = instrumentalTestAssembleGradleTask
         this.instrumentalTestResultPathDirXml = instrumentalTestResultPathDirXml
         this.instrumentalTestResultPathDirHtml = instrumentalTestResultPathDirHtml
+        this.generateUniqueAvdNameForJob = generateUniqueAvdNameForJob
+        this.instrumentationStageRetryCount = instrumentationStageRetryCount
     }
 }
