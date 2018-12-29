@@ -32,10 +32,6 @@ class AndroidPipelineHelper {
 
     def static buildStageBodyAndroid(Object script, String buildGradleTask) {
         script.sh "./gradlew ${buildGradleTask}"
-        /*
-        script.sh "./gradlew clean \
-            :custom-view-sample:assembleRelease \
-            :template:app-injector:assembleRelease"*/
         script.step([$class: 'ArtifactArchiver', artifacts: '**/*.apk', allowEmptyArchive: true])
         script.step([$class: 'ArtifactArchiver', artifacts: '**/mapping.txt', allowEmptyArchive: true])
     }
@@ -97,10 +93,6 @@ class AndroidPipelineHelper {
     ) {
         try {
             script.sh "./gradlew ${androidTestConfig.instrumentalTestAssembleGradleTask}"
-            /*
-            script.sh "./gradlew \
-                :custom-view-sample:assembleAndroidTest \
-                :template:app-injector:assembleAndroidTest"*/
             script.sh "mkdir -p ${androidTestConfig.instrumentalTestResultPathDirXml}; \
                 mkdir -p ${androidTestConfig.instrumentalTestResultPathDirHtml}"
             AndroidTestUtil.runInstrumentalTests(

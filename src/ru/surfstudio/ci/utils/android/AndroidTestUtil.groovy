@@ -194,7 +194,6 @@ class AndroidTestUtil {
                         )
                         allTestsPasses = allTestsPasses && (testResultCode == 0)
 
-                        //script.sh "cat $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
                         script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkMainFolder}"
                     }
