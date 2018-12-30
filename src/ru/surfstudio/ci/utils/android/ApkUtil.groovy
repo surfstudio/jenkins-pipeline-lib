@@ -23,6 +23,7 @@ import ru.surfstudio.ci.CommonUtil
 class ApkUtil {
 
     private static String ANDROID_MANIFEST_FILE_NAME = "AndroidManifest.xml"
+    private static String UNSIGNED_APK_PREFIX = "unsigned"
 
     /**
      * Функция, возвращающая список APK-файлов с заданным суффиксом в текущей директории
@@ -30,7 +31,7 @@ class ApkUtil {
     static String[] getApkList(Object script, String apkPrefix) {
         return getShCommandOutput(
                 script,
-                "find . -name \"*-${apkPrefix}.apk\" | cut -c 3-"
+                "${getCommandForApkSearching(".", apkPrefix)} | cut -c 3-"
         ).split()
     }
 
@@ -40,7 +41,7 @@ class ApkUtil {
     static String[] getApkList(Object script, String apkPrefix, String folderName) {
         return getShCommandOutput(
                 script,
-                "find \"$folderName\" -name \"*-${apkPrefix}.apk\""
+                getCommandForApkSearching(folderName, apkPrefix)
         ).split()
     }
 
@@ -52,8 +53,24 @@ class ApkUtil {
     static String[] getApkList(Object script, String searchedApkPrefix, String excludedApkPrefix, String folderName) {
         return getShCommandOutput(
                 script,
-                "find \"$folderName\" -name \"*-${searchedApkPrefix}.apk\" ! -name \"*-${excludedApkPrefix}.apk\""
+                "${getCommandForApkSearching(folderName, searchedApkPrefix)} ! -name \"*-${excludedApkPrefix}.apk\""
         ).split()
+    }
+
+    /**
+     * Функция, возвращающая строку команды для поиска APK с заданным префиксом в заданной директории
+     * @param folderName директория для поиска APK
+     * @param apkPrefix префикс для поиска APK-файлов
+     * @param excludeUnsigned флаг, показывающий, нужно ли исключать из поиска неподписанные APK
+     * @return строка команды для поиска APK с заданным префиксом в заданной директории
+     */
+    private static String getCommandForApkSearching(
+            String folderName,
+            String apkPrefix,
+            Boolean excludeUnsigned = true
+    ) {
+        String baseCommand = "find $folderName -name \"*-${apkPrefix}.apk\""
+        return excludeUnsigned ? "$baseCommand ! -name \"*-${UNSIGNED_APK_PREFIX}.apk\"" : baseCommand
     }
 
     /**

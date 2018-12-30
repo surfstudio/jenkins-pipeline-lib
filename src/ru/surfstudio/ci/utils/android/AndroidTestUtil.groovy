@@ -119,7 +119,6 @@ class AndroidTestUtil {
             sleep(script, EmulatorUtil.EMULATOR_TIMEOUT)
         } else {
             script.echo "emulator is online"
-            script.sh "${AdbUtil.getAdbShellCommand(script, emulatorName)} input keyevent 82 &"
         }
     }
 
@@ -189,6 +188,8 @@ class AndroidTestUtil {
                         } catch (ignored) {
                             script.echo "error while unistalling apk $testBuildTypeApkName"
                         }
+
+                        script.sh "${AdbUtil.getAdbShellCommand(script, emulatorName)} input keyevent 82 &"
 
                         script.echo "run tests for $apkMainFolder"
                         def testResultCode = script.sh(
