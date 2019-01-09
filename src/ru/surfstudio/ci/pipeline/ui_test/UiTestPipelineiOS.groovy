@@ -113,7 +113,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
             script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
             script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
 
-            CommonUtil.shWithRuby(script, "gem install bundler")
+            CommonUtil.shWithRuby(script, "gem install bundler -v 1.17.3")
 
             script.dir(sourcesDir) {
                 CommonUtil.shWithRuby(script, "make init")
