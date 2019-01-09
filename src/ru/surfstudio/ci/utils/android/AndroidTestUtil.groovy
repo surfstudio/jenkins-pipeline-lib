@@ -86,7 +86,7 @@ class AndroidTestUtil {
     //region Stages of instrumental tests running
     private static void launchEmulator(Object script, AvdConfig config) {
         script.sh "${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
-        EmulatorUtil.launchEmulator(script, config)
+        EmulatorUtil.createAndLaunchNewEmulator(script, config)
     }
 
     private static void checkEmulatorStatus(Object script, AvdConfig config) {
@@ -164,6 +164,7 @@ class AndroidTestUtil {
                         }
 
                         script.sh "${AdbUtil.getAdbShellCommand(script, config.emulatorName)} input keyevent 82 &"
+                        script.sh "sleep 3"
 
                         script.echo "run tests for $apkMainFolder"
                         def testResultCode = script.sh(
