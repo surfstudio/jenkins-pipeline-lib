@@ -90,7 +90,7 @@ class AndroidTestUtil {
     }
 
     private static void checkEmulatorStatus(Object script, AvdConfig config) {
-        if (EmulatorUtil.isEmulatorOffline(script) || !CommonUtil.isNotNullOrEmpty(config.emulatorName)) {
+        if (EmulatorUtil.isEmulatorOffline(script, config.emulatorName) || !CommonUtil.isNotNullOrEmpty(config.emulatorName)) {
             EmulatorUtil.closeAndCreateEmulator(script, config, "emulator is offline")
         } else {
             script.echo "emulator is online"
