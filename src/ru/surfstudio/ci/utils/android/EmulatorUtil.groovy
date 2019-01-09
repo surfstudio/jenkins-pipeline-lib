@@ -73,11 +73,8 @@ class EmulatorUtil {
             script.echo "close running emulator"
             script.sh "${CommonUtil.getAdbHome(script)} -s $emulatorName emu kill"
         }
-        // Удаление AVD, если необходимо
-        if (!config.reuse) {
-            script.echo "delete avd"
-            script.sh "${CommonUtil.getAvdManagerHome(script)} delete avd -n ${config.avdName} || true"
-        }
+        script.echo "delete avd"
+        script.sh "${CommonUtil.getAvdManagerHome(script)} delete avd -n ${config.avdName} || true"
     }
 
     /**
@@ -97,11 +94,10 @@ class EmulatorUtil {
      * Функция, выполняющая запуск эмулятора, параметры которого заданы конфигом
      */
     static void launchEmulator(Object script, AvdConfig config) {
-        def launchEmulatorCommand = "${CommonUtil.getEmulatorHome(script)} \
+        script.sh "${CommonUtil.getEmulatorHome(script)} \
                 -avd \"${config.avdName}\" \
-                -skin \"${config.skinSize}\" -no-window -no-boot-anim "
-        launchEmulatorCommand += (config.reuse) ? " &" : " -no-snapshot-save &"
-        script.sh launchEmulatorCommand
+                -skin \"${config.skinSize}\" \
+                -no-window -no-boot-anim -no-snapshot-save &"
     }
 
     /**

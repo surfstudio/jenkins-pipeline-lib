@@ -88,27 +88,7 @@ class AndroidTestUtil {
         def currentTimeoutSeconds = EmulatorUtil.EMULATOR_TIMEOUT
         def emulatorName = EmulatorUtil.getEmulatorName(script)
 
-        if (config.reuse) {
-            script.echo "try to reuse emulator"
-            script.sh "${CommonUtil.getAvdManagerHome(script)} list avd"
-            // проверка, существует ли AVD
-            def avdName = AvdUtil.isAvdExists(script, config.avdName)
-            if (CommonUtil.isNotNullOrEmpty(avdName)) {
-                script.echo "launch reused emulator"
-                // проверка, запущен ли эмулятор
-                if (CommonUtil.isNotNullOrEmpty(emulatorName)) {
-                    script.echo "emulator have been launched already"
-                    currentTimeoutSeconds = 0
-                } else {
-                    EmulatorUtil.launchEmulator(script, config)
-                }
-            } else { // if AVD is not exists
-                EmulatorUtil.createAndLaunchNewEmulator(script, config)
-            }
-        } else { // if not reuse
-            // запуск нового эмулятора, не затрагивая эмуляторы других job'ов
-            EmulatorUtil.launchEmulator(script, config)
-        }
+        EmulatorUtil.launchEmulator(script, config)
 
         sleep(script, currentTimeoutSeconds)
     }
