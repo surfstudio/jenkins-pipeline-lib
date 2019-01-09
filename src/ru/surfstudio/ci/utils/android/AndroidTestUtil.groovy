@@ -106,7 +106,8 @@ class AndroidTestUtil {
                 EmulatorUtil.createAndLaunchNewEmulator(script, config)
             }
         } else { // if not reuse
-            EmulatorUtil.closeAndCreateEmulator(script, config, "not reuse")
+            // запуск нового эмулятора, не затрагивая эмуляторы других job'ов
+            EmulatorUtil.launchEmulator(script, config)
         }
 
         sleep(script, currentTimeoutSeconds)
