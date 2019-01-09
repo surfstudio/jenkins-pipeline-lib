@@ -67,6 +67,7 @@ class AndroidTestUtil {
             checkEmulatorStatus(script, config)
             runTests(
                     script,
+                    config,
                     androidTestBuildType,
                     getTestInstrumentationRunnerName,
                     androidTestResultPathXml,
@@ -85,60 +86,33 @@ class AndroidTestUtil {
     //region Stages of instrumental tests running
     private static void launchEmulator(Object script, AvdConfig config) {
         script.sh "${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
-        def currentTimeoutSeconds = EmulatorUtil.EMULATOR_TIMEOUT
-        def emulatorName = EmulatorUtil.getEmulatorName(script)
-
-        if (config.reuse) {
-            script.echo "try to reuse emulator"
-            script.sh "${CommonUtil.getAvdManagerHome(script)} list avd"
-            // проверка, существует ли AVD
-            def avdName = AvdUtil.isAvdExists(script, config.avdName)
-            if (CommonUtil.isNotNullOrEmpty(avdName)) {
-                script.echo "launch reused emulator"
-                // проверка, запущен ли эмулятор
-                if (CommonUtil.isNotNullOrEmpty(emulatorName)) {
-                    script.echo "emulator have been launched already"
-                    currentTimeoutSeconds = 0
-                } else {
-                    EmulatorUtil.launchEmulator(script, config)
-                }
-            } else { // if AVD is not exists
-                EmulatorUtil.createAndLaunchNewEmulator(script, config)
-            }
-        } else { // if not reuse
-            EmulatorUtil.closeAndCreateEmulator(script, config, "not reuse")
-        }
-
-        sleep(script, currentTimeoutSeconds)
+        EmulatorUtil.launchEmulator(script, config)
     }
 
     private static void checkEmulatorStatus(Object script, AvdConfig config) {
-        def emulatorName = EmulatorUtil.getEmulatorName(script)
-        if (EmulatorUtil.isEmulatorOffline(script) || !CommonUtil.isNotNullOrEmpty(emulatorName)) {
+        if (EmulatorUtil.isEmulatorOffline(script, config.emulatorName) || !CommonUtil.isNotNullOrEmpty(config.emulatorName)) {
             EmulatorUtil.closeAndCreateEmulator(script, config, "emulator is offline")
-            sleep(script, EmulatorUtil.EMULATOR_TIMEOUT)
         } else {
             script.echo "emulator is online"
-            script.sh "${AdbUtil.getAdbShellCommand(script, emulatorName)} input keyevent 82 &"
         }
     }
 
     private static void runTests(
             Object script,
+            AvdConfig config,
             String androidTestBuildType,
             Closure getTestInstrumentationRunnerName,
             String androidTestResultPathXml,
             String androidTestResultPathDirHtml
     ) {
         script.echo "start running tests"
-        def emulatorName = EmulatorUtil.getEmulatorName(script)
 
         script.sh "${CommonUtil.getAdbHome(script)} devices"
 
         def spoonJarFile = script.libraryResource resource: SPOON_JAR_NAME, encoding: BASE64_ENCODING
         script.writeFile file: SPOON_JAR_NAME, text: spoonJarFile, encoding: BASE64_ENCODING
 
-        boolean allTestsPasses = true
+        boolean allTestsPassed = true
 
         ApkUtil.getApkList(script, "$androidTestBuildType-$ANDROID_TEST_APK_SUFFIX*").each {
             def currentApkName = "$it"
@@ -179,16 +153,17 @@ class AndroidTestUtil {
                         String spoonOutputDir = "${formatArgsForShellCommand(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
                         script.sh "mkdir -p $spoonOutputDir"
 
-                        // Для переиспользуемого эмулятора необходимо удалить предыдущую версию APK для текущего модуля
                         try {
                             def testBuildTypePackageName = ApkUtil.getPackageNameFromApk(
                                     script,
                                     testBuildTypeApkName,
                                     BUILD_TOOLS_VERSION)
-                            ApkUtil.uninstallApk(script, emulatorName, testBuildTypePackageName)
+                            ApkUtil.uninstallApk(script, config.emulatorName, testBuildTypePackageName)
                         } catch (ignored) {
                             script.echo "error while unistalling apk $testBuildTypeApkName"
                         }
+
+                        script.sh "${AdbUtil.getAdbShellCommand(script, config.emulatorName)} input keyevent 82 &"
 
                         script.echo "run tests for $apkMainFolder"
                         def testResultCode = script.sh(
@@ -199,9 +174,9 @@ class AndroidTestUtil {
                                     --output \"${formatArgsForShellCommand(spoonOutputDir)}\" \
                                     --adb-timeout $TIMEOUT_PER_TEST \
                                     --debug --fail-on-failure --grant-all \
-                                    -serial \"${formatArgsForShellCommand(emulatorName)}\""
+                                    -serial \"${formatArgsForShellCommand(config.emulatorName)}\""
                         )
-                        allTestsPasses = allTestsPasses && (testResultCode == 0)
+                        allTestsPassed = allTestsPassed && (testResultCode == 0)
 
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
                         script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkMainFolder}"
@@ -210,19 +185,11 @@ class AndroidTestUtil {
             } // if (testBuildTypeApkList.size() > 0)...
         } // ApkUtil.getApkList...
 
-        if (!allTestsPasses) {
+        if (!allTestsPassed) {
             throw new Exception("Instrumentation test failed")
         }
     }
     //endregion
-
-    //region Helpful functions
-    private static void sleep(Object script, Integer timeout) {
-        if (timeout > 0) {
-            script.echo "waiting $timeout seconds..."
-            script.sh "sleep $timeout"
-        }
-    }
 
     /**
      * Функция, форматирующая аргументы и конкатенирующая их.
@@ -235,7 +202,6 @@ class AndroidTestUtil {
         }
         return result
     }
-    //endregion
 
     /**
      * Функция для запуска инструментальных тестов

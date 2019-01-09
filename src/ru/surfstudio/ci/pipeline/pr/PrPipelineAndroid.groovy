@@ -44,7 +44,7 @@ class PrPipelineAndroid extends PrPipeline {
     public generateUniqueAvdNameForJob = true
 
     // количество попыток перезапуска этапа инструментальных тестов
-    public instrumentationStageRetryCount = 1 //todo change to 1 when instrumental tests become stable
+    public instrumentationStageRetryCount = 0 //todo change to 1 when instrumental tests become stable
 
     /**
      * Функция, возвращающая имя instrumentation runner для запуска инструментальных тестов.
