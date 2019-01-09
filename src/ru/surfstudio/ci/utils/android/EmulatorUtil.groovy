@@ -68,10 +68,9 @@ class EmulatorUtil {
      */
     static void closeRunningEmulator(Object script, AvdConfig config) {
         // Закрытие запущенного эмулятора, если он существует
-        def emulatorName = getEmulatorName(script)
-        if (CommonUtil.isNotNullOrEmpty(emulatorName)) {
+        if (CommonUtil.isNotNullOrEmpty(config.emulatorName)) {
             script.echo "close running emulator"
-            script.sh "${CommonUtil.getAdbHome(script)} -s $emulatorName emu kill"
+            script.sh "${CommonUtil.getAdbHome(script)} -s ${config.emulatorName} emu kill"
         }
         script.echo "delete avd"
         script.sh "${CommonUtil.getAvdManagerHome(script)} delete avd -n ${config.avdName} || true"
@@ -98,6 +97,9 @@ class EmulatorUtil {
                 -avd \"${config.avdName}\" \
                 -skin \"${config.skinSize}\" \
                 -no-window -no-boot-anim -no-snapshot-save &"
+        sleep(script, EMULATOR_TIMEOUT)
+        // запоминаем новое имя эмулятора
+        config.emulatorName = getEmulatorName(script)
     }
 
     /**
@@ -109,4 +111,11 @@ class EmulatorUtil {
         createAndLaunchNewEmulator(script, config)
     }
     //endregion
+
+    private static void sleep(Object script, Integer timeout) {
+        if (timeout > 0) {
+            script.echo "waiting $timeout seconds..."
+            script.sh "sleep $timeout"
+        }
+    }
 }

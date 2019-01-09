@@ -34,4 +34,7 @@ class AvdConfig {
 
     // разрешение эмулятора
     String skinSize = "1440x2560"
+
+    // имя запущенного эмулятора (инициализируется при его запуске)
+    String emulatorName
 }
