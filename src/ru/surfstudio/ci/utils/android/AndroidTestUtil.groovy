@@ -109,6 +109,9 @@ class AndroidTestUtil {
 
         script.sh "${CommonUtil.getAdbHome(script)} devices"
 
+        AdbUtil.disableAnimations(script, config.emulatorName)
+        script.sh "${AdbUtil.getAdbShellCommand(script, config.emulatorName)} input keyevent 82 &"
+
         def spoonJarFile = script.libraryResource resource: SPOON_JAR_NAME, encoding: BASE64_ENCODING
         script.writeFile file: SPOON_JAR_NAME, text: spoonJarFile, encoding: BASE64_ENCODING
 
@@ -163,7 +166,6 @@ class AndroidTestUtil {
                             script.echo "error while unistalling apk $testBuildTypeApkName"
                         }
 
-                        script.sh "${AdbUtil.getAdbShellCommand(script, config.emulatorName)} input keyevent 82 &"
                         script.sh "sleep 3"
 
                         script.echo "run tests for $apkMainFolder"
