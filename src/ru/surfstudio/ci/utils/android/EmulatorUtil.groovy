@@ -24,7 +24,7 @@ import ru.surfstudio.ci.utils.android.config.AvdConfig
 class EmulatorUtil {
 
     // значение таймаута для создания и загрузки нового эмулятора
-    static Integer EMULATOR_TIMEOUT = 5
+    static Integer EMULATOR_TIMEOUT = 15
 
     /**
      * Функция, возвращающая имя последнего запущенного эмулятора
@@ -61,7 +61,7 @@ class EmulatorUtil {
     private static String getEmulatorInfo(Object script, Integer index) {
         return script.sh(
                 returnStdout: true,
-                script: "${CommonUtil.getAdbHome(script)} devices | grep emulator | head -1 | cut -f$index"
+                script: "${CommonUtil.getAdbHome(script)} devices | grep emulator | tail -1 | cut -f$index"
         )
     }
 

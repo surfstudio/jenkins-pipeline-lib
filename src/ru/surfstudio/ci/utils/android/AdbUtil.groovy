@@ -35,4 +35,17 @@ class AdbUtil {
     static String getAdbShellCommand(Object script, String deviceName) {
         return "${getAdbCommand(script, deviceName)} shell"
     }
+
+    /**
+     * Функция для выключения анимаций на конкретном девайсе
+     */
+    static void disableAnimations(Object script, String deviceName) {
+        script.sh "${getAdbSettingsCommand(script, deviceName)} window_animation_scale 0 &"
+        script.sh "${getAdbSettingsCommand(script, deviceName)} transition_animation_scale 0 &"
+        script.sh "${getAdbSettingsCommand(script, deviceName)} animator_duration_scale 0 &"
+    }
+
+    private static String getAdbSettingsCommand(Object script, String deviceName) {
+        return "${getAdbShellCommand(script, deviceName)} settings put global"
+    }
 }

@@ -29,7 +29,7 @@ class AndroidTestUtil {
 
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
     private static String BASE64_ENCODING = "Base64"
-    private static Integer TIMEOUT_PER_TEST = 60 * 3 // seconds
+    private static Integer TIMEOUT_PER_TEST = 60 * 10 // seconds
 
     /**
      * Версия build tools для получения корректного пути к актуальной утилите aapt.
@@ -61,7 +61,7 @@ class AndroidTestUtil {
             config.avdName = "avd-${script.env.JOB_NAME}"
             script.echo "avdName = ${config.avdName}"
         }
-        script.echo "waiting for emulator ${config.avdName}"
+        script.echo "waiting for avd ${config.avdName}"
         script.lock(config.avdName) {
             launchEmulator(script, config)
             checkEmulatorStatus(script, config)
@@ -108,6 +108,9 @@ class AndroidTestUtil {
         script.echo "start running tests"
 
         script.sh "${CommonUtil.getAdbHome(script)} devices"
+
+        AdbUtil.disableAnimations(script, config.emulatorName)
+        script.sh "${AdbUtil.getAdbShellCommand(script, config.emulatorName)} input keyevent 82 &"
 
         def spoonJarFile = script.libraryResource resource: SPOON_JAR_NAME, encoding: BASE64_ENCODING
         script.writeFile file: SPOON_JAR_NAME, text: spoonJarFile, encoding: BASE64_ENCODING
@@ -163,7 +166,6 @@ class AndroidTestUtil {
                             script.echo "error while unistalling apk $testBuildTypeApkName"
                         }
 
-                        script.sh "${AdbUtil.getAdbShellCommand(script, config.emulatorName)} input keyevent 82 &"
                         script.sh "sleep 3"
 
                         script.echo "run tests for $apkMainFolder"

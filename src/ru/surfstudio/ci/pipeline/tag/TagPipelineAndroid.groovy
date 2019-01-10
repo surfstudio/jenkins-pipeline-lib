@@ -49,6 +49,12 @@ class TagPipelineAndroid extends TagPipeline {
     public instrumentalTestResultPathDirXml = "build/outputs/androidTest-results/instrumental"
     public instrumentalTestResultPathDirHtml = "build/reports/androidTests/instrumental"
 
+    // флаг, показывающий, должно ли имя AVD быть уникальным для текущего job'a
+    public generateUniqueAvdNameForJob = true
+
+    // количество попыток перезапуска этапа инструментальных тестов
+    public instrumentationStageRetryCount = 0 //todo change to 1 when instrumental tests become stable
+
     /**
      * Функция, возвращающая имя instrumentation runner для запуска инструментальных тестов.
      *
@@ -107,7 +113,9 @@ class TagPipelineAndroid extends TagPipeline {
                             new AndroidTestConfig(
                                     instrumentalTestAssembleGradleTask,
                                     instrumentalTestResultPathDirXml,
-                                    instrumentalTestResultPathDirHtml
+                                    instrumentalTestResultPathDirHtml,
+                                    generateUniqueAvdNameForJob,
+                                    instrumentationStageRetryCount
                             )
                     )
                 },
