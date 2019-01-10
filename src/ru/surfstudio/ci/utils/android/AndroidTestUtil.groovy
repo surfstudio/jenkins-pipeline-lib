@@ -165,9 +165,7 @@ class AndroidTestUtil {
                         } catch (ignored) {
                             script.echo "error while unistalling apk $testBuildTypeApkName"
                         }
-
-                        script.sh "sleep 3"
-
+                        
                         script.echo "run tests for $apkMainFolder"
                         def testResultCode = script.sh(
                                 returnStatus: true,

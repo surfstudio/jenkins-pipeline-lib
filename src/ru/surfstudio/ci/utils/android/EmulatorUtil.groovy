@@ -23,8 +23,8 @@ import ru.surfstudio.ci.utils.android.config.AvdConfig
  */
 class EmulatorUtil {
 
-    // значение таймаута для создания и загрузки нового эмулятора
-    static Integer EMULATOR_TIMEOUT = 15
+    // значение таймаута (в секундах) для создания и загрузки нового эмулятора
+    static Integer EMULATOR_TIMEOUT = 60
 
     /**
      * Функция, возвращающая имя последнего запущенного эмулятора
@@ -115,7 +115,8 @@ class EmulatorUtil {
                 -avd \"${config.avdName}\" \
                 -skin \"${config.skinSize}\" \
                 -no-window -no-boot-anim -no-snapshot-save &"
-        sleep(script, EMULATOR_TIMEOUT)
+        script.echo "waiting $EMULATOR_TIMEOUT seconds for emulator..."
+        script.sh "sleep $EMULATOR_TIMEOUT"
         // запоминаем новое имя эмулятора
         config.emulatorName = getEmulatorName(script)
     }
@@ -129,11 +130,4 @@ class EmulatorUtil {
         createAndLaunchNewEmulator(script, config)
     }
     //endregion
-
-    private static void sleep(Object script, Integer timeout) {
-        if (timeout > 0) {
-            script.echo "waiting $timeout seconds..."
-            script.sh "sleep $timeout"
-        }
-    }
 }
