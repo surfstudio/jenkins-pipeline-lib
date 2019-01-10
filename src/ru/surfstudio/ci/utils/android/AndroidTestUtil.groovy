@@ -61,7 +61,7 @@ class AndroidTestUtil {
             config.avdName = "avd-${script.env.JOB_NAME}"
             script.echo "avdName = ${config.avdName}"
         }
-        script.echo "waiting for emulator ${config.avdName}"
+        script.echo "waiting for avd ${config.avdName}"
         script.lock(config.avdName) {
             launchEmulator(script, config)
             checkEmulatorStatus(script, config)
