@@ -15,7 +15,6 @@
  */
 package ru.surfstudio.ci.pipeline.pr
 
-import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
@@ -63,7 +62,7 @@ class PrPipelineAndroid extends PrPipeline {
     }
 
     def init() {
-        node = "android-1" //NodeProvider.getAndroidNode()
+        node = "android-2"
 
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }

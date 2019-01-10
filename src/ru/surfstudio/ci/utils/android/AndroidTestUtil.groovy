@@ -29,7 +29,7 @@ class AndroidTestUtil {
 
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
     private static String BASE64_ENCODING = "Base64"
-    private static Integer TIMEOUT_PER_TEST = 60 * 3 // seconds
+    private static Integer TIMEOUT_PER_TEST = 60 * 10 // seconds
 
     /**
      * Версия build tools для получения корректного пути к актуальной утилите aapt.
