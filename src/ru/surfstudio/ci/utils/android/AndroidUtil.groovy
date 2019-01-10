@@ -70,7 +70,7 @@ class AndroidUtil {
         String fileBody = script.readFile(file)
         def lines = fileBody.split("\n")
         for (line in lines) {
-            def words = line.split(/(;| |\t|=)/).findAll({ it?.trim() })
+            def words = line.split(/(;| |\t|=|,|:)/).findAll({ it?.trim() })
             if (words[0] == varName && words.size() > 1) {
                 def value = words[1]
                 script.echo "$varName = $value found in file $file"
@@ -86,7 +86,7 @@ class AndroidUtil {
         String newFileBody = ""
         def lines = fileBody.split("\n")
         for (line in lines) {
-            def words = line.split(/(;| |\t|=)/).findAll({ it?.trim() })
+            def words = line.split(/(;| |\t|=|,|:)/).findAll({ it?.trim() })
             if (words[0] == varName) {
                 String updatedLine = line.replace(oldVarValue, newVarValue)
                 newFileBody += updatedLine
