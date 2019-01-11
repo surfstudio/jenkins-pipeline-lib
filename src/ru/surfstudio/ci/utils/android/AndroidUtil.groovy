@@ -73,7 +73,7 @@ class AndroidUtil {
      */
     def static withGradleBuildCacheCredentials(Object script, Closure body) {
         script.withCredentials([
-                script.file(credentialsId: GRADLE_BUILD_CACHE_CREDENTIALS_ID, usernameVariable: 'GRADLE_BUILD_CACHE_USER', passwordVariable: 'GRADLE_BUILD_CACHE_PASS')
+                script.usernamePassword(credentialsId: GRADLE_BUILD_CACHE_CREDENTIALS_ID, usernameVariable: 'GRADLE_BUILD_CACHE_USER', passwordVariable: 'GRADLE_BUILD_CACHE_PASS')
         ]) {
             body()
         }
