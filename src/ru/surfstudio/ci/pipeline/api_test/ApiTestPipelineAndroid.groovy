@@ -144,10 +144,10 @@ class ApiTestPipelineAndroid extends ScmPipeline {
             message = "Ошибка прогона апи тестов из-за этапов: ${unsuccessReasons}; $link"
 
         } else if(ctx.jobResult == Result.UNSTABLE) {
-            if(ctx.getStage(API_TEST).result = Result.UNSTABLE) {
+            if(ctx.getStage(API_TEST).result == Result.UNSTABLE) {
                 message = "Обнаружены нерабочие методы API; $link"
             }
-            if(ctx.getStage(WAITING_API_TEST).result = Result.UNSTABLE) {
+            if(ctx.getStage(WAITING_API_TEST).result == Result.UNSTABLE) {
                 if(message) message+= "\n"
                 else message = ""
                 message += "Обнаружены новые работающие методы API; $link"
