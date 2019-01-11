@@ -27,11 +27,11 @@ class ApiTestPipelineAndroid extends ScmPipeline {
 
     //stage names
     public static final String CHECKOUT = 'Checkout'
-    public static final String API_TEST = 'API Test'
+    public static final String CHECK_API_TEST = 'Check API Test'
     public static final String WAIT_API_TEST = 'Wait API Test'
 
     //report names
-    private static String API_TEST_REPORT_NAME = "API Test"
+    private static String CHECK_API_TEST_REPORT_NAME = "Check API Test"
     private static String WAIT_API_TEST_REPORT_NAME = "Wait API Test"
 
     //scm
@@ -41,7 +41,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
 
 
     //tasks //todo заменить на новый механизм через ApiTestRunner
-    public apiTestGradleTask = "clean testQaUnitTest --tests *.*TestApi.test*" //тесты на работающие методы на сервере
+    public checkApiTestGradleTask = "clean testQaUnitTest --tests *.*TestApi.test*" //тесты на работающие методы на сервере
     public waitApiTestGradleTask = "clean testQaUnitTest --tests *.*TestApi.wait*" //тесты на апи, которые еще не работают на сервере, эти тесты должны падать при успешном прохождении теста
 
     public testResultPathXml = "**/test-results/testQaUnitTest/*.xml"
@@ -66,8 +66,8 @@ class ApiTestPipelineAndroid extends ScmPipeline {
                 createStage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     checkoutStageBody(script, repoUrl, sourceBranch, repoCredentialsId)
                 },
-                createStage(API_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    test(script, apiTestGradleTask, testResultPathXml, testResultPathDirHtml, API_TEST_REPORT_NAME)
+                createStage(CHECK_API_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                    test(script, checkApiTestGradleTask, testResultPathXml, testResultPathDirHtml, CHECK_API_TEST_REPORT_NAME)
                 },
                 createStage(WAIT_API_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     test(script, waitApiTestGradleTask, testResultPathXml, testResultPathDirHtml, WAIT_API_TEST_REPORT_NAME)
@@ -142,7 +142,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
             message = "Ошибка прогона апи тестов из-за этапов: ${unsuccessReasons}; $link"
 
         } else if(ctx.jobResult == Result.UNSTABLE) {
-            if(ctx.getStage(API_TEST).result == Result.UNSTABLE) {
+            if(ctx.getStage(CHECK_API_TEST).result == Result.UNSTABLE) {
                 message = "Обнаружены нерабочие методы API; $link"
             }
             if(ctx.getStage(WAIT_API_TEST).result == Result.UNSTABLE) {
