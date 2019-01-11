@@ -42,7 +42,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
 
     //tasks //todo заменить на новый механизм через ApiTestRunner
     public apiTestGradleTask = "clean testQaUnitTest --tests *.*TestApi.test*" //тесты на работающие методы на сервере
-    public waitingApiTestGradleTask = "clean testQaUnitTest --tests *.*TestApi.wait*" //тесты на апи, которые еще не работают на сервере, эти тесты должны падать при успешном прохождении теста
+    public waitApiTestGradleTask = "clean testQaUnitTest --tests *.*TestApi.wait*" //тесты на апи, которые еще не работают на сервере, эти тесты должны падать при успешном прохождении теста
 
     public testResultPathXml = "**/test-results/testQaUnitTest/*.xml"
     public testResultPathDirHtml = "app-injector/build/reports/tests/testQaUnitTest/"
@@ -70,7 +70,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
                     test(script, apiTestGradleTask, testResultPathXml, testResultPathDirHtml, API_TEST_REPORT_NAME)
                 },
                 createStage(WAIT_API_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    test(script, waitingApiTestGradleTask, testResultPathXml, testResultPathDirHtml, WAIT_API_TEST_REPORT_NAME)
+                    test(script, waitApiTestGradleTask, testResultPathXml, testResultPathDirHtml, WAIT_API_TEST_REPORT_NAME)
                 },
         ]
         finalizeBody = { finalizeStageBody(this) }
@@ -83,7 +83,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
 
 
         CommonUtil.printInitialStageStrategies(ctx)
-        
+
         //Достаем main branch для sourceRepo, если не указали в параметрах
         extractValueFromParamsAndRun(script, SOURCE_BRANCH_PARAMETER) {
             value -> ctx.sourceBranch = value
