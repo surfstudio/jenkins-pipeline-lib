@@ -172,7 +172,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
         def script = ctx.script
         return [
                 buildDiscarder(script),
-                parameters(script, ctx.defaultSourceBranch, ctx.node),
+                parameters(script, ctx.defaultSourceBranch),
                 triggers(script, ctx.cronTimeTrigger)
         ]
     }
@@ -187,7 +187,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
         )
     }
 
-    private static void parameters(script, String defaultSourceBranch, String node) {
+    private static void parameters(script, String defaultSourceBranch) {
         return script.parameters([
                 script.string(
                         name: SOURCE_BRANCH_PARAMETER,
