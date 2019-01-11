@@ -16,28 +16,23 @@
 package ru.surfstudio.ci.pipeline.api_test
 
 import ru.surfstudio.ci.*
-import ru.surfstudio.ci.error.UnstableStateThrowable
 import ru.surfstudio.ci.pipeline.ScmPipeline
-import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
-import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
 
 import ru.surfstudio.ci.utils.android.AndroidUtil
 
-import java.util.regex.Pattern
-
-import static ru.surfstudio.ci.AndroidUtil.*
+import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 
 class ApiTestPipelineAndroid extends ScmPipeline {
 
     //stage names
     public static final String CHECKOUT = 'Checkout'
     public static final String API_TEST = 'API Test'
-    public static final String WAITING_API_TEST = 'Waiting API Test'
+    public static final String WAIT_API_TEST = 'Wait API Test'
 
     //report names
     private static String API_TEST_REPORT_NAME = "API Test"
-    private static String WAITING_API_TEST_REPORT_NAME = "Waiting API Test"
+    private static String WAIT_API_TEST_REPORT_NAME = "Wait API Test"
 
     //scm
     public UNDEFINED_BRANCH = "<undefined>"
@@ -74,8 +69,8 @@ class ApiTestPipelineAndroid extends ScmPipeline {
                 createStage(API_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     test(script, apiTestGradleTask, testResultPathXml, testResultPathDirHtml, API_TEST_REPORT_NAME)
                 },
-                createStage(WAITING_API_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    test(script, waitingApiTestGradleTask, testResultPathXml, testResultPathDirHtml, WAITING_API_TEST_REPORT_NAME)
+                createStage(WAIT_API_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                    test(script, waitingApiTestGradleTask, testResultPathXml, testResultPathDirHtml, WAIT_API_TEST_REPORT_NAME)
                 },
         ]
         finalizeBody = { finalizeStageBody(this) }
@@ -88,8 +83,11 @@ class ApiTestPipelineAndroid extends ScmPipeline {
 
 
         CommonUtil.printInitialStageStrategies(ctx)
-
+        
         //Достаем main branch для sourceRepo, если не указали в параметрах
+        extractValueFromParamsAndRun(script, SOURCE_BRANCH_PARAMETER) {
+            value -> ctx.sourceBranch = value
+        }
         if (!ctx.sourceBranch || ctx.sourceBranch == ctx.UNDEFINED_BRANCH) {
             ctx.sourceBranch = JarvisUtil.getMainBranch(ctx.script, ctx.repoUrl)
         }
@@ -147,7 +145,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
             if(ctx.getStage(API_TEST).result == Result.UNSTABLE) {
                 message = "Обнаружены нерабочие методы API; $link"
             }
-            if(ctx.getStage(WAITING_API_TEST).result == Result.UNSTABLE) {
+            if(ctx.getStage(WAIT_API_TEST).result == Result.UNSTABLE) {
                 if(message) message+= "\n"
                 else message = ""
                 message += "Обнаружены новые работающие методы API; $link"
