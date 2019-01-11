@@ -180,7 +180,9 @@ class TagPipelineAndroid extends TagPipeline {
     }
 
     def static betaUploadStageBodyAndroid(Object script, String betaUploadGradleTask) {
-        script.sh "./gradlew ${betaUploadGradleTask}"
+        AndroidUtil.withGradleBuildCacheCredentials(script) {
+            script.sh "./gradlew ${betaUploadGradleTask}"
+        }
     }
 
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================

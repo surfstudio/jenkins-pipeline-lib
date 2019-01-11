@@ -17,6 +17,8 @@ package ru.surfstudio.ci.utils.android
 
 class AndroidUtil {
 
+    static final String GRADLE_BUILD_CACHE_CREDENTIALS_ID = "gradle_build_cache"
+
     /**
      * Run body with extracted Environment Variables:
      *  - storePassword
@@ -63,6 +65,17 @@ class AndroidUtil {
                 script.echo "^^^^ Ignored exception for read keystore credentials: ${e.toString()} ^^^^"
                 body()
             }
+        }
+    }
+
+    /**
+     * Execute body with global variables 'GRADLE_BUILD_CACHE_USER' and 'GRADLE_BUILD_CACHE_PASS'
+     */
+    def static withGradleBuildCacheCredentials(Object script, Closure body) {
+        script.withCredentials([
+                script.file(credentialsId: GRADLE_BUILD_CACHE_CREDENTIALS_ID, usernameVariable: 'GRADLE_BUILD_CACHE_USER', passwordVariable: 'GRADLE_BUILD_CACHE_PASS')
+        ]) {
+            body()
         }
     }
 

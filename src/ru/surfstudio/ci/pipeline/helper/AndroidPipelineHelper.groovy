@@ -31,7 +31,9 @@ class AndroidPipelineHelper {
     private static String DEFAULT_HTML_RESULT_FILENAME = "index.html"
 
     def static buildStageBodyAndroid(Object script, String buildGradleTask) {
-        script.sh "./gradlew ${buildGradleTask}"
+        AndroidUtil.withGradleBuildCacheCredentials(script) {
+            script.sh "./gradlew ${buildGradleTask}"
+        }
         script.step([$class: 'ArtifactArchiver', artifacts: '**/*.apk', allowEmptyArchive: true])
         script.step([$class: 'ArtifactArchiver', artifacts: '**/mapping.txt', allowEmptyArchive: true])
     }
@@ -54,7 +56,9 @@ class AndroidPipelineHelper {
             String testResultPathDirHtml
     ) {
         try {
-            script.sh "./gradlew $unitTestGradleTask"
+            AndroidUtil.withGradleBuildCacheCredentials(script) {
+                script.sh "./gradlew $unitTestGradleTask"
+            }
         } finally {
             publishTestResults(script, testResultPathXml, testResultPathDirHtml, UNIT_TEST_REPORT_NAME)
         }
@@ -92,7 +96,9 @@ class AndroidPipelineHelper {
             AndroidTestConfig androidTestConfig
     ) {
         try {
-            script.sh "./gradlew ${androidTestConfig.instrumentalTestAssembleGradleTask}"
+            AndroidUtil.withGradleBuildCacheCredentials(script) {
+                script.sh "./gradlew ${androidTestConfig.instrumentalTestAssembleGradleTask}"
+            }
             script.sh "mkdir -p ${androidTestConfig.instrumentalTestResultPathDirXml}; \
                 mkdir -p ${androidTestConfig.instrumentalTestResultPathDirHtml}"
 
