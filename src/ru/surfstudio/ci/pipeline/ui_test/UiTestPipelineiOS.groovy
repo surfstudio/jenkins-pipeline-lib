@@ -21,9 +21,6 @@ import ru.surfstudio.ci.stage.StageStrategy
 
 class UiTestPipelineiOS extends UiTestPipeline {
 
-    public artifactForTest = "for_test.apk"
-    public buildGradleTask = "clean assembleQa"
-    public builtApkPattern = "${sourcesDir}/**/*qa*.apk"
 
     //dirs
     public derivedDataPath = "${sourcesDir}"
@@ -35,6 +32,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
     public testDeviceName = "iPhone 7"
     public testOSVersion = "12.1"
     public testiOSSDK = "iphonesimulator12.1"
+
 
     UiTestPipelineiOS(Object script) {
         super(script)
@@ -120,6 +118,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
             }
             CommonUtil.shWithRuby(script, "bundle install")
             CommonUtil.shWithRuby(script, "echo -ne '\n' | bundle exec calabash-ios setup ${sourcesDir}")
+            script.sh "cd .. && ./calabash-expect.sh \"MDKTests\" \"MDK Debug\""
 
             script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//') -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
         }
