@@ -29,7 +29,7 @@ class AndroidTestUtil {
 
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
     private static String BASE64_ENCODING = "Base64"
-    private static Integer TIMEOUT_PER_TEST = 60 * 10 // seconds
+    private static Integer TIMEOUT_PER_TEST = 60 * 5 // seconds
 
     /**
      * Версия build tools для получения корректного пути к актуальной утилите aapt.
@@ -47,6 +47,7 @@ class AndroidTestUtil {
      * @param androidTestResultPathXml путь для сохранения xml-отчетов о результатах тестов
      * @param androidTestResultPathDirHtml путь для сохранения html-отчетов о результатах тестов
      * @param generateUniqueAvdNameForJob флаг, показывающий, должно ли имя AVD быть уникальным для текущего job'a
+     * @param instrumentationTestRetryCount количество попыток перезапуска одного теста при его падении
      */
     static void runInstrumentalTests(
             Object script,
@@ -55,7 +56,8 @@ class AndroidTestUtil {
             Closure getTestInstrumentationRunnerName,
             String androidTestResultPathXml,
             String androidTestResultPathDirHtml,
-            Boolean generateUniqueAvdNameForJob
+            Boolean generateUniqueAvdNameForJob,
+            Integer instrumentationTestRetryCount
     ) {
         if (generateUniqueAvdNameForJob) {
             config.avdName = "avd-${script.env.JOB_NAME}"
@@ -71,7 +73,8 @@ class AndroidTestUtil {
                     androidTestBuildType,
                     getTestInstrumentationRunnerName,
                     androidTestResultPathXml,
-                    androidTestResultPathDirHtml
+                    androidTestResultPathDirHtml,
+                    instrumentationTestRetryCount
             )
         }
     }
@@ -103,7 +106,8 @@ class AndroidTestUtil {
             String androidTestBuildType,
             Closure getTestInstrumentationRunnerName,
             String androidTestResultPathXml,
-            String androidTestResultPathDirHtml
+            String androidTestResultPathDirHtml,
+            Integer instrumentationTestRetryCount
     ) {
         script.echo "start running tests"
 
@@ -165,18 +169,32 @@ class AndroidTestUtil {
                         } catch (ignored) {
                             script.echo "error while unistalling apk $testBuildTypeApkName"
                         }
-                        
+
                         script.echo "run tests for $apkMainFolder"
-                        def testResultCode = script.sh(
-                                returnStatus: true,
-                                script: "java -jar $SPOON_JAR_NAME \
+
+                        int countOfLaunch = 0, testResultCode = 0
+                        while (countOfLaunch <= instrumentationTestRetryCount) {
+                            if (countOfLaunch > 0) {
+                                printInfoForRelaunch(script, apkMainFolder)
+                            }
+
+                            testResultCode = script.sh(
+                                    returnStatus: true,
+                                    script: "java -jar $SPOON_JAR_NAME \
                                     --apk \"${formatArgsForShellCommand(projectRootDir, testBuildTypeApkName)}\" \
                                     --test-apk \"${formatArgsForShellCommand(projectRootDir, currentApkName)}\" \
                                     --output \"${formatArgsForShellCommand(spoonOutputDir)}\" \
                                     --adb-timeout $TIMEOUT_PER_TEST \
                                     --debug --fail-on-failure --grant-all \
                                     -serial \"${formatArgsForShellCommand(config.emulatorName)}\""
-                        )
+                            )
+
+                            if (testResultCode == 0) {
+                                break
+                            }
+                            countOfLaunch++
+                        }
+
                         allTestsPassed = allTestsPassed && (testResultCode == 0)
 
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
@@ -202,6 +220,10 @@ class AndroidTestUtil {
             result += it.replaceAll('\n', '')
         }
         return result
+    }
+
+    private static void printInfoForRelaunch(Object script, String testName) {
+        script.echo "---------------------------------- REPEAT TEST FOR: $testName ----------------------------------"
     }
 
     /**

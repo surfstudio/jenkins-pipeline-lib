@@ -32,20 +32,20 @@ class AndroidTestConfig {
     // флаг, показывающий, должно ли имя AVD быть уникальным для текущего job'a
     Boolean generateUniqueAvdNameForJob
 
-    // количество попыток перезапуска этапа инструментальных тестов
-    Integer instrumentationStageRetryCount
+    // количество попыток перезапуска одного теста при его падении
+    Integer instrumentationTestRetryCount
 
     AndroidTestConfig(
             String instrumentalTestAssembleGradleTask,
             String instrumentalTestResultPathDirXml,
             String instrumentalTestResultPathDirHtml,
             Boolean generateUniqueAvdNameForJob,
-            Integer instrumentationStageRetryCount
+            Integer instrumentationTestRetryCount
     ) {
         this.instrumentalTestAssembleGradleTask = instrumentalTestAssembleGradleTask
         this.instrumentalTestResultPathDirXml = instrumentalTestResultPathDirXml
         this.instrumentalTestResultPathDirHtml = instrumentalTestResultPathDirHtml
         this.generateUniqueAvdNameForJob = generateUniqueAvdNameForJob
-        this.instrumentationStageRetryCount = instrumentationStageRetryCount
+        this.instrumentationTestRetryCount = instrumentationTestRetryCount
     }
 }
