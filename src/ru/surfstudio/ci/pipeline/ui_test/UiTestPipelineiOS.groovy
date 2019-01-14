@@ -146,6 +146,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
         script.sh "xcrun simctl boot \$(cat ${simulatorIdentifierFile})"
         script.sh "xcrun simctl install booted ${derivedDataPath}/Build/Products/Debug-iphonesimulator/*.app"
+        // restart the CoreSimulator processes with this command
+        CommonUtil.shWithRuby(script, "bundle exec run-loop simctl manage-processes")
 
         script.echo "Tests started"
         script.echo "start tests for $taskKey"
