@@ -377,8 +377,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.string(
                         name: NODE_PARAMETER,
                         defaultValue: node,
-                        description: 'Node на котором будет выполняться job'),
-
+                        description: 'Node на котором будет выполняться job')
         ])
     }
 
