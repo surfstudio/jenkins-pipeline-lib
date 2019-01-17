@@ -373,9 +373,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.string(
                         name: USER_EMAIL_PARAMETER,
                         defaultValue: "qa@surfstudio.ru",
-                        description: 'почта пользователя, которому будут отсылаться уведомления о результатах тестирования. Если не указано. то сообщения будут отсылаться в группу проекта'),
-                script.string(),
-                script.string(),        
+                        description: 'почта пользователя, которому будут отсылаться уведомления о результатах тестирования. Если не указано. то сообщения будут отсылаться в группу проекта'),      
                 script.string(
                         name: NODE_PARAMETER,
                         defaultValue: node,
