@@ -318,8 +318,6 @@ abstract class UiTestPipeline extends ScmPipeline {
     public static final String SOURCE_BRANCH_PARAMETER = 'sourceBranch'
     public static final String USER_EMAIL_PARAMETER = 'userEmail'
     public static final String NODE_PARAMETER = 'node'
-    public static final String LAST_STRING_IONDICATOR = 'last_target'
-    public static final String TARGET = 'target'
 
     def static List<Object> properties(UiTestPipeline ctx) {
         def script = ctx.script
