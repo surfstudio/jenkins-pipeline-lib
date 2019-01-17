@@ -52,8 +52,8 @@ class TagPipelineAndroid extends TagPipeline {
     // флаг, показывающий, должно ли имя AVD быть уникальным для текущего job'a
     public generateUniqueAvdNameForJob = true
 
-    // количество попыток перезапуска этапа инструментальных тестов
-    public instrumentationStageRetryCount = 0 //todo change to 1 when instrumental tests become stable
+    // количество попыток перезапуска тестов для одного модуля при падении одного из них
+    public instrumentationTestRetryCount = 0
 
     /**
      * Функция, возвращающая имя instrumentation runner для запуска инструментальных тестов.
@@ -115,7 +115,7 @@ class TagPipelineAndroid extends TagPipeline {
                                     instrumentalTestResultPathDirXml,
                                     instrumentalTestResultPathDirHtml,
                                     generateUniqueAvdNameForJob,
-                                    instrumentationStageRetryCount
+                                    instrumentationTestRetryCount
                             )
                     )
                 },
