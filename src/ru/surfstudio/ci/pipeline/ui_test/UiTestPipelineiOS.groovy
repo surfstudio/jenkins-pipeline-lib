@@ -26,7 +26,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
     public derivedDataPath = "${sourcesDir}"
 
     //files
-    public simulatorIdentificationFile = "currentSim"
+    public simulatorIdentifierFile = "currentSim"
 
     //environment
     public testDeviceName = "iPhone 7"
