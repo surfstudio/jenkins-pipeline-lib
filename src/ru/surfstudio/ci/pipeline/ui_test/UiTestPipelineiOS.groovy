@@ -178,7 +178,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
                 script.sh "mkdir arhive"
             }
             script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
-        }
+        
 
             script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
         }
