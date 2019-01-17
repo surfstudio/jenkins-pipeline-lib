@@ -87,16 +87,15 @@ class UiTestPipelineiOS extends UiTestPipeline {
                             outputHtmlFile,
                             outputJsonFile)
                 },
-                createStage(PUBLISH_RESULTS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                createStage(PUBLISH_RESULTS, StageStrategy.FAIT_WHEN_STAGE_ERROR) {
                     publishResultsStageBody(script,
                             outputsDir,
                             outputJsonFile,
                             outputHtmlFile,
                             jiraAuthenticationName,
+                            outputrerunTxtFile,
                             "UI Tests ${taskKey} ${taskName}")
-
                 }
-
         ]
         finalizeBody = { finalizeStageBody(this) }
     }
@@ -117,7 +116,20 @@ class UiTestPipelineiOS extends UiTestPipeline {
                 CommonUtil.shWithRuby(script, "make init")
             }
             CommonUtil.shWithRuby(script, "bundle install")
-            CommonUtil.shWithRuby(script, "set -x; expect -f calabash-expect.sh; set +x;")
+            //CommonUtil.shWithRuby(script, "echo -ne '\n' | bundle exec calabash-ios setup ${sourcesDir}")
+
+        try {
+            CommonUtil.shWithRuby(script, "APP_BUNDLE_PATH=${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//').app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty")
+        } finally {
+            script.sh "xcrun simctl shutdown \$(cat ${simulatorIdentifierFile})"
+            script.sh "xcrun simctl shutdown all"
+            script.sh "xcrun simctl list"
+            script.sh "sleep 15"
+            script.echo "Removing simulator ..."
+
+            //script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
+        }
+            script.sh "calabash-expect.sh"
             script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//') -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
         }
     }
@@ -146,8 +158,6 @@ class UiTestPipelineiOS extends UiTestPipeline {
         script.sh "xcrun simctl boot \$(cat ${simulatorIdentifierFile})"
         script.sh "xcrun simctl install booted ${derivedDataPath}/Build/Products/Debug-iphonesimulator/*.app"
 
-        CommonUtil.shWithRuby(script, "run-loop simctl manage-processes")
-
         script.echo "Tests started"
         script.echo "start tests for $taskKey"
         CommonUtil.safe(script) {
@@ -164,7 +174,13 @@ class UiTestPipelineiOS extends UiTestPipeline {
             script.sh "sleep 15"
             script.echo "Removing simulator ..."
 
-            //script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
+             CommonUtil.safe(script) {
+                script.sh "mkdir arhive"
+            }
+            script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
+        }
+
+            script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
         }
     }
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
