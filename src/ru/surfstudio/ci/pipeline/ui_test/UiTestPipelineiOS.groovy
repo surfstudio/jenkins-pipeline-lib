@@ -87,7 +87,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
                             outputHtmlFile,
                             outputJsonFile)
                 },
-                createStage(PUBLISH_RESULTS, StageStrategy.FAIT_WHEN_STAGE_ERROR) {
+                createStage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     publishResultsStageBody(script,
                             outputsDir,
                             outputJsonFile,
