@@ -85,7 +85,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
                             featuresDir,
                             featureForTest,
                             outputHtmlFile,
-                            outputJsonFile)
+                            outputJsonFile,
+                            outputrerunTxtFile)
                 },
                 createStage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     publishResultsStageBody(script,
@@ -135,7 +136,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
                                 String featuresDir,
                                 String featureFile,
                                 String outputHtmlFile,
-                                String outputJsonFile) {
+                                String outputJsonFile,
+                                outputrerunTxtFile) {
 
         def simulatorIdentifierFile = "currentsim"
 
@@ -158,7 +160,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
 
         try {
-            CommonUtil.shWithRuby(script, "APP_BUNDLE_PATH=${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//').app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty")
+            CommonUtil.shWithRuby(script, "APP_BUNDLE_PATH=${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//').app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty")
         } finally {
             script.sh "xcrun simctl shutdown \$(cat ${simulatorIdentifierFile})"
             script.sh "xcrun simctl shutdown all"
