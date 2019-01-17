@@ -92,8 +92,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
                             outputsDir,
                             outputJsonFile,
                             outputHtmlFile,
-                            jiraAuthenticationName,
                             outputrerunTxtFile,
+                            jiraAuthenticationName,
                             "UI Tests ${taskKey} ${taskName}")
                 }
         ]

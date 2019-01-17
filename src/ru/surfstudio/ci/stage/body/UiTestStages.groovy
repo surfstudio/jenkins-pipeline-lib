@@ -109,12 +109,14 @@ class UiTestStages {
                                        String outputsDir,
                                        String outputJsonFile,
                                        String outputHtmlFile,
+                                       String outputrerunTxtFile
                                        String jiraAuthenticationName,
                                        String htmlReportName) {
         UiTestPipeline.publishResultsStageBody(script,
                 outputsDir,
                 outputJsonFile,
                 outputHtmlFile,
+                outputrerunTxtFile,
                 jiraAuthenticationName,
                 htmlReportName)
     }

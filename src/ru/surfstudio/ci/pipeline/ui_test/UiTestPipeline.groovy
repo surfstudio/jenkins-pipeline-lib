@@ -318,6 +318,8 @@ abstract class UiTestPipeline extends ScmPipeline {
     public static final String SOURCE_BRANCH_PARAMETER = 'sourceBranch'
     public static final String USER_EMAIL_PARAMETER = 'userEmail'
     public static final String NODE_PARAMETER = 'node'
+    public static final String LAST_STRING_IONDICATOR = 'last_target'
+    public static final String TARGET = 'target'
 
     def static List<Object> properties(UiTestPipeline ctx) {
         def script = ctx.script
@@ -374,6 +376,8 @@ abstract class UiTestPipeline extends ScmPipeline {
                         name: USER_EMAIL_PARAMETER,
                         defaultValue: "qa@surfstudio.ru",
                         description: 'почта пользователя, которому будут отсылаться уведомления о результатах тестирования. Если не указано. то сообщения будут отсылаться в группу проекта'),
+                script.string(),
+                script.string(),        
                 script.string(
                         name: NODE_PARAMETER,
                         defaultValue: node,
