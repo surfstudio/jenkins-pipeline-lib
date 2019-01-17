@@ -47,7 +47,7 @@ class AndroidTestUtil {
      * @param androidTestResultPathXml путь для сохранения xml-отчетов о результатах тестов
      * @param androidTestResultPathDirHtml путь для сохранения html-отчетов о результатах тестов
      * @param generateUniqueAvdNameForJob флаг, показывающий, должно ли имя AVD быть уникальным для текущего job'a
-     * @param instrumentationTestRetryCount количество попыток перезапуска одного теста при его падении
+     * @param instrumentationTestRetryCount количество попыток перезапуска тестов для одного модуля при падении одного из них
      */
     static void runInstrumentalTests(
             Object script,

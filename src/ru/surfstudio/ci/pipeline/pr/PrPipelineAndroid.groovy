@@ -43,7 +43,7 @@ class PrPipelineAndroid extends PrPipeline {
     // флаг, показывающий, должно ли имя AVD быть уникальным для текущего job'a
     public generateUniqueAvdNameForJob = true
 
-    // количество попыток перезапуска одного теста при его падении
+    // количество попыток перезапуска тестов для одного модуля при падении одного из них
     public instrumentationTestRetryCount = 0
     
     /**

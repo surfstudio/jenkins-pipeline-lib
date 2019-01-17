@@ -32,7 +32,7 @@ class AndroidTestConfig {
     // флаг, показывающий, должно ли имя AVD быть уникальным для текущего job'a
     Boolean generateUniqueAvdNameForJob
 
-    // количество попыток перезапуска одного теста при его падении
+    // количество попыток перезапуска тестов для одного модуля при падении одного из них
     Integer instrumentationTestRetryCount
 
     AndroidTestConfig(
