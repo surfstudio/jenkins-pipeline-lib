@@ -165,8 +165,9 @@ class UiTestPipelineiOS extends UiTestPipeline {
             script.sh "xcrun simctl shutdown \$(cat ${simulatorIdentifierFile})"
             script.sh "xcrun simctl shutdown all"
             script.sh "xcrun simctl list"
-            script.sh "sleep 15"
+            script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
             script.echo "Removing simulator ..."
+            script.sh "sleep 3"
 
              CommonUtil.safe(script) {
                 script.sh "mkdir arhive"
@@ -174,7 +175,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
             script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
         
 
-            script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
+            
         }
     }
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
