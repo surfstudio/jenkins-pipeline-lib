@@ -122,7 +122,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
             //CommonUtil.shWithRuby(script, "echo -ne '\n' | bundle exec calabash-ios setup ${sourcesDir}")
 
 
-            script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
+            script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
         }
     }
 
