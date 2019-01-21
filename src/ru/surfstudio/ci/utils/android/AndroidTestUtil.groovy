@@ -160,15 +160,7 @@ class AndroidTestUtil {
                         String spoonOutputDir = "${formatArgsForShellCommand(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
                         script.sh "mkdir -p $spoonOutputDir"
 
-                        try {
-                            def testBuildTypePackageName = ApkUtil.getPackageNameFromApk(
-                                    script,
-                                    testBuildTypeApkName,
-                                    BUILD_TOOLS_VERSION)
-                            ApkUtil.uninstallApk(script, config.emulatorName, testBuildTypePackageName)
-                        } catch (ignored) {
-                            script.echo "error while unistalling apk $testBuildTypeApkName"
-                        }
+                        deleteApk(script, testBuildTypeApkName, config.emulatorName)
 
                         script.echo "run tests for $apkMainFolder"
 
@@ -189,10 +181,13 @@ class AndroidTestUtil {
                                     -serial \"${formatArgsForShellCommand(config.emulatorName)}\""
                             )
 
+                            script.echo "testResultCode $testResultCode"
+                            
                             if (testResultCode == 0) {
                                 break
                             }
                             countOfLaunch++
+                            deleteApk(script, testBuildTypeApkName, config.emulatorName)
                         }
 
                         allTestsPassed = allTestsPassed && (testResultCode == 0)
@@ -220,6 +215,21 @@ class AndroidTestUtil {
             result += it.replaceAll('\n', '')
         }
         return result
+    }
+
+    /**
+     * Функция для удаления данного APK с эмулятора
+     */
+    private static void deleteApk(Object script, String apkName, String emulatorName) {
+        try {
+            def testBuildTypePackageName = ApkUtil.getPackageNameFromApk(
+                    script,
+                    apkName,
+                    BUILD_TOOLS_VERSION)
+            ApkUtil.uninstallApk(script, emulatorName, testBuildTypePackageName)
+        } catch (ignored) {
+            script.echo "error while unistalling apk $apkName"
+        }
     }
 
     private static void printInfoForRelaunch(Object script, String testName) {
