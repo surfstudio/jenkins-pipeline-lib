@@ -196,7 +196,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                                        String outputJsonFile,
                                        String outputHtmlFile,
                                        String outputrerunTxtFile,
-                                       String outputsIdsDiff
+                                       String outputsIdsDiff,
                                        String jiraAuthenticationName,
                                        String htmlReportName) {
         script.dir(outputsDir) {
