@@ -65,7 +65,8 @@ class UiTestStages {
                                     String featureFile,
                                     String outputHtmlFile,
                                     String outputJsonFile,
-                                    String outputrerunTxtFile) {
+                                    String outputrerunTxtFile,
+                                    String outputsIdsDiff) {
         UiTestPipelineAndroid.testStageBodyAndroid(
                 script,
                 taskKey,
