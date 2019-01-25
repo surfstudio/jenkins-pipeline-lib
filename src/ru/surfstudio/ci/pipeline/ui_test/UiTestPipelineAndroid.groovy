@@ -156,11 +156,11 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 script.sh "ls && cp ./fullScript.sh sources"
 
                 script.dir(sourcesDir) {
-                        script.sh "sh fullScript.sh"
+                        script.sh "fullScript.sh"
                          }
 
-                script "sh find_id.sh"
-                script.sh "sh match.sh"                
+                script "find_id.sh"
+                script.sh "match.sh"                
             }
             CommonUtil.safe(script) {
                 script.sh "mkdir arhive"
