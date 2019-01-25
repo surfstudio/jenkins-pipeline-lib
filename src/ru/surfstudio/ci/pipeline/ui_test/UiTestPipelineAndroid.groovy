@@ -62,6 +62,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 createStage(TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     testStageBodyAndroid(script,
                             taskKey,
+                            sourcesDir,
                             outputsDir,
                             featuresDir,
                             artifactForTest,
@@ -108,6 +109,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
     def static testStageBodyAndroid(Object script,
                                     String taskKey,
+                                    String sourcesDir,
                                     String outputsDir,
                                     String featuresDir,
                                     String artifactForTest,
