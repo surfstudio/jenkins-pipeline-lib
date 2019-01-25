@@ -146,6 +146,9 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
         try {
             CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  -p json_report\" ${featuresDir}/${featureFile} --concurrent")
+
+            }
+        finally {
             CommonUtil.safe(script) 
             {
                 script.sh "ls && cp ./fullScript.sh sources"
@@ -157,9 +160,6 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 script "sh find_id.sh"
                 script.sh "sh match.sh"                
             }
-
-            }
-        finally {
             CommonUtil.safe(script) {
                 script.sh "mkdir arhive"
             }
