@@ -156,7 +156,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 script.sh "ls && cp ./fullScript.sh sources"
 
                 script.dir(sourcesDir) {
-                        script.sh "./fullScript.sh"
+                        script.sh "source ~/.bashrc; /bin/bash ./fullScript.sh"
                          }
 
                 script "find_id.sh"
