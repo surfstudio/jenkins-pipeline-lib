@@ -160,6 +160,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                          }
 
                 script.sh "source ~/.bashrc; /bin/bash ./find_id.sh"
+                script.sh "mv sources/idFullA.txt ."
                 script.sh "source ~/.bashrc; /bin/bash ./match.sh"                
             }
             CommonUtil.safe(script) {
