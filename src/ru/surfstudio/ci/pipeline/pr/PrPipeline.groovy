@@ -166,7 +166,7 @@ abstract class PrPipeline extends ScmPipeline {
                         artifactDaysToKeepStr: '3',
                         artifactNumToKeepStr: '10',
                         daysToKeepStr: '60',
-                        numToKeepStr: '')
+                        numToKeepStr: '200')
         )
     }
 
