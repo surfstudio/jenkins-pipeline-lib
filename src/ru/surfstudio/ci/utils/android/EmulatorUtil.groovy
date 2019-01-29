@@ -113,8 +113,7 @@ class EmulatorUtil {
     static void launchEmulator(Object script, AvdConfig config) {
         script.sh "${CommonUtil.getEmulatorHome(script)} \
                 -avd \"${config.avdName}\" \
-                -skin \"${config.skinSize}\" \
-                -no-window -no-boot-anim -no-snapshot-save &"
+                -netdelay none -netspeed full -no-window -no-snapshot-save &"
         script.echo "waiting $EMULATOR_TIMEOUT seconds for emulator..."
         script.sh "sleep $EMULATOR_TIMEOUT"
         // запоминаем новое имя эмулятора

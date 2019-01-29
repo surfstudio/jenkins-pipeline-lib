@@ -30,10 +30,7 @@ class AvdConfig {
     String sdkId = "system-images;android-28;google_apis;x86"
 
     // размер объема sdcard эмулятора
-    String sdcardSize = "3072M"
-
-    // разрешение эмулятора
-    String skinSize = "1440x2560"
+    String sdcardSize = "2048M"
 
     // имя запущенного эмулятора (инициализируется при его запуске)
     String emulatorName
