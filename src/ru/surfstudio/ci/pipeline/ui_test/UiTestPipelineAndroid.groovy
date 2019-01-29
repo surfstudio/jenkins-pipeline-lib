@@ -77,7 +77,6 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                             outputJsonFile,
                             outputHtmlFile,
                             outputrerunTxtFile,
-                            outputsIdsDiff,
                             jiraAuthenticationName,
                             "UI Tests ${taskKey} ${taskName}")
 
@@ -163,6 +162,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 script.sh "mv sources/idFullA.txt ."
                 script.sh "source ~/.bashrc; /bin/bash ./match.sh"                
             }
+            script.step([$class: 'ArtifactArchiver', artifacts: outputsIdsDiff, allowEmptyArchive: true])
             CommonUtil.safe(script) {
                 script.sh "mkdir arhive"
             }

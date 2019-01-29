@@ -196,7 +196,6 @@ abstract class UiTestPipeline extends ScmPipeline {
                                        String outputJsonFile,
                                        String outputHtmlFile,
                                        String outputrerunTxtFile,
-                                       String outputsIdsDiff,
                                        String jiraAuthenticationName,
                                        String htmlReportName) {
         script.dir(outputsDir) {
@@ -215,7 +214,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.sh "cd .. && curl -H \"Content-Type: multipart/form-data\" -u ${script.env.USERNAME}:${script.env.PASSWORD} -F \"file=@arhive.zip\" ${Constants.JIRA_URL}rest/raven/1.0/import/execution/bundle"
             }
             script.step([$class: 'ArtifactArchiver', artifacts: outputrerunTxtFile, allowEmptyArchive: true]) 
-            script.step([$class: 'ArtifactArchiver', artifacts: outputsIdsDiff, allowEmptyArchive: true])
+        
             CommonUtil.safe(script){
 
                 script.sh "rm arhive.zip"
