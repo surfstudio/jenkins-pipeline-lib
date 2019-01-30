@@ -163,7 +163,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 script.sh "source ~/.bashrc; /bin/bash ./match.sh"                
             }
             */
-            CommonUtil.shWithRuby(script, "ruby -r './find_id.rb' -e 'Find.new.get_miss_id('${sourcesDir}', 'features/android/pages')'")
+            CommonUtil.shWithRuby(script, "ruby -r './find_id.rb' -e 'Find.new.get_miss_id('/${sourcesDir}', '/features/android/pages')'")
             script.step([$class: 'ArtifactArchiver', artifacts: outputsIdsDiff, allowEmptyArchive: true])
             CommonUtil.safe(script) {
                 script.sh "mkdir arhive"
