@@ -288,8 +288,7 @@ abstract class UiTestPipeline extends ScmPipeline {
             def tasks = ctx.taskKey.split(",")
             for (task in tasks) {
                 CommonUtil.safe(script) {
-                    CommonUtil.startCurrentBuildCloneWithParams
-                    (
+                    CommonUtil.startCurrentBuildCloneWithParams(
                             script,
                             [
                                 script.string(name: TASK_KEY_PARAMETER, value: task.trim())
