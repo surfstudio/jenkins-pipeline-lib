@@ -31,6 +31,12 @@ class AndroidTestUtil {
     private static String BASE64_ENCODING = "Base64"
     private static Integer TIMEOUT_PER_TEST = 60 * 5 // seconds
 
+    //region messages
+    private static String RUN_TESTS_MESSAGE = "RUN TESTS FOR: "
+    private static String REPEAT_TESTS_MESSAGE = "REPEAT TESTS FOR "
+    private static String TEST_RESULT_CODE_MESSAGE = "TEST RESULT CODE: "
+    //endregion
+
     /**
      * Версия build tools для получения корректного пути к актуальной утилите aapt.
      *
@@ -161,13 +167,12 @@ class AndroidTestUtil {
                         script.sh "mkdir -p $spoonOutputDir"
 
                         deleteApk(script, testBuildTypeApkName, config.emulatorName)
-
-                        script.echo "---------------------------------- RUN TESTS FOR: $apkMainFolder ----------------------------------"
+                        printMessage(script, "$RUN_TESTS_MESSAGE $apkMainFolder")
 
                         int countOfLaunch = 0, testResultCode = 0
                         while (countOfLaunch <= instrumentationTestRetryCount) {
                             if (countOfLaunch > 0) {
-                                printInfoForRelaunch(script, apkMainFolder)
+                                printMessage(script, "$REPEAT_TESTS_MESSAGE $apkMainFolder")
                             }
 
                             testResultCode = script.sh(
@@ -181,8 +186,8 @@ class AndroidTestUtil {
                                     -serial \"${formatArgsForShellCommand(config.emulatorName)}\""
                             )
 
-                            script.echo "testResultCode $testResultCode"
-                            
+                            printMessage(script, "$TEST_RESULT_CODE_MESSAGE $testResultCode")
+
                             if (testResultCode == 0) {
                                 break
                             }
@@ -232,8 +237,8 @@ class AndroidTestUtil {
         }
     }
 
-    private static void printInfoForRelaunch(Object script, String testName) {
-        script.echo "---------------------------------- REPEAT TEST FOR: $testName ----------------------------------"
+    private static void printMessage(Object script, String message) {
+        script.echo "---------------------------------- $message ----------------------------------"
     }
 
     /**
