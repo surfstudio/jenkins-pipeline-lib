@@ -26,6 +26,8 @@ class EmulatorUtil {
     // значение таймаута (в секундах) для создания и загрузки нового эмулятора
     static Integer EMULATOR_TIMEOUT = 60
 
+    private static String TEMP_FILE_NAME = "telnet-logs"
+
     /**
      * Функция, возвращающая имя последнего запущенного эмулятора
      */
@@ -63,6 +65,16 @@ class EmulatorUtil {
                 returnStdout: true,
                 script: "${CommonUtil.getAdbHome(script)} devices | grep emulator | tail -1 | cut -f$index"
         )
+    }
+
+    /**
+     * Функция, возвращающая список имен запущенных эмуляторов
+     */
+    private static String[] getAllEmulatorNames(Object script) {
+        return script.sh(
+                returnStdout: true,
+                script: "${CommonUtil.getAdbHome(script)} devices | grep emulator | cut -f1"
+        ).split()
     }
 
     /**
@@ -105,6 +117,16 @@ class EmulatorUtil {
             -d \"${config.deviceName}\" \
             -k \"${config.sdkId}\" \
             -c \"${config.sdcardSize}\""
+        /*
+        script.sh "${CommonUtil.getAvdManagerHome(script)} create avd -f \
+            -n \"ANOTHER_NAME\" \
+            -d \"${config.deviceName}\" \
+            -k \"${config.sdkId}\" \
+            -c \"${config.sdcardSize}\""
+        script.sh "${CommonUtil.getEmulatorHome(script)} \
+                -avd \"ANOTHER_NAME\" \
+                -no-boot-anim -netfast -noaudio -accel on -no-window -gpu swiftshader_indirect -no-snapshot-save &"
+                */
         launchEmulator(script, config)
     }
 
@@ -118,7 +140,26 @@ class EmulatorUtil {
                 -no-boot-anim -netfast -noaudio -accel on -no-window -gpu swiftshader_indirect -no-snapshot-save &"
         script.echo "waiting $EMULATOR_TIMEOUT seconds for emulator..."
         script.sh "sleep $EMULATOR_TIMEOUT"
+
         // запоминаем новое имя эмулятора
+        // todo get from adb
+        getAllEmulatorNames(script).each {
+            script.echo it
+            def emulatorPort = it.substring(it.indexOf('-') + 1, it.length())
+            script.echo emulatorPort
+
+            script.sh "telnet localhost $emulatorPort > $TEMP_FILE_NAME || true"
+            script.sh "cat $TEMP_FILE_NAME"
+            script.sh "rm $TEMP_FILE_NAME"
+
+            /*
+            script.sh "telnet localhost $emulatorPort > $TEMP_FILE_NAME"
+            script.sh "avd name"
+            script.sh "exit"
+
+            script.sh "cat $TEMP_FILE_NAME | tail -2"
+            script.sh "rm $TEMP_FILE_NAME"*/
+        }
         config.emulatorName = getEmulatorName(script)
     }
 
