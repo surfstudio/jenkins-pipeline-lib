@@ -162,7 +162,7 @@ class AndroidTestUtil {
 
                         deleteApk(script, testBuildTypeApkName, config.emulatorName)
 
-                        script.echo "run tests for $apkMainFolder"
+                        script.echo "---------------------------------- RUN TESTS FOR: $apkMainFolder ----------------------------------"
 
                         int countOfLaunch = 0, testResultCode = 0
                         while (countOfLaunch <= instrumentationTestRetryCount) {

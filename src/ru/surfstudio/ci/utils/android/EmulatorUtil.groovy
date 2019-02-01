@@ -97,6 +97,8 @@ class EmulatorUtil {
      * Функция для создания и запуска нового эмулятора
      */
     static void createAndLaunchNewEmulator(Object script, AvdConfig config) {
+        script.echo "check for acceleration"
+        script.sh "${CommonUtil.getEmulatorHome(script)} -accel-check"
         script.echo "create new emulator"
         script.sh "${CommonUtil.getAvdManagerHome(script)} create avd -f \
             -n \"${config.avdName}\" \
@@ -113,7 +115,7 @@ class EmulatorUtil {
     static void launchEmulator(Object script, AvdConfig config) {
         script.sh "${CommonUtil.getEmulatorHome(script)} \
                 -avd \"${config.avdName}\" \
-                -netdelay none -netspeed full -no-window -no-snapshot-save &"
+                -no-boot-anim -netfast -noaudio -accel on -no-window -gpu swiftshader_indirect -no-snapshot-save &"
         script.echo "waiting $EMULATOR_TIMEOUT seconds for emulator..."
         script.sh "sleep $EMULATOR_TIMEOUT"
         // запоминаем новое имя эмулятора
