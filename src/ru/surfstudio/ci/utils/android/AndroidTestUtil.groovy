@@ -31,6 +31,12 @@ class AndroidTestUtil {
     private static String BASE64_ENCODING = "Base64"
     private static Integer TIMEOUT_PER_TEST = 60 * 5 // seconds
 
+    //region messages
+    private static String RUN_TESTS_MESSAGE = "RUN TESTS FOR: "
+    private static String REPEAT_TESTS_MESSAGE = "REPEAT TESTS FOR "
+    private static String TEST_RESULT_CODE_MESSAGE = "TEST RESULT CODE: "
+    //endregion
+
     /**
      * Версия build tools для получения корректного пути к актуальной утилите aapt.
      *
@@ -160,22 +166,13 @@ class AndroidTestUtil {
                         String spoonOutputDir = "${formatArgsForShellCommand(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
                         script.sh "mkdir -p $spoonOutputDir"
 
-                        try {
-                            def testBuildTypePackageName = ApkUtil.getPackageNameFromApk(
-                                    script,
-                                    testBuildTypeApkName,
-                                    BUILD_TOOLS_VERSION)
-                            ApkUtil.uninstallApk(script, config.emulatorName, testBuildTypePackageName)
-                        } catch (ignored) {
-                            script.echo "error while unistalling apk $testBuildTypeApkName"
-                        }
-
-                        script.echo "run tests for $apkMainFolder"
+                        deleteApk(script, testBuildTypeApkName, config.emulatorName)
+                        printMessage(script, "$RUN_TESTS_MESSAGE $apkMainFolder")
 
                         int countOfLaunch = 0, testResultCode = 0
                         while (countOfLaunch <= instrumentationTestRetryCount) {
                             if (countOfLaunch > 0) {
-                                printInfoForRelaunch(script, apkMainFolder)
+                                printMessage(script, "$REPEAT_TESTS_MESSAGE $apkMainFolder")
                             }
 
                             testResultCode = script.sh(
@@ -189,10 +186,13 @@ class AndroidTestUtil {
                                     -serial \"${formatArgsForShellCommand(config.emulatorName)}\""
                             )
 
+                            printMessage(script, "$TEST_RESULT_CODE_MESSAGE $testResultCode")
+
                             if (testResultCode == 0) {
                                 break
                             }
                             countOfLaunch++
+                            deleteApk(script, testBuildTypeApkName, config.emulatorName)
                         }
 
                         allTestsPassed = allTestsPassed && (testResultCode == 0)
@@ -222,8 +222,23 @@ class AndroidTestUtil {
         return result
     }
 
-    private static void printInfoForRelaunch(Object script, String testName) {
-        script.echo "---------------------------------- REPEAT TEST FOR: $testName ----------------------------------"
+    /**
+     * Функция для удаления данного APK с эмулятора
+     */
+    private static void deleteApk(Object script, String apkName, String emulatorName) {
+        try {
+            def testBuildTypePackageName = ApkUtil.getPackageNameFromApk(
+                    script,
+                    apkName,
+                    BUILD_TOOLS_VERSION)
+            ApkUtil.uninstallApk(script, emulatorName, testBuildTypePackageName)
+        } catch (ignored) {
+            script.echo "error while unistalling apk $apkName"
+        }
+    }
+
+    private static void printMessage(Object script, String message) {
+        script.echo "---------------------------------- $message ----------------------------------"
     }
 
     /**
