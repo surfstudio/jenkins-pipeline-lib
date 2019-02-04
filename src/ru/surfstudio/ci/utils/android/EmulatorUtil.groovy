@@ -25,8 +25,9 @@ class EmulatorUtil {
 
     // значение таймаута (в секундах) для создания и загрузки нового эмулятора
     static Integer EMULATOR_TIMEOUT = 60
-
-    private static String TEMP_FILE_NAME = "telnet-logs"
+    
+    // время, в течение которого будет открыт сеанс netcat для эмулятора при получении имени AVD
+    private static Integer NETCAT_TIMEOUT = 3
 
     /**
      * Функция, возвращающая имя последнего запущенного эмулятора
@@ -117,16 +118,6 @@ class EmulatorUtil {
             -d \"${config.deviceName}\" \
             -k \"${config.sdkId}\" \
             -c \"${config.sdcardSize}\""
-        /*
-        script.sh "${CommonUtil.getAvdManagerHome(script)} create avd -f \
-            -n \"ANOTHER_NAME\" \
-            -d \"${config.deviceName}\" \
-            -k \"${config.sdkId}\" \
-            -c \"${config.sdcardSize}\""
-        script.sh "${CommonUtil.getEmulatorHome(script)} \
-                -avd \"ANOTHER_NAME\" \
-                -no-boot-anim -netfast -noaudio -accel on -no-window -gpu swiftshader_indirect -no-snapshot-save &"
-                */
         launchEmulator(script, config)
     }
 
@@ -142,25 +133,20 @@ class EmulatorUtil {
         script.sh "sleep $EMULATOR_TIMEOUT"
 
         // запоминаем новое имя эмулятора
-        // todo get from adb
-        getAllEmulatorNames(script).each {
-            script.echo it
-            def emulatorPort = it.substring(it.indexOf('-') + 1, it.length())
+        for (def emulatorName : getAllEmulatorNames(script)) {
+            def emulatorPort = emulatorName.substring(emulatorName.indexOf('-') + 1, emulatorName.length())
             def avdName = getAvdNameForEmulatorPort(script, emulatorPort)
-            script.sh "$avdName"
-            
-            //script.sh "cat $TEMP_FILE_NAME"
-            //script.sh "rm $TEMP_FILE_NAME"
 
-            /*
-            script.sh "telnet localhost $emulatorPort > $TEMP_FILE_NAME"
-            script.sh "avd name"
-            script.sh "exit"
-
-            script.sh "cat $TEMP_FILE_NAME | tail -2"
-            script.sh "rm $TEMP_FILE_NAME"*/
+            if (avdName == config.avdName) {
+                config.emulatorName = emulatorName
+                script.echo "$emulatorName for $avdName"
+                break
+            }
         }
-        config.emulatorName = getEmulatorName(script)
+
+        if (CommonUtil.isNullOrEmpty(config.emulatorName)) {
+            throw new Exception("Emulator for AVD ${config.avdName} not found")
+        }
     }
 
     /**
@@ -178,7 +164,7 @@ class EmulatorUtil {
     private static String getAvdNameForEmulatorPort(Object script, String emulatorPort) {
         def netcatOutput = getShCommandOutput(
                 script,
-                "echo \"avd name\" | netcat localhost $emulatorPort | exit"
+                "echo avd name | nc localhost $emulatorPort -q $NETCAT_TIMEOUT"
         ).split()
         return netcatOutput[netcatOutput.length - 2]
     }
