@@ -32,9 +32,9 @@ class AndroidTestUtil {
     private static Integer TIMEOUT_PER_TEST = 60 * 5 // seconds
 
     //region messages
-    private static String RUN_TESTS_MESSAGE = "RUN TESTS FOR: "
-    private static String REPEAT_TESTS_MESSAGE = "REPEAT TESTS FOR "
-    private static String TEST_RESULT_CODE_MESSAGE = "TEST RESULT CODE: "
+    private static String RUN_TESTS_MESSAGE = "RUN TESTS FOR:"
+    private static String REPEAT_TESTS_MESSAGE = "REPEAT TESTS FOR:"
+    private static String TEST_RESULT_CODE_MESSAGE = "TEST RESULT CODE:"
     //endregion
 
     /**
@@ -135,13 +135,13 @@ class AndroidTestUtil {
             def apkModuleName = ApkUtil.getApkModuleName(script, currentApkName).trim()
             def apkPrefix = (apkModuleName != "build") ? apkModuleName : apkMainFolder
             def testReportFileNameSuffix = apkMainFolder
-
+            
             // Получение префикса модуля для запуска gradle-таска
             def gradleTaskPrefix = apkMainFolder
 
             if (apkMainFolder != apkPrefix) {
                 gradleTaskPrefix = "$apkMainFolder:$apkPrefix"
-                testReportFileNameSuffix += "-$apkPrefix"
+                testReportFileNameSuffix += "/$testReportFileNameSuffix-$apkPrefix"
             }
 
             // Находим APK для androidTestBuildType, заданного в конфиге
@@ -157,11 +157,15 @@ class AndroidTestUtil {
                 def testBuildTypeApkName = testBuildTypeApkList[0]
                 if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) {
                     def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, gradleTaskPrefix).trim()
-                    script.echo "currentInstrumentationRunnerName $currentInstrumentationRunnerName"
 
-                    // Проверка, определен ли testInstrumentationRunner для текущего модуля
-                    if (currentInstrumentationRunnerName != CommonUtil.EMPTY_STRING &&
+                    // Проверка, определен ли testInstrumentationRunner для текущего модуля.
+                    // Имя testInstrumentationRunner должно состоять из одного слова.
+                    if (currentInstrumentationRunnerName.split().length == 1 &&
+                            currentInstrumentationRunnerName != CommonUtil.EMPTY_STRING &&
                             currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {
+
+                        script.echo "currentInstrumentationRunnerName $currentInstrumentationRunnerName"
+
                         String projectRootDir = "${script.sh(returnStdout: true, script: "pwd")}/"
                         String spoonOutputDir = "${formatArgsForShellCommand(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
                         script.sh "mkdir -p $spoonOutputDir"
