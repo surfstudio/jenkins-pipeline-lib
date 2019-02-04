@@ -46,9 +46,9 @@ class EmulatorUtil {
      * Функция, возвращающая статус эмулятора с заданным именем
      */
     static String getEmulatorStatus(Object script, String emulatorName) {
-        return script.sh(
-                returnStdout: true,
-                script: "${CommonUtil.getAdbHome(script)} devices | grep $emulatorName | cut -f2"
+        return getShCommandOutput(
+                script,
+                "${CommonUtil.getAdbHome(script)} devices | grep $emulatorName | cut -f2"
         ).trim()
     }
 
@@ -61,9 +61,9 @@ class EmulatorUtil {
      * Индекс позволяет задать номер необходимого параметра: имя или статус.
      */
     private static String getEmulatorInfo(Object script, Integer index) {
-        return script.sh(
-                returnStdout: true,
-                script: "${CommonUtil.getAdbHome(script)} devices | grep emulator | tail -1 | cut -f$index"
+        return getShCommandOutput(
+                script,
+                "${CommonUtil.getAdbHome(script)} devices | grep emulator | tail -1 | cut -f$index"
         )
     }
 
@@ -71,9 +71,9 @@ class EmulatorUtil {
      * Функция, возвращающая список имен запущенных эмуляторов
      */
     private static String[] getAllEmulatorNames(Object script) {
-        return script.sh(
-                returnStdout: true,
-                script: "${CommonUtil.getAdbHome(script)} devices | grep emulator | cut -f1"
+        return getShCommandOutput(
+                script,
+                "${CommonUtil.getAdbHome(script)} devices | grep emulator | cut -f1"
         ).split()
     }
 
@@ -146,11 +146,11 @@ class EmulatorUtil {
         getAllEmulatorNames(script).each {
             script.echo it
             def emulatorPort = it.substring(it.indexOf('-') + 1, it.length())
-            script.echo emulatorPort
-
-            script.sh "telnet localhost $emulatorPort > $TEMP_FILE_NAME || true"
-            script.sh "cat $TEMP_FILE_NAME"
-            script.sh "rm $TEMP_FILE_NAME"
+            def avdName = getAvdNameForEmulatorPort(script, emulatorPort)
+            script.sh "$avdName"
+            
+            //script.sh "cat $TEMP_FILE_NAME"
+            //script.sh "rm $TEMP_FILE_NAME"
 
             /*
             script.sh "telnet localhost $emulatorPort > $TEMP_FILE_NAME"
@@ -171,5 +171,20 @@ class EmulatorUtil {
         closeRunningEmulator(script, config)
         createAndLaunchNewEmulator(script, config)
     }
+
+    /**
+     * Функция, возвращающая имя AVD для эмулятора с заданным портом
+     */
+    private static String getAvdNameForEmulatorPort(Object script, String emulatorPort) {
+        def netcatOutput = getShCommandOutput(
+                script,
+                "echo \"avd name\" | netcat localhost $emulatorPort | exit"
+        ).split()
+        return netcatOutput[netcatOutput.length - 2]
+    }
     //endregion
+
+    private static String getShCommandOutput(Object script, String command) {
+        return script.sh(returnStdout: true, script: command)
+    }
 }
