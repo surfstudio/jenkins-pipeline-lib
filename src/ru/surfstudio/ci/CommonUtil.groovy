@@ -46,6 +46,13 @@ class CommonUtil {
         return string != null && string != EMPTY_STRING
     }
 
+    /**
+     * Функция, проверяющая, что строка, переданная параметром, равна null или является пустой
+     */
+    static Boolean isNullOrEmpty(String string) {
+        return string == null || string == EMPTY_STRING
+    }
+
     //region Environment variables
     static String getAndroidHome(Object script) {
         return script.env.ANDROID_HOME
