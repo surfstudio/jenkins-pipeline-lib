@@ -97,7 +97,7 @@ abstract class Pipeline implements Serializable {
         }
     }
 
-    private void printStageResults() {
+    def printStageResults() {
         for (Stage stage : stages) {
             script.echo (String.format("%-30s", "\"${stage.name}\" stage result: ") + stage.result)
         }
