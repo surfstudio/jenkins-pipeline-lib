@@ -84,15 +84,22 @@ abstract class Pipeline implements Serializable {
             }
         }  finally {
             script.echo "Finalize build:"
+            printStageResults()
             script.echo "Current job result: ${script.currentBuild.result}"
             script.echo "Try apply job result: ${jobResult}"
-            script.currentBuild.result = jobResult  //нельзя повышать статус, то есть если раньше был установлен failed, нельзя заменить на success
+            script.currentBuild.result = jobResult  //нельзя повышать статус, то есть если раньше был установлен failed или unstable, нельзя заменить на success
             script.echo "Updated job result: ${script.currentBuild.result}"
             if (finalizeBody) {
                 script.echo "Start finalize body"
                 finalizeBody()
                 script.echo "End finalize body"
             }
+        }
+    }
+
+    private void printStageResults() {
+        for (Stage stage : stages) {
+            script.echo (String.format("%-30s", "\"${stage.name}\" stage result: ") + stage.result)
         }
     }
 
@@ -110,30 +117,31 @@ abstract class Pipeline implements Serializable {
                 return
             } else {
                 try {
-                    script.echo("Stage ${stage.name} started")
+                    script.echo("Stage ${stage.name} STARTED")
                     if(preExecuteStageBody){
                         preExecuteStageBody(stage)
                     }
                     stage.body()
                     stage.result = Result.SUCCESS
-                    script.echo("Stage ${stage.name} success")
+                    script.echo("Stage ${stage.name} SUCCESS")
                 } catch (e) {
                     script.echo "Error: ${e.toString()}"
                     CommonUtil.printStackTrace(script, e)
 
                     if(e instanceof InterruptedException || //отменено из другого процесса
                             e instanceof hudson.AbortException && e.getMessage() == "script returned exit code 143") { //отменено пользователем
-                        script.echo("Stage ${stage.name} aborted")
+                        script.echo("Stage ${stage.name} ABORTED")
                         stage.result = Result.ABORTED
                         jobResult = Result.ABORTED
                         throw e
                     } else if (e instanceof UnstableStateThrowable) {
+                        script.echo("Stage ${stage.name} STOPPED and mark as unstable")
                         stage.result = Result.UNSTABLE
                         if (jobResult != Result.FAILURE) {
                             jobResult = Result.UNSTABLE
                         }
                     } else {
-                        script.echo("Stage ${stage.name} fail")
+                        script.echo("Stage ${stage.name} FAIL")
                         script.echo("Apply stage strategy: ${stage.strategy}")
                         if (stage.strategy == StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                             stage.result = Result.FAILURE
