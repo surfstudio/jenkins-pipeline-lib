@@ -25,14 +25,26 @@ class AndroidTestUtil {
 
     static String ANDROID_TEST_APK_SUFFIX = "androidTest"
 
-    private static String NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME = "null"
-
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
-    private static String BASE64_ENCODING = "Base64"
     private static Integer TIMEOUT_PER_TEST = 60 * 5 // seconds
+
+    //region helpful constants
+    private static String NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME = "null"
+    private static String BASE64_ENCODING = "Base64"
+
+    private static String TEST_COUNT_STRING = "testCount="
+    private static String FAILURE_STRING = "failure"
+
+    private static String ZERO_STRING = "0"
+    private static String DIVIDER = "="
+
+    private static Integer SUCCESS_CODE = 0
+    private static Integer ERROR_CODE = 1
+    //endregion
 
     //region messages
     private static String RUN_TESTS_MESSAGE = "RUN TESTS FOR:"
+    private static String NO_INSTRUMENTAL_TESTS_MESSAGE = "NO INSTRUMENTAL TESTS IN MODULE:"
     private static String REPEAT_TESTS_MESSAGE = "REPEAT TESTS FOR:"
     private static String TEST_RESULT_CODE_MESSAGE = "TEST RESULT CODE:"
     //endregion
@@ -135,13 +147,17 @@ class AndroidTestUtil {
             def apkModuleName = ApkUtil.getApkModuleName(script, currentApkName).trim()
             def apkPrefix = (apkModuleName != "build") ? apkModuleName : apkMainFolder
             def testReportFileNameSuffix = apkMainFolder
-            
+
+            // Фактическое имя модуля, в котором запущены тесты (отличается от apkMainFolder, если проект содержит вложенные модули)
+            def testModuleName = apkMainFolder
+
             // Получение префикса модуля для запуска gradle-таска
             def gradleTaskPrefix = apkMainFolder
 
             if (apkMainFolder != apkPrefix) {
                 gradleTaskPrefix = "$apkMainFolder:$apkPrefix"
                 testReportFileNameSuffix += "/$testReportFileNameSuffix-$apkPrefix"
+                testModuleName += "/$apkPrefix"
             }
 
             // Находим APK для androidTestBuildType, заданного в конфиге
@@ -171,35 +187,48 @@ class AndroidTestUtil {
                         script.sh "mkdir -p $spoonOutputDir"
 
                         deleteApk(script, testBuildTypeApkName, config.emulatorName)
-                        printMessage(script, "$RUN_TESTS_MESSAGE $apkMainFolder")
+                        printMessage(script, "$RUN_TESTS_MESSAGE $testModuleName")
 
                         int countOfLaunch = 0, testResultCode = 0
                         while (countOfLaunch <= instrumentationTestRetryCount) {
                             if (countOfLaunch > 0) {
-                                printMessage(script, "$REPEAT_TESTS_MESSAGE $apkMainFolder")
+                                printMessage(script, "$REPEAT_TESTS_MESSAGE $testModuleName")
                             }
 
-                            testResultCode = script.sh(
-                                    returnStatus: true,
+                            def testResultLogs = script.sh(
+                                    returnStdout: true,
                                     script: "java -jar $SPOON_JAR_NAME \
                                     --apk \"${formatArgsForShellCommand(projectRootDir, testBuildTypeApkName)}\" \
                                     --test-apk \"${formatArgsForShellCommand(projectRootDir, currentApkName)}\" \
                                     --output \"${formatArgsForShellCommand(spoonOutputDir)}\" \
                                     --adb-timeout $TIMEOUT_PER_TEST \
-                                    --debug --fail-on-failure --grant-all \
+                                    --debug --grant-all --no-animations \
                                     -serial \"${formatArgsForShellCommand(config.emulatorName)}\""
                             )
+                            script.echo testResultLogs
+                            testResultLogs = testResultLogs.split()
 
-                            printMessage(script, "$TEST_RESULT_CODE_MESSAGE $testResultCode")
+                            def testCountString = testResultLogs.find { it.contains(TEST_COUNT_STRING) }
+                            def testCount = testCountString.split().find { it.contains(TEST_COUNT_STRING) }.split(DIVIDER).last()
 
-                            if (testResultCode == 0) {
+                            if (testCount == ZERO_STRING) {
+                                printMessage(script, "$NO_INSTRUMENTAL_TESTS_MESSAGE $testModuleName")
                                 break
                             }
+
+                            def testFailureString = testResultLogs.find { it.contains(FAILURE_STRING) }
+                            testResultCode = testFailureString == null && testCountString != null ? SUCCESS_CODE : ERROR_CODE
+                            printMessage(script, "$TEST_RESULT_CODE_MESSAGE $testResultCode")
+
+                            if (testResultCode == SUCCESS_CODE) {
+                                break
+                            }
+
                             countOfLaunch++
                             deleteApk(script, testBuildTypeApkName, config.emulatorName)
                         }
 
-                        allTestsPassed = allTestsPassed && (testResultCode == 0)
+                        allTestsPassed = allTestsPassed && (testResultCode == SUCCESS_CODE)
 
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
                         script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkMainFolder}"
