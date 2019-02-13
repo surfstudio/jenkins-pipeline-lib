@@ -55,6 +55,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public outputJsonFile = "report.json"
     public outputHtmlFile = "report.html"
     public outputrerunTxtFile = "rerun.txt"
+    public outputsIdsDiff = "miss_id.txt"
 
     //credentials
     public jiraAuthenticationName = 'Jarvis_Jira'
@@ -213,6 +214,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.sh "cd .. && curl -H \"Content-Type: multipart/form-data\" -u ${script.env.USERNAME}:${script.env.PASSWORD} -F \"file=@arhive.zip\" ${Constants.JIRA_URL}rest/raven/1.0/import/execution/bundle"
             }
             script.step([$class: 'ArtifactArchiver', artifacts: outputrerunTxtFile, allowEmptyArchive: true]) 
+        
             CommonUtil.safe(script){
 
                 script.sh "rm arhive.zip"
@@ -290,7 +292,8 @@ abstract class UiTestPipeline extends ScmPipeline {
                             script,
                             [
                                 script.string(name: TASK_KEY_PARAMETER, value: task.trim())
-                            ]
+                            ],  
+                            true
                     )
                 }
             }
@@ -334,8 +337,8 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.logRotator(
                         artifactDaysToKeepStr: '3',
                         artifactNumToKeepStr: '10',
-                        daysToKeepStr: '90',
-                        numToKeepStr: '')
+                        daysToKeepStr: '60',
+                        numToKeepStr: '200')
         )
     }
 
@@ -373,12 +376,11 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.string(
                         name: USER_EMAIL_PARAMETER,
                         defaultValue: "qa@surfstudio.ru",
-                        description: 'почта пользователя, которому будут отсылаться уведомления о результатах тестирования. Если не указано. то сообщения будут отсылаться в группу проекта'),
+                        description: 'почта пользователя, которому будут отсылаться уведомления о результатах тестирования. Если не указано. то сообщения будут отсылаться в группу проекта'),      
                 script.string(
                         name: NODE_PARAMETER,
                         defaultValue: node,
-                        description: 'Node на котором будет выполняться job'),
-
+                        description: 'Node на котором будет выполняться job')
         ])
     }
 

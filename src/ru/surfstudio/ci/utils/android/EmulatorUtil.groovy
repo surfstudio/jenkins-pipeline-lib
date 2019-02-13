@@ -25,6 +25,9 @@ class EmulatorUtil {
 
     // значение таймаута (в секундах) для создания и загрузки нового эмулятора
     static Integer EMULATOR_TIMEOUT = 60
+    
+    // время, в течение которого будет открыт сеанс netcat для эмулятора при получении имени AVD
+    private static Integer NETCAT_TIMEOUT = 3
 
     /**
      * Функция, возвращающая имя последнего запущенного эмулятора
@@ -44,9 +47,9 @@ class EmulatorUtil {
      * Функция, возвращающая статус эмулятора с заданным именем
      */
     static String getEmulatorStatus(Object script, String emulatorName) {
-        return script.sh(
-                returnStdout: true,
-                script: "${CommonUtil.getAdbHome(script)} devices | grep $emulatorName | cut -f2"
+        return getShCommandOutput(
+                script,
+                "${CommonUtil.getAdbHome(script)} devices | grep $emulatorName | cut -f2"
         ).trim()
     }
 
@@ -59,10 +62,20 @@ class EmulatorUtil {
      * Индекс позволяет задать номер необходимого параметра: имя или статус.
      */
     private static String getEmulatorInfo(Object script, Integer index) {
-        return script.sh(
-                returnStdout: true,
-                script: "${CommonUtil.getAdbHome(script)} devices | grep emulator | tail -1 | cut -f$index"
+        return getShCommandOutput(
+                script,
+                "${CommonUtil.getAdbHome(script)} devices | grep emulator | tail -1 | cut -f$index"
         )
+    }
+
+    /**
+     * Функция, возвращающая список имен запущенных эмуляторов
+     */
+    private static String[] getAllEmulatorNames(Object script) {
+        return getShCommandOutput(
+                script,
+                "${CommonUtil.getAdbHome(script)} devices | grep emulator | cut -f1"
+        ).split()
     }
 
     /**
@@ -97,6 +110,8 @@ class EmulatorUtil {
      * Функция для создания и запуска нового эмулятора
      */
     static void createAndLaunchNewEmulator(Object script, AvdConfig config) {
+        script.echo "check for acceleration"
+        script.sh "${CommonUtil.getEmulatorHome(script)} -accel-check"
         script.echo "create new emulator"
         script.sh "${CommonUtil.getAvdManagerHome(script)} create avd -f \
             -n \"${config.avdName}\" \
@@ -113,12 +128,25 @@ class EmulatorUtil {
     static void launchEmulator(Object script, AvdConfig config) {
         script.sh "${CommonUtil.getEmulatorHome(script)} \
                 -avd \"${config.avdName}\" \
-                -skin \"${config.skinSize}\" \
-                -no-window -no-boot-anim -no-snapshot-save &"
+                -no-boot-anim -netfast -noaudio -accel on -no-window -gpu swiftshader_indirect -no-snapshot-save &"
         script.echo "waiting $EMULATOR_TIMEOUT seconds for emulator..."
         script.sh "sleep $EMULATOR_TIMEOUT"
+
         // запоминаем новое имя эмулятора
-        config.emulatorName = getEmulatorName(script)
+        for (def emulatorName : getAllEmulatorNames(script)) {
+            def emulatorPort = emulatorName.substring(emulatorName.indexOf('-') + 1, emulatorName.length())
+            def avdName = getAvdNameForEmulatorPort(script, emulatorPort)
+
+            if (avdName == config.avdName) {
+                config.emulatorName = emulatorName
+                script.echo "$emulatorName for $avdName"
+                break
+            }
+        }
+
+        if (CommonUtil.isNullOrEmpty(config.emulatorName)) {
+            throw new Exception("Emulator for AVD ${config.avdName} not found")
+        }
     }
 
     /**
@@ -129,5 +157,20 @@ class EmulatorUtil {
         closeRunningEmulator(script, config)
         createAndLaunchNewEmulator(script, config)
     }
+
+    /**
+     * Функция, возвращающая имя AVD для эмулятора с заданным портом
+     */
+    private static String getAvdNameForEmulatorPort(Object script, String emulatorPort) {
+        def netcatOutput = getShCommandOutput(
+                script,
+                "echo avd name | nc localhost $emulatorPort -q $NETCAT_TIMEOUT"
+        ).split()
+        return netcatOutput[netcatOutput.length - 2]
+    }
     //endregion
+
+    private static String getShCommandOutput(Object script, String command) {
+        return script.sh(returnStdout: true, script: command)
+    }
 }

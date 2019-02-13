@@ -165,8 +165,8 @@ abstract class PrPipeline extends ScmPipeline {
                 script.logRotator(
                         artifactDaysToKeepStr: '3',
                         artifactNumToKeepStr: '10',
-                        daysToKeepStr: '90',
-                        numToKeepStr: '')
+                        daysToKeepStr: '60',
+                        numToKeepStr: '200')
         )
     }
 

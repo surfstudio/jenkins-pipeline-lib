@@ -26,7 +26,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
     public derivedDataPath = "${sourcesDir}"
 
     //files
-    public simulatorIdentificationFile = "currentSim"
+    public simulatorIdentifierFile = "currentSim"
 
     //environment
     public testDeviceName = "iPhone 7"
@@ -85,18 +85,18 @@ class UiTestPipelineiOS extends UiTestPipeline {
                             featuresDir,
                             featureForTest,
                             outputHtmlFile,
-                            outputJsonFile)
+                            outputJsonFile,
+                            outputrerunTxtFile)
                 },
-                createStage(PUBLISH_RESULTS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                createStage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     publishResultsStageBody(script,
                             outputsDir,
                             outputJsonFile,
                             outputHtmlFile,
+                            outputrerunTxtFile,
                             jiraAuthenticationName,
                             "UI Tests ${taskKey} ${taskName}")
-
                 }
-
         ]
         finalizeBody = { finalizeStageBody(this) }
     }
@@ -116,11 +116,14 @@ class UiTestPipelineiOS extends UiTestPipeline {
             script.dir(sourcesDir) {
                 CommonUtil.shWithRuby(script, "make init")
             }
+
             CommonUtil.shWithRuby(script, "bundle install")
-            //CommonUtil.shWithRuby(script, "echo -ne '\n' | bundle exec calabash-ios setup ${sourcesDir}")
-            //script.sh "source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use 2.3.5; expect -f calabash-expect.sh"
-            CommonUtil.shWithRuby(script, "expect -f calabash-expect.sh")
-            script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//') -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
+            
+            CommonUtil.shWithRuby(script, "set -x; expect -f calabash-expect.sh; set +x;")
+
+            script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
+            
+            
         }
     }
 
@@ -134,7 +137,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
                                 String featuresDir,
                                 String featureFile,
                                 String outputHtmlFile,
-                                String outputJsonFile) {
+                                String outputJsonFile,
+                                outputrerunTxtFile) {
 
         def simulatorIdentifierFile = "currentsim"
 
@@ -148,6 +152,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
         script.sh "xcrun simctl boot \$(cat ${simulatorIdentifierFile})"
         script.sh "xcrun simctl install booted ${derivedDataPath}/Build/Products/Debug-iphonesimulator/*.app"
 
+        CommonUtil.shWithRuby(script, "run-loop simctl manage-processes") 
         script.echo "Tests started"
         script.echo "start tests for $taskKey"
         CommonUtil.safe(script) {
@@ -156,15 +161,22 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
 
         try {
-            CommonUtil.shWithRuby(script, "APP_BUNDLE_PATH=${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//').app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty")
+            CommonUtil.shWithRuby(script, "APP_BUNDLE_PATH=${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//').app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty")
         } finally {
             script.sh "xcrun simctl shutdown \$(cat ${simulatorIdentifierFile})"
             script.sh "xcrun simctl shutdown all"
             script.sh "xcrun simctl list"
-            script.sh "sleep 15"
+            script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
             script.echo "Removing simulator ..."
+            script.sh "sleep 3"
 
-            //script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
+             CommonUtil.safe(script) {
+                script.sh "mkdir arhive"
+            }
+            script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
+        
+
+            
         }
     }
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================

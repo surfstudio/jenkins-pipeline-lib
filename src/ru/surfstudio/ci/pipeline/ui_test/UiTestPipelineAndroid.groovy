@@ -62,12 +62,14 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 createStage(TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     testStageBodyAndroid(script,
                             taskKey,
+                            sourcesDir,
                             outputsDir,
                             featuresDir,
                             artifactForTest,
                             featureForTest,
                             outputHtmlFile,
-                            outputrerunTxtFile)
+                            outputrerunTxtFile,
+                            outputsIdsDiff)
                 },
                 createStage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     publishResultsStageBody(script,
@@ -106,12 +108,14 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
     def static testStageBodyAndroid(Object script,
                                     String taskKey,
+                                    String sourcesDir,
                                     String outputsDir,
                                     String featuresDir,
                                     String artifactForTest,
                                     String featureFile,
                                     String outputHtmlFile,
-                                    String outputrerunTxtFile
+                                    String outputrerunTxtFile,
+                                    String outputsIdsDiff
                                     ) {
 
 
@@ -143,8 +147,24 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
         try {
             CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  -p json_report\" ${featuresDir}/${featureFile} --concurrent")
-        }
+
+            }
         finally {
+            /*CommonUtil.safe(script) 
+            {
+                script.sh "ls && cp ./fullScript.sh sources"
+
+                script.dir(sourcesDir) {
+                        script.sh "source ~/.bashrc; /bin/bash ./fullScript.sh"
+                         }
+
+                script.sh "source ~/.bashrc; /bin/bash ./find_id.sh"
+                script.sh "mv sources/idFullA.txt ."
+                script.sh "source ~/.bashrc; /bin/bash ./match.sh"                
+            }
+            */
+            CommonUtil.shWithRuby(script, "ruby -r \'./find_id.rb\' -e \"Find.new.get_miss_id(\'./${sourcesDir}\', \'./features/android/pages\')\"")
+            script.step([$class: 'ArtifactArchiver', artifacts: outputsIdsDiff, allowEmptyArchive: true])
             CommonUtil.safe(script) {
                 script.sh "mkdir arhive"
             }
