@@ -29,7 +29,7 @@ class PrPipelineAndroid extends PrPipeline {
 
     public buildGradleTask = "clean assembleQa"
 
-    public unitTestGradleTask = "testQaUnitTest"
+    public unitTestGradleTask = "testQaUnitTest -PtestType=unit"
     public unitTestResultPathXml = "**/test-results/testQaUnitTest/*.xml"
     public unitTestResultPathDirHtml = "app/build/reports/tests/testQaUnitTest/"
 

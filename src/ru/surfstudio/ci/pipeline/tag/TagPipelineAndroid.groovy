@@ -38,7 +38,7 @@ class TagPipelineAndroid extends TagPipeline {
     public buildGradleTask = "clean assembleQa assembleRelease"
     public betaUploadGradleTask = "crashlyticsUploadDistributionQa"
 
-    public unitTestGradleTask = "testQaUnitTest"
+    public unitTestGradleTask = "testQaUnitTest -PtestType=unit"
     public unitTestResultPathXml = "**/test-results/testQaUnitTest/*.xml"
     public unitTestResultPathDirHtml = "app/build/reports/tests/testQaUnitTest/"
 

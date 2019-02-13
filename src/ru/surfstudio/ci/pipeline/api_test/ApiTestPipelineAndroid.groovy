@@ -41,8 +41,8 @@ class ApiTestPipelineAndroid extends ScmPipeline {
 
 
     //tasks //todo заменить на новый механизм через ApiTestRunner
-    public checkApiTestGradleTask = "clean testQaUnitTest --tests *.*TestApi.test*" //тесты на работающие методы на сервере
-    public waitApiTestGradleTask = "clean testQaUnitTest --tests *.*TestApi.wait*" //тесты на апи, которые еще не работают на сервере, эти тесты должны падать при успешном прохождении теста
+    public checkApiTestGradleTask = "clean testQaUnitTest -PtestType=api" //тесты на работающие методы на сервере
+    public waitApiTestGradleTask = "clean testQaUnitTest -PtestType=waitApi" //тесты на апи, которые еще не работают на сервере, эти тесты должны падать при успешном прохождении теста
 
     public testResultPathXml = "**/test-results/testQaUnitTest/*.xml"
     public testResultPathDirHtml = "app-injector/build/reports/tests/testQaUnitTest/"
