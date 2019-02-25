@@ -9,9 +9,6 @@ import ru.surfstudio.ci.stage.body.UiTestStages
 
 class UiTestPipelineiOS extends UiTestPipeline {
 
-    public artifactForTest = "for_test.apk"
-    public buildGradleTask = "clean assembleQa"
-    public builtApkPattern = "${sourcesDir}/**/*qa*.apk"
 
     //dirs
     public derivedDataPath = "${sourcesDir}"
@@ -20,9 +17,14 @@ class UiTestPipelineiOS extends UiTestPipeline {
     public simulatorIdentificationFile = "currentSim"
 
     //environment
-    public testDeviceName = "iPhone 7"
-    public testOSVersion = "11.4"
-    public testiOSSDK = "iphonesimulator11.4"
+    //public testDeviceName = "iPhone 7"
+    //public testOSVersion = "11.4"
+    //public testiOSSDK = "iphonesimulator11.4"
+
+    //environment
+    public testDeviceName = ""
+    public testOSVersion = ""
+    public testiOSSDK = ""
 
     UiTestPipelineiOS(Object script) {
         super(script)
