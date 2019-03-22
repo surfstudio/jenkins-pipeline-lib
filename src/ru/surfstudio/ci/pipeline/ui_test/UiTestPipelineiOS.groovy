@@ -140,7 +140,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
                                 String outputJsonFile,
                                 outputrerunTxtFile) {
 
-        lock ("Lock_ui_test_on_${script.env.NODE_NAME}") {
+        script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
             def simulatorIdentifierFile = "currentsim"
 
             script.sh "xcrun simctl shutdown all"
