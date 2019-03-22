@@ -118,7 +118,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                                     String outputsIdsDiff
                                     ) {
 
-        lock ("Lock_ui_test_on_${script.env.NODE_NAME}") {
+        script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
             script.echo "Tests started"
             script.echo "start tests for $artifactForTest $taskKey"
             CommonUtil.safe(script) {
