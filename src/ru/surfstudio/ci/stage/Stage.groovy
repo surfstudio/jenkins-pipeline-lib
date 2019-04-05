@@ -40,7 +40,7 @@ class Stage implements StageInterface {
     }
 
     @Override
-    def execute(Object script, Closure preExecuteStageBody, Closure postExecuteStageBody) {
+    void execute(Object script, Closure preExecuteStageBody, Closure postExecuteStageBody) {
         //https://issues.jenkins-ci.org/browse/JENKINS-39203 подождем пока сделают разные статусы на разные Stage
         def stage = this
         script.node(stage.node) {

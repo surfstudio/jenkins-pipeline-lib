@@ -11,11 +11,13 @@ public class ParallelStageSet implements StageGroup {
     }
 
     @Override
-    def execute(Object script, Closure preExecuteStageBody, Closure postExecuteStageBody) {
+    void execute(Object script, Closure preExecuteStageBody, Closure postExecuteStageBody) {
         def lines = [:]
         for (StageInterface stage in stages) {
             lines[stage.name] = {stage.execute(script, preExecuteStageBody, postExecuteStageBody)}
         }
-        script.parallel lines
+        script.stage(name) {
+            script.parallel lines
+        }
     }
 }
