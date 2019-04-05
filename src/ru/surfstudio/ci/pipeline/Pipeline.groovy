@@ -24,6 +24,7 @@ import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageGroup
 import ru.surfstudio.ci.stage.StageInterface
 import ru.surfstudio.ci.stage.StageStrategy
+import ru.surfstudio.ci.utils.StageTreeUtil
 
 /**
  * Наследники класса Pipeline - ключевые сущности для выполнения скрипта
@@ -111,24 +112,7 @@ abstract class Pipeline implements Serializable {
      * @return true/false
      */
     def replaceStage(Stage newStage) {
-        return recReplaceStage(stages, newStage)
-    }
-
-    def recReplaceStage(List<StageInterface> stages, Stage newStage) {
-        for(int i = 0; i < stages.size(); i++){
-            def stage = stages.get(i)
-            if(stage.name == newStage.name) {
-                stages.remove(i)
-                stages.add(i, newStage)
-                return true
-            } else if (stage instanceof StageGroup){
-                def result = recReplaceStage(stage.stages, newStage)
-                if (result) {
-                    return true
-                }
-            }
-        }
-        return false
+        return StageTreeUtil.replaceStage(stages, newStage)
     }
 
     /**
@@ -137,21 +121,7 @@ abstract class Pipeline implements Serializable {
      * @return stage/null
      */
     def getStage(String stageName) {
-        return recGetStage(stages, stageName)
-    }
-
-    def recGetStage(List<StageInterface> stages, String stageName) {
-        for(StageInterface stage in stages){
-            if(stage.name == stageName) {
-                return stage
-            } else if (stage instanceof StageGroup){
-                def result = recGetStage(stage.stages, stageName)
-                if (result) {
-                    return result
-                }
-            }
-        }
-        return null
+        return StageTreeUtil.getStage(stages, stageName)
     }
 
     /**
@@ -159,17 +129,7 @@ abstract class Pipeline implements Serializable {
      * @param lambda: { stage ->  ... }
      */
     def forStages(Closure lambda) {
-        return recForStages(stages, lambda)
-    }
-
-    def recForStages(List<StageInterface> stages, Closure lambda) {
-        for(StageInterface stage in stages){
-            lambda(stage)
-            if (stage instanceof StageGroup){
-                recForStages(stages, lambda)
-            }
-        }
-        return null
+        return StageTreeUtil.forStages(stages, lambda)
     }
 
     // ==================================== DSL =========================================

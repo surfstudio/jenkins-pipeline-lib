@@ -17,7 +17,10 @@ package ru.surfstudio.ci
 
 import ru.surfstudio.ci.pipeline.Pipeline
 import ru.surfstudio.ci.stage.Stage
+import ru.surfstudio.ci.stage.StageInterface
+import ru.surfstudio.ci.stage.StageWithResult
 import ru.surfstudio.ci.stage.StageWithStrategy
+import ru.surfstudio.ci.utils.StageTreeUtil
 
 class CommonUtil {
 
@@ -223,14 +226,16 @@ class CommonUtil {
         script.echo "initial value of {$varName} is {$varValue}"
     }
 
-    def static unsuccessReasonsToString(List<Stage> stages){
+    def static unsuccessReasonsToString(List<StageInterface> stages){
         def unsuccessReasons = ""
-        for (stage in stages) {
-            if (stage.result && stage.result != Result.SUCCESS) {
-                if (!unsuccessReasons.isEmpty()) {
-                    unsuccessReasons += ", "
+        StageTreeUtil.forStages(stages) { stage ->
+            if(stage instanceof StageWithResult) {
+                if (stage.result && stage.result != Result.SUCCESS) {
+                    if (!unsuccessReasons.isEmpty()) {
+                        unsuccessReasons += ", "
+                    }
+                    unsuccessReasons += "${stage.name} -> ${stage.result}"
                 }
-                unsuccessReasons += "${stage.name} -> ${stage.result}"
             }
         }
         return unsuccessReasons
@@ -251,8 +256,13 @@ class CommonUtil {
     def static applyStrategiesFromParams(Pipeline pipeline, Map strategiesFromParamsMap) {
         strategiesFromParamsMap.each{ stageName, strategyValue ->
             if(strategyValue) {
-                pipeline.getStage(stageName).strategy = strategyValue
-                pipeline.script.echo "value of ${stageName}.strategy sets from parameters to ${strategyValue}"
+                def stage = pipeline.getStage(stageName)
+                if(stage instanceof StageWithStrategy) {
+                    stage.strategy = strategyValue
+                    pipeline.script.echo "value of ${stageName}.strategy sets from parameters to ${strategyValue}"
+                } else {
+                    script.error "stage with name ${stageName} is not StageWithStrategy"
+                }
             }
         }
     }
