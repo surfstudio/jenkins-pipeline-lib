@@ -20,7 +20,7 @@ import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
-import ru.surfstudio.ci.error.UnstableStateThrowable
+
 import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
@@ -127,8 +127,7 @@ abstract class TagPipeline extends ScmPipeline {
         }
 
         if(!branchForChangeVersion){
-            script.echo "WARN: Do not find suitable branch for setting version. Branches serched for patterns: $branchesPatternsForAutoChangeVersion"
-            throw new UnstableStateThrowable()
+            script.error "WARN: Do not find suitable branch for setting version. Branches searched for patterns: $branchesPatternsForAutoChangeVersion"
         }
 
         script.sh "git stash"

@@ -38,28 +38,28 @@ class UiTestPipelineAndroid extends UiTestPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                createStage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, sourceRepoCredentialsId)
                 },
-                createStage(CHECKOUT_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(CHECKOUT_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     checkoutTestsStageBody(script, repoUrl, testBranch, testRepoCredentialsId)
                 },
-                createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     buildStageBodyAndroid(script, sourcesDir, buildGradleTask)
                 },
-                createStage(PREPARE_ARTIFACT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(PREPARE_ARTIFACT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     prepareApkStageBodyAndroid(script,
                             builtApkPattern,
                             artifactForTest)
                 },
-                createStage(PREPARE_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(PREPARE_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     prepareTestsStageBody(script,
                             jiraAuthenticationName,
                             taskKey,
                             featuresDir,
                             featureForTest)
                 },
-                createStage(TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                stage(TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     testStageBodyAndroid(script,
                             taskKey,
                             sourcesDir,
@@ -71,7 +71,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                             outputrerunTxtFile,
                             outputsIdsDiff)
                 },
-                createStage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     publishResultsStageBody(script,
                             outputsDir,
                             outputJsonFile,

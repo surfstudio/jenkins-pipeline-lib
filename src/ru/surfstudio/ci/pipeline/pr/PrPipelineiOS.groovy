@@ -40,22 +40,22 @@ class PrPipelineiOS extends PrPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                createStage(PRE_MERGE, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(PRE_MERGE, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
-                createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     iOSPipelineHelper.buildStageBodyiOS(script,
                         iOSKeychainCredenialId,
                         iOSCertfileCredentialId
                     )
                 },
-                createStage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     iOSPipelineHelper.unitTestStageBodyiOS(script)
                 },
-                createStage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                stage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     iOSPipelineHelper.instrumentationTestStageBodyiOS(script)
                 },
-                createStage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     iOSPipelineHelper.staticCodeAnalysisStageBodyiOS(script)
                 }
         ]

@@ -47,16 +47,16 @@ class UiTestPipelineiOS extends UiTestPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     initBody(this)
                 },
-                createStage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, sourceRepoCredentialsId)
                 },
-                createStage(CHECKOUT_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(CHECKOUT_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     checkoutTestsStageBody(script, repoUrl, testBranch, testRepoCredentialsId)
                 },
-                createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     buildStageBodyiOS(script,
                             sourcesDir, 
                             derivedDataPath,
@@ -64,17 +64,17 @@ class UiTestPipelineiOS extends UiTestPipeline {
                             iOSKeychainCredenialId, 
                             iOSCertfileCredentialId)
                 },
-                createStage(PREPARE_ARTIFACT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(PREPARE_ARTIFACT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     script.echo "empty stage"
                 },
-                createStage(PREPARE_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(PREPARE_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     prepareTestsStageBody(script,
                             jiraAuthenticationName,
                             taskKey,
                             featuresDir,
                             featureForTest)
                 },
-                createStage(TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                stage(TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     testStageBodyiOS(script,
                             taskKey,
                             sourcesDir,
@@ -88,7 +88,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
                             outputJsonFile,
                             outputrerunTxtFile)
                 },
-                createStage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     publishResultsStageBody(script,
                             outputsDir,
                             outputJsonFile,

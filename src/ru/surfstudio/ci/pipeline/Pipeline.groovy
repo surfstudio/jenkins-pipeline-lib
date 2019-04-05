@@ -16,10 +16,13 @@
  */
 package ru.surfstudio.ci.pipeline
 
-import ru.surfstudio.ci.CommonUtil
+
 import ru.surfstudio.ci.Result
-import ru.surfstudio.ci.error.UnstableStateThrowable
+
+import ru.surfstudio.ci.stage.ParallelStageSet
 import ru.surfstudio.ci.stage.Stage
+import ru.surfstudio.ci.stage.StageGroup
+import ru.surfstudio.ci.stage.StageInterface
 import ru.surfstudio.ci.stage.StageStrategy
 
 /**
@@ -52,11 +55,11 @@ abstract class Pipeline implements Serializable {
     public static final String INIT = 'Init'
 
     public script //Jenkins Pipeline Script
-    public jobResult = Result.SUCCESS
+    public jobResult = Result.NOT_BUILT
     public node
     public Closure initializeBody  //runs on master node
     public Closure<List<Object>> propertiesProvider  //runs after initializeBody on master node
-    public List<Stage> stages     //runs on specified node
+    public List<StageInterface> stages     //runs on specified node
     public Closure finalizeBody
 
     public preExecuteStageBody = {}  // { stage -> ... } runs for all stages in 'stages' list
@@ -76,13 +79,17 @@ abstract class Pipeline implements Serializable {
     def run() {
         try {
             def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, createInitStageBody())
-            stageWithStrategy(initStage, {}, {})
+            initStage.execute(script, {}, {})
             script.node(node) {
-                for (Stage stage : stages) {
-                    stageWithStrategy(stage, preExecuteStageBody, postExecuteStageBody)
+                for (StageInterface stage : stages) {
+                    stage.execute(script, preExecuteStageBody, postExecuteStageBody)
                 }
             }
         }  finally {
+            jobResult = calculateJobResult(stages)
+            if (jobResult == Result.ABORTED || jobResult == Result.FAILURE) {
+                script.echo "Job stopped, see reason above ^^^^"
+            }
             script.echo "Finalize build:"
             printStageResults()
             script.echo "Current job result: ${script.currentBuild.result}"
@@ -97,9 +104,86 @@ abstract class Pipeline implements Serializable {
         }
     }
 
+
+    /**
+     * Replace stage with same name as newStage
+     * @param newStage
+     * @return true/false
+     */
+    def replaceStage(Stage newStage) {
+        return recReplaceStage(stages, newStage)
+    }
+
+    def recReplaceStage(List<StageInterface> stages, Stage newStage) {
+        for(int i = 0; i < stages.size(); i++){
+            def stage = stages.get(i)
+            if(stage.name == newStage.name) {
+                stages.remove(i)
+                stages.add(i, newStage)
+                return true
+            } else if (stage instanceof StageGroup){
+                def result = recReplaceStage(stage.stages, newStage)
+                if (result) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    /**
+     * Get stage by name
+     * @param stageName
+     * @return stage
+     */
+    def getStage(String stageName) {
+        return recGetStage(stages, stageName)
+    }
+
+    def recGetStage(List<StageInterface> stages, String stageName) {
+        for(StageInterface stage in stages){
+            if(stage.name == stageName) {
+                return stage
+            } else if (stage instanceof StageGroup){
+                def result = recReplaceStage(stage.stages, newStage)
+                if (result) {
+                    return result
+                }
+            }
+        }
+        script.error("stage with name ${stageName} doesn't exist in pipeline")
+    }
+
+    // ==================================== DSL =========================================
+
+    def static stage(String name, String strategy, Closure body){
+        return new Stage(name, strategy, body)
+    }
+
+    /**
+     * Create stage with undefined strategy
+     * You munst specify strategy in runtime, for example inside initialize body
+     */
+    def static stage(String name, Closure body) {
+        return new Stage(name, StageStrategy.UNDEFINED, body)
+    }
+
+    def static parallel(Collection<Stage> stages) {
+        return new ParallelStageSet("Parallel", stages)
+    }
+
+    def static parallel(String name, Collection<Stage> stages) {
+        return new ParallelStageSet(name, stages)
+    }
+
+    // ==================================== UTIL =========================================
+
     def printStageResults() {
-        for (Stage stage : stages) {
-            script.echo (String.format("%-30s", "\"${stage.name}\" stage result: ") + stage.result)
+        for (StageInterface abstractStage : stages) {
+            if(abstractStage instanceof Stage) {
+                def stage = abstractStage as Stage
+                script.echo(String.format("%-30s", "\"${stage.name}\" stage result: ") + stage.result)
+            }
         }
     }
 
@@ -110,86 +194,56 @@ abstract class Pipeline implements Serializable {
         }
     }
 
-    def stageWithStrategy(Stage stage, Closure preExecuteStageBody, Closure postExecuteStageBody) {
-        //https://issues.jenkins-ci.org/browse/JENKINS-39203 подождем пока сделают разные статусы на разные Stage
-        script.stage(stage.name) {
-            if (stage.strategy == StageStrategy.SKIP_STAGE) {
-                return
-            } else {
-                try {
-                    script.echo("Stage ${stage.name} STARTED")
-                    if(preExecuteStageBody){
-                        preExecuteStageBody(stage)
-                    }
-                    stage.body()
-                    stage.result = Result.SUCCESS
-                    script.echo("Stage ${stage.name} SUCCESS")
-                } catch (e) {
-                    script.echo "Error: ${e.toString()}"
-                    CommonUtil.printStackTrace(script, e)
+    def calculateJobResult(Collection<StageInterface> stages) {
+        def jobResultPriority = [:]
+        jobResultPriority[Result.ABORTED] = 5
+        jobResultPriority[Result.FAILURE] = 4
+        jobResultPriority[Result.UNSTABLE] = 3
+        jobResultPriority[Result.SUCCESS] = 3
+        jobResultPriority[Result.NOT_BUILT] = 1
 
-                    if(e instanceof InterruptedException || //отменено из другого процесса
-                            e instanceof hudson.AbortException && e.getMessage() == "script returned exit code 143") { //отменено пользователем
-                        script.echo("Stage ${stage.name} ABORTED")
-                        stage.result = Result.ABORTED
-                        jobResult = Result.ABORTED
-                        throw e
-                    } else if (e instanceof UnstableStateThrowable) {
-                        script.echo("Stage ${stage.name} STOPPED and mark as unstable")
-                        stage.result = Result.UNSTABLE
-                        if (jobResult != Result.FAILURE) {
-                            jobResult = Result.UNSTABLE
-                        }
-                    } else {
-                        script.echo("Stage ${stage.name} FAIL")
-                        script.echo("Apply stage strategy: ${stage.strategy}")
-                        if (stage.strategy == StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                            stage.result = Result.FAILURE
-                            jobResult = Result.FAILURE
-                            throw e
-                        } else if (stage.strategy == StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                            stage.result = Result.UNSTABLE
-                            if (jobResult != Result.FAILURE) {
-                                jobResult = Result.UNSTABLE
-                            }
-                        } else if (stage.strategy == StageStrategy.SUCCESS_WHEN_STAGE_ERROR) {
-                            stage.result = Result.SUCCESS
-                        } else {
-                            script.error("Unsupported strategy " + stage.strategy)
-                        }
+        def currentJobResult = Result.NOT_BUILT
+        for (StageInterface abstractStage : stages) {
+            def newJobResult
+            if(abstractStage instanceof StageGroup) {
+                newJobResult = this.calculateJobResult((abstractStage as StageGroup).stages)
+            } else if(abstractStage instanceof Stage) {
+                def stage = abstractStage as Stage
+
+                if (stage.result == Result.SUCCESS) {
+                    newJobResult = Result.SUCCESS
+                } else if (stage.result == Result.ABORTED) {
+                    newJobResult = Result.ABORTED
+                } else if (stage.result == Result.NOT_BUILT) {
+                    newJobResult = Result.NOT_BUILT
+                } else if (stage.result == Result.FAILURE) {
+                    if (stage.strategy == StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                        newJobResult = Result.FAILURE
+                    } else if (stage.strategy == StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                        newJobResult = Result.UNSTABLE
+                    } else if (stage.strategy == StageStrategy.SUCCESS_WHEN_STAGE_ERROR) {
+                        newJobResult = Result.SUCCESS
                     }
-                } finally {
-                    if(postExecuteStageBody){
-                        postExecuteStageBody(stage)
-                    }
-                    if(jobResult == Result.ABORTED || jobResult == Result.FAILURE) {
-                        script.echo "Job stopped, see reason above ^^^^"
-                    }
+                } else {
+                    script.error("Unsupported stage result " + stage.result)
                 }
             }
-        }
-    }
-
-    def replaceStage(Stage newStage) {
-        for(int i = 0; i < stages.size(); i++){
-            if(stages.get(i).name == newStage.name) {
-                stages.remove(i)
-                stages.add(i, newStage)
-                return
+            if (jobResultPriority[newJobResult] > jobResultPriority[currentJobResult]) {
+                currentJobResult = newJobResult
             }
         }
+        return currentJobResult
     }
 
-    def getStage(String stageName) {
-        for(Stage stage in  stages){
-            if(stage.name == stageName) {
-                return stage
-            }
-        }
-        script.error("stage with name ${stageName} doesn't exist in pipeline")
-    }
+    // ================================== Deprecate ======================================
 
+    @Deprecated
     def static createStage(String name, String strategy, Closure body){
         return new Stage(name, strategy, body)
+    }
+
+    @Deprecated
+    def stageWithStrategy(Stage stage, Closure preExecuteStageBody, Closure postExecuteStageBody) {
+        stage.execute(script, preExecuteStageBody, postExecuteStageBody)
     }
 }

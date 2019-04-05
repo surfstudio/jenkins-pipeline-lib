@@ -31,4 +31,8 @@ class NodeProvider {
     def static getiOSNode() {
         return "ios"
     }
+
+    def static getFlutterNode() {
+        return "flutter"
+    }
 }

@@ -42,8 +42,8 @@ class AndroidUtil {
     def static withKeystore(Object script, String keystoreCredentials, String keystorePropertiesCredentials, Closure body) {
         def bodyStarted = false
         try {
-            script.echo "start extract keystoreCredentials: $keystoreCredentials " +
-                    "and keystorePropertiesCredentials: $keystorePropertiesCredentials"
+            script.echo "start extract KeystoreCredentials: $keystoreCredentials " +
+                    "and androidKeystorePropertiesCredentials: $keystorePropertiesCredentials"
             script.withCredentials([
                     script.file(credentialsId: keystoreCredentials, variable: 'KEYSTORE'),
                     script.file(credentialsId: keystorePropertiesCredentials, variable: 'KEYSTORE_PROPERTIES')

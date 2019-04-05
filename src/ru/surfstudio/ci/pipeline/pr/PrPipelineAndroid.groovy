@@ -72,22 +72,22 @@ class PrPipelineAndroid extends PrPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                createStage(PRE_MERGE, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(PRE_MERGE, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
-                createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
                             buildGradleTask,
                             keystoreCredentials,
                             keystorePropertiesCredentials)
                 },
-                createStage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.unitTestStageBodyAndroid(script,
                             unitTestGradleTask,
                             unitTestResultPathXml,
                             unitTestResultPathDirHtml)
                 },
-                createStage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                stage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.instrumentationTestStageBodyAndroid(
                             script,
                             avdConfig,
@@ -102,7 +102,7 @@ class PrPipelineAndroid extends PrPipeline {
                             )
                     )
                 },
-                createStage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
 

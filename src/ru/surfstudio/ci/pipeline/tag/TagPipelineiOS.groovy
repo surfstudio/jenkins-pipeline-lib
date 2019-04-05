@@ -46,28 +46,28 @@ class TagPipelineiOS extends TagPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                createStage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
-                createStage(VERSION_UPDATE, StageStrategy.SKIP_STAGE) {
+                stage(VERSION_UPDATE) {
                     script.echo "stage not specified" //todo
                 },
-                createStage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     iOSPipelineHelper.buildStageBodyiOS(script,
                         iOSKeychainCredenialId,
                         iOSCertfileCredentialId
                     )
                 },
-                createStage(UNIT_TEST, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(UNIT_TEST, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     iOSPipelineHelper.unitTestStageBodyiOS(script)
                 },
-                createStage(INSTRUMENTATION_TEST, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(INSTRUMENTATION_TEST, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     iOSPipelineHelper.instrumentationTestStageBodyiOS(script)
                 },
-                createStage(STATIC_CODE_ANALYSIS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(STATIC_CODE_ANALYSIS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     iOSPipelineHelper.staticCodeAnalysisStageBodyiOS(script)
                 },
-                createStage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     betaUploadStageBodyiOS(script,
                         iOSKeychainCredenialId,
                         iOSCertfileCredentialId,
@@ -75,7 +75,7 @@ class TagPipelineiOS extends TagPipeline {
                         getBuildConfigValue()
                     )
                 },
-                createStage(VERSION_PUSH, StageStrategy.SKIP_STAGE) {
+                stage(VERSION_PUSH) {
                     script.echo "stage not specified" //todo temp
                 },
 
