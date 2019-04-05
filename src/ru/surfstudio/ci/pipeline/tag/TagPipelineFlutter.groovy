@@ -18,12 +18,10 @@ package ru.surfstudio.ci.pipeline.tag
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
-import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.android.AndroidUtil
-import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
-import ru.surfstudio.ci.utils.android.config.AvdConfig
+import ru.surfstudio.ci.utils.flutter.FlutterUtil
 
 class TagPipelineFlutter extends TagPipeline {
 
@@ -46,8 +44,7 @@ class TagPipelineFlutter extends TagPipeline {
     public testCommand = "flutter test"
 
     def configFile = "pubspec.yaml"
-    def appVersionNameVar = "version"
-    //def appVersionCodeGradleVar = "versionCode"
+    def compositeVersionNameVar = "version"
 
     TagPipelineFlutter(Object script) {
         super(script)
@@ -67,13 +64,10 @@ class TagPipelineFlutter extends TagPipeline {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
                 stage(VERSION_UPDATE) {
-                    script.echo "empty"
-                    //todo
-                    /*versionUpdateStageBodyAndroid(script,
+                    versionUpdateStageBodyAndroid(script,
                             repoTag,
                             configFile,
-                            appVersionNameVar,
-                            appVersionCodeGradleVar)*/
+                            compositeVersionNameVar)
                 },
                 parallel(BUILD, [
                         stage(BUILD_ANDROID, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
@@ -114,19 +108,17 @@ class TagPipelineFlutter extends TagPipeline {
                         },
                 ]),
                 stage(VERSION_PUSH) {
-                    script.echo "empty"
-                    //todo
-                   /* versionPushStageBody(script,
+
+                   versionPushStageBody(script,
                             repoTag,
                             branchesPatternsForAutoChangeVersion,
                             repoUrl,
                             repoCredentialsId,
                             prepareChangeVersionCommitMessage(
                                     script,
-                                    gradleConfigFile,
-                                    appVersionNameGradleVar,
-                                    appVersionCodeGradleVar,
-                            ))*/
+                                    configFile,
+                                    compositeVersionNameVar
+                            ))
                 },
 
 
@@ -151,24 +143,20 @@ class TagPipelineFlutter extends TagPipeline {
 
     def static versionUpdateStageBodyAndroid(Object script,
                                              String repoTag,
-                                             String gradleConfigFile,
-                                             String appVersionNameGradleVar,
-                                             String appVersionCodeGradleVar) {
-        AndroidUtil.changeGradleVariable(script, gradleConfigFile, appVersionNameGradleVar, "\"$repoTag\"")
-        def codeStr = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
-        def newCodeStr = String.valueOf(Integer.valueOf(codeStr) + 1)
-        AndroidUtil.changeGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar, newCodeStr)
-
+                                             String configYamlFile,
+                                             String compositeVersionNameVar) {
+        def compositeVersion = FlutterUtil.getYamlVariable(script, configYamlFile, compositeVersionNameVar)
+        def versionCode = FlutterUtil.getVersionCode(compositeVersion)
+        def newVersionCode = String.valueOf(Integer.valueOf(versionCode) + 1)
+        def newCompositeVersion = "$repoTag+$newVersionCode"
+        FlutterUtil.changeYamlVariable(script, configYamlFile, compositeVersionNameVar, newCompositeVersion)
     }
 
     def static prepareChangeVersionCommitMessage(Object script,
-                                                        String gradleConfigFile,
-                                                        String appVersionNameGradleVar,
-                                                        String appVersionCodeGradleVar){
-        def versionName = CommonUtil.removeQuotesFromTheEnds(
-                AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionNameGradleVar))
-        def versionCode = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
-        return "Change version to $versionName ($versionCode) $RepositoryUtil.SKIP_CI_LABEL1 $RepositoryUtil.VERSION_LABEL1"
+                                                 String configYamlFile,
+                                                 String compositeVersionNameVar){
+        def compositeVersion = FlutterUtil.getYamlVariable(script, configYamlFile, compositeVersionNameVar)
+        return "Change version to $compositeVersion $RepositoryUtil.SKIP_CI_LABEL1 $RepositoryUtil.VERSION_LABEL1"
 
     }
 
