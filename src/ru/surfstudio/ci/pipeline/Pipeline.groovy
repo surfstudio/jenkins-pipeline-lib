@@ -145,7 +145,7 @@ abstract class Pipeline implements Serializable {
             if(stage.name == stageName) {
                 return stage
             } else if (stage instanceof StageGroup){
-                def result = recGetStage(stages, stageName)
+                def result = recGetStage(stage.stages, stageName)
                 if (result) {
                     return result
                 }
