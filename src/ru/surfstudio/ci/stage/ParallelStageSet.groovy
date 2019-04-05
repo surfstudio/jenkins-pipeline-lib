@@ -19,8 +19,8 @@ public class ParallelStageSet implements StageGroup {
                 script.echo stage.name
                 stage.execute(script, preExecuteStageBody, postExecuteStageBody)}
         }
-        script.stage(name) {
+        //script.stage(name) {
             script.parallel lines
-        }
+       // }
     }
 }
