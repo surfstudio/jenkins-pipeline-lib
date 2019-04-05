@@ -15,12 +15,13 @@ public class ParallelStageSet implements StageGroup {
         def lines = [:]
         for (StageInterface stage in stages) {
             script.echo stage.name
+            def tmp = stage
             lines[stage.name] = {
-                script.echo stage.name
-                stage.execute(script, preExecuteStageBody, postExecuteStageBody)}
+                script.echo tmp.name
+                tmp.execute(script, preExecuteStageBody, postExecuteStageBody) }
         }
-        //script.stage(name) {
+        script.stage(name) {
             script.parallel lines
-       // }
+        }
     }
 }
