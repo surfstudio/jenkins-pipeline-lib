@@ -144,6 +144,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
             def simulatorIdentifierFile = "currentsim"
 
             script.sh "xcrun simctl shutdown all"
+            script.sh "xcrun simctl erase all"
 
             script.echo "Setting up simulator ..."
             script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > ${simulatorIdentifierFile}"
