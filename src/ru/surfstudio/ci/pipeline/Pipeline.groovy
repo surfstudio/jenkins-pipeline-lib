@@ -146,11 +146,11 @@ abstract class Pipeline implements Serializable {
         return new Stage(name, StageStrategy.UNDEFINED, body)
     }
 
-    def static parallel(Collection<Stage> stages) {
+    def static parallel(List<Stage> stages) {
         return new ParallelStageSet("Parallel", stages)
     }
 
-    def static parallel(String name, Collection<Stage> stages) {
+    def static parallel(String name, List<Stage> stages) {
         return new ParallelStageSet(name, stages)
     }
 

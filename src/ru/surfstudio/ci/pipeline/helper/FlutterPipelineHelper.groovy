@@ -39,7 +39,9 @@ class FlutterPipelineHelper {
             String keystoreCredentials,
             String keystorePropertiesCredentials
     ) {
-        script.node("$NodeProvider.flutterNode && $NodeProvider.androidNode") {
+        def node = "$NodeProvider.flutterNode && $NodeProvider.androidNode"
+        script.node(node) {
+            script.echo "Execute stage on node: $script.env.NODE_NAME"
             AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
                 buildStageBodyAndroid(script, buildShCommand)
                 script.step([$class: 'ArtifactArchiver', artifacts: '**/*.apk', allowEmptyArchive: true])
@@ -52,7 +54,9 @@ class FlutterPipelineHelper {
                                  String buildShCommand,
                                  String keychainCredenialId,
                                  String certfileCredentialId) {
-        script.node("$NodeProvider.flutterNode && $NodeProvider.iOSNode") {
+        def node = "$NodeProvider.flutterNode && $NodeProvider.iOSNode"
+        script.node(node) {
+            script.echo "Execute stage on node: $script.env.NODE_NAME"
             script.withCredentials([
                     script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
                     script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
