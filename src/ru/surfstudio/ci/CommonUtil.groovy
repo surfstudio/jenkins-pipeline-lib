@@ -17,6 +17,7 @@ package ru.surfstudio.ci
 
 import ru.surfstudio.ci.pipeline.Pipeline
 import ru.surfstudio.ci.stage.Stage
+import ru.surfstudio.ci.stage.StageWithStrategy
 
 class CommonUtil {
 
@@ -236,8 +237,10 @@ class CommonUtil {
     }
 
     def static printInitialStageStrategies(Pipeline pipeline){
-        for (stage in pipeline.stages) {
-            printInitialVar(pipeline.script, stage.name + ".strategy", stage.strategy)
+        pipeline.forStages { stage ->
+            if(stage instanceof StageWithStrategy) {
+                printInitialVar(pipeline.script, stage.name + ".strategy", stage.strategy)
+            }
         }
     }
 

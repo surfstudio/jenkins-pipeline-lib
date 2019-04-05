@@ -21,7 +21,7 @@ import ru.surfstudio.ci.Result
 /**
  * Stage для {@link ru.surfstudio.ci.pipeline.Pipeline}
  */
-class Stage implements StageInterface {
+class Stage implements StageWithStrategy {
     String name
     Closure body
     String strategy //see class StageStrategy
