@@ -1,4 +1,4 @@
-@Library('surf-lib@version-1.0.0-SNAPSHOT') // https://bitbucket.org/surfstudio/jenkins-pipeline-lib/
+@Library('surf-lib@flutter') // https://bitbucket.org/surfstudio/jenkins-pipeline-lib/
 import ru.surfstudio.ci.pipeline.pr.PrPipelineFlutter
 import ru.surfstudio.ci.stage.StageStrategy
 
