@@ -134,7 +134,7 @@ abstract class Pipeline implements Serializable {
     /**
      * Get stage by name
      * @param stageName
-     * @return stage
+     * @return stage/null
      */
     def getStage(String stageName) {
         return recGetStage(stages, stageName)
@@ -151,7 +151,25 @@ abstract class Pipeline implements Serializable {
                 }
             }
         }
-        script.error("stage with name ${stageName} doesn't exist in pipeline")
+        return null
+    }
+
+    /**
+     * execute lambda with all stages in stage three
+     * @param lambda: { stage ->  ... }
+     */
+    def forStages(Closure lambda) {
+        return recForStages(stages, lambda)
+    }
+
+    def recForStages(List<StageInterface> stages, Closure lambda) {
+        for(StageInterface stage in stages){
+            lambda(stage)
+            if (stage instanceof StageGroup){
+                recForStages(stages, lambda)
+            }
+        }
+        return null
     }
 
     // ==================================== DSL =========================================

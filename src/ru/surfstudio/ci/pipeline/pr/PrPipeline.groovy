@@ -72,7 +72,7 @@ abstract class PrPipeline extends ScmPipeline {
 
         if(ctx.targetBranchChanged) {
             script.echo "Build triggered by target branch changes, run only ${ctx.stagesForTargetBranchChangedMode} stages"
-            for (stage in ctx.stages) {
+            ctx.forStages { stage ->
                 def executeStage = false
                 for(stageNameForTargetBranchChangedMode in ctx.stagesForTargetBranchChangedMode){
                     executeStage = executeStage || (stageNameForTargetBranchChangedMode == stage.getName())
