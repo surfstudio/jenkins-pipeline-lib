@@ -14,6 +14,7 @@ public class ParallelStageSet implements StageGroup {
     void execute(Object script, Closure preExecuteStageBody, Closure postExecuteStageBody) {
         def lines = [:]
         for (StageInterface stage in stages) {
+            script.echo stage.name
             lines[stage.name] = {stage.execute(script, preExecuteStageBody, postExecuteStageBody)}
         }
         script.stage(name) {
