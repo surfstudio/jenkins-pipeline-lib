@@ -35,7 +35,7 @@ class PrPipelineFlutter extends PrPipeline {
     public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey" //todo
 
     //
-    public buildAndroidCommand = "ls -la; flutter build apk --release -t lib/main-qa.dart"
+    public buildAndroidCommand = "set +x; ls -la; flutter build apk --release -t lib/main-qa.dart"
     public buildIOsCommand = "flutter build ios --release -t lib/main-qa.dart"
     public testCommand = "flutter test"
 
