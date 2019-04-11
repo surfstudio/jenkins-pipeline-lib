@@ -140,43 +140,43 @@ class UiTestPipelineiOS extends UiTestPipeline {
                                 String outputJsonFile,
                                 outputrerunTxtFile) {
 
-        def simulatorIdentifierFile = "currentsim"
+        script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
+            def simulatorIdentifierFile = "currentsim"
 
-        script.sh "xcrun simctl shutdown all"
-
-        script.echo "Setting up simulator ..."
-        script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > ${simulatorIdentifierFile}"
-        script.sh "xcrun simctl list"
-
-
-        script.sh "xcrun simctl boot \$(cat ${simulatorIdentifierFile})"
-        script.sh "xcrun simctl install booted ${derivedDataPath}/Build/Products/Debug-iphonesimulator/*.app"
-
-        CommonUtil.shWithRuby(script, "run-loop simctl manage-processes") 
-        script.echo "Tests started"
-        script.echo "start tests for $taskKey"
-        CommonUtil.safe(script) {
-            script.sh "mkdir $outputsDir"
-        }
-
-
-        try {
-            CommonUtil.shWithRuby(script, "APP_BUNDLE_PATH=${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//').app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty")
-        } finally {
-            script.sh "xcrun simctl shutdown \$(cat ${simulatorIdentifierFile})"
             script.sh "xcrun simctl shutdown all"
+            script.sh "xcrun simctl erase all"
+
+            script.echo "Setting up simulator ..."
+            script.sh "xcrun simctl create \"MyTestiPhone\" \"${device}\" \"${iosVersion}\" > ${simulatorIdentifierFile}"
             script.sh "xcrun simctl list"
-            script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
-            script.echo "Removing simulator ..."
-            script.sh "sleep 3"
 
-             CommonUtil.safe(script) {
-                script.sh "mkdir arhive"
+
+            script.sh "xcrun simctl boot \$(cat ${simulatorIdentifierFile})"
+            script.sh "xcrun simctl install booted ${derivedDataPath}/Build/Products/Debug-iphonesimulator/*.app"
+
+            CommonUtil.shWithRuby(script, "run-loop simctl manage-processes") 
+            script.echo "Tests started"
+            script.echo "start tests for $taskKey"
+            CommonUtil.safe(script) {
+                script.sh "mkdir $outputsDir"
             }
-            script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
-        
 
-            
+
+            try {
+                CommonUtil.shWithRuby(script, "APP_BUNDLE_PATH=${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//').app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty")
+            } finally {
+                script.sh "xcrun simctl shutdown \$(cat ${simulatorIdentifierFile})"
+                script.sh "xcrun simctl shutdown all"
+                script.sh "xcrun simctl list"
+                script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
+                script.echo "Removing simulator ..."
+                script.sh "sleep 3"
+    
+                 CommonUtil.safe(script) {
+                    script.sh "mkdir arhive"
+                }
+                script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
+            }
         }
     }
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
