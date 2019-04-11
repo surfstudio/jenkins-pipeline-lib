@@ -105,8 +105,6 @@ class ApiTestPipelineAndroid extends ScmPipeline {
                 poll: true
         )
 
-        RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
-
         RepositoryUtil.saveCurrentGitCommitHash(script)
     }
 
