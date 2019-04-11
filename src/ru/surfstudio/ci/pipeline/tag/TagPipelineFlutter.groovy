@@ -39,8 +39,8 @@ class TagPipelineFlutter extends TagPipeline {
     public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey" //todo
 
 
-    public buildAndroidCommand = "flutter build apk --qa --release"
-    public buildIOsCommand = "flutter build ios --qa --release"
+    public buildAndroidCommand = "flutter build apk --release -t lib/main-qa.dart && flutter build apk --release -t lib/main-release.dart"
+    public buildIOsCommand = "flutter build ios --release -t lib/main-qa.dart && flutter build ios --release -t lib/main-release.dart"
     public testCommand = "flutter test"
 
     def configFile = "pubspec.yaml"
