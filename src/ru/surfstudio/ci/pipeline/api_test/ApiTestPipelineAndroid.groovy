@@ -85,8 +85,10 @@ class ApiTestPipelineAndroid extends ScmPipeline {
         CommonUtil.printInitialStageStrategies(ctx)
 
         //Достаем main branch для sourceRepo, если не указали в параметрах
-        extractValueFromParamsAndRun(script, SOURCE_BRANCH_PARAMETER) {
-            value -> ctx.sourceBranch = value
+        extractValueFromParamsAndRun(script, SOURCE_BRANCH_PARAMETER) { value -> 
+            if(value != ctx.UNDEFINED_BRANCH) {
+                ctx.sourceBranch = value
+            }
         }
         if (!ctx.sourceBranch || ctx.sourceBranch == ctx.UNDEFINED_BRANCH) {
             ctx.sourceBranch = JarvisUtil.getMainBranch(ctx.script, ctx.repoUrl)
