@@ -82,29 +82,29 @@ class TagPipelineAndroid extends TagPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                stage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(CHECKOUT) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
-                stage(VERSION_UPDATE) {
+                stage(VERSION_UPDATE, StageStrategy.UNDEFINED) {
                     versionUpdateStageBodyAndroid(script,
                             repoTag,
                             gradleConfigFile,
                             appVersionNameGradleVar,
                             appVersionCodeGradleVar)
                 },
-                stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(BUILD) {
                     AndroidPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
                             buildGradleTask,
                             keystoreCredentials,
                             keystorePropertiesCredentials)
                 },
-                stage(UNIT_TEST, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(UNIT_TEST) {
                     AndroidPipelineHelper.unitTestStageBodyAndroid(script,
                             unitTestGradleTask,
                             unitTestResultPathXml,
                             unitTestResultPathDirHtml)
                 },
-                stage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                stage(INSTRUMENTATION_TEST) {
                     AndroidPipelineHelper.instrumentationTestStageBodyAndroid(
                             script,
                             avdConfig,
@@ -119,16 +119,16 @@ class TagPipelineAndroid extends TagPipeline {
                             )
                     )
                 },
-                stage(STATIC_CODE_ANALYSIS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(STATIC_CODE_ANALYSIS) {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
-                stage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(BETA_UPLOAD) {
                     betaUploadWithKeystoreStageBodyAndroid(script,
                             betaUploadGradleTask,
                             keystoreCredentials,
                             keystorePropertiesCredentials)
                 },
-                stage(VERSION_PUSH) {
+                stage(VERSION_PUSH, StageStrategy.UNDEFINED) {
                     versionPushStageBody(script,
                             repoTag,
                             branchesPatternsForAutoChangeVersion,

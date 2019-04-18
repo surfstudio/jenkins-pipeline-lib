@@ -17,7 +17,6 @@ package ru.surfstudio.ci
 
 import ru.surfstudio.ci.pipeline.Pipeline
 import ru.surfstudio.ci.stage.Stage
-import ru.surfstudio.ci.stage.StageInterface
 import ru.surfstudio.ci.stage.StageWithResult
 import ru.surfstudio.ci.stage.StageWithStrategy
 import ru.surfstudio.ci.utils.StageTreeUtil
@@ -226,7 +225,7 @@ class CommonUtil {
         script.echo "initial value of {$varName} is {$varValue}"
     }
 
-    def static unsuccessReasonsToString(List<StageInterface> stages){
+    def static unsuccessReasonsToString(List<Stage> stages){
         def unsuccessReasons = ""
         StageTreeUtil.forStages(stages) { stage ->
             if(stage instanceof StageWithResult) {

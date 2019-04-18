@@ -1,6 +1,6 @@
 package ru.surfstudio.ci.stage
 
-interface StageGroup extends StageInterface {
-    List<StageInterface> getStages()
+interface StageGroup extends Stage {
+    List<Stage> getStages()
 
 }

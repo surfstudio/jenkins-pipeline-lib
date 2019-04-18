@@ -22,7 +22,7 @@ import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
 
 import ru.surfstudio.ci.pipeline.ScmPipeline
-import ru.surfstudio.ci.stage.Stage
+import ru.surfstudio.ci.stage.SimpleStage
 import ru.surfstudio.ci.stage.StageStrategy
 import java.util.regex.Pattern
 
@@ -163,11 +163,11 @@ abstract class TagPipeline extends ScmPipeline {
         })
     }
 
-    def static preExecuteStageBodyTag(Object script, Stage stage, String repoUrl) {
+    def static preExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
         if (stage.name != CHECKOUT) RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
     }
 
-    def static postExecuteStageBodyTag(Object script, Stage stage, String repoUrl) {
+    def static postExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
         if (stage.name != CHECKOUT) RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
     }
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================

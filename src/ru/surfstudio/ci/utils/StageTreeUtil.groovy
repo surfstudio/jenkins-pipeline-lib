@@ -1,8 +1,9 @@
 package ru.surfstudio.ci.utils
 
-import ru.surfstudio.ci.stage.Stage
+
+import ru.surfstudio.ci.stage.SimpleStage
 import ru.surfstudio.ci.stage.StageGroup
-import ru.surfstudio.ci.stage.StageInterface
+import ru.surfstudio.ci.stage.Stage
 
 class StageTreeUtil {
 
@@ -12,7 +13,7 @@ class StageTreeUtil {
      * @param stagesTree - tree of stagesTree
      * @return true/false
      */
-    def static replaceStage(List<StageInterface> stagesTree, Stage newStage) {
+    def static replaceStage(List<Stage> stagesTree, SimpleStage newStage) {
         for(int i = 0; i < stagesTree.size(); i++){
             def stage = stagesTree.get(i)
             if(stage.name == newStage.name) {
@@ -35,8 +36,8 @@ class StageTreeUtil {
      * @param stagesTree - tree of stagesTree
      * @return stage/null
      */
-    def static getStage(List<StageInterface> stagesTree, String stageName) {
-        for(StageInterface stage in stagesTree){
+    def static getStage(List<Stage> stagesTree, String stageName) {
+        for(Stage stage in stagesTree){
             if(stage.name == stageName) {
                 return stage
             } else if (stage instanceof StageGroup){
@@ -54,8 +55,8 @@ class StageTreeUtil {
      * @param lambda: { stage ->  ... }
      * @param stagesTree - tree of stagesTree
      */
-    def static forStages(List<StageInterface> stagesTree, Closure lambda) {
-        for(StageInterface stage in stagesTree){
+    def static forStages(List<Stage> stagesTree, Closure lambda) {
+        for(Stage stage in stagesTree){
             lambda(stage)
             if (stage instanceof StageGroup){
                 forStages(stage.stages, lambda)

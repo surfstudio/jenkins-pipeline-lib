@@ -72,10 +72,10 @@ class PrPipelineAndroid extends PrPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                stage(PRE_MERGE, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(PRE_MERGE) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
-                stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(BUILD) {
                     AndroidPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
                             buildGradleTask,
                             keystoreCredentials,

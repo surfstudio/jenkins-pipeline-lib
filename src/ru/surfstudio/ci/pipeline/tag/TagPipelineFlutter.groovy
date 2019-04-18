@@ -60,37 +60,37 @@ class TagPipelineFlutter extends TagPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                stage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(CHECKOUT) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
-                stage(VERSION_UPDATE) {
+                stage(VERSION_UPDATE, StageStrategy.UNDEFINED) {
                     versionUpdateStageBodyAndroid(script,
                             repoTag,
                             configFile,
                             compositeVersionNameVar)
                 },
                 parallel(BUILD, [
-                        stage(BUILD_ANDROID, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                        stage(BUILD_ANDROID) {
                             FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
                                     buildAndroidCommand,
                                     androidKeystoreCredentials,
                                     androidKeystorePropertiesCredentials)
                         },
-                        stage(BUILD_IOS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                        stage(BUILD_IOS) {
                             FlutterPipelineHelper.buildStageBodyIOS(script,
                                     buildIOsCommand,
                                     iOSKeychainCredenialId,
                                     iOSCertfileCredentialId)
                         },
                 ]),
-                createStage(UNIT_TEST, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(UNIT_TEST) {
                     FlutterPipelineHelper.testStageBody(script, testCommand)
                 },
-                createStage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                stage(STATIC_CODE_ANALYSIS) {
                     FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
                 parallel(BETA_UPLOAD, [
-                        stage(BETA_UPLOAD_ANDROID, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                        stage(BETA_UPLOAD_ANDROID) {
                             script.echo "empty"
                             //todo
                             /*betaUploadWithKeystoreStageBodyAndroid(script,
@@ -98,7 +98,7 @@ class TagPipelineFlutter extends TagPipeline {
                                     keystoreCredentials,
                                     keystorePropertiesCredentials)*/
                         },
-                        stage(BETA_UPLOAD_IOS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                        stage(BETA_UPLOAD_IOS) {
                             script.echo "empty"
                             //todo
                            /* FlutterPipelineHelper.buildStageBodyiOS(script,
@@ -107,7 +107,7 @@ class TagPipelineFlutter extends TagPipeline {
                                     iOSCertfileCredentialId)*/
                         },
                 ]),
-                stage(VERSION_PUSH) {
+                stage(VERSION_PUSH, StageStrategy.UNDEFINED) {
 
                    versionPushStageBody(script,
                             repoTag,

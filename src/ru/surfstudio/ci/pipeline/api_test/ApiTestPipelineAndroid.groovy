@@ -63,7 +63,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                stage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(CHECKOUT) {
                     checkoutStageBody(script, repoUrl, sourceBranch, repoCredentialsId)
                 },
                 stage(CHECK_API_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {

@@ -20,9 +20,9 @@ package ru.surfstudio.ci.pipeline
 import ru.surfstudio.ci.Result
 
 import ru.surfstudio.ci.stage.ParallelStageSet
-import ru.surfstudio.ci.stage.Stage
+import ru.surfstudio.ci.stage.SimpleStage
 import ru.surfstudio.ci.stage.StageGroup
-import ru.surfstudio.ci.stage.StageInterface
+import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.StageTreeUtil
 
@@ -54,13 +54,14 @@ import ru.surfstudio.ci.utils.StageTreeUtil
  */
 abstract class Pipeline implements Serializable {
     public static final String INIT = 'Init'
+    public static final String DEFAULT_STAGE_STRATEGY = StageStrategy.FAIL_WHEN_STAGE_ERROR
 
     public script //Jenkins Pipeline Script
     public jobResult = Result.NOT_BUILT
     public node
     public Closure initializeBody  //runs on master node
     public Closure<List<Object>> propertiesProvider  //runs after initializeBody on master node
-    public List<StageInterface> stages     //runs on specified node
+    public List<Stage> stages     //runs on specified node
     public Closure finalizeBody
 
     public preExecuteStageBody = {}  // { stage -> ... } runs for all stages in 'stages' list
@@ -82,7 +83,7 @@ abstract class Pipeline implements Serializable {
             def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, createInitStageBody())
             initStage.execute(script, {}, {})
             script.node(node) {
-                for (StageInterface stage : stages) {
+                for (Stage stage : stages) {
                     stage.execute(script, preExecuteStageBody, postExecuteStageBody)
                 }
             }
@@ -111,7 +112,7 @@ abstract class Pipeline implements Serializable {
      * @param newStage
      * @return true/false
      */
-    def replaceStage(Stage newStage) {
+    def replaceStage(SimpleStage newStage) {
         return StageTreeUtil.replaceStage(stages, newStage)
     }
 
@@ -125,7 +126,7 @@ abstract class Pipeline implements Serializable {
     }
 
     /**
-     * execute lambda with all stages in stage three
+     * execute lambda with all stages in stage tree
      * @param lambda: { stage ->  ... }
      */
     def forStages(Closure lambda) {
@@ -135,31 +136,38 @@ abstract class Pipeline implements Serializable {
     // ==================================== DSL =========================================
 
     def static stage(String name, String strategy, Closure body){
-        return new Stage(name, strategy, body)
+        return new SimpleStage(name, strategy, body)
     }
 
     /**
-     * Create stage with undefined strategy
-     * You munst specify strategy in runtime, for example inside initialize body
+     * Create stage with {@link #DEFAULT_STAGE_STRATEGY}
      */
     def static stage(String name, Closure body) {
-        return new Stage(name, StageStrategy.UNDEFINED, body)
+        return new SimpleStage(name, DEFAULT_STAGE_STRATEGY, body)
     }
 
-    def static parallel(List<Stage> stages) {
-        return new ParallelStageSet("Parallel", stages)
+    def static parallel(List<SimpleStage> stages) {
+        return new ParallelStageSet("Parallel", true, stages)
     }
 
-    def static parallel(String name, List<Stage> stages) {
-        return new ParallelStageSet(name, stages)
+    def static parallel(String name, List<SimpleStage> stages) {
+        return new ParallelStageSet(name, true, stages)
+    }
+
+    def static parallel(boolean copyWorkspace, List<SimpleStage> stages) {
+        return new ParallelStageSet("Parallel", copyWorkspace, stages)
+    }
+
+    def static parallel(String name, boolean copyWorkspace, List<SimpleStage> stages) {
+        return new ParallelStageSet(name, copyWorkspace, stages)
     }
 
     // ==================================== UTIL =========================================
 
     def printStageResults() {
-        for (StageInterface abstractStage : stages) {
-            if(abstractStage instanceof Stage) {
-                def stage = abstractStage as Stage
+        for (Stage abstractStage : stages) {
+            if(abstractStage instanceof SimpleStage) {
+                def stage = abstractStage as SimpleStage
                 script.echo(String.format("%-30s", "\"${stage.name}\" stage result: ") + stage.result)
             }
         }
@@ -172,7 +180,7 @@ abstract class Pipeline implements Serializable {
         }
     }
 
-    def calculateJobResult(Collection<StageInterface> stages) {
+    def calculateJobResult(Collection<Stage> stages) {
         def jobResultPriority = [:]
         jobResultPriority[Result.ABORTED] = 5
         jobResultPriority[Result.FAILURE] = 4
@@ -181,12 +189,12 @@ abstract class Pipeline implements Serializable {
         jobResultPriority[Result.NOT_BUILT] = 1
 
         def currentJobResult = Result.NOT_BUILT
-        for (StageInterface abstractStage : stages) {
+        for (Stage abstractStage : stages) {
             def newJobResult
             if(abstractStage instanceof StageGroup) {
                 newJobResult = this.calculateJobResult((abstractStage as StageGroup).stages)
-            } else if(abstractStage instanceof Stage) {
-                def stage = abstractStage as Stage
+            } else if(abstractStage instanceof SimpleStage) {
+                def stage = abstractStage as SimpleStage
 
                 if (stage.result == Result.SUCCESS) {
                     newJobResult = Result.SUCCESS
@@ -217,11 +225,11 @@ abstract class Pipeline implements Serializable {
 
     @Deprecated
     def static createStage(String name, String strategy, Closure body){
-        return new Stage(name, strategy, body)
+        return new SimpleStage(name, strategy, body)
     }
 
     @Deprecated
-    def stageWithStrategy(Stage stage, Closure preExecuteStageBody, Closure postExecuteStageBody) {
+    def stageWithStrategy(SimpleStage stage, Closure preExecuteStageBody, Closure postExecuteStageBody) {
         stage.execute(script, preExecuteStageBody, postExecuteStageBody)
     }
 }

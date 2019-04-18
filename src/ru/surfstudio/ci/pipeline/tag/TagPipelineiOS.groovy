@@ -46,28 +46,28 @@ class TagPipelineiOS extends TagPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                stage(CHECKOUT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(CHECKOUT) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
-                stage(VERSION_UPDATE) {
+                stage(VERSION_UPDATE, StageStrategy.UNDEFINED) {
                     script.echo "stage not specified" //todo
                 },
-                stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(BUILD) {
                     iOSPipelineHelper.buildStageBodyiOS(script,
                         iOSKeychainCredenialId,
                         iOSCertfileCredentialId
                     )
                 },
-                stage(UNIT_TEST, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(UNIT_TEST) {
                     iOSPipelineHelper.unitTestStageBodyiOS(script)
                 },
-                stage(INSTRUMENTATION_TEST, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(INSTRUMENTATION_TEST) {
                     iOSPipelineHelper.instrumentationTestStageBodyiOS(script)
                 },
-                stage(STATIC_CODE_ANALYSIS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(STATIC_CODE_ANALYSIS) {
                     iOSPipelineHelper.staticCodeAnalysisStageBodyiOS(script)
                 },
-                stage(BETA_UPLOAD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(BETA_UPLOAD) {
                     betaUploadStageBodyiOS(script,
                         iOSKeychainCredenialId,
                         iOSCertfileCredentialId,
@@ -75,7 +75,7 @@ class TagPipelineiOS extends TagPipeline {
                         getBuildConfigValue()
                     )
                 },
-                stage(VERSION_PUSH) {
+                stage(VERSION_PUSH, StageStrategy.UNDEFINED) {
                     script.echo "stage not specified" //todo temp
                 },
 
