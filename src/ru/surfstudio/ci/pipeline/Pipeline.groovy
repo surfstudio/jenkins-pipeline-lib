@@ -196,8 +196,9 @@ abstract class Pipeline implements Serializable {
                 newJobResult = this.calculateJobResult((abstractStage as StageGroup).stages)
             } else if(abstractStage instanceof SimpleStage) {
                 def stage = abstractStage as SimpleStage
-
-                if (stage.result == Result.SUCCESS) {
+                if (stage.result == null) {
+                    newJobResult = Result.NOT_BUILT
+                } else  if (stage.result == Result.SUCCESS) {
                     newJobResult = Result.SUCCESS
                 } else if (stage.result == Result.ABORTED) {
                     newJobResult = Result.ABORTED
