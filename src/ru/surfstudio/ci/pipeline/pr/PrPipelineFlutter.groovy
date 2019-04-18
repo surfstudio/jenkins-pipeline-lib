@@ -71,10 +71,10 @@ class PrPipelineFlutter extends PrPipeline {
                                     iOSCertfileCredentialId)
                         },
                 ]),
-                createStage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     FlutterPipelineHelper.testStageBody(script, testCommand)
                 },
-                createStage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
 
