@@ -301,4 +301,11 @@ class CommonUtil {
         String exceptionAsString = sw.toString()
         script.echo "Stacktrace: \n $exceptionAsString"
     }
+
+    static def fixVisualizingStagesInParallelBlock(Object script) {
+        if (!script.currentBuild.rawBuild.getAction(org.jenkinsci.plugins.pipeline.modeldefinition.actions.ExecutionModelAction))
+            script.currentBuild.rawBuild.addAction(
+                    new org.jenkinsci.plugins.pipeline.modeldefinition.actions.ExecutionModelAction(
+                            new org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStages(null)))
+    }
 }

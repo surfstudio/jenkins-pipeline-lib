@@ -16,7 +16,7 @@
  */
 package ru.surfstudio.ci.pipeline
 
-
+import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Result
 
 import ru.surfstudio.ci.stage.ParallelStageSet
@@ -79,6 +79,7 @@ abstract class Pipeline implements Serializable {
     abstract def init()
 
     def run() {
+        CommonUtil.fixVisualizingStagesInParallelBlock(script)
         try {
             def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, createInitStageBody())
             initStage.execute(script, {}, {})
