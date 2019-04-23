@@ -244,12 +244,9 @@ abstract class Pipeline implements Serializable {
                     script.error("Unsupported stage result " + stage.result)
                 }
             }
-            script.echo "calc result for stage ${abstractStage.name}"
-            script.echo "candidate result $newJobResult"
             if (jobResultPriority[newJobResult] > jobResultPriority[currentJobResult]) {
                 currentJobResult = newJobResult
             }
-            script.echo "updated result $currentJobResult"
         }
         return currentJobResult
     }

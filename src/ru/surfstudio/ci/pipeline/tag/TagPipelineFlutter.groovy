@@ -51,7 +51,7 @@ class TagPipelineFlutter extends TagPipeline {
     }
 
     def init() {
-        node = NodeProvider.flutterNode
+        node = NodeProvider.androidFlutterNode
 
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
