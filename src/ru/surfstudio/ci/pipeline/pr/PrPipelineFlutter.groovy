@@ -65,10 +65,10 @@ class PrPipelineFlutter extends PrPipeline {
                 },
                 node(NodeProvider.iOSFlutterNode, true, [
                         stage(BUILD_IOS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                            /*FlutterPipelineHelper.buildStageBodyIOS(script,
+                            FlutterPipelineHelper.buildStageBodyIOS(script,
                                     buildIOsCommand,
                                     iOSKeychainCredenialId,
-                                    iOSCertfileCredentialId)*/
+                                    iOSCertfileCredentialId)
                         },
                 ]),
                 stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
