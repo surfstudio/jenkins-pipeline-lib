@@ -229,7 +229,7 @@ class CommonUtil {
         def unsuccessReasons = ""
         StageTreeUtil.forStages(stages) { stage ->
             if(stage instanceof StageWithResult) {
-                if (stage.result && stage.result != Result.SUCCESS) {
+                if (stage.result && stage.result != Result.SUCCESS && stage.result != Result.NOT_BUILT) {
                     if (!unsuccessReasons.isEmpty()) {
                         unsuccessReasons += ", "
                     }
