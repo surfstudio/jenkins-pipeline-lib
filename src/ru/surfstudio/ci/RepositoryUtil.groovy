@@ -33,7 +33,7 @@ class RepositoryUtil {
         if (!commit) {
             script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
         }
-        CommonUtil.echo(script, "Notify bitbucket - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $bitbucketStatus")
+        script.echo "Notify bitbucket - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $bitbucketStatus"
         script.bitbucketStatusNotify(
                 buildState: 'INPROGRESS',
                 buildKey: stageName,
