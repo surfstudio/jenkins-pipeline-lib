@@ -32,6 +32,6 @@ public class NodeStagesWrapper implements StageGroup {
                 stage.execute(script, preExecuteStageBody, postExecuteStageBody)
             }
         }
-        script.echo "Switch back to previous node: ${script.env.NODE_NAME}" 
+        script.echo "Switch back to previous node: ${script.env.NODE_NAME}"
     }
 }
