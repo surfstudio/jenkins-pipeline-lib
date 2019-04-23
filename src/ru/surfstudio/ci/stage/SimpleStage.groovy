@@ -46,13 +46,13 @@ class SimpleStage implements Stage, StageWithStrategy, StageWithResult {
                 return
             } else {
                 try {
-                    script.echo("Stage ${stage.name} STARTED")
+                    script.echo("Stage \"${stage.name}\" STARTED")
                     if (preExecuteStageBody) {
                         preExecuteStageBody(stage)
                     }
                     stage.body()
                     stage.result = Result.SUCCESS
-                    script.echo("Stage ${stage.name} SUCCESS")
+                    script.echo("Stage \"${stage.name}\" SUCCESS")
                 } catch (e) {
                     script.echo "Error: ${e.toString()}"
                     CommonUtil.printStackTrace(script, e)
@@ -60,11 +60,11 @@ class SimpleStage implements Stage, StageWithStrategy, StageWithResult {
                     if (e instanceof InterruptedException || //отменено из другого процесса
                             e instanceof hudson.AbortException && e.getMessage() == "script returned exit code 143") {
                         //отменено пользователем
-                        script.echo("Stage ${stage.name} ABORTED")
+                        script.echo("Stage \"${stage.name}\" ABORTED")
                         stage.result = Result.ABORTED
                         throw e
                     } else {
-                        script.echo("Stage ${stage.name} FAIL")
+                        script.echo("Stage \"${stage.name}\" FAIL")
                         script.echo("Stage strategy: ${stage.strategy}")
                         stage.result = Result.FAILURE
                         if (stage.strategy == StageStrategy.FAIL_WHEN_STAGE_ERROR) {
