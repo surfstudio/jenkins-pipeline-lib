@@ -24,6 +24,7 @@ public class NodeStagesWrapper implements StageGroup {
             script.stash includes: '**', name: stashName
         }
         script.node(node) {
+            script.echo "Switch to node ${node}: ${script.env.NODE_NAME}"
             if(copyWorkspace) {
                 script.unstash stashName
             }
@@ -31,6 +32,7 @@ public class NodeStagesWrapper implements StageGroup {
                 stage.execute(script, preExecuteStageBody, postExecuteStageBody)
             }
         }
+        script.echo "Switch back to previous node: ${script.env.NODE_NAME}"
 
 
     }

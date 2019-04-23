@@ -84,6 +84,9 @@ abstract class Pipeline implements Serializable {
             def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, createInitStageBody())
             initStage.execute(script, {}, {})
             script.node(node) {
+                if(CommonUtil.notEmpty(node)) {
+                    script.echo "Switch to node ${node}: ${script.env.NODE_NAME}"
+                }
                 for (Stage stage : stages) {
                     stage.execute(script, preExecuteStageBody, postExecuteStageBody)
                 }
