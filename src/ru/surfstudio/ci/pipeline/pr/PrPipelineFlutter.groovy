@@ -54,17 +54,17 @@ class PrPipelineFlutter extends PrPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                stage(PRE_MERGE, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(PRE_MERGE) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
-                stage(BUILD_ANDROID, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(BUILD_ANDROID) {
                     FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
                             buildAndroidCommand,
                             androidKeystoreCredentials,
                             androidKeystorePropertiesCredentials)
                 },
                 node(NodeProvider.iOSFlutterNode, true, [
-                        stage(BUILD_IOS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                        stage(BUILD_IOS) {
                             FlutterPipelineHelper.buildStageBodyIOS(script,
                                     buildIOsCommand,
                                     iOSKeychainCredenialId,
