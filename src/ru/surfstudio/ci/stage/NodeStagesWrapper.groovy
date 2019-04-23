@@ -1,7 +1,7 @@
 package ru.surfstudio.ci.stage
 
 /**
- * обертка для запуска стейджей на ноде, отличной от ноды на которой выполняется пайплайн
+ * Wrapper for run stages on specific node
  */
 public class NodeStagesWrapper extends AbstractStagesWrapper {
     String node
@@ -12,7 +12,7 @@ public class NodeStagesWrapper extends AbstractStagesWrapper {
         this.node = node
         this.copyWorkspace = copyWorkspace
         this.stagesWrapperFunction = {
-            script, executeStagesBody ->
+            script, context, executeStagesBody ->
                 def stashName = "${script.env.JOB_NAME}_${script.env.BUILD_NUMBER}_workspace"
                 if(copyWorkspace){
                     script.stash includes: '**', name: stashName

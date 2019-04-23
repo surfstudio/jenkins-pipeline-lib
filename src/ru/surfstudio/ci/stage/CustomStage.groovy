@@ -3,7 +3,7 @@ package ru.surfstudio.ci.stage
 import ru.surfstudio.ci.pipeline.Pipeline
 
 /**
- * Позволяет создавтаь полностью кастомные элементы пайплайна
+ * Allow create fully custom blocks of pipeline
  */
 public class CustomStage implements Stage {
     String name

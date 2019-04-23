@@ -3,12 +3,14 @@ package ru.surfstudio.ci.stage
 import ru.surfstudio.ci.pipeline.Pipeline
 
 /**
- * Позволяет создавтаь полностью кастомные элементы пайплайна
+ * Wrap execution of stages on user code
+ * stagesWrapperFunction gets parameters (script, Closure executeStagesBody),
+ * where executeStagesBody - function, which execute stages
  */
 public class CustomStagesWrapper extends AbstractStagesWrapper {
 
     public CustomStagesWrapper(String name, Closure stagesWrapperFunction, List<Stage> stages) {
-        super(name, stagesWrapperFunction, stages)
+        super(name, { script, context, executeStagesBody -> stagesWrapperFunction(script, executeStagesBody)}, stages)
     }
 
     @Override

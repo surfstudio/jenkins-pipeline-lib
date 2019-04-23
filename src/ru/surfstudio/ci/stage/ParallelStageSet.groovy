@@ -2,6 +2,9 @@ package ru.surfstudio.ci.stage
 
 import ru.surfstudio.ci.pipeline.Pipeline
 
+/**
+ * Run stages parallel
+ */
 //TODO не поддерживается набор стейджей для каждой ветки https://issues.jenkins-ci.org/browse/JENKINS-53162
 public class ParallelStageSet implements StageGroup {
     String name

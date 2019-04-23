@@ -20,7 +20,7 @@ import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.Pipeline
 
 /**
- * Stage для {@link ru.surfstudio.ci.pipeline.Pipeline}
+ * Standard Stage
  */
 class SimpleStage implements Stage, StageWithStrategy, StageWithResult {
     String name

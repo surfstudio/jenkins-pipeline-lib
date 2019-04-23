@@ -219,7 +219,7 @@ abstract class Pipeline implements Serializable {
 
     /**
      * Wrap execution of stages on user code
-     * stagesWrapperFunction pass parameters (script, executeStagesBody), where executeStagesBody - function, which execute stages
+     * stagesWrapperFunction gets parameters (script, Closure executeStagesBody), where executeStagesBody - function, which execute stages
      */
     def static wrapStages(String name, Closure stagesWrapperFunction, List<Stage> stages) {
         return new CustomStagesWrapper(name, stagesWrapperFunction, stages)
