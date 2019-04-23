@@ -79,7 +79,7 @@ abstract class Pipeline implements Serializable {
     abstract def init()
 
     def run() {
-        CommonUtil.fixVisualizingStagesInParallelBlock(script)
+        //CommonUtil.fixVisualizingStagesInParallelBlock(script)
         try {
             def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, createInitStageBody())
             initStage.execute(script, {}, {})

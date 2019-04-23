@@ -1,7 +1,5 @@
 package ru.surfstudio.ci.stage
 
-import ru.surfstudio.ci.CommonUtil
-
 /**
  * обертка для запуска стейджей на ноде, отличной от ноды на которой выполняется пайплайн
  */
@@ -26,7 +24,7 @@ public class NodeStagesWrapper implements StageGroup {
             script.stash includes: '**', name: stashName
         }
         script.node(node) {
-            CommonUtil.echo (script, "Switch to node ${node}: ${script.env.NODE_NAME}")
+            script.echo "Switch to node ${node}: ${script.env.NODE_NAME}"
             if(copyWorkspace) {
                 script.unstash stashName
             }
@@ -34,8 +32,6 @@ public class NodeStagesWrapper implements StageGroup {
                 stage.execute(script, preExecuteStageBody, postExecuteStageBody)
             }
         }
-        CommonUtil.echo (script, "Switch back to previous node: ${script.env.NODE_NAME}")
-
-
+        script.echo "Switch to node ${node}: ${script.env.NODE_NAME}"
     }
 }

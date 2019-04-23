@@ -308,8 +308,4 @@ class CommonUtil {
                     new org.jenkinsci.plugins.pipeline.modeldefinition.actions.ExecutionModelAction(
                             new org.jenkinsci.plugins.pipeline.modeldefinition.ast.ModelASTStages(null)))
     }
-
-    def static echo(Object script, String msg) {
-        script.sh script: "echo \"$msg\"", label: msg
-    }
 }
