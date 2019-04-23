@@ -39,14 +39,10 @@ class FlutterPipelineHelper {
             String keystoreCredentials,
             String keystorePropertiesCredentials
     ) {
-        def node = "$NodeProvider.flutterNode && $NodeProvider.androidNode"
-        script.node(node) {
-            script.echo "Execute stage on node: $script.env.NODE_NAME"
-            AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
-                buildStageBodyAndroid(script, buildShCommand)
-                script.step([$class: 'ArtifactArchiver', artifacts: '**/*.apk', allowEmptyArchive: true])
-                script.step([$class: 'ArtifactArchiver', artifacts: '**/mapping.txt', allowEmptyArchive: true])
-            }
+        AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
+            buildStageBodyAndroid(script, buildShCommand)
+            script.step([$class: 'ArtifactArchiver', artifacts: '**/*.apk', allowEmptyArchive: true])
+            script.step([$class: 'ArtifactArchiver', artifacts: '**/mapping.txt', allowEmptyArchive: true])
         }
     }
 
@@ -54,20 +50,17 @@ class FlutterPipelineHelper {
                                  String buildShCommand,
                                  String keychainCredenialId,
                                  String certfileCredentialId) {
-        def node = "$NodeProvider.flutterNode && $NodeProvider.iOSNode"
-        script.node(node) {
-            script.echo "Execute stage on node: $script.env.NODE_NAME"
-            script.withCredentials([
-                    script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
-                    script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
-            ]) {
-                script.sh('security default-keychain -s /Users/jenkins/Library/Keychains/login.keychain-db')
-                script.sh('security -v unlock-keychain -p $KEYCHAIN_PASS')
-                script.sh('security import "$DEVELOPER_P12_KEY" -P "" -T /usr/bin/codesign -T /usr/bin/security')
-                script.sh('security set-key-partition-list -S apple-tool:,apple: -s -k $KEYCHAIN_PASS ~/Library/Keychains/login.keychain-db')
-                //todo use credentials
-                script.sh buildShCommand
-            }
+        script.echo "Execute stage on node: $script.env.NODE_NAME"
+        script.withCredentials([
+                script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
+                script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
+        ]) {
+            script.sh('security default-keychain -s /Users/jenkins/Library/Keychains/login.keychain-db')
+            script.sh('security -v unlock-keychain -p $KEYCHAIN_PASS')
+            script.sh('security import "$DEVELOPER_P12_KEY" -P "" -T /usr/bin/codesign -T /usr/bin/security')
+            script.sh('security set-key-partition-list -S apple-tool:,apple: -s -k $KEYCHAIN_PASS ~/Library/Keychains/login.keychain-db')
+            //todo use credentials
+            script.sh buildShCommand
         }
     }
 
