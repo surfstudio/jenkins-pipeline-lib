@@ -43,7 +43,6 @@ class SimpleStage implements Stage, StageWithStrategy, StageWithResult {
             }
             if (stage.strategy == StageStrategy.SKIP_STAGE) {
                 stage.result = Result.NOT_BUILT
-                org.jenkinsci.plugins.pipeline.modeldefinition.Utils.markStageSkippedForConditional(stage.name)
                 return
             } else {
                 try {

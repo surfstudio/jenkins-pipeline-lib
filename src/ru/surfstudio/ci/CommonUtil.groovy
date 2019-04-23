@@ -302,6 +302,7 @@ class CommonUtil {
         script.echo "Stacktrace: \n $exceptionAsString"
     }
 
+    //TODO not work https://issues.jenkins-ci.org/browse/JENKINS-53162
     static def fixVisualizingStagesInParallelBlock(Object script) {
         if (!script.currentBuild.rawBuild.getAction(org.jenkinsci.plugins.pipeline.modeldefinition.actions.ExecutionModelAction))
             script.currentBuild.rawBuild.addAction(
