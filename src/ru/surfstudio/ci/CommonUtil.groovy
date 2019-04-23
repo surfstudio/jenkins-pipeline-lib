@@ -311,7 +311,10 @@ class CommonUtil {
 
     def static echo(Object script, String msg) {
         def shCommand = "echo \"$msg\""
-        script.sh script:shCommand, label: msg
-        script.labelledShell label:msg , script:shCommand
+        script.stage(msg) {
+            script.echo msg
+        }
+        //script.sh script:shCommand, label: msg
+       // script.labelledShell label:msg , script:shCommand
     }
 }
