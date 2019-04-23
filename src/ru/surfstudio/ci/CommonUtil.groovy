@@ -310,6 +310,6 @@ class CommonUtil {
     }
 
     def static echo(Object script, String msg) {
-        script.sh "echo $msg", label: msg
+        script.sh script: "echo $msg", label: msg
     }
 }
