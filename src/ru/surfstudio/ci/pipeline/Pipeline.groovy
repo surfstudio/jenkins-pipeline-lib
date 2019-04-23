@@ -79,7 +79,7 @@ abstract class Pipeline implements Serializable {
     abstract def init()
 
     def run() {
-        //CommonUtil.fixVisualizingStagesInParallelBlock(script) todo
+        CommonUtil.fixVisualizingStagesInParallelBlock(script) todo
         try {
             def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, createInitStageBody())
             initStage.execute(script, {}, {})
@@ -214,7 +214,7 @@ abstract class Pipeline implements Serializable {
         jobResultPriority[Result.ABORTED] = 5
         jobResultPriority[Result.FAILURE] = 4
         jobResultPriority[Result.UNSTABLE] = 3
-        jobResultPriority[Result.SUCCESS] = 3
+        jobResultPriority[Result.SUCCESS] = 2
         jobResultPriority[Result.NOT_BUILT] = 1
 
         def currentJobResult = Result.NOT_BUILT

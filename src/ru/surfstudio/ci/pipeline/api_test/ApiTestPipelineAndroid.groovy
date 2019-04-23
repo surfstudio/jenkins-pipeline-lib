@@ -40,7 +40,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
     public sourceBranch = ""
 
 
-    //tasks //todo заменить на новый механизм через ApiTestRunner
+    //tasks
     public checkApiTestGradleTask = "clean testQaUnitTest -PtestType=api" //тесты на работающие методы на сервере
     public waitApiTestGradleTask = "clean testQaUnitTest -PtestType=waitApi" //тесты на апи, которые еще не работают на сервере, эти тесты должны падать при успешном прохождении теста
 
