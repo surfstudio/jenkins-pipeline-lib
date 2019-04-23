@@ -8,9 +8,11 @@ import ru.surfstudio.ci.pipeline.Pipeline
  * where executeStagesBody - function, which execute stages
  */
 public class CustomStagesWrapper extends AbstractStagesWrapper {
+    Closure stagesWrapperFunction
 
     public CustomStagesWrapper(String name, Closure stagesWrapperFunction, List<Stage> stages) {
-        super(name, { script, context, executeStagesBody -> stagesWrapperFunction(script, executeStagesBody)}, stages)
+        super(name, stages)
+        this.stagesWrapperFunction = stagesWrapperFunction
     }
 
     @Override
@@ -21,5 +23,10 @@ public class CustomStagesWrapper extends AbstractStagesWrapper {
         } finally {
             script.echo("Custom stages wrapper \"${name}\" FINISHED")
         }
+    }
+
+    @Override
+    def wrapStages(Object script, Pipeline context, Closure executeStagesBody) {
+      stagesWrapperFunction(script, executeStagesBody)
     }
 }

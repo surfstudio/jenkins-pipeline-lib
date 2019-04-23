@@ -10,12 +10,10 @@ import ru.surfstudio.ci.pipeline.Pipeline
  */
 public abstract class AbstractStagesWrapper implements StageGroup {
     String name
-    Closure stagesWrapperFunction
     List<Stage> stages
 
-    public AbstractStagesWrapper(String name, Closure stagesWrapperFunction, List<Stage> stages) {
+    public AbstractStagesWrapper(String name, List<Stage> stages) {
         this.name = name
-        this.stagesWrapperFunction = stagesWrapperFunction
         this.stages = stages
     }
 
@@ -26,6 +24,14 @@ public abstract class AbstractStagesWrapper implements StageGroup {
                 stage.execute(script, context)
             }
         }
-        stagesWrapperFunction(script, context, executeStagesBody)
+        wrapStages(script, context, executeStagesBody)
     }
+
+    /**
+     * wrap stages execution
+     * @param script
+     * @param context
+     * @param executeStagesBody - function, which execute stages
+     */
+    abstract def wrapStages(Object script, Pipeline context, Closure executeStagesBody)
 }
