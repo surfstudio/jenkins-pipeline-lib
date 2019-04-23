@@ -6,7 +6,7 @@ package ru.surfstudio.ci.stage
 public class NodeStagesWrapper extends AbstractStagesWrapper {
     String node
     boolean copyWorkspace = true
-    final def nodeWrapperFunction = {
+    static final def nodeWrapperFunction = {
         script, executeStagesBody ->
             def stashName = "${script.env.JOB_NAME}_${script.env.BUILD_NUMBER}_workspace"
             if(copyWorkspace){
