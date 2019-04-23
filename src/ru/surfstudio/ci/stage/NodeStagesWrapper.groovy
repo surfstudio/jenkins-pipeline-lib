@@ -11,16 +11,16 @@ public class NodeStagesWrapper extends AbstractStagesWrapper {
         super(name, {}, stages)
         this.node = node
         this.copyWorkspace = copyWorkspace
-        this.stagesWrapperFunction = {
+        super.stagesWrapperFunction = {
             script, context, executeStagesBody ->
                 def stashName = "${script.env.JOB_NAME}_${script.env.BUILD_NUMBER}_workspace"
-                if(copyWorkspace){
+                if (this.copyWorkspace) {
                     script.stash includes: '**', name: stashName
                 }
                 try {
-                    script.node(node) {
-                        script.echo "Switch to node ${node}: ${script.env.NODE_NAME}"
-                        if (copyWorkspace) {
+                    script.node(this.node) {
+                        script.echo "Switch to node ${this.node}: ${script.env.NODE_NAME}"
+                        if (this.copyWorkspace) {
                             script.unstash stashName
                         }
                         executeStagesBody()
@@ -30,6 +30,5 @@ public class NodeStagesWrapper extends AbstractStagesWrapper {
                 }
 
         }
-
     }
 }
