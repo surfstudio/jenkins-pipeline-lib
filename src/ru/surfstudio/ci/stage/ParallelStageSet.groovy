@@ -1,6 +1,8 @@
 package ru.surfstudio.ci.stage
 
-//TODO не поддерживается набора стейджей для каждой ветки https://issues.jenkins-ci.org/browse/JENKINS-53162
+import ru.surfstudio.ci.pipeline.Pipeline
+
+//TODO не поддерживается набор стейджей для каждой ветки https://issues.jenkins-ci.org/browse/JENKINS-53162
 public class ParallelStageSet implements StageGroup {
     String name
     List<Stage> stages = Collections.emptyList()
@@ -14,7 +16,7 @@ public class ParallelStageSet implements StageGroup {
     }
 
     @Override
-    void execute(Object script, Closure preExecuteStageBody, Closure postExecuteStageBody) {
+    void execute(Object script, Pipeline context) {
         def stashName = "${script.env.JOB_NAME}_${script.env.BUILD_NUMBER}_workspace"
         if(copyWorkspace){
             script.stash includes: '**', name: stashName
@@ -26,7 +28,7 @@ public class ParallelStageSet implements StageGroup {
                 if(copyWorkspace) {
                     script.unstash stashName
                 }
-                tmpStage.execute(script, preExecuteStageBody, postExecuteStageBody) }
+                tmpStage.execute(script, context) }
         }
         script.stage(name) {
             script.parallel lines

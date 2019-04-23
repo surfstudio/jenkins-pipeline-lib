@@ -1,4 +1,6 @@
-package ru.surfstudio.ci.stage;
+package ru.surfstudio.ci.stage
+
+import ru.surfstudio.ci.pipeline.Pipeline;
 
 /**
  * базовый интерфейс для всех стейждей, в том числе для комплексных
@@ -8,7 +10,7 @@ public interface Stage {
 
     String getName()
 
-    void execute(Object script, Closure preExecuteStageBody, Closure postExecuteStageBody)
+    void execute(Object script, Pipeline context)
 
 }
 

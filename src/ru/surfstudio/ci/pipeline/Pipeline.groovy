@@ -19,6 +19,7 @@ package ru.surfstudio.ci.pipeline
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.stage.CustomStage
+import ru.surfstudio.ci.stage.CustomStagesWrapper
 import ru.surfstudio.ci.stage.NodeStagesWrapper
 import ru.surfstudio.ci.stage.ParallelStageSet
 import ru.surfstudio.ci.stage.SimpleStage
@@ -143,14 +144,14 @@ abstract class Pipeline implements Serializable {
     // ------------ Simple Stage ----------------
 
     /**
-     * run simple stage
+     * create simple stage
      */
     def static stage(String name, String strategy, Closure body){
         return new SimpleStage(name, strategy, body)
     }
 
     /**
-     * run simple stage with {@link #DEFAULT_STAGE_STRATEGY}
+     * create simple stage with {@link #DEFAULT_STAGE_STRATEGY}
      */
     def static stage(String name, Closure body) {
         return new SimpleStage(name, DEFAULT_STAGE_STRATEGY, body)
@@ -200,6 +201,14 @@ abstract class Pipeline implements Serializable {
      */
     def static customScript(String name, Closure body) {
         return new CustomStage(name, body)
+    }
+
+    /**
+     * Wrap execution of stages on user code
+     * stagesWrapperFunction pass parameters (script, executeStagesBody), where executeStagesBody - function, which execute stages
+     */
+    def static wrapStages(String name, Closure stagesWrapperFunction, List<Stage> stages) {
+        return new CustomStagesWrapper(name, stagesWrapperFunction, stages)
     }
 
     // ==================================== UTIL =========================================

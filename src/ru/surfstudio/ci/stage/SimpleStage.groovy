@@ -17,6 +17,7 @@ package ru.surfstudio.ci.stage
 
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Result
+import ru.surfstudio.ci.pipeline.Pipeline
 
 /**
  * Stage для {@link ru.surfstudio.ci.pipeline.Pipeline}
@@ -34,7 +35,7 @@ class SimpleStage implements Stage, StageWithStrategy, StageWithResult {
     }
 
     @Override
-    void execute(Object script, Closure preExecuteStageBody, Closure postExecuteStageBody) {
+    void execute(Object script, Pipeline context) {
         //https://issues.jenkins-ci.org/browse/JENKINS-39203 подождем пока сделают разные статусы на разные Stage
         def stage = this
         script.stage(stage.name) {
@@ -47,8 +48,8 @@ class SimpleStage implements Stage, StageWithStrategy, StageWithResult {
             } else {
                 try {
                     script.echo("Stage \"${stage.name}\" STARTED")
-                    if (preExecuteStageBody) {
-                        preExecuteStageBody(stage)
+                    if (context.preExecuteStageBody) {
+                        context.preExecuteStageBody(stage)
                     }
                     stage.body()
                     stage.result = Result.SUCCESS
@@ -72,8 +73,8 @@ class SimpleStage implements Stage, StageWithStrategy, StageWithResult {
                         }
                     }
                 } finally {
-                    if (postExecuteStageBody) {
-                        postExecuteStageBody(stage)
+                    if (context.postExecuteStageBody) {
+                        context.postExecuteStageBody(stage)
                     }
                 }
             }
