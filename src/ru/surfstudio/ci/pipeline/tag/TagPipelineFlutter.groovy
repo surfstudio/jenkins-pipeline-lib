@@ -69,34 +69,32 @@ class TagPipelineFlutter extends TagPipeline {
                             configFile,
                             compositeVersionNameVar)
                 },
-                parallel(BUILD, [
-                        stage(BUILD_ANDROID) {
-                            FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
-                                    buildAndroidCommand,
-                                    androidKeystoreCredentials,
-                                    androidKeystorePropertiesCredentials)
-                        },
-                        stage(BUILD_IOS) {
-                            FlutterPipelineHelper.buildStageBodyIOS(script,
-                                    buildIOsCommand,
-                                    iOSKeychainCredenialId,
-                                    iOSCertfileCredentialId)
-                        },
-                ]),
+                stage(BUILD_ANDROID) {
+                    FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
+                            buildAndroidCommand,
+                            androidKeystoreCredentials,
+                            androidKeystorePropertiesCredentials)
+                },
                 stage(UNIT_TEST) {
                     FlutterPipelineHelper.testStageBody(script, testCommand)
                 },
                 stage(STATIC_CODE_ANALYSIS) {
                     FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
-                parallel(BETA_UPLOAD, [
-                        stage(BETA_UPLOAD_ANDROID) {
-                            script.echo "empty"
-                            //todo
-                            /*betaUploadWithKeystoreStageBodyAndroid(script,
-                                    betaUploadGradleTask,
-                                    keystoreCredentials,
-                                    keystorePropertiesCredentials)*/
+                stage(BETA_UPLOAD_ANDROID) {
+                    script.echo "empty"
+                    //todo
+                    /*betaUploadWithKeystoreStageBodyAndroid(script,
+                            betaUploadGradleTask,
+                            keystoreCredentials,
+                            keystorePropertiesCredentials)*/
+                },
+                node(NodeProvider.iOSFlutterNode, true, [
+                        stage(BUILD_IOS) {
+                            FlutterPipelineHelper.buildStageBodyIOS(script,
+                                    buildIOsCommand,
+                                    iOSKeychainCredenialId,
+                                    iOSCertfileCredentialId)
                         },
                         stage(BETA_UPLOAD_IOS) {
                             script.echo "empty"
@@ -108,7 +106,6 @@ class TagPipelineFlutter extends TagPipeline {
                         },
                 ]),
                 stage(VERSION_PUSH, StageStrategy.UNDEFINED) {
-
                    versionPushStageBody(script,
                             repoTag,
                             branchesPatternsForAutoChangeVersion,

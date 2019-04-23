@@ -18,7 +18,7 @@ package ru.surfstudio.ci.pipeline
 
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Result
-
+import ru.surfstudio.ci.stage.NodeStagesWrapper
 import ru.surfstudio.ci.stage.ParallelStageSet
 import ru.surfstudio.ci.stage.SimpleStage
 import ru.surfstudio.ci.stage.StageGroup
@@ -136,23 +136,33 @@ abstract class Pipeline implements Serializable {
 
     // ==================================== DSL =========================================
 
+    // ------------ Simple Stage ----------------
+
+    /**
+     * run simple stage
+     */
     def static stage(String name, String strategy, Closure body){
         return new SimpleStage(name, strategy, body)
     }
 
     /**
-     * Create stage with {@link #DEFAULT_STAGE_STRATEGY}
+     * run simple stage with {@link #DEFAULT_STAGE_STRATEGY}
      */
     def static stage(String name, Closure body) {
         return new SimpleStage(name, DEFAULT_STAGE_STRATEGY, body)
     }
 
+    // ------------ Parallel ----------------
+
+    /**
+     * Run Stages in parallel
+     */
     def static parallel(List<SimpleStage> stages) {
-        return new ParallelStageSet("Parallel", true, stages)
+        return new ParallelStageSet("Parallel", false, stages)
     }
 
     def static parallel(String name, List<SimpleStage> stages) {
-        return new ParallelStageSet(name, true, stages)
+        return new ParallelStageSet(name, false, stages)
     }
 
     def static parallel(boolean copyWorkspace, List<SimpleStage> stages) {
@@ -161,6 +171,22 @@ abstract class Pipeline implements Serializable {
 
     def static parallel(String name, boolean copyWorkspace, List<SimpleStage> stages) {
         return new ParallelStageSet(name, copyWorkspace, stages)
+    }
+
+    // ------------ Node ----------------
+
+    /**
+     * Run stages on specific node
+     */
+    def static node(String node, boolean copyWorkspace, List<SimpleStage> stages) {
+        return new NodeStagesWrapper("Node: $node", node, copyWorkspace, stages)
+    }
+
+    /**
+     * Run stages on specific node.
+     */
+    def static node(String node, List<SimpleStage> stages) {
+        return new NodeStagesWrapper("Node: $node", node, false, stages)
     }
 
     // ==================================== UTIL =========================================

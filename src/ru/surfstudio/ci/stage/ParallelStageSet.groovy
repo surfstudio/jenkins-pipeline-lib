@@ -15,7 +15,7 @@ public class ParallelStageSet implements StageGroup {
 
     @Override
     void execute(Object script, Closure preExecuteStageBody, Closure postExecuteStageBody) {
-        def stashName = 'workspace'
+        def stashName = "${script.env.JOB_NAME}_${script.env.BUILD_NUMBER}_workspace"
         if(copyWorkspace){
             script.stash includes: '**', name: stashName
         }
