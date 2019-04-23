@@ -195,9 +195,8 @@ abstract class Pipeline implements Serializable {
     // ==================================== UTIL =========================================
 
     def printStageResults() {
-        for (Stage abstractStage : stages) {
-            if(abstractStage instanceof SimpleStage) {
-                def stage = abstractStage as SimpleStage
+        forStages {stage ->
+            if(stage instanceof SimpleStage) {
                 script.echo(String.format("%-30s", "\"${stage.name}\" stage result: ") + stage.result)
             }
         }
@@ -245,9 +244,12 @@ abstract class Pipeline implements Serializable {
                     script.error("Unsupported stage result " + stage.result)
                 }
             }
+            script.echo "calc result for stage ${abstractStage.name}"
+            script.echo "candidate result $newJobResult"
             if (jobResultPriority[newJobResult] > jobResultPriority[currentJobResult]) {
                 currentJobResult = newJobResult
             }
+            script.echo "updated result $currentJobResult"
         }
         return currentJobResult
     }
