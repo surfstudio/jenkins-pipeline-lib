@@ -146,8 +146,8 @@ abstract class Pipeline implements Serializable {
     /**
      * create simple stage
      */
-    def static stage(String name, String strategy, boolean runPreAndPostExecuteStageBody, Closure body){
-        return new SimpleStage(name, strategy, runPreAndPostExecuteStageBody, body)
+    def static stage(String name, String strategy, boolean runPreAndPostExecuteStageBodies, Closure body){
+        return new SimpleStage(name, strategy, runPreAndPostExecuteStageBodies, body)
     }
 
     /**
@@ -160,8 +160,8 @@ abstract class Pipeline implements Serializable {
     /**
      * create simple stage with {@link #DEFAULT_STAGE_STRATEGY}
      */
-    def static stage(String name, boolean runPreAndPostExecuteStageBody, Closure body) {
-        return new SimpleStage(name, DEFAULT_STAGE_STRATEGY, runPreAndPostExecuteStageBody, body)
+    def static stage(String name, boolean runPreAndPostExecuteStageBodies, Closure body) {
+        return new SimpleStage(name, DEFAULT_STAGE_STRATEGY, runPreAndPostExecuteStageBodies, body)
     }
 
     /**

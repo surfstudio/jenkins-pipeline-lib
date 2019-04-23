@@ -27,16 +27,16 @@ class SimpleStage implements Stage, StageWithStrategy, StageWithResult {
     Closure body
     String strategy //see class StageStrategy
     String result  //see class StageResult
-    boolean runPreAndPostExecuteStageBody = true
+    boolean runPreAndPostExecuteStageBodies = true
 
     SimpleStage(String name, String strategy, Closure body) {
         this(name, strategy, true, body);
     }
 
-    SimpleStage(String name, String strategy, boolean runPreAndPostExecuteStageBody, Closure body) {
+    SimpleStage(String name, String strategy, boolean runPreAndPostExecuteStageBodies, Closure body) {
         this.name = name
         this.body = body
-        this.runPreAndPostExecuteStageBody = runPreAndPostExecuteStageBody
+        this.runPreAndPostExecuteStageBodies = runPreAndPostExecuteStageBodies
         this.strategy = strategy
     }
 
@@ -54,7 +54,7 @@ class SimpleStage implements Stage, StageWithStrategy, StageWithResult {
             } else {
                 try {
                     script.echo("Stage \"${stage.name}\" STARTED")
-                    if (context.preExecuteStageBody && runPreAndPostExecuteStageBody) {
+                    if (context.preExecuteStageBody && runPreAndPostExecuteStageBodies) {
                         context.preExecuteStageBody(stage)
                     }
                     stage.body()
@@ -79,7 +79,7 @@ class SimpleStage implements Stage, StageWithStrategy, StageWithResult {
                         }
                     }
                 } finally {
-                    if (context.postExecuteStageBody && runPreAndPostExecuteStageBody) {
+                    if (context.postExecuteStageBody && runPreAndPostExecuteStageBodies) {
                         context.postExecuteStageBody(stage)
                     }
                 }
