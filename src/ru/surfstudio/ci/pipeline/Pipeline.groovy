@@ -84,13 +84,13 @@ abstract class Pipeline implements Serializable {
         CommonUtil.fixVisualizingStagesInParallelBlock(script)
         try {
             def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, createInitStageBody())
-            initStage.execute(script, {}, {})
+            initStage.execute(script, this)
             script.node(node) {
                 if(CommonUtil.notEmpty(node)) {
                     script.echo "Switch to node ${node}: ${script.env.NODE_NAME}"
                 }
                 for (Stage stage : stages) {
-                    stage.execute(script, preExecuteStageBody, postExecuteStageBody)
+                    stage.execute(script, this)
                 }
             }
         }  finally {
