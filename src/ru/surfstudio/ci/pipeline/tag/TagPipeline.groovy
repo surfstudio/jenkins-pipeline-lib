@@ -164,11 +164,11 @@ abstract class TagPipeline extends ScmPipeline {
     }
 
     def static preExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
-        if (stage.name != CHECKOUT) RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
+        RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
     }
 
     def static postExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
-        if (stage.name != CHECKOUT) RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
+        RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
     }
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
 

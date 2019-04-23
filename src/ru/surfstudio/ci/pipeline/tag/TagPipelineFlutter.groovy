@@ -60,7 +60,7 @@ class TagPipelineFlutter extends TagPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                stage(CHECKOUT) {
+                stage(CHECKOUT, false) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
                 stage(VERSION_UPDATE, StageStrategy.UNDEFINED) {

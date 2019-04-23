@@ -83,7 +83,7 @@ abstract class Pipeline implements Serializable {
     def run() {
         CommonUtil.fixVisualizingStagesInParallelBlock(script)
         try {
-            def initStage = createStage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, createInitStageBody())
+            def initStage = stage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, false, createInitStageBody())
             initStage.execute(script, this)
             script.node(node) {
                 if(CommonUtil.notEmpty(node)) {
@@ -146,8 +146,22 @@ abstract class Pipeline implements Serializable {
     /**
      * create simple stage
      */
+    def static stage(String name, String strategy, boolean runPreAndPostExecuteStageBody, Closure body){
+        return new SimpleStage(name, strategy, runPreAndPostExecuteStageBody, body)
+    }
+
+    /**
+     * create simple stage
+     */
     def static stage(String name, String strategy, Closure body){
         return new SimpleStage(name, strategy, body)
+    }
+
+    /**
+     * create simple stage with {@link #DEFAULT_STAGE_STRATEGY}
+     */
+    def static stage(String name, boolean runPreAndPostExecuteStageBody, Closure body) {
+        return new SimpleStage(name, DEFAULT_STAGE_STRATEGY, runPreAndPostExecuteStageBody, body)
     }
 
     /**

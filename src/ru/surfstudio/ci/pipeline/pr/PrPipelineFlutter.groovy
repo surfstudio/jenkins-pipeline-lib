@@ -54,7 +54,7 @@ class PrPipelineFlutter extends PrPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                stage(PRE_MERGE) {
+                stage(PRE_MERGE, false) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
                 stage(BUILD_ANDROID) {

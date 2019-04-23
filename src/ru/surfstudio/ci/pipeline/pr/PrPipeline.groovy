@@ -134,11 +134,11 @@ abstract class PrPipeline extends ScmPipeline {
     }
 
     def static preExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
-        if (stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
+        RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
     }
 
     def static postExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
-         if (stage.name != PRE_MERGE) RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
+        RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
     }
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
 
