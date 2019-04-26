@@ -41,8 +41,9 @@ class iOSPipelineHelper {
     }
 
     def static unitTestStageBodyiOS(Object script) {
-        script.echo "empty"
-        // TODO: Implement me
+        CommonUtil.shWithRuby(this, "make test")
+        junit 'fastlane/test_output/report.junit'
+        archiveArtifacts artifacts: 'fastlane/test_output/report.html'
     }
 
     def static instrumentationTestStageBodyiOS(Object script) {
@@ -51,6 +52,6 @@ class iOSPipelineHelper {
     }
 
     def static staticCodeAnalysisStageBodyiOS(Object script) {
-        script.sh "make sonar"
+        CommonUtil.shWithRuby(script, "make lint")
     }
 }
