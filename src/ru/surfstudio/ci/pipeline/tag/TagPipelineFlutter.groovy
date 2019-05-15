@@ -46,6 +46,8 @@ class TagPipelineFlutter extends TagPipeline {
     def configFile = "pubspec.yaml"
     def compositeVersionNameVar = "version"
 
+    def shBetaUploadCommandAndroid = "cd android && fastlane android beta"
+
     TagPipelineFlutter(Object script) {
         super(script)
     }
@@ -82,12 +84,7 @@ class TagPipelineFlutter extends TagPipeline {
                     FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
                 stage(BETA_UPLOAD_ANDROID) {
-                    script.echo "empty"
-                    //todo
-                    /*betaUploadWithKeystoreStageBodyAndroid(script,
-                            betaUploadGradleTask,
-                            keystoreCredentials,
-                            keystorePropertiesCredentials)*/
+                    betaUploadStageBody(script, shBetaUploadCommandAndroid)
                 },
                 node(NodeProvider.iOSFlutterNode, true, [
                         stage(BUILD_IOS) {
@@ -129,13 +126,8 @@ class TagPipelineFlutter extends TagPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ ======================================================
 
-    def static betaUploadWithKeystoreStageBodyAndroid(Object script,
-                                                      String betaUploadGradleTask,
-                                                      String keystoreCredentials,
-                                                      String keystorePropertiesCredentials) {
-        AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
-            betaUploadStageBodyAndroid(script, betaUploadGradleTask)
-        }
+    def static betaUploadStageBody(Object script, String shBetaUploadCommand) {
+        script.sh shBetaUploadCommand
     }
 
     def static versionUpdateStageBodyAndroid(Object script,
@@ -155,12 +147,6 @@ class TagPipelineFlutter extends TagPipeline {
         def compositeVersion = FlutterUtil.getYamlVariable(script, configYamlFile, compositeVersionNameVar)
         return "Change version to $compositeVersion $RepositoryUtil.SKIP_CI_LABEL1 $RepositoryUtil.VERSION_LABEL1"
 
-    }
-
-    def static betaUploadStageBodyAndroid(Object script, String betaUploadGradleTask) {
-        AndroidUtil.withGradleBuildCacheCredentials(script) {
-            script.sh "./gradlew ${betaUploadGradleTask}"
-        }
     }
 
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
