@@ -42,7 +42,7 @@ class TagPipelineFlutter extends TagPipeline {
 
     public buildAndroidCommand = "./script/android/build.sh -qa " +
             "&& ./script/android/build.sh -release "
-    public buildAndroidCommandArm64 ="&& ./script/android/build.sh -qa -x64 " +
+    public buildAndroidCommandArm64 ="./script/android/build.sh -qa -x64 " +
             "&& ./script/android/build.sh -release -x64"
     public buildIOsCommand = "./script/ios/build.sh -qa && ./script/ios/build.sh -release"
     public testCommand = "flutter test"
