@@ -54,7 +54,7 @@ class TagPipelineFlutter extends TagPipeline {
 
     public minVersionCode = 10000
     //temp
-    public armVersionCode = "<undefined>"
+    public mainVersionCode = "<undefined>"
     public arm64VersionCode = "<undefined>"
 
     TagPipelineFlutter(Object script) {
@@ -96,7 +96,7 @@ class TagPipelineFlutter extends TagPipeline {
                 stage(VERSION_UPDATE) {
                     versionUpdateStageBody(script,
                             repoTag,
-                            armVersionCode,
+                            mainVersionCode,
                             configFile,
                             compositeVersionNameVar)
                 },
@@ -163,8 +163,10 @@ class TagPipelineFlutter extends TagPipeline {
         if (newMainVersionCode < minVersionCode) {
             newMainVersionCode = minVersionCode
         }
-        ctx.armVersionCode = String.valueOf(newMainVersionCode)
+        ctx.mainVersionCode = String.valueOf(newMainVersionCode)
         ctx.arm64VersionCode = "64" + String.valueOf(newMainVersionCode)
+        script.echo "New main versionCode: $ctx.mainVersionCode"
+        script.echo "New arm64 versionCode: $ctx.arm64VersionCode"
     }
 
     def static betaUploadStageBody(Object script, String shBetaUploadCommand) {
