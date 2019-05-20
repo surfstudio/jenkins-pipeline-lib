@@ -13,7 +13,7 @@ class StageTreeUtil {
      * @param stagesTree - tree of stagesTree
      * @return true/false
      */
-    def static replaceStage(List<Stage> stagesTree, SimpleStage newStage) {
+    def static replaceStage(List<Stage> stagesTree, Stage newStage) {
         for(int i = 0; i < stagesTree.size(); i++){
             def stage = stagesTree.get(i)
             if(stage.name == newStage.name) {

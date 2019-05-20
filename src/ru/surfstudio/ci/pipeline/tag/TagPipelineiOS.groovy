@@ -35,8 +35,6 @@ class TagPipelineiOS extends TagPipeline {
 
     @Override
     def init() {
-        changeVersionAsTag = false //todo temp
-
         node = NodeProvider.getiOSNode()
 
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
@@ -49,7 +47,7 @@ class TagPipelineiOS extends TagPipeline {
                 stage(CHECKOUT, false) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
-                stage(VERSION_UPDATE, StageStrategy.UNDEFINED) {
+                stage(VERSION_UPDATE) {
                     script.echo "stage not specified" //todo
                 },
                 stage(BUILD) {
@@ -75,7 +73,7 @@ class TagPipelineiOS extends TagPipeline {
                         getBuildConfigValue()
                     )
                 },
-                stage(VERSION_PUSH, StageStrategy.UNDEFINED) {
+                stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     script.echo "stage not specified" //todo temp
                 },
 

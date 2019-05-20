@@ -15,18 +15,19 @@
  */
 package ru.surfstudio.ci.pipeline.tag
 
-import ru.surfstudio.ci.CommonUtil
+
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
-import ru.surfstudio.ci.utils.android.AndroidUtil
 import ru.surfstudio.ci.utils.flutter.FlutterUtil
 
 class TagPipelineFlutter extends TagPipeline {
 
-
+    public static final String CALCULATE_VERSION_CODES = 'Calculate Version Codes'
+    public static final String VERSION_UPDATE_FOR_ARM64 = 'Version Update For Arm64'
     public static final String BUILD_ANDROID = 'Build Android'
+    public static final String BUILD_ANDROID_ARM64 = 'Build Android Arm64'
     public static final String BUILD_IOS = 'Build iOS'
     public static final String BETA_UPLOAD_ANDROID = 'Beta Upload Android'
     public static final String BETA_UPLOAD_IOS = 'Beta Upload iOS'
@@ -39,14 +40,22 @@ class TagPipelineFlutter extends TagPipeline {
     public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey" //todo
 
 
-    public buildAndroidCommand = "flutter build apk --release -t lib/main-qa.dart && flutter build apk --release -t lib/main-release.dart"
-    public buildIOsCommand = "flutter build ios --release -t lib/main-qa.dart && flutter build ios --release -t lib/main-release.dart"
+    public buildAndroidCommand = "./script/android/build.sh -qa " +
+            "&& ./script/android/build.sh -release "
+    public buildAndroidCommandArm64 ="&& ./script/android/build.sh -qa -x64 " +
+            "&& ./script/android/build.sh -release -x64"
+    public buildIOsCommand = "./script/ios/build.sh -qa && ./script/ios/build.sh -release"
     public testCommand = "flutter test"
 
-    def configFile = "pubspec.yaml"
-    def compositeVersionNameVar = "version"
+    public configFile = "pubspec.yaml"
+    public compositeVersionNameVar = "version"
 
-    def shBetaUploadCommandAndroid = "cd android && fastlane android beta"
+    public shBetaUploadCommandAndroid = "cd android && fastlane android beta"
+
+    public minVersionCode = 10000
+    //temp
+    public armVersionCode = "<undefined>"
+    public arm64VersionCode = "<undefined>"
 
     TagPipelineFlutter(Object script) {
         super(script)
@@ -65,9 +74,29 @@ class TagPipelineFlutter extends TagPipeline {
                 stage(CHECKOUT, false) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
-                stage(VERSION_UPDATE, StageStrategy.UNDEFINED) {
-                    versionUpdateStageBodyAndroid(script,
+                stage(CALCULATE_VERSION_CODES) {
+                    calculateVersionCodesStageBody(this,
+                            configFile,
+                            compositeVersionNameVar,
+                            minVersionCode)
+                },
+                stage(VERSION_UPDATE_FOR_ARM64) {
+                    versionUpdateStageBody(script,
                             repoTag,
+                            arm64VersionCode,
+                            configFile,
+                            compositeVersionNameVar)
+                },
+                stage(BUILD_ANDROID_ARM64) {
+                    FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
+                            buildAndroidCommandArm64,
+                            androidKeystoreCredentials,
+                            androidKeystorePropertiesCredentials)
+                },
+                stage(VERSION_UPDATE) {
+                    versionUpdateStageBody(script,
+                            repoTag,
+                            armVersionCode,
                             configFile,
                             compositeVersionNameVar)
                 },
@@ -102,7 +131,7 @@ class TagPipelineFlutter extends TagPipeline {
                                     iOSCertfileCredentialId)*/
                         },
                 ]),
-                stage(VERSION_PUSH, StageStrategy.UNDEFINED) {
+                stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                    versionPushStageBody(script,
                             repoTag,
                             branchesPatternsForAutoChangeVersion,
@@ -121,23 +150,33 @@ class TagPipelineFlutter extends TagPipeline {
     }
 
 
-
-    //other
-
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ ======================================================
+
+    def static calculateVersionCodesStageBody(TagPipelineFlutter ctx,
+                                       String configFile,
+                                       String compositeVersionNameVar,
+                                       Integer minVersionCode) {
+        def script = ctx.script
+        def compositeVersion = FlutterUtil.getYamlVariable(script, configFile, compositeVersionNameVar)
+        def versionCode = Integer.valueOf(FlutterUtil.getVersionCode(compositeVersion))
+        def newMainVersionCode = versionCode + 1
+        if (newMainVersionCode < minVersionCode) {
+            newMainVersionCode = minVersionCode
+        }
+        ctx.armVersionCode = String.valueOf(newMainVersionCode)
+        ctx.arm64VersionCode = "64" + String.valueOf(newMainVersionCode)
+    }
 
     def static betaUploadStageBody(Object script, String shBetaUploadCommand) {
         script.sh shBetaUploadCommand
     }
 
-    def static versionUpdateStageBodyAndroid(Object script,
-                                             String repoTag,
-                                             String configYamlFile,
-                                             String compositeVersionNameVar) {
-        def compositeVersion = FlutterUtil.getYamlVariable(script, configYamlFile, compositeVersionNameVar)
-        def versionCode = FlutterUtil.getVersionCode(compositeVersion)
-        def newVersionCode = String.valueOf(Integer.valueOf(versionCode) + 1)
-        def newCompositeVersion = "$repoTag+$newVersionCode"
+    def static versionUpdateStageBody(Object script,
+                                      String repoTag,
+                                      String versionCode,
+                                      String configYamlFile,
+                                      String compositeVersionNameVar) {
+        def newCompositeVersion = "$repoTag+$versionCode"
         FlutterUtil.changeYamlVariable(script, configYamlFile, compositeVersionNameVar, newCompositeVersion)
     }
 

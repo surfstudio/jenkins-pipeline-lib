@@ -41,10 +41,8 @@ abstract class TagPipeline extends ScmPipeline {
     public static final String VERSION_PUSH = 'Version Push'
 
     //scm
-
     public tagRegexp = /(.*)?\d{1,4}\.\d{1,4}\.\d{1,4}(.*)?/
     public repoTag = ""
-    public changeVersionAsTag = true
     public branchesPatternsForAutoChangeVersion = [/^origin\/dev\/.*/, /^origin\/feature\/.*/] //будет выбрана первая подходящая ветка
 
 
@@ -56,9 +54,6 @@ abstract class TagPipeline extends ScmPipeline {
 
     def static initBody(TagPipeline ctx) {
         def script = ctx.script
-
-        ctx.getStage(VERSION_UPDATE).strategy = ctx.changeVersionAsTag ? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE
-        ctx.getStage(VERSION_PUSH).strategy = ctx.changeVersionAsTag ? StageStrategy.UNSTABLE_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE
 
         CommonUtil.printInitialStageStrategies(ctx)
 

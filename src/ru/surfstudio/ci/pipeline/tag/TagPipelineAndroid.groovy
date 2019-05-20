@@ -31,6 +31,7 @@ class TagPipelineAndroid extends TagPipeline {
     public keystorePropertiesCredentials = "no_credentials"
 
     //other
+
     def gradleConfigFile = "config.gradle"
     def appVersionNameGradleVar = "versionName"
     def appVersionCodeGradleVar = "versionCode"
@@ -85,7 +86,7 @@ class TagPipelineAndroid extends TagPipeline {
                 stage(CHECKOUT, false) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
-                stage(VERSION_UPDATE, StageStrategy.UNDEFINED) {
+                stage(VERSION_UPDATE) {
                     versionUpdateStageBodyAndroid(script,
                             repoTag,
                             gradleConfigFile,
@@ -128,7 +129,7 @@ class TagPipelineAndroid extends TagPipeline {
                             keystoreCredentials,
                             keystorePropertiesCredentials)
                 },
-                stage(VERSION_PUSH, StageStrategy.UNDEFINED) {
+                stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     versionPushStageBody(script,
                             repoTag,
                             branchesPatternsForAutoChangeVersion,

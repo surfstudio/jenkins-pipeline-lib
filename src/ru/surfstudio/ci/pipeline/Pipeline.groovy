@@ -118,7 +118,7 @@ abstract class Pipeline implements Serializable {
      * @param newStage
      * @return true/false
      */
-    def replaceStage(SimpleStage newStage) {
+    def replaceStage(Stage newStage) {
         return StageTreeUtil.replaceStage(stages, newStage)
     }
 
