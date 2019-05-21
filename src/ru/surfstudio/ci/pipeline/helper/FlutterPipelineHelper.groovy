@@ -62,7 +62,7 @@ class FlutterPipelineHelper {
             //todo use credentials
             //CommonUtil.shWithRuby(script, "gem install bundler -v 1.17.3") 
             CommonUtil.shWithRuby(script, "make -C ios/ init")
-            script.sh buildShCommand
+            CommonUtil.shWithRuby(script, buildShCommand)
         }
     }
 
