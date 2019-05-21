@@ -61,9 +61,7 @@ class FlutterPipelineHelper {
             script.sh('security set-key-partition-list -S apple-tool:,apple: -s -k $KEYCHAIN_PASS ~/Library/Keychains/login.keychain-db')
             //todo use credentials
             //CommonUtil.shWithRuby(script, "gem install bundler -v 1.17.3") 
-            script.sh('cd ios/')
-            CommonUtil.shWithRuby(script, "make init")
-            script.sh ('cd ..')
+            CommonUtil.shWithRuby(script, "cd $WORKSPACE/ios/ && make init")
             script.sh buildShCommand
         }
     }
