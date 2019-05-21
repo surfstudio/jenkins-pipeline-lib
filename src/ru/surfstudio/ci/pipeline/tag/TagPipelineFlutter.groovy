@@ -21,6 +21,7 @@ import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.flutter.FlutterUtil
+import ru.surfstudio.ci.CommonUtil
 
 class TagPipelineFlutter extends TagPipeline {
 
@@ -170,7 +171,7 @@ class TagPipelineFlutter extends TagPipeline {
     }
 
     def static betaUploadStageBody(Object script, String shBetaUploadCommand) {
-        script.sh shBetaUploadCommand
+        CommonUtil.shWithRuby(script, shBetaUploadCommand)
     }
 
     def static versionUpdateStageBody(Object script,
