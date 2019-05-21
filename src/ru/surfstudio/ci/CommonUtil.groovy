@@ -87,7 +87,7 @@ class CommonUtil {
     //endregion
 
     def static shWithRuby(Object script, String command, String version = "2.3.5") {
-        script.sh "hostname; set +x; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use $version; $command"
+        script.sh "hostname; set -x; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use $version; $command"
     }
 
     @Deprecated
