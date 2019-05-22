@@ -45,13 +45,14 @@ class TagPipelineFlutter extends TagPipeline {
             "&& ./script/android/build.sh -release "
     public buildAndroidCommandArm64 ="./script/android/build.sh -qa -x64 " +
             "&& ./script/android/build.sh -release -x64"
-    public buildIOsCommand = "./script/ios/build.sh -qa && ./script/ios/build.sh -release"
+    public buildIOsCommand = "./script/ios/build.sh -qa" //todo && ./script/ios/build.sh -release - на случай релизной сборки
     public testCommand = "flutter test"
 
     public configFile = "pubspec.yaml"
     public compositeVersionNameVar = "version"
 
     public shBetaUploadCommandAndroid = "cd android && fastlane android beta"
+    public shBetaUploadCommandIos= "make -C ios/ beta"
 
     //versions
     public minVersionCode = 10000
@@ -124,12 +125,8 @@ class TagPipelineFlutter extends TagPipeline {
                                     iOSCertfileCredentialId)
                         },
                         stage(BETA_UPLOAD_IOS) {
-                            script.echo "empty"
-                            //todo
-                           /* FlutterPipelineHelper.buildStageBodyiOS(script,
-                                    buildIOsCommand,
-                                    iOSKeychainCredenialId,
-                                    iOSCertfileCredentialId)*/
+                            script.echo "Upload iOS"
+                            betaUploadStageBody(script, shBetaUploadCommandIos)
                         },
                 ]),
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
