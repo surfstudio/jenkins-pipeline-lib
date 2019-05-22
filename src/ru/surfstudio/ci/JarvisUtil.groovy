@@ -16,6 +16,8 @@
 package ru.surfstudio.ci
 
 import ru.surfstudio.ci.pipeline.tag.TagPipeline
+import ru.surfstudio.ci.stage.SimpleStage
+import ru.surfstudio.ci.stage.StageWithResult
 
 class JarvisUtil {
 
@@ -107,8 +109,8 @@ class JarvisUtil {
         def script = ctx.script
         withJarvisToken(script) {
             def stageResultsBody = []
-            for (stage in ctx.stages) {
-                if(stage.result) {
+            ctx.forStages { stage ->
+                if(stage instanceof StageWithResult && stage.result) {
                     stageResultsBody.add([name: stage.name, status: stage.result])
                 }
             }
