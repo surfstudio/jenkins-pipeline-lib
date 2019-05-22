@@ -20,6 +20,7 @@ import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.stage.CustomStage
 import ru.surfstudio.ci.stage.CustomStagesWrapper
+import ru.surfstudio.ci.stage.DirStagesWrapper
 import ru.surfstudio.ci.stage.NodeStagesWrapper
 import ru.surfstudio.ci.stage.ParallelStageSet
 import ru.surfstudio.ci.stage.SimpleStage
@@ -176,19 +177,19 @@ abstract class Pipeline implements Serializable {
     /**
      * Run Stages in parallel
      */
-    def static parallel(List<SimpleStage> stages) {
+    def static parallel(List<Stage> stages) {
         return new ParallelStageSet("Parallel", false, stages)
     }
 
-    def static parallel(String name, List<SimpleStage> stages) {
+    def static parallel(String name, List<Stage> stages) {
         return new ParallelStageSet(name, false, stages)
     }
 
-    def static parallel(boolean copyWorkspace, List<SimpleStage> stages) {
+    def static parallel(boolean copyWorkspace, List<Stage> stages) {
         return new ParallelStageSet("Parallel", copyWorkspace, stages)
     }
 
-    def static parallel(String name, boolean copyWorkspace, List<SimpleStage> stages) {
+    def static parallel(String name, boolean copyWorkspace, List<Stage> stages) {
         return new ParallelStageSet(name, copyWorkspace, stages)
     }
 
@@ -197,15 +198,24 @@ abstract class Pipeline implements Serializable {
     /**
      * Run stages on specific node
      */
-    def static node(String node, boolean copyWorkspace, List<SimpleStage> stages) {
+    def static node(String node, boolean copyWorkspace, List<Stage> stages) {
         return new NodeStagesWrapper("Node: $node", node, copyWorkspace, stages)
     }
 
     /**
      * Run stages on specific node.
      */
-    def static node(String node, List<SimpleStage> stages) {
+    def static node(String node, List<Stage> stages) {
         return new NodeStagesWrapper("Node: $node", node, false, stages)
+    }
+
+    // ------------ Dir ----------------
+
+    /**
+     * Run stages on specific dir.
+     */
+    def static dir(String dir, List<Stage> stages) {
+        return new DirStagesWrapper("Dir: $dir", dir, stages)
     }
 
     // ------------ Custom ----------------
