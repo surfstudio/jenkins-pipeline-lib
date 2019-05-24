@@ -215,7 +215,7 @@ abstract class PrPipeline extends ScmPipeline {
                         printContributedVariables: true,
                         printPostContent: true,
                         causeString: 'Triggered by Bitbucket',
-                        regexpFilterExpression: "$repoUrl",
+                        regexpFilterExpression: '^'+"$repoUrl"+'$',
                         regexpFilterText: '$repoUrl'
                 ),
                 script.pollSCM('')
