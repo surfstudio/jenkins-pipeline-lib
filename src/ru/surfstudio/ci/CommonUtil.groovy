@@ -258,7 +258,7 @@ class CommonUtil {
                 def stage = pipeline.getStage(stageName)
                 if(stage == null) {
                     pipeline.script.echo "applying strategy from params skipped because stage ${stageName} missing"
-                    return 
+                    return
                 }
                 if(stage instanceof StageWithStrategy) {
                     stage.strategy = strategyValue

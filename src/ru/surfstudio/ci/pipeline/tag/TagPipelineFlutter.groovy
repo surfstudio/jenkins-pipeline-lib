@@ -125,7 +125,6 @@ class TagPipelineFlutter extends TagPipeline {
                                     iOSCertfileCredentialId)
                         },
                         stage(BETA_UPLOAD_IOS) {
-                            script.echo "Upload iOS"
                             betaUploadStageBody(script, shBetaUploadCommandIos)
                         },
                 ]),
