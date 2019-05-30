@@ -260,7 +260,7 @@ class CommonUtil {
                     stage.strategy = strategyValue
                     pipeline.script.echo "value of ${stageName}.strategy sets from parameters to ${strategyValue}"
                 } else {
-                    script.error "stage with name ${stageName} is not StageWithStrategy"
+                    pipeline.script.error "stage with name ${stageName} is not StageWithStrategy"
                 }
             }
         }
