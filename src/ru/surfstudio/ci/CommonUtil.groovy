@@ -256,6 +256,10 @@ class CommonUtil {
         strategiesFromParamsMap.each{ stageName, strategyValue ->
             if(strategyValue) {
                 def stage = pipeline.getStage(stageName)
+                if(stage == null) {
+                    pipeline.script.echo "applying strategy from params skipped because stage ${stageName} missing"
+                    return 
+                }
                 if(stage instanceof StageWithStrategy) {
                     stage.strategy = strategyValue
                     pipeline.script.echo "value of ${stageName}.strategy sets from parameters to ${strategyValue}"

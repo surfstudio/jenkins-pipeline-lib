@@ -144,6 +144,18 @@ class TagPipelineFlutter extends TagPipeline {
 
 
         ]
+
+        applyStrategiesFromParams = { ctx ->
+            def params = script.params
+            CommonUtil.applyStrategiesFromParams(ctx, [
+                    (UNIT_TEST)           : params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
+                    (STATIC_CODE_ANALYSIS): params[STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER],
+                    (BETA_UPLOAD_ANDROID)         : params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
+                    (BETA_UPLOAD_IOS)         : params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
+            ])
+
+        }
+
         finalizeBody = { finalizeStageBody(this) }
     }
 

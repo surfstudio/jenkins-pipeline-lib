@@ -45,6 +45,17 @@ abstract class TagPipeline extends ScmPipeline {
     public repoTag = ""
     public branchesPatternsForAutoChangeVersion = [/^origin\/dev\/.*/, /^origin\/feature\/.*/] //будет выбрана первая подходящая ветка
 
+    //logic for customize
+    public Closure applyStrategiesFromParams = { ctx -> //todo нужна ли вообще эта логика?
+        def params = script.params
+        CommonUtil.applyStrategiesFromParams(ctx, [
+                (UNIT_TEST): params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
+                (INSTRUMENTATION_TEST): params[INSTRUMENTATION_TEST_STAGE_STRATEGY_PARAMETER],
+                (STATIC_CODE_ANALYSIS): params[STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER],
+                (BETA_UPLOAD): params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
+        ])
+    }
+
 
     TagPipeline(Object script) {
         super(script)
@@ -58,14 +69,7 @@ abstract class TagPipeline extends ScmPipeline {
         CommonUtil.printInitialStageStrategies(ctx)
 
         //Используем нестандартные стратегии для Stage из параметров, если они установлены
-        def params = script.params
-        def env = script.env
-        CommonUtil.applyStrategiesFromParams(ctx, [
-                (ctx.UNIT_TEST): params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
-                (ctx.INSTRUMENTATION_TEST): params[INSTRUMENTATION_TEST_STAGE_STRATEGY_PARAMETER],
-                (ctx.STATIC_CODE_ANALYSIS): params[STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER],
-                (ctx.BETA_UPLOAD): params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
-        ])
+        applyStrategiesFromParams(ctx)
 
         //если триггером был webhook параметры устанавливаются как env, если запустили вручную, то устанавливается как params
         extractValueFromEnvOrParamsAndRun(script, REPO_TAG_PARAMETER) {
