@@ -69,7 +69,7 @@ abstract class TagPipeline extends ScmPipeline {
         CommonUtil.printInitialStageStrategies(ctx)
 
         //Используем нестандартные стратегии для Stage из параметров, если они установлены
-        applyStrategiesFromParams(ctx)
+        ctx.applyStrategiesFromParams(ctx)
 
         //если триггером был webhook параметры устанавливаются как env, если запустили вручную, то устанавливается как params
         extractValueFromEnvOrParamsAndRun(script, REPO_TAG_PARAMETER) {
