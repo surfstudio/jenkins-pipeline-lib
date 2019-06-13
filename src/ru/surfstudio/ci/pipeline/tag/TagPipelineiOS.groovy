@@ -99,6 +99,8 @@ class TagPipelineiOS extends TagPipeline {
                 script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
                 script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
         ]) {
+        
+            script.echo "Importing iOS certificate: ${certfileCredentialId}"
 
             CommonUtil.shWithRuby(script, 'security -v unlock-keychain -p $KEYCHAIN_PASS')
             CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
