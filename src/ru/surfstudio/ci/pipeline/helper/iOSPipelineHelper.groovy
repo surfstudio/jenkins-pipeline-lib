@@ -27,6 +27,8 @@ class iOSPipelineHelper {
                 script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
                 script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
         ]) {
+        
+            script.echo "Importing iOS certificate: ${certfileCredentialId}"
 
             script.sh('security default-keychain -s /Users/jenkins/Library/Keychains/login.keychain-db')
             script.sh('security -v unlock-keychain -p $KEYCHAIN_PASS')
