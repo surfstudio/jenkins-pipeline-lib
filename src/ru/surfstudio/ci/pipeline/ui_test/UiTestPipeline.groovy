@@ -82,7 +82,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     //ios
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
-    public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey"
+    public iOSCertfileCredentialId = "AppleIDDev.p12"
 
     UiTestPipeline(Object script) {
         super(script)
