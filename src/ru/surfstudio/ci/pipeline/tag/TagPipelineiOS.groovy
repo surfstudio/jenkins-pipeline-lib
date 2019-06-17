@@ -23,7 +23,7 @@ import ru.surfstudio.ci.pipeline.helper.iOSPipelineHelper
 class TagPipelineiOS extends TagPipeline {
 
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
-    public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey"
+    public iOSCertfileCredentialId = "AppleIDDev.p12"
     public betaUploadConfigArgument = "config"
 
     // Значение, которое передастся в Makefile скрипт beta пл ключу из betaUploadConfigArgument
