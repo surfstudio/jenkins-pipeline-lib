@@ -106,6 +106,7 @@ class TagPipelineiOS extends TagPipeline {
             CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
             CommonUtil.shWithRuby(script, 'security set-key-partition-list -S apple-tool:,apple: -s -k $KEYCHAIN_PASS ~/Library/Keychains/login.keychain-db')
             CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
+            CommonUtil.shWithRuby(script, 'open ../../xcode.app $(ls | grep xcworkspace)')
 
             CommonUtil.shWithRuby(script, "gem install bundler -v 1.17.3")
 
