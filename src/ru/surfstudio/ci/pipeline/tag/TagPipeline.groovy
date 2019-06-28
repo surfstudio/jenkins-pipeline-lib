@@ -205,20 +205,20 @@ abstract class TagPipeline extends ScmPipeline {
 
     def static parameters(script) {
         return script.parameters([
-                [
+                /*[
                         $class     : 'GitParameterDefinition',
                         name       : REPO_TAG_PARAMETER,
                         type       : 'PT_TAG',
                         description: 'Тег для сборки',
                         selectedValue: 'NONE',
                         sortMode: 'DESCENDING_SMART'
-                ],
-                [
+                ],*/
+                /*[
                         name: IOS_BUILD_TYPE,
                         description: "Вариант билда",
                         choice: ["release\nqa"],
                         selectedValue: 'NONE',
-                ],
+                ],*/
                 choice(
                         name: 'Nodes',
                         choices:"Linux\nMac",
