@@ -170,16 +170,16 @@ class TagPipelineFlutter extends TagPipeline {
         finalizeBody = { finalizeStageBody(this) }
     }
 
-    private static initBodyFlutter(TagPipeline ctx) {
+    private static initBodyFlutter(TagPipelineFlutter ctx) {
         initBody(ctx)
 
         def script = ctx.script
         script.echo "Initialize build type..."
-        script.echo "Default build type = ${this.buildType}"
+        script.echo "Default build type = ${ctx.buildType}"
 
         extractValueFromParamsAndRun(script, BUILD_TYPE_PARAMETER) { value ->
-            this.buildType = value
-            script.echo "Using build type $buildType"
+            ctx.buildType = value
+            script.echo "Using build type ${ctx.buildType}"
         }
     }
 
