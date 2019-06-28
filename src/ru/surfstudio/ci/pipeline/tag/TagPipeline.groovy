@@ -180,6 +180,7 @@ abstract class TagPipeline extends ScmPipeline {
     public static final String STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER = 'staticCodeAnalysisStageStrategy'
     public static final String BETA_UPLOAD_STAGE_STRATEGY_PARAMETER = 'betaUploadStageStrategy'
     public static final String REPO_TAG_PARAMETER = 'repoTag_0'
+    public static final String IOS_BUILD_TYPE= 'iosBuildType'
 
     public static final String STAGE_STRATEGY_PARAM_DESCRIPTION = 'stage strategy types, see repo <a href="https://bitbucket.org/surfstudio/jenkins-pipeline-lib">jenkins-pipeline-lib</a> , class StageStrategy. If empty, job will use initial strategy for this stage'
 
@@ -211,6 +212,11 @@ abstract class TagPipeline extends ScmPipeline {
                         description: 'Тег для сборки',
                         selectedValue: 'NONE',
                         sortMode: 'DESCENDING_SMART'
+                ],
+                [
+                        name: IOS_BUILD_TYPE,
+                        description: "Вариант билда",
+                        choice: ["release\nqa"],
                 ],
                 script.string(
                         name: UNIT_TEST_STAGE_STRATEGY_PARAMETER,
