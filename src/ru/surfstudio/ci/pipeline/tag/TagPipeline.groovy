@@ -219,7 +219,7 @@ abstract class TagPipeline extends ScmPipeline {
                         choice: ["release\nqa"],
                         selectedValue: 'NONE',
                 ],
-                choice(
+                script.choice(
                         name: 'Nodes',
                         choices:"Linux\nMac",
                         description: "Choose Node!"),
