@@ -180,7 +180,7 @@ abstract class TagPipeline extends ScmPipeline {
     public static final String STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER = 'staticCodeAnalysisStageStrategy'
     public static final String BETA_UPLOAD_STAGE_STRATEGY_PARAMETER = 'betaUploadStageStrategy'
     public static final String REPO_TAG_PARAMETER = 'repoTag_0'
-    public static final String BUILD_TYPE_PARAMETER = 'iosBuildType'
+    public static final String BUILD_TYPE_PARAMETER = 'buildType'
 
     public static final String RELEASE_TYPE = "release"
     public static final String QA_BUILD_TYPE = "qa"

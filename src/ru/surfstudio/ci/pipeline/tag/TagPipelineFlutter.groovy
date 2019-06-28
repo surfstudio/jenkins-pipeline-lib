@@ -174,8 +174,11 @@ class TagPipelineFlutter extends TagPipeline {
         initBody(ctx)
 
         def script = ctx.script
+        script.echo "Initialize build type..."
+        script.echo "Default build type = ${this.buildType}"
+
         extractValueFromParamsAndRun(script, BUILD_TYPE_PARAMETER) { value ->
-            buildType = value
+            this.buildType = value
             script.echo "Using build type $buildType"
         }
     }
