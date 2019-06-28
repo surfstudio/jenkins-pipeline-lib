@@ -176,6 +176,8 @@ class TagPipelineFlutter extends TagPipeline {
         finalizeBody = { finalizeStageBody(this) }
     }
 
+
+    // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ ======================================================
     private static initBodyFlutter(TagPipelineFlutter ctx) {
         initBody(ctx)
 
@@ -189,8 +191,19 @@ class TagPipelineFlutter extends TagPipeline {
         }
     }
 
+    def static checkoutStageBody(Object script, String url, String repoTag, String credentialsId) {
+        script.git(
+                url: url,
+                credentialsId: credentialsId,
+                poll: true
+        )
 
-    // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ ======================================================
+        script.sh "git checkout tags/$repoTag"
+
+        if (script.buildType != RELEASE_TYPE) RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
+
+        RepositoryUtil.saveCurrentGitCommitHash(script)
+    }
 
     def static calculateVersionCodesStageBody(TagPipelineFlutter ctx,
                                               String configFile,
