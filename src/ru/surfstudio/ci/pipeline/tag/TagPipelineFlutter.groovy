@@ -20,6 +20,7 @@ import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
+import ru.surfstudio.ci.stage.StageWithStrategy
 import ru.surfstudio.ci.utils.flutter.FlutterUtil
 import ru.surfstudio.ci.CommonUtil
 
@@ -31,8 +32,9 @@ class TagPipelineFlutter extends TagPipeline {
     public static final String VERSION_UPDATE_FOR_ARM64 = 'Version Update For Arm64'
     public static final String BUILD_ANDROID = 'Build Android'
     public static final String BUILD_ANDROID_ARM64 = 'Build Android Arm64'
-    public static final String BUILD_IOS = 'Build iOS'
     public static final String BETA_UPLOAD_ANDROID = 'Beta Upload Android'
+    public static final String BUILD_IOS_BETA = 'Build iOS BETA'
+    public static final String BUILD_IOS_TESTFLIGHT = 'Build iOS TestFlight'
     public static final String BETA_UPLOAD_IOS = 'Beta Upload iOS'
     public static final String TESTFLIGHT_UPLOAD_IOS = 'TestFlight Upload iOS'
 
@@ -43,8 +45,10 @@ class TagPipelineFlutter extends TagPipeline {
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
     public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey"
 
-    //type of build. QA - default
-    public buildType = QA_BUILD_TYPE
+    //build flags
+    public boolean shouldBuildAndroid = true
+    public boolean shouldBuildIosBeta = true
+    public boolean shouldBuildIosTestFlight = false
 
     public buildAndroidCommand = "./script/android/build.sh -qa " +
             "&& ./script/android/build.sh -release "
@@ -72,24 +76,19 @@ class TagPipelineFlutter extends TagPipeline {
 
     def init() {
 
-        applyStrategiesFromParams = { ctx ->
-            def params = script.params
-            CommonUtil.applyStrategiesFromParams(ctx, [
-                    (UNIT_TEST)           : params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
-                    (STATIC_CODE_ANALYSIS): params[STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER],
-                    (BETA_UPLOAD_ANDROID) : params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
-                    (BETA_UPLOAD_IOS)     : params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
-            ])
-
-        }
-
         node = NodeProvider.androidFlutterNode
 
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
 
         initializeBody = { initBodyFlutter(this) }
-        propertiesProvider = { properties(this) }
+        propertiesProvider = {
+            [
+                    buildDiscarder(script),
+                    parametersFlutter(script),
+                    triggers(script, this.repoUrl, this.tagRegexp)
+            ]
+        }
 
         stages = [
                 stage(CHECKOUT, false) {
@@ -134,26 +133,26 @@ class TagPipelineFlutter extends TagPipeline {
                     FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
                 stage(BETA_UPLOAD_ANDROID) {
-                    betaUploadStageBody(script, shBetaUploadCommandAndroid)
+                    uploadStageBody(script, shBetaUploadCommandAndroid)
                 },
                 node(NodeProvider.iOSFlutterNode, true, [
-                        stage(BUILD_IOS) {
+                        stage(BUILD_IOS_BETA) {
                             FlutterPipelineHelper.buildStageBodyIOS(script,
                                     buildQaIOsCommand,
                                     iOSKeychainCredenialId,
                                     iOSCertfileCredentialId)
                         },
                         stage(BETA_UPLOAD_IOS) {
-                            betaUploadStageBody(script, shBetaUploadCommandIos)
+                            uploadStageBody(script, shBetaUploadCommandIos)
                         },
-                        stage(BUILD_IOS, buildType == QA_BUILD_TYPE ? StageStrategy.SKIP_STAGE : DEFAULT_STAGE_STRATEGY,) {
+                        stage(BUILD_IOS_TESTFLIGHT) {
                             FlutterPipelineHelper.buildStageBodyIOS(script,
                                     buildReleaseIOsCommand,
                                     iOSKeychainCredenialId,
                                     iOSCertfileCredentialId)
                         },
-                        stage(TESTFLIGHT_UPLOAD_IOS, buildType == QA_BUILD_TYPE ? StageStrategy.SKIP_STAGE : DEFAULT_STAGE_STRATEGY,) {
-                            betaUploadStageBody(script, shTestFlightUploadCommandIos)
+                        stage(TESTFLIGHT_UPLOAD_IOS) {
+                            uploadStageBody(script, shTestFlightUploadCommandIos)
                         }
                 ]),
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
@@ -182,27 +181,34 @@ class TagPipelineFlutter extends TagPipeline {
         initBody(ctx)
 
         def script = ctx.script
-        script.echo "Initialize build type..."
-        script.echo "Default build type = ${ctx.buildType}"
-
-        extractValueFromParamsAndRun(script, BUILD_TYPE_PARAMETER) { value ->
-            ctx.buildType = value ?: ctx.buildType
-            script.echo "Using build type ${ctx.buildType}"
+        extractValueFromParamsAndRun(script, PARAMETER_ANDROID_FULL_BETA) { value ->
+            ctx.shouldBuildAndroid = value ?: ctx.shouldBuildAndroid
+            script.echo "Android full build with upload to Beta(qa) : ${ctx.shouldBuildAndroid}"
         }
+        extractValueFromParamsAndRun(script, PARAMETER_IOS_FOR_BETA) { value ->
+            ctx.shouldBuildIosBeta= value ?: ctx.shouldBuildIosBeta
+            script.echo "Ios qa build with upload to Beta(qa) : ${ctx.shouldBuildIosBeta}"
+
+        }
+        extractValueFromParamsAndRun(script, PARAMETER_IOS_FOR_TESTFLIGHT) { value ->
+            ctx.shouldBuildIosTestFlight= value ?: ctx.shouldBuildIosTestFlight
+            script.echo "Ios release build with upload to TestFlight(release) : ${ctx.shouldBuildIosTestFlight}"
+
+        }
+
+        initStrategies(ctx)
     }
 
-    def static checkoutStageBody(TagPipelineFlutter ctx, Object script, String url, String repoTag, String credentialsId) {
-        script.git(
-                url: url,
-                credentialsId: credentialsId,
-                poll: true
-        )
+    private static void initStrategies(TagPipelineFlutter ctx) {
+        (ctx.getStage(BUILD_ANDROID) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
+        (ctx.getStage(BUILD_ANDROID_ARM64) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
+        (ctx.getStage(BETA_UPLOAD_ANDROID) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
 
-        script.sh "git checkout tags/$repoTag"
+        (ctx.getStage(BUILD_IOS_BETA) as StageWithStrategy).strategy = ctx.shouldBuildIosBeta ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
+        (ctx.getStage(BETA_UPLOAD_IOS) as StageWithStrategy).strategy = ctx.shouldBuildIosBeta ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
 
-        if (ctx.buildType != RELEASE_TYPE) RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
-
-        RepositoryUtil.saveCurrentGitCommitHash(script)
+        (ctx.getStage(BUILD_IOS_TESTFLIGHT) as StageWithStrategy).strategy = ctx.shouldBuildIosTestFlight ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
+        (ctx.getStage(TESTFLIGHT_UPLOAD_IOS) as StageWithStrategy).strategy = ctx.shouldBuildIosTestFlight ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
     }
 
     def static calculateVersionCodesStageBody(TagPipelineFlutter ctx,
@@ -222,7 +228,7 @@ class TagPipelineFlutter extends TagPipeline {
         script.echo "New arm64 versionCode: $ctx.arm64VersionCode"
     }
 
-    def static betaUploadStageBody(Object script, String shBetaUploadCommand) {
+    def static uploadStageBody(Object script, String shBetaUploadCommand) {
         CommonUtil.shWithRuby(script, shBetaUploadCommand)
     }
 
@@ -244,5 +250,54 @@ class TagPipelineFlutter extends TagPipeline {
     }
 
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
+
+    // ======================================================  ↓↓↓ PARAMETERS ↓↓↓   ====================================================
+    public static final String PARAMETER_ANDROID_FULL_BETA = 'parameterAndroidFullBeta'
+    public static final String PARAMETER_IOS_FOR_BETA = 'parameterIosForBeta'
+    public static final String PARAMETER_IOS_FOR_TESTFLIGHT = 'parameterIosForTestFlight'
+
+    public static final String RELEASE_TYPE = "release"
+    public static final String QA_BUILD_TYPE = "qa"
+
+    def static parametersFlutter(script) {
+        return script.parameters([
+                [
+                        $class       : 'GitParameterDefinition',
+                        name         : REPO_TAG_PARAMETER,
+                        type         : 'PT_TAG',
+                        description  : 'Тег для сборки',
+                        selectedValue: 'NONE',
+                        sortMode     : 'DESCENDING_SMART'
+                ],
+                script.booleanParam(
+                        defaultValue: true,
+                        name: PARAMETER_ANDROID_FULL_BETA,
+                        description: "Сборка Android(qa/release). Qa выгружается в Beta",
+                ),
+                script.booleanParam(
+                        defaultValue: true,
+                        name: PARAMETER_IOS_FOR_BETA,
+                        description: "Сборка Ios(qa). Qa выгружается в Beta",
+                ),
+                script.booleanParam(
+                        defaultValue: false,
+                        name: PARAMETER_IOS_FOR_TESTFLIGHT,
+                        description: "Сборка Ios(release). Release выгружается в TestFlight",
+                ),
+                script.string(
+                        name: UNIT_TEST_STAGE_STRATEGY_PARAMETER,
+                        description: STAGE_STRATEGY_PARAM_DESCRIPTION),
+                script.string(
+                        name: INSTRUMENTATION_TEST_STAGE_STRATEGY_PARAMETER,
+                        description: STAGE_STRATEGY_PARAM_DESCRIPTION),
+                script.string(
+                        name: STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER,
+                        description: STAGE_STRATEGY_PARAM_DESCRIPTION),
+                script.string(
+                        name: BETA_UPLOAD_STAGE_STRATEGY_PARAMETER,
+                        description: STAGE_STRATEGY_PARAM_DESCRIPTION),
+
+        ])
+    }
 
 }
