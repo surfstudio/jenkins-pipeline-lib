@@ -218,8 +218,9 @@ abstract class TagPipeline extends ScmPipeline {
                 ],
                 script.choice(
                         name: BUILD_TYPE_PARAMETER,
-                        choices: [RELEASE_TYPE, QA_BUILD_TYPE],
-                        description: "Выберите тип сборки. Для iOS release загружается в тестфлайт"),
+                        choices: [QA_BUILD_TYPE, RELEASE_TYPE],
+                        description: "Выберите тип сборки. Для iOS release загружается в тестфлайт",
+                ),
                 script.string(
                         name: UNIT_TEST_STAGE_STRATEGY_PARAMETER,
                         description: STAGE_STRATEGY_PARAM_DESCRIPTION),
