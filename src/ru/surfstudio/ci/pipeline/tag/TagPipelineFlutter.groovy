@@ -93,7 +93,7 @@ class TagPipelineFlutter extends TagPipeline {
 
         stages = [
                 stage(CHECKOUT, false) {
-                    checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
+                    checkoutStageBody(this, script, repoUrl, repoTag, repoCredentialsId)
                 },
                 stage(CALCULATE_VERSION_CODES) {
                     calculateVersionCodesStageBody(this,
@@ -191,7 +191,7 @@ class TagPipelineFlutter extends TagPipeline {
         }
     }
 
-    def static checkoutStageBody(Object script, String url, String repoTag, String credentialsId) {
+    def static checkoutStageBody(TagPipelineFlutter ctx, Object script, String url, String repoTag, String credentialsId) {
         script.git(
                 url: url,
                 credentialsId: credentialsId,
@@ -200,7 +200,7 @@ class TagPipelineFlutter extends TagPipeline {
 
         script.sh "git checkout tags/$repoTag"
 
-        if (script.buildType != RELEASE_TYPE) RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
+        if (ctx.buildType != RELEASE_TYPE) RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
 
         RepositoryUtil.saveCurrentGitCommitHash(script)
     }
