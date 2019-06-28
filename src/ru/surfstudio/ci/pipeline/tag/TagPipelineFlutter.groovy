@@ -139,9 +139,7 @@ class TagPipelineFlutter extends TagPipeline {
                 node(NodeProvider.iOSFlutterNode, true, [
                         stage(BUILD_IOS) {
                             FlutterPipelineHelper.buildStageBodyIOS(script,
-                                    buildType == QA_BUILD_TYPE
-                                            ? buildQaIOsCommand
-                                            : buildReleaseIOsCommand,
+                                    buildQaIOsCommand,
                                     iOSKeychainCredenialId,
                                     iOSCertfileCredentialId)
                         },
