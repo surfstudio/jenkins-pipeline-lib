@@ -183,11 +183,11 @@ class TagPipelineFlutter extends TagPipeline {
         def script = ctx.script
         extractValueFromParamsAndRun(script, PARAMETER_ANDROID_FULL_BETA) { value ->
             ctx.shouldBuildAndroid = value ?: ctx.shouldBuildAndroid
-            script.echo "Android full build with upload to Beta(qa) : ${ctx.shouldBuildAndroid}"
+            script.echo "Android full build with upload to Beta(qa) : $ctx.shouldBuildAndroid"
         }
         extractValueFromParamsAndRun(script, PARAMETER_IOS_FOR_BETA) { value ->
             ctx.shouldBuildIosBeta= value ?: ctx.shouldBuildIosBeta
-            script.echo "Ios qa build with upload to Beta(qa) : ${ctx.shouldBuildIosBeta}"
+            script.echo "Ios qa build with upload to Beta(qa) : $ctx.shouldBuildIosBeta | extracted $value "
 
         }
         extractValueFromParamsAndRun(script, PARAMETER_IOS_FOR_TESTFLIGHT) { value ->
