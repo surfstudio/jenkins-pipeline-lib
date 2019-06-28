@@ -217,10 +217,15 @@ abstract class TagPipeline extends ScmPipeline {
                         name: IOS_BUILD_TYPE,
                         description: "Вариант билда",
                         choice: ["release\nqa"],
+                        selectedValue: 'NONE',
                 ],
-                script.string(
-                        name: UNIT_TEST_STAGE_STRATEGY_PARAMETER,
-                        description: STAGE_STRATEGY_PARAM_DESCRIPTION),
+                choice(
+                        name: 'Nodes',
+                        choices:"Linux\nMac",
+                        description: "Choose Node!"),
+//                script.string(
+//                        name: UNIT_TEST_STAGE_STRATEGY_PARAMETER,
+//                        description: STAGE_STRATEGY_PARAM_DESCRIPTION),
                 script.string(
                         name: INSTRUMENTATION_TEST_STAGE_STRATEGY_PARAMETER,
                         description: STAGE_STRATEGY_PARAM_DESCRIPTION),
