@@ -296,7 +296,9 @@ class CommonUtil {
     }
 
     def static isJobStartedByUser(Object script) {
-        return script.currentBuild.rawBuild.getCauses()[0].toString().contains('UserIdCause')
+        def result = script.currentBuild.rawBuild.getCauses()[0].toString().contains('UserIdCause')
+        script.echo "isJobStartedByUser $result"
+        return result
     }
 
     static def printStackTrace(Object script, Exception e) {
