@@ -42,8 +42,9 @@ class TagPipelineFlutter extends TagPipeline {
     public androidKeystoreCredentials = "no_credentials"
     public androidKeystorePropertiesCredentials = "no_credentials"
 
+
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
-    public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey"
+    public iOSCertfileCredentialId = "AppleIDDev.p12"
 
     //build flags
     public boolean shouldBuildAndroid = true
