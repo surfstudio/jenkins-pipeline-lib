@@ -92,7 +92,7 @@ class TagPipelineFlutter extends TagPipeline {
 
         stages = [
                 stage(CHECKOUT, false) {
-                    checkoutStageBody(this, script, repoUrl, repoTag, repoCredentialsId)
+                    checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
                 stage(CALCULATE_VERSION_CODES) {
                     calculateVersionCodesStageBody(this,
