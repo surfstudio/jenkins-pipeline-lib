@@ -180,10 +180,10 @@ abstract class TagPipeline extends ScmPipeline {
     public static final String STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER = 'staticCodeAnalysisStageStrategy'
     public static final String BETA_UPLOAD_STAGE_STRATEGY_PARAMETER = 'betaUploadStageStrategy'
     public static final String REPO_TAG_PARAMETER = 'repoTag_0'
-    public static final String BUILD_TYPE = 'iosBuildType'
+    public static final String BUILD_TYPE_PARAMETER = 'iosBuildType'
 
     public static final String RELEASE_TYPE = "release"
-    public static final String QA_TYPE = "qa"
+    public static final String QA_BUILD_TYPE = "qa"
 
     public static final String STAGE_STRATEGY_PARAM_DESCRIPTION = 'stage strategy types, see repo <a href="https://bitbucket.org/surfstudio/jenkins-pipeline-lib">jenkins-pipeline-lib</a> , class StageStrategy. If empty, job will use initial strategy for this stage'
 
@@ -217,8 +217,8 @@ abstract class TagPipeline extends ScmPipeline {
                         sortMode: 'DESCENDING_SMART'
                 ],
                 script.choice(
-                        name: BUILD_TYPE,
-                        choices: [RELEASE_TYPE, QA_TYPE],
+                        name: BUILD_TYPE_PARAMETER,
+                        choices: [RELEASE_TYPE, QA_BUILD_TYPE],
                         description: "Выберите тип сборки. Для iOS release загружается в тестфлайт"),
                 script.string(
                         name: UNIT_TEST_STAGE_STRATEGY_PARAMETER,

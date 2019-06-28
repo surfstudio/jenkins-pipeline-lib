@@ -23,6 +23,8 @@ import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.flutter.FlutterUtil
 import ru.surfstudio.ci.CommonUtil
 
+import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
+
 class TagPipelineFlutter extends TagPipeline {
 
     public static final String CALCULATE_VERSION_CODES = 'Calculate Version Codes'
@@ -40,19 +42,23 @@ class TagPipelineFlutter extends TagPipeline {
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
     public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey"
 
+    //type of build. QA - default
+    public buildType = QA_BUILD_TYPE
 
     public buildAndroidCommand = "./script/android/build.sh -qa " +
             "&& ./script/android/build.sh -release "
-    public buildAndroidCommandArm64 ="./script/android/build.sh -qa -x64 " +
+    public buildAndroidCommandArm64 = "./script/android/build.sh -qa -x64 " +
             "&& ./script/android/build.sh -release -x64"
-    public buildIOsCommand = "./script/ios/build.sh -qa" //todo && ./script/ios/build.sh -release - на случай релизной сборки
+    public buildQaIOsCommand = "./script/ios/build.sh -qa"
+    public buildReleaseIOsCommand = "./script/ios/build.sh -release"
     public testCommand = "flutter test"
 
     public configFile = "pubspec.yaml"
     public compositeVersionNameVar = "version"
 
     public shBetaUploadCommandAndroid = "cd android && fastlane android beta"
-    public shBetaUploadCommandIos= "make -C ios/ beta"
+    public shBetaUploadCommandIos = "make -C ios/ beta"
+    public shReleaseUploadCommandIos = "make -C ios/ release"
 
     //versions
     public minVersionCode = 10000
@@ -69,7 +75,7 @@ class TagPipelineFlutter extends TagPipeline {
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
 
-        initializeBody = { initBody(this) }
+        initializeBody = { initBodyFlutter(this) }
         propertiesProvider = { properties(this) }
 
         stages = [
@@ -120,16 +126,22 @@ class TagPipelineFlutter extends TagPipeline {
                 node(NodeProvider.iOSFlutterNode, true, [
                         stage(BUILD_IOS) {
                             FlutterPipelineHelper.buildStageBodyIOS(script,
-                                    buildIOsCommand,
+                                    buildType == QA_BUILD_TYPE
+                                            ? buildQaIOsCommand
+                                            : buildReleaseIOsCommand,
                                     iOSKeychainCredenialId,
                                     iOSCertfileCredentialId)
                         },
                         stage(BETA_UPLOAD_IOS) {
-                            betaUploadStageBody(script, shBetaUploadCommandIos)
+                            betaUploadStageBody(script,
+                                    buildType == QA_BUILD_TYPE
+                                            ? shBetaUploadCommandIos
+                                            : shReleaseUploadCommandIos
+                            )
                         },
                 ]),
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                   versionPushStageBody(script,
+                    versionPushStageBody(script,
                             repoTag,
                             branchesPatternsForAutoChangeVersion,
                             repoUrl,
@@ -149,8 +161,8 @@ class TagPipelineFlutter extends TagPipeline {
             CommonUtil.applyStrategiesFromParams(ctx, [
                     (UNIT_TEST)           : params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
                     (STATIC_CODE_ANALYSIS): params[STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER],
-                    (BETA_UPLOAD_ANDROID)         : params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
-                    (BETA_UPLOAD_IOS)         : params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
+                    (BETA_UPLOAD_ANDROID) : params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
+                    (BETA_UPLOAD_IOS)     : params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
             ])
 
         }
@@ -158,13 +170,23 @@ class TagPipelineFlutter extends TagPipeline {
         finalizeBody = { finalizeStageBody(this) }
     }
 
+    private static initBodyFlutter(TagPipeline ctx) {
+        initBody(ctx)
+
+        def script = ctx.script
+        extractValueFromParamsAndRun(script, BUILD_TYPE_PARAMETER) { value ->
+            buildType = value
+            script.echo "Using build type $buildType"
+        }
+    }
+
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ ======================================================
 
     def static calculateVersionCodesStageBody(TagPipelineFlutter ctx,
-                                       String configFile,
-                                       String compositeVersionNameVar,
-                                       Integer minVersionCode) {
+                                              String configFile,
+                                              String compositeVersionNameVar,
+                                              Integer minVersionCode) {
         def script = ctx.script
         def compositeVersion = FlutterUtil.getYamlVariable(script, configFile, compositeVersionNameVar)
         def versionCode = Integer.valueOf(FlutterUtil.getVersionCode(compositeVersion))
@@ -193,7 +215,7 @@ class TagPipelineFlutter extends TagPipeline {
 
     def static prepareChangeVersionCommitMessage(Object script,
                                                  String configYamlFile,
-                                                 String compositeVersionNameVar){
+                                                 String compositeVersionNameVar) {
         def compositeVersion = FlutterUtil.getYamlVariable(script, configYamlFile, compositeVersionNameVar)
         return "Change version to $compositeVersion $RepositoryUtil.SKIP_CI_LABEL1 $RepositoryUtil.VERSION_LABEL1"
 
