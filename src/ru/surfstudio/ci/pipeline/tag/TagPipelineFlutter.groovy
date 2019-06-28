@@ -178,7 +178,7 @@ class TagPipelineFlutter extends TagPipeline {
         script.echo "Default build type = ${ctx.buildType}"
 
         extractValueFromParamsAndRun(script, BUILD_TYPE_PARAMETER) { value ->
-            ctx.buildType = value
+            ctx.buildType = value ?: ctx.buildType
             script.echo "Using build type ${ctx.buildType}"
         }
     }
