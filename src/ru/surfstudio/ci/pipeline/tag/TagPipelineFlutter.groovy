@@ -34,6 +34,7 @@ class TagPipelineFlutter extends TagPipeline {
     public static final String BUILD_IOS = 'Build iOS'
     public static final String BETA_UPLOAD_ANDROID = 'Beta Upload Android'
     public static final String BETA_UPLOAD_IOS = 'Beta Upload iOS'
+    public static final String TESTFLIGHT_UPLOAD_IOS = 'TestFlight Upload iOS'
 
     //required initial configuration
     public androidKeystoreCredentials = "no_credentials"
@@ -58,7 +59,7 @@ class TagPipelineFlutter extends TagPipeline {
 
     public shBetaUploadCommandAndroid = "cd android && fastlane android beta"
     public shBetaUploadCommandIos = "make -C ios/ beta"
-    public shReleaseUploadCommandIos = "make -C ios/ release"
+    public shTestFlightUploadCommandIos = "make -C ios/ release"
 
     //versions
     public minVersionCode = 10000
@@ -70,6 +71,18 @@ class TagPipelineFlutter extends TagPipeline {
     }
 
     def init() {
+
+        applyStrategiesFromParams = { ctx ->
+            def params = script.params
+            CommonUtil.applyStrategiesFromParams(ctx, [
+                    (UNIT_TEST)           : params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
+                    (STATIC_CODE_ANALYSIS): params[STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER],
+                    (BETA_UPLOAD_ANDROID) : params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
+                    (BETA_UPLOAD_IOS)     : params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
+            ])
+
+        }
+
         node = NodeProvider.androidFlutterNode
 
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
@@ -133,12 +146,17 @@ class TagPipelineFlutter extends TagPipeline {
                                     iOSCertfileCredentialId)
                         },
                         stage(BETA_UPLOAD_IOS) {
-                            betaUploadStageBody(script,
-                                    buildType == QA_BUILD_TYPE
-                                            ? shBetaUploadCommandIos
-                                            : shReleaseUploadCommandIos
-                            )
+                            betaUploadStageBody(script, shBetaUploadCommandIos)
                         },
+                        stage(BUILD_IOS, buildType == QA_BUILD_TYPE ? StageStrategy.SKIP_STAGE : DEFAULT_STAGE_STRATEGY,) {
+                            FlutterPipelineHelper.buildStageBodyIOS(script,
+                                    buildReleaseIOsCommand,
+                                    iOSKeychainCredenialId,
+                                    iOSCertfileCredentialId)
+                        },
+                        stage(TESTFLIGHT_UPLOAD_IOS, buildType == QA_BUILD_TYPE ? StageStrategy.SKIP_STAGE : DEFAULT_STAGE_STRATEGY,) {
+                            betaUploadStageBody(script, shTestFlightUploadCommandIos)
+                        }
                 ]),
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     versionPushStageBody(script,
@@ -156,16 +174,6 @@ class TagPipelineFlutter extends TagPipeline {
 
         ]
 
-        applyStrategiesFromParams = { ctx ->
-            def params = script.params
-            CommonUtil.applyStrategiesFromParams(ctx, [
-                    (UNIT_TEST)           : params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
-                    (STATIC_CODE_ANALYSIS): params[STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER],
-                    (BETA_UPLOAD_ANDROID) : params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
-                    (BETA_UPLOAD_IOS)     : params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
-            ])
-
-        }
 
         finalizeBody = { finalizeStageBody(this) }
     }
