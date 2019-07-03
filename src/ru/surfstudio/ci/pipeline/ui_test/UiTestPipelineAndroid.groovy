@@ -142,26 +142,12 @@ class UiTestPipelineAndroid extends UiTestPipeline {
     
             def platform = 'android'
 
-            //single run
-            //CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
-
+       
             try {
                 CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  -p json_report\" ${featuresDir}/${featureFile} --concurrent")
             }
             finally {
-                /*CommonUtil.safe(script) 
-                {
-                    script.sh "ls && cp ./fullScript.sh sources"
-
-                    script.dir(sourcesDir) {
-                            script.sh "source ~/.bashrc; /bin/bash ./fullScript.sh"
-                         }
-
-                    script.sh "source ~/.bashrc; /bin/bash ./find_id.sh"
-                    script.sh "mv sources/idFullA.txt ."
-                    script.sh "source ~/.bashrc; /bin/bash ./match.sh"                
-                }
-                */
+      
                 CommonUtil.shWithRuby(script, "ruby -r \'./find_id.rb\' -e \"Find.new.get_miss_id(\'./${sourcesDir}\', \'./features/android/pages\')\"")
                 script.step([$class: 'ArtifactArchiver', artifacts: outputsIdsDiff, allowEmptyArchive: true])
                 CommonUtil.safe(script) {
