@@ -46,7 +46,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public defaultTaskKey  //task for run periodically
 
     //dirs
-    public sourcesDir = "sources"
+    public sourcesDir = "src"
     public featuresDir = "features"
     public outputsDir = "outputs"
 
