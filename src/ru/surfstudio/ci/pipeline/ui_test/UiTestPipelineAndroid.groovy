@@ -22,8 +22,8 @@ import ru.surfstudio.ci.stage.StageStrategy
 class UiTestPipelineAndroid extends UiTestPipeline {
 
     public artifactForTest = "for_test.apk"
-    public buildGradleTask = "clean assembleQa"
-    public builtApkPattern = "${sourcesDir}/**/*qa*.apk"
+    public buildGradleTask = "clean assembleDebug"
+    public builtApkPattern = "${sourcesDir}/**/*Debug*.apk"
 
     UiTestPipelineAndroid(Object script) {
         super(script)
