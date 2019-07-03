@@ -23,7 +23,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
     public artifactForTest = "for_test.apk"
     public buildGradleTask = "clean assembleDebug"
-    public builtApkPattern = "${sourcesDir}/**/*Debug*.apk"
+    public builtApkPattern = "${sourcesDir}/**/**.apk"
 
     UiTestPipelineAndroid(Object script) {
         super(script)
