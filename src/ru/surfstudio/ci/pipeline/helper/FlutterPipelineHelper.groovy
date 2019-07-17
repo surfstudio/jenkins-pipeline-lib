@@ -23,7 +23,7 @@ import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
 import ru.surfstudio.ci.utils.android.config.AvdConfig
 
 /**
- *
+ * Helper for flutter pipelines
  */
 class FlutterPipelineHelper {
 
@@ -65,6 +65,7 @@ class FlutterPipelineHelper {
             CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
             CommonUtil.shWithRuby(script, 'open ../../scripts/xcode.app $(ls | grep xcworkspace)')
 
+            //todo temp
             /*script.sh('security default-keychain -s /Users/jenkins/Library/Keychains/login.keychain-db')
             script.sh('security -v unlock-keychain -p $KEYCHAIN_PASS')
             script.sh('security import "$DEVELOPER_P12_KEY" -P "" -T /usr/bin/codesign -T /usr/bin/security')
@@ -87,6 +88,4 @@ class FlutterPipelineHelper {
         script.echo "empty"
         //todo
     }
-
-
 }
