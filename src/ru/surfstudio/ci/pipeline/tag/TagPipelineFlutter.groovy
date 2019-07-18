@@ -29,6 +29,7 @@ import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 class TagPipelineFlutter extends TagPipeline {
 
     public static final String CALCULATE_VERSION_CODES = 'Calculate Version Codes'
+    public static final String CLEAN_PREV_BUILD = 'Clean Previous Build'
     public static final String VERSION_UPDATE_FOR_ARM64 = 'Version Update For Arm64'
     public static final String BUILD_ANDROID = 'Build Android'
     public static final String BUILD_ANDROID_ARM64 = 'Build Android Arm64'
@@ -51,7 +52,9 @@ class TagPipelineFlutter extends TagPipeline {
     public boolean shouldBuildIosBeta = true
     public boolean shouldBuildIosTestFlight = false
 
-    public buildAndroidCommand = "./script/android/build.sh -qa " +
+    public cleanFlutterCommand = "flutter clean"
+
+    public buildAndroidCommand =  "./script/android/build.sh -qa " +
             "&& ./script/android/build.sh -release "
     public buildAndroidCommandArm64 = "./script/android/build.sh -qa -x64 " +
             "&& ./script/android/build.sh -release -x64"
@@ -100,6 +103,9 @@ class TagPipelineFlutter extends TagPipeline {
                             configFile,
                             compositeVersionNameVar,
                             minVersionCode)
+                },
+                stage(CLEAN_PREV_BUILD) {
+                    script.sh cleanFlutterCommand
                 },
                 stage(VERSION_UPDATE_FOR_ARM64) {
                     versionUpdateStageBody(script,
