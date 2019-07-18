@@ -53,8 +53,7 @@ class TagPipelineFlutter extends TagPipeline {
 
     public buildAndroidCommand = "./script/android/build.sh -qa " +
             "&& ./script/android/build.sh -release "
-    /*public buildAndroidCommandArm64 = "./script/android/build.sh -qa -x64 " +
-            "&& ./script/android/build.sh -release -x64"*/
+
     public buildQaIOsCommand = "./script/ios/build.sh -qa"
     public buildReleaseIOsCommand = "./script/ios/build.sh -release"
     public testCommand = "flutter test"
@@ -69,7 +68,6 @@ class TagPipelineFlutter extends TagPipeline {
     //versions
     public minVersionCode = 10000
     public mainVersionCode = "<undefined>"
-    public arm64VersionCode = "<undefined>"
 
     TagPipelineFlutter(Object script) {
         super(script)
@@ -202,7 +200,7 @@ class TagPipelineFlutter extends TagPipeline {
 
     private static void initStrategies(TagPipelineFlutter ctx) {
         (ctx.getStage(BUILD_ANDROID) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
-        (ctx.getStage(BUILD_ANDROID_ARM64) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
+//        (ctx.getStage(BUILD_ANDROID_ARM64) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
         (ctx.getStage(BETA_UPLOAD_ANDROID) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
 
         (ctx.getStage(BUILD_IOS_BETA) as StageWithStrategy).strategy = ctx.shouldBuildIosBeta ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
