@@ -65,12 +65,6 @@ class FlutterPipelineHelper {
             CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
             CommonUtil.shWithRuby(script, 'ls ios/; open ../../scripts/xcode.app ./ios/$(ls ./ios/ | grep xcworkspace)')
 
-            //todo temp
-            /*script.sh('security default-keychain -s /Users/jenkins/Library/Keychains/login.keychain-db')
-            script.sh('security -v unlock-keychain -p $KEYCHAIN_PASS')
-            script.sh('security import "$DEVELOPER_P12_KEY" -P "" -T /usr/bin/codesign -T /usr/bin/security')
-            script.sh('security set-key-partition-list -S apple-tool:,apple: -s -k $KEYCHAIN_PASS ~/Library/Keychains/login.keychain-db')*/
-
             CommonUtil.shWithRuby(script, "make -C ios/ init")
             CommonUtil.shWithRuby(script, buildShCommand)
         }
