@@ -53,7 +53,7 @@ class TagPipelineFlutter extends TagPipeline {
 
     public cleanFlutterCommand = "flutter clean"
 
-    public buildAndroidCommand = cleanFlutterCommand + "./script/android/build.sh -qa " +
+    public buildAndroidCommand = cleanFlutterCommand + "&& ./script/android/build.sh -qa " +
             "&& ./script/android/build.sh -release "
 
     public buildQaIOsCommand = "./script/ios/build.sh -qa"
