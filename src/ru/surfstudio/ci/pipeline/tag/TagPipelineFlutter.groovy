@@ -63,7 +63,7 @@ class TagPipelineFlutter extends TagPipeline {
     public configFile = "pubspec.yaml"
     public compositeVersionNameVar = "version"
 
-    public shBetaUploadCommandAndroid = "cd android && fastlane android beta"
+    public shBetaUploadCommandAndroid = "cd android && fastlane android beta" //todo android release build?
     public shBetaUploadCommandIos = "make -C ios/ beta"
     public shTestFlightUploadCommandIos = "make -C ios/ release"
 
