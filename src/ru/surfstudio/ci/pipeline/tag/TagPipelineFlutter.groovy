@@ -53,8 +53,8 @@ class TagPipelineFlutter extends TagPipeline {
 
     public buildAndroidCommand = "./script/android/build.sh -qa " +
             "&& ./script/android/build.sh -release "
-    public buildAndroidCommandArm64 = "./script/android/build.sh -qa -x64 " +
-            "&& ./script/android/build.sh -release -x64"
+    /*public buildAndroidCommandArm64 = "./script/android/build.sh -qa -x64 " +
+            "&& ./script/android/build.sh -release -x64"*/
     public buildQaIOsCommand = "./script/ios/build.sh -qa"
     public buildReleaseIOsCommand = "./script/ios/build.sh -release"
     public testCommand = "flutter test"
@@ -101,19 +101,19 @@ class TagPipelineFlutter extends TagPipeline {
                             compositeVersionNameVar,
                             minVersionCode)
                 },
-                stage(VERSION_UPDATE_FOR_ARM64) {
-                    versionUpdateStageBody(script,
-                            repoTag,
-                            arm64VersionCode,
-                            configFile,
-                            compositeVersionNameVar)
-                },
-                stage(BUILD_ANDROID_ARM64) {
-                    FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
-                            buildAndroidCommandArm64,
-                            androidKeystoreCredentials,
-                            androidKeystorePropertiesCredentials)
-                },
+//                stage(VERSION_UPDATE_FOR_ARM64) {
+//                    versionUpdateStageBody(script,
+//                            repoTag,
+//                            arm64VersionCode,
+//                            configFile,
+//                            compositeVersionNameVar)
+//                },
+//                stage(BUILD_ANDROID_ARM64) {
+//                    FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
+//                            buildAndroidCommandArm64,
+//                            androidKeystoreCredentials,
+//                            androidKeystorePropertiesCredentials)
+//                },
                 stage(VERSION_UPDATE) {
                     versionUpdateStageBody(script,
                             repoTag,
@@ -224,9 +224,9 @@ class TagPipelineFlutter extends TagPipeline {
             newMainVersionCode = minVersionCode
         }
         ctx.mainVersionCode = String.valueOf(newMainVersionCode)
-        ctx.arm64VersionCode = "64" + String.valueOf(newMainVersionCode)
+//        ctx.arm64VersionCode = "64" + String.valueOf(newMainVersionCode)
         script.echo "New main versionCode: $ctx.mainVersionCode"
-        script.echo "New arm64 versionCode: $ctx.arm64VersionCode"
+//        script.echo "New arm64 versionCode: $ctx.arm64VersionCode"
     }
 
     def static uploadStageBody(Object script, String shBetaUploadCommand) {
