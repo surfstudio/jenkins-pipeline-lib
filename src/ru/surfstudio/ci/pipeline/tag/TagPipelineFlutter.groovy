@@ -29,6 +29,8 @@ import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 class TagPipelineFlutter extends TagPipeline {
 
     public static final String CALCULATE_VERSION_CODES = 'Calculate Version Codes'
+    public static final String CLEAN_PREV_BUILD = 'Clean Previous Build'
+    public static final String CHECKOUT_FLUTTER_VERSION = 'Checkout Flutter Project Version'
     public static final String VERSION_UPDATE_FOR_ARM64 = 'Version Update For Arm64'
     public static final String BUILD_ANDROID = 'Build Android'
     public static final String BUILD_ANDROID_ARM64 = 'Build Android Arm64'
@@ -52,10 +54,12 @@ class TagPipelineFlutter extends TagPipeline {
     public boolean shouldBuildIosTestFlight = false
 
     public cleanFlutterCommand = "flutter clean"
+    public checkoutFlutterVersionCommand = "./script/version.sh"
 
-    public buildAndroidCommand = cleanFlutterCommand + "&& ./script/android/build.sh -qa " +
+    public buildAndroidCommand =  "./script/android/build.sh -qa " +
             "&& ./script/android/build.sh -release "
-
+    public buildAndroidCommandArm64 = "./script/android/build.sh -qa -x64 " +
+            "&& ./script/android/build.sh -release -x64"
     public buildQaIOsCommand = "./script/ios/build.sh -qa"
     public buildReleaseIOsCommand = "./script/ios/build.sh -release"
     public testCommand = "flutter test"
@@ -70,6 +74,7 @@ class TagPipelineFlutter extends TagPipeline {
     //versions
     public minVersionCode = 10000
     public mainVersionCode = "<undefined>"
+    public arm64VersionCode = "<undefined>"
 
     TagPipelineFlutter(Object script) {
         super(script)
@@ -101,19 +106,25 @@ class TagPipelineFlutter extends TagPipeline {
                             compositeVersionNameVar,
                             minVersionCode)
                 },
-//                stage(VERSION_UPDATE_FOR_ARM64) {
-//                    versionUpdateStageBody(script,
-//                            repoTag,
-//                            arm64VersionCode,
-//                            configFile,
-//                            compositeVersionNameVar)
-//                },
-//                stage(BUILD_ANDROID_ARM64) {
-//                    FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
-//                            buildAndroidCommandArm64,
-//                            androidKeystoreCredentials,
-//                            androidKeystorePropertiesCredentials)
-//                },
+                stage(CLEAN_PREV_BUILD) {
+                    script.sh cleanFlutterCommand
+                },
+                stage(CHECKOUT_FLUTTER_VERSION) {
+                    script.sh checkoutFlutterVersionCommand
+                },
+                stage(VERSION_UPDATE_FOR_ARM64) {
+                    versionUpdateStageBody(script,
+                            repoTag,
+                            arm64VersionCode,
+                            configFile,
+                            compositeVersionNameVar)
+                },
+                stage(BUILD_ANDROID_ARM64) {
+                    FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
+                            buildAndroidCommandArm64,
+                            androidKeystoreCredentials,
+                            androidKeystorePropertiesCredentials)
+                },
                 stage(VERSION_UPDATE) {
                     versionUpdateStageBody(script,
                             repoTag,
@@ -137,6 +148,9 @@ class TagPipelineFlutter extends TagPipeline {
                     uploadStageBody(script, shBetaUploadCommandAndroid)
                 },
                 node(NodeProvider.iOSFlutterNode, true, [
+                        stage(CHECKOUT_FLUTTER_VERSION) {
+                            script.sh checkoutFlutterVersionCommand
+                        },
                         stage(BUILD_IOS_BETA) {
                             FlutterPipelineHelper.buildStageBodyIOS(script,
                                     buildQaIOsCommand,
@@ -202,7 +216,7 @@ class TagPipelineFlutter extends TagPipeline {
 
     private static void initStrategies(TagPipelineFlutter ctx) {
         (ctx.getStage(BUILD_ANDROID) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
-//        (ctx.getStage(BUILD_ANDROID_ARM64) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
+        (ctx.getStage(BUILD_ANDROID_ARM64) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
         (ctx.getStage(BETA_UPLOAD_ANDROID) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
 
         (ctx.getStage(BUILD_IOS_BETA) as StageWithStrategy).strategy = ctx.shouldBuildIosBeta ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
@@ -224,9 +238,9 @@ class TagPipelineFlutter extends TagPipeline {
             newMainVersionCode = minVersionCode
         }
         ctx.mainVersionCode = String.valueOf(newMainVersionCode)
-//        ctx.arm64VersionCode = "64" + String.valueOf(newMainVersionCode)
+        ctx.arm64VersionCode = "64" + String.valueOf(newMainVersionCode)
         script.echo "New main versionCode: $ctx.mainVersionCode"
-//        script.echo "New arm64 versionCode: $ctx.arm64VersionCode"
+        script.echo "New arm64 versionCode: $ctx.arm64VersionCode"
     }
 
     def static uploadStageBody(Object script, String shBetaUploadCommand) {
