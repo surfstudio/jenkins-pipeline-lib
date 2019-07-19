@@ -30,6 +30,7 @@ class TagPipelineFlutter extends TagPipeline {
 
     public static final String CALCULATE_VERSION_CODES = 'Calculate Version Codes'
     public static final String CLEAN_PREV_BUILD = 'Clean Previous Build'
+    public static final String CHECKOUT_FLUTTER_VERSION = 'Checkout Flutter Project Version'
     public static final String VERSION_UPDATE_FOR_ARM64 = 'Version Update For Arm64'
     public static final String BUILD_ANDROID = 'Build Android'
     public static final String BUILD_ANDROID_ARM64 = 'Build Android Arm64'
@@ -53,6 +54,7 @@ class TagPipelineFlutter extends TagPipeline {
     public boolean shouldBuildIosTestFlight = false
 
     public cleanFlutterCommand = "flutter clean"
+    public checkoutFlutterVersionCommand = "./script/version.sh"
 
     public buildAndroidCommand =  "./script/android/build.sh -qa " +
             "&& ./script/android/build.sh -release "
@@ -65,7 +67,7 @@ class TagPipelineFlutter extends TagPipeline {
     public configFile = "pubspec.yaml"
     public compositeVersionNameVar = "version"
 
-    public shBetaUploadCommandAndroid = "cd android && fastlane android beta"
+    public shBetaUploadCommandAndroid = "cd android && fastlane android beta" //todo android release build?
     public shBetaUploadCommandIos = "make -C ios/ beta"
     public shTestFlightUploadCommandIos = "make -C ios/ release"
 
@@ -107,6 +109,9 @@ class TagPipelineFlutter extends TagPipeline {
                 stage(CLEAN_PREV_BUILD) {
                     script.sh cleanFlutterCommand
                 },
+                stage(CHECKOUT_FLUTTER_VERSION) {
+                    script.sh checkoutFlutterVersionCommand
+                },
                 stage(VERSION_UPDATE_FOR_ARM64) {
                     versionUpdateStageBody(script,
                             repoTag,
@@ -143,6 +148,9 @@ class TagPipelineFlutter extends TagPipeline {
                     uploadStageBody(script, shBetaUploadCommandAndroid)
                 },
                 node(NodeProvider.iOSFlutterNode, true, [
+                        stage(CHECKOUT_FLUTTER_VERSION) {
+                            script.sh checkoutFlutterVersionCommand
+                        },
                         stage(BUILD_IOS_BETA) {
                             FlutterPipelineHelper.buildStageBodyIOS(script,
                                     buildQaIOsCommand,
