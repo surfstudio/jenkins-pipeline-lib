@@ -22,7 +22,7 @@ import ru.surfstudio.ci.pipeline.helper.iOSPipelineHelper
 class PrPipelineiOS extends PrPipeline {
 
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
-    public iOSCertfileCredentialId = "AppleIDDev.p12"
+    public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
 
     PrPipelineiOS(Object script) {
         super(script)
