@@ -32,7 +32,7 @@ class PrPipelineFlutter extends PrPipeline {
     public androidKeystorePropertiesCredentials = "no_credentials"
 
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
-    public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey"
+    public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
 
     //sh commands
     public buildAndroidCommand = "./script/android/build.sh -qa && ./script/android/build.sh -qa -x64"
