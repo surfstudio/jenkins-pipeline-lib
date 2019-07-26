@@ -23,7 +23,7 @@ import ru.surfstudio.ci.pipeline.helper.iOSPipelineHelper
 class TagPipelineiOS extends TagPipeline {
 
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
-    public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey"
+    public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
     public betaUploadConfigArgument = "config"
 
     // Значение, которое передастся в Makefile скрипт beta пл ключу из betaUploadConfigArgument
@@ -97,11 +97,14 @@ class TagPipelineiOS extends TagPipeline {
                 script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
                 script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
         ]) {
+        
+            script.echo "Importing iOS certificate: ${certfileCredentialId}"
 
             CommonUtil.shWithRuby(script, 'security -v unlock-keychain -p $KEYCHAIN_PASS')
             CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
             CommonUtil.shWithRuby(script, 'security set-key-partition-list -S apple-tool:,apple: -s -k $KEYCHAIN_PASS ~/Library/Keychains/login.keychain-db')
             CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
+            CommonUtil.shWithRuby(script, 'open ../../scripts/xcode.app $(ls | grep xcworkspace)')
 
             CommonUtil.shWithRuby(script, "gem install bundler -v 1.17.3")
 
