@@ -84,8 +84,12 @@ class RepositoryUtil {
      * call this after checkout for save source commit hash
      */
     def static saveCurrentGitCommitHash(Object script) {
-        script.env.COMMIT_HASH = script.sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+        script.env.COMMIT_HASH = getCurrentCommitHash(script)
         script.echo "Set global variable COMMIT_HASH to $script.env.COMMIT_HASH"
+    }
+
+    def static getCurrentCommitHash(script) {
+        return script.sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
     }
 
     /**

@@ -154,7 +154,7 @@ abstract class PrPipeline extends ScmPipeline {
     public static final String AUTHOR_USERNAME_PARAMETER = 'authorUsername'
     public static final String TARGET_BRANCH_CHANGED_PARAMETER = 'targetBranchChanged'
 
-    def static List<Object> properties(PrPipeline ctx) {
+    def static List<Object> properties(ScmPipeline ctx) {
         def script = ctx.script
         return [
                 buildDiscarder(script),
