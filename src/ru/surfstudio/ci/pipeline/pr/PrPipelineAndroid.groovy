@@ -16,6 +16,7 @@
 package ru.surfstudio.ci.pipeline.pr
 
 import ru.surfstudio.ci.NodeProvider
+import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
@@ -45,7 +46,7 @@ class PrPipelineAndroid extends PrPipeline {
 
     // количество попыток перезапуска тестов для одного модуля при падении одного из них
     public instrumentationTestRetryCount = 1
-    
+
     /**
      * Функция, возвращающая имя instrumentation runner для запуска инструментальных тестов.
      *
@@ -102,10 +103,26 @@ class PrPipelineAndroid extends PrPipeline {
                             )
                     )
                 },
+                stage(ROLLBACK_PRE_MERGE_CHANGES, StageStrategy.SKIP_STAGE) {
+                    RepositoryUtil.revertUncommittedChanges(script)
+                },
+                stage(CODE_STYLE_FORMATTING, StageStrategy.SKIP_STAGE) {
+                    AndroidPipelineHelper.ktlintFormatStageAndroid(
+                            script,
+                            sourceBranch,
+                            destinationBranch
+                    )
+                },
+                stage(APPLY_CODE_STYLE_FORMATTING, StageStrategy.SKIP_STAGE) {
+                    AndroidPipelineHelper.applyFormatChanges(
+                            script,
+                            repoUrl,
+                            repoCredentialsId
+                    )
+                },
                 stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
-                },
-
+                }
         ]
         finalizeBody = { finalizeStageBody(this) }
     }
