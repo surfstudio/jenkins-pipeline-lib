@@ -33,6 +33,9 @@ abstract class PrPipeline extends ScmPipeline {
     public static final String BUILD = 'Build'
     public static final String UNIT_TEST = 'Unit Test'
     public static final String INSTRUMENTATION_TEST = 'Instrumentation Test'
+    public static final String ROLLBACK_PRE_MERGE_CHANGES = 'Rollback PreMerge changes'
+    public static final String CODE_STYLE_FORMATTING = 'Code Style Formatting'
+    public static final String APPLY_CODE_STYLE_FORMATTING = 'Commit and push formatting changes'
     public static final String STATIC_CODE_ANALYSIS = 'Static Code Analysis'
 
     //scm
@@ -101,6 +104,7 @@ abstract class PrPipeline extends ScmPipeline {
 
         CommonUtil.safe(script) {
             script.sh "git reset --merge" //revert previous failed merge
+            RepositoryUtil.revertUncommittedChanges(script)
         }
 
         script.git(
@@ -109,10 +113,11 @@ abstract class PrPipeline extends ScmPipeline {
                 branch: sourceBranch
         )
 
-        RepositoryUtil.saveCurrentGitCommitHash(script)
-
         //local merge with destination
-        script.sh "git merge origin/$destinationBranch --no-ff"
+        script.sh "git merge origin/$destinationBranch --no-ff --no-commit"
+
+        RepositoryUtil.saveCurrentGitCommitHash(script)
+        RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
     }
 
     def static prepareMessageForPipeline(PrPipeline ctx, Closure handler) {
@@ -143,6 +148,7 @@ abstract class PrPipeline extends ScmPipeline {
     def static postExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
         RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
     }
+
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
 
 
