@@ -47,6 +47,8 @@ class PrPipelineAndroid extends PrPipeline {
     // количество попыток перезапуска тестов для одного модуля при падении одного из них
     public instrumentationTestRetryCount = 1
 
+    private boolean hasChanges = false
+
     /**
      * Функция, возвращающая имя instrumentation runner для запуска инструментальных тестов.
      *
@@ -69,12 +71,24 @@ class PrPipelineAndroid extends PrPipeline {
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
-        initializeBody = { initBody(this) }
+        initializeBody = {
+            hasChanges = false
+            initBody(this)
+        }
         propertiesProvider = { properties(this) }
 
         stages = [
-                stage(PRE_MERGE, false) {
-                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                stage(CHECKOUT, false) {
+                    checkout(script)
+                    saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
+                    abortDuplicateBuildsWithDescription(this)
+                },
+                stage(CODE_STYLE_FORMATTING, StageStrategy.SKIP_STAGE) {
+                    AndroidPipelineHelper.ktlintFormatStageAndroid(script, sourceBranch, destinationBranch)
+                    hasChanges = AndroidPipelineHelper.checkChangesAndCommit(script)
+                },
+                stage(PRE_MERGE, StageStrategy.SKIP_STAGE) {
+                    mergeLocal(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
                 stage(BUILD) {
                     AndroidPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
@@ -106,25 +120,19 @@ class PrPipelineAndroid extends PrPipeline {
                 stage(ROLLBACK_PRE_MERGE_CHANGES, StageStrategy.SKIP_STAGE) {
                     RepositoryUtil.revertUncommittedChanges(script)
                 },
-                stage(CODE_STYLE_FORMATTING, StageStrategy.SKIP_STAGE) {
-                    AndroidPipelineHelper.ktlintFormatStageAndroid(
-                            script,
-                            sourceBranch,
-                            destinationBranch
-                    )
-                },
-                stage(APPLY_CODE_STYLE_FORMATTING, StageStrategy.SKIP_STAGE) {
-                    AndroidPipelineHelper.applyFormatChanges(
-                            script,
-                            repoUrl,
-                            repoCredentialsId
-                    )
-                },
                 stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
+                },
+                stage(PUSH_CODE_STYLE_FORMATTING) {
+                    if (hasChanges) {
+                        AndroidPipelineHelper.pushChanges(script, repoUrl, repoCredentialsId)
+                    }
                 }
         ]
-        finalizeBody = { finalizeStageBody(this) }
+        finalizeBody = {
+            AndroidPipelineHelper.notifyAfterCodeStyleFormatting(this, script, hasChanges)
+            finalizeStageBody(this)
+        }
     }
 
     /**

@@ -36,12 +36,17 @@ class PrPipelineiOS extends PrPipeline {
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
-        initializeBody = {  initBody(this) }
+        initializeBody = {
+            initBody(this)
+            abortDuplicateBuildsWithDescription(this)
+        }
         propertiesProvider = { properties(this) }
 
         stages = [
                 stage(PRE_MERGE, false) {
-                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                    checkout(script)
+                    mergeLocal(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                    saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
                 },
                 stage(BUILD) {
                     iOSPipelineHelper.buildStageBodyiOS(script,

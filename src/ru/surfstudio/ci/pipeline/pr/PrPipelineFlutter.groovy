@@ -16,11 +16,8 @@
 package ru.surfstudio.ci.pipeline.pr
 
 import ru.surfstudio.ci.NodeProvider
-import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
-import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
-import ru.surfstudio.ci.utils.android.config.AvdConfig
 
 class PrPipelineFlutter extends PrPipeline {
 
@@ -50,12 +47,17 @@ class PrPipelineFlutter extends PrPipeline {
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
-        initializeBody = { initBody(this) }
+        initializeBody = {
+            initBody(this)
+            abortDuplicateBuildsWithDescription(this)
+        }
         propertiesProvider = { properties(this) }
 
         stages = [
                 stage(PRE_MERGE, false) {
-                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                    checkout(script)
+                    mergeLocal(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                    saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
                 },
                 stage(BUILD_ANDROID) {
                     FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,

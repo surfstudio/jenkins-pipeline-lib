@@ -16,6 +16,10 @@
 package ru.surfstudio.ci.pipeline.helper
 
 import ru.surfstudio.ci.RepositoryUtil
+import ru.surfstudio.ci.Result
+import ru.surfstudio.ci.pipeline.pr.PrPipeline
+import ru.surfstudio.ci.stage.SimpleStage
+import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.utils.android.AndroidTestUtil
 import ru.surfstudio.ci.utils.android.AndroidUtil
 import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
@@ -164,16 +168,31 @@ class AndroidPipelineHelper {
         }
     }
 
-    def static applyFormatChanges(
+    static boolean checkChangesAndCommit(Object script) {
+        boolean hasChanges = RepositoryUtil.checkHasChanges(script)
+        if (hasChanges) {
+            script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1\""
+        } else {
+            script.echo "No modification after code formatting. "
+        }
+        return hasChanges
+    }
+
+    def static pushChanges(
             Object script,
             String repoUrl,
             String repoCredentialsId
     ) {
-        if (RepositoryUtil.checkHasChanges(script)) {
-            script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1\""
-            RepositoryUtil.push(script, repoUrl, repoCredentialsId)
-        } else {
-            script.echo "No modification after code formatting. "
+        RepositoryUtil.push(script, repoUrl, repoCredentialsId)
+    }
+
+    def static notifyAfterCodeStyleFormatting(PrPipeline ctx, Object script, boolean hasChanges) {
+        if (!hasChanges) return
+        RepositoryUtil.saveCurrentGitCommitHash(script)
+        for (Stage stage : ctx.stages) {
+            if (stage instanceof SimpleStage && (stage as SimpleStage).result != Result.NOT_BUILT) {
+                PrPipeline.postExecuteStageBodyPr(script, stage as SimpleStage, ctx.repoUrl)
+            }
         }
     }
 }
