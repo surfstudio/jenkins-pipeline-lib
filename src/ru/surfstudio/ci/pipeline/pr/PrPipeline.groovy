@@ -37,6 +37,7 @@ abstract class PrPipeline extends ScmPipeline {
     public static final String CODE_STYLE_FORMATTING = 'Code Style Formatting'
     public static final String STATIC_CODE_ANALYSIS = 'Static Code Analysis'
     public static final String PUSH_CODE_STYLE_FORMATTING = 'Push code style formatting'
+    public static final String UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT = "Update current commit hash after format"
 
     //scm
     public sourceBranch = ""

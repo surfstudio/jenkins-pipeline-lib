@@ -163,7 +163,7 @@ class AndroidPipelineHelper {
             AndroidUtil.withGradleBuildCacheCredentials(script) {
                 script.sh "./gradlew ktlintFilesFormat -PlintFiles=\"${files.join("\",\"")}\""
             }
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             script.echo "Formatting exception $ex"
         }
     }
@@ -189,7 +189,9 @@ class AndroidPipelineHelper {
     def static notifyAfterCodeStyleFormatting(PrPipeline ctx, boolean hasChanges) {
         if (!hasChanges) return
         for (Stage stage : ctx.stages) {
-            if (stage instanceof SimpleStage && (stage as SimpleStage).result != Result.NOT_BUILT) {
+            if (stage instanceof SimpleStage
+                    && (stage as SimpleStage).result != Result.NOT_BUILT
+                    && (stage as SimpleStage).runPreAndPostExecuteStageBodies) {
                 PrPipeline.postExecuteStageBodyPr(ctx.script, stage as SimpleStage, ctx.repoUrl)
             }
         }
