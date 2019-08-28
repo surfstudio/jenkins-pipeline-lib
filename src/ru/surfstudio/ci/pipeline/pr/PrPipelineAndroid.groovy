@@ -117,9 +117,13 @@ class PrPipelineAndroid extends PrPipeline {
                 stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
-                stage(PUSH_CODE_STYLE_FORMATTING) {
+                stage(PUSH_CODE_STYLE_FORMATTING, false) {
+                    preExecuteStageBody(this)
                     if (hasChanges) {
                         AndroidPipelineHelper.pushChanges(script, repoUrl, repoCredentialsId)
+                    }
+                    postExecuteStageBody(this)
+                    if (hasChanges) {
                         RepositoryUtil.saveCurrentGitCommitHash(script)
                     }
                 }
