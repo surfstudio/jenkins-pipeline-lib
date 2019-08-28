@@ -97,7 +97,7 @@ abstract class PrPipeline extends ScmPipeline {
         CommonUtil.abortDuplicateBuildsWithDescription(ctx.script, AbortDuplicateStrategy.ANOTHER, ctx.buildDescription())
     }
 
-    def static checkout(Object script) {
+    def static checkout(Object script, String url, String sourceBranch, String credentialsId) {
         //script.sh 'git config --global user.name "Jenkins"'
         //script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
 
@@ -105,15 +105,15 @@ abstract class PrPipeline extends ScmPipeline {
             script.sh "git reset --merge" //revert previous failed merge
             RepositoryUtil.revertUncommittedChanges(script)
         }
-    }
 
-    def static mergeLocal(Object script, String url, String sourceBranch, String destinationBranch, String credentialsId) {
         script.git(
                 url: url,
                 credentialsId: credentialsId,
                 branch: sourceBranch
         )
+    }
 
+    def static mergeLocal(Object script, String destinationBranch) {
         //local merge with destination
         script.sh "git merge origin/$destinationBranch --no-ff --no-commit"
     }

@@ -44,8 +44,8 @@ class PrPipelineiOS extends PrPipeline {
 
         stages = [
                 stage(PRE_MERGE, false) {
-                    checkout(script)
-                    mergeLocal(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                    checkout(script, repoUrl, sourceBranch, repoCredentialsId)
+                    mergeLocal(script, destinationBranch)
                     saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
                 },
                 stage(BUILD) {

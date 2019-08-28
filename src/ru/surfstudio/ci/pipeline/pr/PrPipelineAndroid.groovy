@@ -79,7 +79,7 @@ class PrPipelineAndroid extends PrPipeline {
 
         stages = [
                 stage(CHECKOUT, false) {
-                    checkout(script)
+                    checkout(script, repoUrl, sourceBranch, repoCredentialsId)
                     saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
                     abortDuplicateBuildsWithDescription(this)
                 },
@@ -88,7 +88,7 @@ class PrPipelineAndroid extends PrPipeline {
                     hasChanges = AndroidPipelineHelper.checkChangesAndCommit(script)
                 },
                 stage(PRE_MERGE) {
-                    mergeLocal(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                    mergeLocal(script, destinationBranch)
                 },
                 stage(BUILD, StageStrategy.SKIP_STAGE) {
                     AndroidPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
