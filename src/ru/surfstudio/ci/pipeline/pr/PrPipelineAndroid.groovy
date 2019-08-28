@@ -82,7 +82,12 @@ class PrPipelineAndroid extends PrPipeline {
                 },
                 stage(CODE_STYLE_FORMATTING) {
                     AndroidPipelineHelper.ktlintFormatStageAndroid(script, sourceBranch, destinationBranch)
-                    hasChanges = AndroidPipelineHelper.checkChangesAndCommit(script)
+                    hasChanges = AndroidPipelineHelper.checkChangesAndUpdate(script, repoUrl, repoCredentialsId)
+                },
+                stage(UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT, false) {
+                    if (hasChanges) {
+                        RepositoryUtil.saveCurrentGitCommitHash(script)
+                    }
                 },
                 stage(PRE_MERGE) {
                     mergeLocal(script, destinationBranch)
@@ -116,24 +121,9 @@ class PrPipelineAndroid extends PrPipeline {
                 },
                 stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
-                },
-                stage(PUSH_CODE_STYLE_FORMATTING) {
-                    if (hasChanges) {
-                        AndroidPipelineHelper.pushChanges(script, repoUrl, repoCredentialsId)
-                    }
-                },
-                stage(UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT, false) {
-                    if (hasChanges) {
-                        RepositoryUtil.saveCurrentGitCommitHash(script)
-                    }
                 }
         ]
-        finalizeBody = {
-            if (hasChanges) {
-                AndroidPipelineHelper.notifyAfterCodeStyleFormatting(this)
-            }
-            finalizeStageBody(this)
-        }
+        finalizeBody = { finalizeStageBody(this) }
     }
 
     /**
