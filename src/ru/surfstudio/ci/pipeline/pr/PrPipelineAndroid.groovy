@@ -83,11 +83,11 @@ class PrPipelineAndroid extends PrPipeline {
                     saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
                     abortDuplicateBuildsWithDescription(this)
                 },
-                stage(CODE_STYLE_FORMATTING, StageStrategy.SKIP_STAGE) {
+                stage(CODE_STYLE_FORMATTING) {
                     AndroidPipelineHelper.ktlintFormatStageAndroid(script, sourceBranch, destinationBranch)
                     hasChanges = AndroidPipelineHelper.checkChangesAndCommit(script)
                 },
-                stage(PRE_MERGE, StageStrategy.SKIP_STAGE) {
+                stage(PRE_MERGE) {
                     mergeLocal(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
                 stage(BUILD) {
@@ -117,7 +117,7 @@ class PrPipelineAndroid extends PrPipeline {
                             )
                     )
                 },
-                stage(ROLLBACK_PRE_MERGE_CHANGES, StageStrategy.SKIP_STAGE) {
+                stage(ROLLBACK_PRE_MERGE_CHANGES) {
                     RepositoryUtil.revertUncommittedChanges(script)
                 },
                 stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
