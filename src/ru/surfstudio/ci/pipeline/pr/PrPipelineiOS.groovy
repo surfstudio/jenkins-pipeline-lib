@@ -36,7 +36,7 @@ class PrPipelineiOS extends PrPipeline {
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
-        initializeBody = {  initBody(this) }
+        initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }
 
         stages = [

@@ -16,6 +16,10 @@
 package ru.surfstudio.ci.pipeline.helper
 
 import ru.surfstudio.ci.RepositoryUtil
+import ru.surfstudio.ci.Result
+import ru.surfstudio.ci.pipeline.pr.PrPipeline
+import ru.surfstudio.ci.stage.SimpleStage
+import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.utils.android.AndroidTestUtil
 import ru.surfstudio.ci.utils.android.AndroidUtil
 import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
@@ -159,21 +163,36 @@ class AndroidPipelineHelper {
             AndroidUtil.withGradleBuildCacheCredentials(script) {
                 script.sh "./gradlew ktlintFilesFormat -PlintFiles=\"${files.join("\",\"")}\""
             }
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             script.echo "Formatting exception $ex"
         }
     }
 
-    def static applyFormatChanges(
+    static boolean checkChangesAndCommit(Object script) {
+        boolean hasChanges = RepositoryUtil.checkHasChanges(script)
+        if (hasChanges) {
+            script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1\""
+        } else {
+            script.echo "No modification after code formatting. "
+        }
+        return hasChanges
+    }
+
+    def static pushChanges(
             Object script,
             String repoUrl,
             String repoCredentialsId
     ) {
-        if (RepositoryUtil.checkHasChanges(script)) {
-            script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1\""
-            RepositoryUtil.push(script, repoUrl, repoCredentialsId)
-        } else {
-            script.echo "No modification after code formatting. "
+        RepositoryUtil.push(script, repoUrl, repoCredentialsId)
+    }
+
+    def static notifyAfterCodeStyleFormatting(PrPipeline ctx) {
+        for (Stage stage : ctx.stages) {
+            if (stage instanceof SimpleStage
+                    && (stage as SimpleStage).result != Result.NOT_BUILT
+                    && (stage as SimpleStage).runPreAndPostExecuteStageBodies) {
+                PrPipeline.postExecuteStageBodyPr(ctx.script, stage as SimpleStage, ctx.repoUrl)
+            }
         }
     }
 }
