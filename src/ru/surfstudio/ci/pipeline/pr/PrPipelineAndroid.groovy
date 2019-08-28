@@ -90,7 +90,7 @@ class PrPipelineAndroid extends PrPipeline {
                 stage(PRE_MERGE) {
                     mergeLocal(script, destinationBranch)
                 },
-                stage(BUILD, StageStrategy.SKIP_STAGE) {
+                stage(BUILD) {
                     AndroidPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
                             buildGradleTask,
                             keystoreCredentials,
