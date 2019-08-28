@@ -129,7 +129,9 @@ class PrPipelineAndroid extends PrPipeline {
                 }
         ]
         finalizeBody = {
-            AndroidPipelineHelper.notifyAfterCodeStyleFormatting(this, hasChanges)
+            if (hasChanges) {
+                AndroidPipelineHelper.notifyAfterCodeStyleFormatting(this)
+            }
             finalizeStageBody(this)
         }
     }

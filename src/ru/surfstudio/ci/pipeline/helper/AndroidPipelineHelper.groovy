@@ -186,8 +186,7 @@ class AndroidPipelineHelper {
         RepositoryUtil.push(script, repoUrl, repoCredentialsId)
     }
 
-    def static notifyAfterCodeStyleFormatting(PrPipeline ctx, boolean hasChanges) {
-        if (!hasChanges) return
+    def static notifyAfterCodeStyleFormatting(PrPipeline ctx) {
         for (Stage stage : ctx.stages) {
             if (stage instanceof SimpleStage
                     && (stage as SimpleStage).result != Result.NOT_BUILT
