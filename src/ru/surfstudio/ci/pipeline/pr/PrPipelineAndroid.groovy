@@ -126,6 +126,8 @@ class PrPipelineAndroid extends PrPipeline {
                 stage(PUSH_CODE_STYLE_FORMATTING) {
                     if (hasChanges) {
                         AndroidPipelineHelper.pushChanges(script, repoUrl, repoCredentialsId)
+                        checkout(script, repoUrl, sourceBranch, repoCredentialsId)
+                        RepositoryUtil.saveCurrentGitCommitHash(script)
                     }
                 }
         ]

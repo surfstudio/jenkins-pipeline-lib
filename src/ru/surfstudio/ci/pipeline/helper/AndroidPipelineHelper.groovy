@@ -188,8 +188,6 @@ class AndroidPipelineHelper {
 
     def static notifyAfterCodeStyleFormatting(PrPipeline ctx, boolean hasChanges) {
         if (!hasChanges) return
-        PrPipeline.checkout(ctx.script, ctx.repoUrl, ctx.sourceBranch, ctx.repoCredentialsId)
-        RepositoryUtil.saveCurrentGitCommitHash(ctx.script)
         for (Stage stage : ctx.stages) {
             if (stage instanceof SimpleStage && (stage as SimpleStage).result != Result.NOT_BUILT) {
                 PrPipeline.postExecuteStageBodyPr(ctx.script, stage as SimpleStage, ctx.repoUrl)
