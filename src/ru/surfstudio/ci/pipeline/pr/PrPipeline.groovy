@@ -56,6 +56,11 @@ abstract class PrPipeline extends ScmPipeline {
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
     def static initBody(PrPipeline ctx) {
+        initBodyWithOutAbortDuplicateBuilds(ctx)
+        abortDuplicateBuildsWithDescription(ctx)
+    }
+
+    def static initBodyWithOutAbortDuplicateBuilds(PrPipeline ctx) {
         def script = ctx.script
         CommonUtil.printInitialStageStrategies(ctx)
 
@@ -95,6 +100,12 @@ abstract class PrPipeline extends ScmPipeline {
 
     def static abortDuplicateBuildsWithDescription(PrPipeline ctx) {
         CommonUtil.abortDuplicateBuildsWithDescription(ctx.script, AbortDuplicateStrategy.ANOTHER, ctx.buildDescription())
+    }
+
+    def static preMergeStageBody(Object script, String url, String sourceBranch, String destinationBranch, String credentialsId) {
+        checkout(script, url, sourceBranch, credentialsId)
+        mergeLocal(script, destinationBranch)
+        saveCommitHashAndCheckSkipCi(script, false)
     }
 
     def static checkout(Object script, String url, String sourceBranch, String credentialsId) {

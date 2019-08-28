@@ -47,10 +47,7 @@ class PrPipelineFlutter extends PrPipeline {
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
-        initializeBody = {
-            initBody(this)
-            abortDuplicateBuildsWithDescription(this)
-        }
+        initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }
 
         stages = [
@@ -60,10 +57,7 @@ class PrPipelineFlutter extends PrPipeline {
                     saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
                 },
                 stage(BUILD_ANDROID) {
-                    FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
-                            buildAndroidCommand,
-                            androidKeystoreCredentials,
-                            androidKeystorePropertiesCredentials)
+                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
                 node(NodeProvider.iOSFlutterNode, true, [
                         stage(BUILD_IOS) {

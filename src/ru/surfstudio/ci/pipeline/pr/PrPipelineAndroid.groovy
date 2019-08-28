@@ -71,10 +71,7 @@ class PrPipelineAndroid extends PrPipeline {
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
-        initializeBody = {
-            hasChanges = false
-            initBody(this)
-        }
+        initializeBody = { initBodyWithOutAbortDuplicateBuilds(this) }
         propertiesProvider = { properties(this) }
 
         stages = [
@@ -126,7 +123,6 @@ class PrPipelineAndroid extends PrPipeline {
                 stage(PUSH_CODE_STYLE_FORMATTING) {
                     if (hasChanges) {
                         AndroidPipelineHelper.pushChanges(script, repoUrl, repoCredentialsId)
-                        checkout(script, repoUrl, sourceBranch, repoCredentialsId)
                         RepositoryUtil.saveCurrentGitCommitHash(script)
                     }
                 }
