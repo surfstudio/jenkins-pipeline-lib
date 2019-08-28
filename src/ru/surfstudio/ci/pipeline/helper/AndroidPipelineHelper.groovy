@@ -186,12 +186,13 @@ class AndroidPipelineHelper {
         RepositoryUtil.push(script, repoUrl, repoCredentialsId)
     }
 
-    def static notifyAfterCodeStyleFormatting(PrPipeline ctx, Object script, boolean hasChanges) {
+    def static notifyAfterCodeStyleFormatting(PrPipeline ctx, boolean hasChanges) {
         if (!hasChanges) return
-        RepositoryUtil.saveCurrentGitCommitHash(script)
+        PrPipeline.checkout(ctx.script, ctx.repoUrl, ctx.sourceBranch, ctx.repoCredentialsId)
+        RepositoryUtil.saveCurrentGitCommitHash(ctx.script)
         for (Stage stage : ctx.stages) {
             if (stage instanceof SimpleStage && (stage as SimpleStage).result != Result.NOT_BUILT) {
-                PrPipeline.postExecuteStageBodyPr(script, stage as SimpleStage, ctx.repoUrl)
+                PrPipeline.postExecuteStageBodyPr(ctx.script, stage as SimpleStage, ctx.repoUrl)
             }
         }
     }
