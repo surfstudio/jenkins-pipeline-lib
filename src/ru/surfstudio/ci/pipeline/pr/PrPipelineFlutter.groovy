@@ -52,12 +52,14 @@ class PrPipelineFlutter extends PrPipeline {
 
         stages = [
                 stage(PRE_MERGE, false) {
-                    checkout(script, repoUrl, sourceBranch, repoCredentialsId)
-                    mergeLocal(script, destinationBranch)
-                    saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
+                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
                 stage(BUILD_ANDROID) {
-                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                    FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
+                            buildAndroidCommand,
+                            androidKeystoreCredentials,
+                            androidKeystorePropertiesCredentials
+                    )
                 },
                 node(NodeProvider.iOSFlutterNode, true, [
                         stage(BUILD_IOS) {
