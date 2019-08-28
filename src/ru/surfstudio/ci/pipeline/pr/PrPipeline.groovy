@@ -34,7 +34,6 @@ abstract class PrPipeline extends ScmPipeline {
     public static final String BUILD = 'Build'
     public static final String UNIT_TEST = 'Unit Test'
     public static final String INSTRUMENTATION_TEST = 'Instrumentation Test'
-    public static final String ROLLBACK_PRE_MERGE_CHANGES = 'Rollback PreMerge changes'
     public static final String CODE_STYLE_FORMATTING = 'Code Style Formatting'
     public static final String STATIC_CODE_ANALYSIS = 'Static Code Analysis'
     public static final String PUSH_CODE_STYLE_FORMATTING = 'Push code style formatting'

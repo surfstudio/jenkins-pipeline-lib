@@ -114,9 +114,6 @@ class PrPipelineAndroid extends PrPipeline {
                             )
                     )
                 },
-                stage(ROLLBACK_PRE_MERGE_CHANGES) {
-                    RepositoryUtil.revertUncommittedChanges(script)
-                },
                 stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
