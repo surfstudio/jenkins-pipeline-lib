@@ -168,31 +168,18 @@ class AndroidPipelineHelper {
         }
     }
 
-    static boolean checkChangesAndCommit(Object script) {
-        boolean hasChanges = RepositoryUtil.checkHasChanges(script)
-        if (hasChanges) {
-            script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1\""
-        } else {
-            script.echo "No modification after code formatting. "
-        }
-        return hasChanges
-    }
-
-    def static pushChanges(
+    static boolean checkChangesAndUpdate(
             Object script,
             String repoUrl,
             String repoCredentialsId
     ) {
-        RepositoryUtil.push(script, repoUrl, repoCredentialsId)
-    }
-
-    def static notifyAfterCodeStyleFormatting(PrPipeline ctx) {
-        for (Stage stage : ctx.stages) {
-            if (stage instanceof SimpleStage
-                    && (stage as SimpleStage).result != Result.NOT_BUILT
-                    && (stage as SimpleStage).runPreAndPostExecuteStageBodies) {
-                PrPipeline.postExecuteStageBodyPr(ctx.script, stage as SimpleStage, ctx.repoUrl)
-            }
+        boolean hasChanges = RepositoryUtil.checkHasChanges(script)
+        if (hasChanges) {
+            script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1\""
+            RepositoryUtil.push(script, repoUrl, repoCredentialsId)
+        } else {
+            script.echo "No modification after code formatting. "
         }
+        return hasChanges
     }
 }
