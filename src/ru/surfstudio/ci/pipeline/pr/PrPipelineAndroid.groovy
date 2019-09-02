@@ -89,7 +89,7 @@ class PrPipelineAndroid extends PrPipeline {
                         RepositoryUtil.saveCurrentGitCommitHash(script)
                     }
                 },
-                stage(PRE_MERGE, StageStrategy.SKIP_STAGE) {
+                stage(PRE_MERGE) {
                     mergeLocal(script, destinationBranch)
                 },
                 stage(BUILD) {
