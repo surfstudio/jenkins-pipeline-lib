@@ -82,6 +82,9 @@ abstract class TagPipeline extends ScmPipeline {
     }
 
     def static checkoutStageBody(Object script,  String url, String repoTag, String credentialsId) {
+        CommonUtil.safe(script) {
+            script.sh "rm -rf ./*"
+        }
         script.git(
                 url: url,
                 credentialsId: credentialsId,
