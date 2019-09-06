@@ -75,6 +75,9 @@ class TagPipelineFlutter extends TagPipeline {
     public mainVersionCode = "<undefined>"
     public arm64VersionCode = "<undefined>"
 
+    //ios node
+    public nodeIos = NodeProvider.iOSFlutterNode
+
     TagPipelineFlutter(Object script) {
         super(script)
     }
@@ -146,7 +149,7 @@ class TagPipelineFlutter extends TagPipeline {
                 stage(BETA_UPLOAD_ANDROID) {
                     uploadStageBody(script, shBetaUploadCommandAndroid)
                 },
-                node(NodeProvider.iOSFlutterNode, true, [
+                node(nodeIos, true, [
                         stage(CHECKOUT_FLUTTER_VERSION) {
                             script.sh checkoutFlutterVersionCommand
                         },
