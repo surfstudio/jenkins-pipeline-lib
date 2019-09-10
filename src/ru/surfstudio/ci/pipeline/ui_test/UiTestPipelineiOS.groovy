@@ -30,8 +30,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
     //environment
     public testDeviceName = "iPhone 7"
-    public testOSVersion = "com.apple.CoreSimulator.SimRuntime.iOS-12-2"
-    public testiOSSDK = "iphonesimulator12.2"
+    public testOSVersion = "com.apple.CoreSimulator.SimRuntime.iOS-12-3"
+    public testiOSSDK = "iphonesimulator12.3"
 
 
     UiTestPipelineiOS(Object script) {
