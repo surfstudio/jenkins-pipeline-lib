@@ -156,7 +156,7 @@ class AndroidTestUtil {
 
             if (apkMainFolder != apkPrefix) {
                 gradleTaskPrefix = "$apkMainFolder:$apkPrefix"
-                testReportFileNameSuffix += "/$testReportFileNameSuffix-$apkPrefix"
+                testReportFileNameSuffix += "/$apkPrefix"
                 testModuleName += "/$apkPrefix"
             }
 
@@ -178,7 +178,7 @@ class AndroidTestUtil {
             if (testBuildTypeApkList.size() > 0) {
                 def testBuildTypeApkName = testBuildTypeApkList[0]
                 if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) {
-                    def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, gradleTaskPrefix).trim()
+                    def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, apkModuleName).trim()
 
                     // Проверка, определен ли testInstrumentationRunner для текущего модуля.
                     // Имя testInstrumentationRunner должно состоять из одного слова.
