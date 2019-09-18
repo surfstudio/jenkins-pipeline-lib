@@ -120,7 +120,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
             CommonUtil.shWithRuby(script, "bundle install")
             
             
-            CommonUtil.shWithRuby(script, "bundle install && bundle exec ruby ${sourcesDir}/scripts/flatter.rb ${sourcesDir}/*.xcodeproj")
+            CommonUtil.shWithRuby(script, "cd ${sourcesDir} && bundle install && bundle exec ruby ${sourcesDir}/scripts/flatter.rb ${sourcesDir}/*.xcodeproj")
             
             CommonUtil.shWithRuby(script, "set -x; expect -f calabash-expect.sh; set +x;")
             
