@@ -35,6 +35,13 @@ class ApkUtil {
         ).split()
     }
 
+    static String[] getModuleList(Object script) {
+        return getShCommandOutput(
+                script,
+                "./gradlew -q projects"
+        ).split()
+    }
+
     /**
      * Функция, возвращающая список APK-файлов с заданным суффиксом в заданной директории
      */
