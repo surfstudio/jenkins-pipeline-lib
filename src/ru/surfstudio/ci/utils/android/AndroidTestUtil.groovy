@@ -167,7 +167,7 @@ class AndroidTestUtil {
             if (testBuildTypeApkList.size() > 0) {
                 def testBuildTypeApkName = testBuildTypeApkList[0]
                 if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) {
-                    def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, apkModuleName).trim()
+                    def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, apkModuleName).split("\n").last()
                     script.echo "$currentInstrumentationRunnerName"
 
                     // Проверка, определен ли testInstrumentationRunner для текущего модуля.
