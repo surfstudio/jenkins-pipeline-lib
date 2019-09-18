@@ -154,11 +154,11 @@ class AndroidTestUtil {
             // Получение префикса модуля для запуска gradle-таска
             def gradleTaskPrefix = apkMainFolder
 
-//            if (apkMainFolder != apkPrefix) {
-//                gradleTaskPrefix = "$apkMainFolder:$apkPrefix"
-//                testReportFileNameSuffix += "/$testReportFileNameSuffix-$apkPrefix"
-//                testModuleName += "/$apkPrefix"
-//            }
+            if (apkMainFolder != apkPrefix) {
+                gradleTaskPrefix = "$apkMainFolder:$apkPrefix"
+                testReportFileNameSuffix += "/$testReportFileNameSuffix-$apkPrefix"
+                testModuleName += "/$apkPrefix"
+            }
 
             script.echo("apkModuleName: " + apkModuleName
             + "\napkPrefix: " + apkPrefix
