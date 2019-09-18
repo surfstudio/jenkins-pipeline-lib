@@ -35,11 +35,11 @@ class ApkUtil {
         ).split()
     }
 
-    static String[] getModuleList(Object script) {
+    static String getModuleList(Object script) {
         return getShCommandOutput(
                 script,
                 "./gradlew -q projects"
-        ).split()
+        )
     }
 
     /**

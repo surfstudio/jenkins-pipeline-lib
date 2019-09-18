@@ -139,9 +139,8 @@ class AndroidTestUtil {
 
         boolean allTestsPassed = true
 
-        ApkUtil.getModuleList(script).each {
-            script.echo it
-        }
+        script.echo ApkUtil.getModuleList(script)
+
         ApkUtil.getApkList(script, "$androidTestBuildType-$ANDROID_TEST_APK_SUFFIX*").each {
             def currentApkName = "$it"
             def apkMainFolder = ApkUtil.getApkFolderName(script, currentApkName).trim()
