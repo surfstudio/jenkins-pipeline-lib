@@ -139,11 +139,8 @@ class AndroidTestUtil {
 
         boolean allTestsPassed = true
 
-        //ApkUtil.getModuleList(script).each { script.echo it.substring(2, it.length() - 1) }
-
         ApkUtil.getApkList(script, "$androidTestBuildType-$ANDROID_TEST_APK_SUFFIX*").each {
             def currentApkName = "$it"
-            script.echo currentApkName
             def apkMainFolder = ApkUtil.getApkFolderName(script, currentApkName).trim()
 
             // Проверка, содержит ли проект модули

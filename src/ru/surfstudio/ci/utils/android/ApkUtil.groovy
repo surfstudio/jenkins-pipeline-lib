@@ -126,7 +126,7 @@ class ApkUtil {
      */
     static String getApkModuleName(String apkFullName, String androidTestBuildType, String androidTestSuffix) {
         String[] split = apkFullName.split("/")
-        return split[split.length - 1].replace("$androidTestBuildType-${androidTestSuffix}.apk", "")
+        return split[split.length - 1].replace("-$androidTestBuildType-${androidTestSuffix}.apk", "")
     }
 
     /**
