@@ -160,6 +160,12 @@ class AndroidTestUtil {
                 testModuleName += "/$apkPrefix"
             }
 
+            script.echo("apkModuleName: " + apkModuleName
+            + "\napkPrefix: " + apkPrefix
+            + "\ngradleTaskPrefix: " + gradleTaskPrefix
+            + "\ntestReportFileNameSuffix: " + testReportFileNameSuffix
+            + "\ntestModuleName: " + testModuleName)
+
             // Находим APK для androidTestBuildType, заданного в конфиге
             def testBuildTypeApkList = ApkUtil.getApkList(
                     script,
@@ -209,7 +215,9 @@ class AndroidTestUtil {
                             testResultLogs = testResultLogs.split()
 
                             def testCountString = testResultLogs.find { it.contains(TEST_COUNT_STRING) }
-                            def testCount = testCountString.split().find { it.contains(TEST_COUNT_STRING) }.split(DIVIDER).last()
+                            def testCount = testCountString.split().find {
+                                it.contains(TEST_COUNT_STRING)
+                            }.split(DIVIDER).last()
 
                             if (testCount == ZERO_STRING) {
                                 printMessage(script, "$NO_INSTRUMENTAL_TESTS_MESSAGE $testModuleName")
