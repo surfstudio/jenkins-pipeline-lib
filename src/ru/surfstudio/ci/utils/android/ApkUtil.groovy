@@ -124,8 +124,9 @@ class ApkUtil {
      * например, template в android-standard,
      * то имя модуля будет отличаться от имени директории APK-файла.
      */
-    static String getApkModuleName(Object script, String apkFullName) {
-        return getApkInfo(script, apkFullName, 2)
+    static String getApkModuleName(String apkFullName, String androidTestBuildType, String androidTestSuffix) {
+        String[] split = apkFullName.split("/")
+        return split[split.length - 1].replace("$androidTestBuildType-${androidTestSuffix}.apk", "")
     }
 
     /**

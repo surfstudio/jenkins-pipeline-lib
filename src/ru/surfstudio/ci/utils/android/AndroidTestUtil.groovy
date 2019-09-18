@@ -147,27 +147,16 @@ class AndroidTestUtil {
             def apkMainFolder = ApkUtil.getApkFolderName(script, currentApkName).trim()
 
             // Проверка, содержит ли проект модули
-            def apkModuleName = ApkUtil.getApkModuleName(script, currentApkName).trim()
-            def apkPrefix = (apkModuleName != "build") ? apkModuleName : apkMainFolder
+            def apkModuleName = ApkUtil.getApkModuleName(currentApkName, androidTestBuildType, ANDROID_TEST_APK_SUFFIX).trim()
             def testReportFileNameSuffix = apkMainFolder
 
             // Фактическое имя модуля, в котором запущены тесты (отличается от apkMainFolder, если проект содержит вложенные модули)
             def testModuleName = apkMainFolder
 
-            // Получение префикса модуля для запуска gradle-таска
-            def gradleTaskPrefix = apkMainFolder
-
-            if (apkMainFolder != apkPrefix) {
-                gradleTaskPrefix = "$apkMainFolder:$apkPrefix"
-                testReportFileNameSuffix += "/$apkPrefix"
-                testModuleName += "/$apkPrefix"
+            if (apkMainFolder != apkModuleName) {
+                testReportFileNameSuffix += "/$apkModuleName"
+                testModuleName += "/$apkModuleName"
             }
-
-            script.echo("apkModuleName: " + apkModuleName
-            + "\napkPrefix: " + apkPrefix
-            + "\ngradleTaskPrefix: " + gradleTaskPrefix
-            + "\ntestReportFileNameSuffix: " + testReportFileNameSuffix
-            + "\ntestModuleName: " + testModuleName)
 
             // Находим APK для androidTestBuildType, заданного в конфиге
             def testBuildTypeApkList = ApkUtil.getApkList(
