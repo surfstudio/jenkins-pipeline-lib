@@ -17,6 +17,8 @@ package ru.surfstudio.ci.utils.android
 
 import ru.surfstudio.ci.CommonUtil
 
+import java.util.function.Consumer
+
 /**
  * Утилиты для работы с APK
  */
@@ -35,11 +37,16 @@ class ApkUtil {
         ).split()
     }
 
-    static String getModuleList(Object script) {
-        return getShCommandOutput(
+    static String[] getModuleList(Object script) {
+        List<String> allList = getShCommandOutput(
                 script,
                 "./gradlew -q projects"
-        )
+        ).split()
+        List<String> modules = new ArrayList<>()
+        for (String str : allList) {
+            if (str.startsWith("':") && (str.endsWith("'"))) modules.add(str)
+        }
+        return modules
     }
 
     /**
