@@ -139,7 +139,7 @@ class AndroidTestUtil {
 
         boolean allTestsPassed = true
 
-        script.echo ApkUtil.getModuleList(script)
+        ApkUtil.getModuleList(script).each { script.echo it.substring(2, it.length() - 1) }
 
         ApkUtil.getApkList(script, "$androidTestBuildType-$ANDROID_TEST_APK_SUFFIX*").each {
             def currentApkName = "$it"
