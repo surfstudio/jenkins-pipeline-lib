@@ -144,20 +144,15 @@ class AndroidTestUtil {
             def apkMainFolder = ApkUtil.getApkFolderName(script, currentApkName).trim()
 
             // Проверка, содержит ли проект модули
-            def apkModuleName = ApkUtil.getApkModuleName(script, currentApkName).trim()
-            def apkPrefix = (apkModuleName != "build") ? apkModuleName : apkMainFolder
+            def apkModuleName = ApkUtil.getApkModuleName(currentApkName, androidTestBuildType, ANDROID_TEST_APK_SUFFIX).trim()
             def testReportFileNameSuffix = apkMainFolder
 
             // Фактическое имя модуля, в котором запущены тесты (отличается от apkMainFolder, если проект содержит вложенные модули)
             def testModuleName = apkMainFolder
 
-            // Получение префикса модуля для запуска gradle-таска
-            def gradleTaskPrefix = apkMainFolder
-
-            if (apkMainFolder != apkPrefix) {
-                gradleTaskPrefix = "$apkMainFolder:$apkPrefix"
-                testReportFileNameSuffix += "/$testReportFileNameSuffix-$apkPrefix"
-                testModuleName += "/$apkPrefix"
+            if (apkMainFolder != apkModuleName) {
+                testReportFileNameSuffix += "/$apkModuleName"
+                testModuleName += "/$apkModuleName"
             }
 
             // Находим APK для androidTestBuildType, заданного в конфиге
@@ -172,7 +167,7 @@ class AndroidTestUtil {
             if (testBuildTypeApkList.size() > 0) {
                 def testBuildTypeApkName = testBuildTypeApkList[0]
                 if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) {
-                    def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, gradleTaskPrefix).trim()
+                    def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, apkModuleName).trim()
 
                     // Проверка, определен ли testInstrumentationRunner для текущего модуля.
                     // Имя testInstrumentationRunner должно состоять из одного слова.
@@ -230,8 +225,8 @@ class AndroidTestUtil {
 
                         allTestsPassed = allTestsPassed && (testResultCode == SUCCESS_CODE)
 
-                        script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
-                        script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkMainFolder}"
+                        script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkModuleName}.xml"
+                        script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkModuleName}"
                     }
                 } // if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) ...
             } // if (testBuildTypeApkList.size() > 0)...
