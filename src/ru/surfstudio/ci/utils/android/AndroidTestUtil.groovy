@@ -167,7 +167,7 @@ class AndroidTestUtil {
             if (testBuildTypeApkList.size() > 0) {
                 def testBuildTypeApkName = testBuildTypeApkList[0]
                 if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) {
-                    def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, apkModuleName).split("\n").last()
+                    def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, apkModuleName)
                     script.echo "$currentInstrumentationRunnerName"
 
                     // Проверка, определен ли testInstrumentationRunner для текущего модуля.
@@ -228,8 +228,8 @@ class AndroidTestUtil {
 
                         allTestsPassed = allTestsPassed && (testResultCode == SUCCESS_CODE)
 
-                        script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkMainFolder}.xml"
-                        script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkMainFolder}"
+                        script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkModuleName}.xml"
+                        script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkModuleName}"
                     }
                 } // if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) ...
             } // if (testBuildTypeApkList.size() > 0)...

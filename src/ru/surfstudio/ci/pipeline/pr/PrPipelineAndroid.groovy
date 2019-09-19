@@ -142,6 +142,6 @@ class PrPipelineAndroid extends PrPipeline {
         return script.sh(
                 returnStdout: true,
                 script: "./gradlew :$prefix:$defaultInstrumentationRunnerGradleTaskName"
-        )
+        ).split("\n").last()
     }
 }
