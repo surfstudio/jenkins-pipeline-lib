@@ -24,6 +24,7 @@ import ru.surfstudio.ci.utils.android.config.AvdConfig
 
 class PrPipelineFlutter extends PrPipeline {
 
+    public static final String CHECKOUT_FLUTTER_VERSION = 'Checkout Flutter Project Version'
     public static final String BUILD_ANDROID = 'Build Android'
     public static final String BUILD_IOS = 'Build iOS'
 
@@ -35,6 +36,8 @@ class PrPipelineFlutter extends PrPipeline {
     public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
 
     //sh commands
+    public checkoutFlutterVersionCommand = "./script/version.sh"
+
     public buildAndroidCommand = "./script/android/build.sh -qa && ./script/android/build.sh -qa -x64"
     public buildIOsCommand = "./script/ios/build.sh -qa"
     public testCommand = "flutter test"
@@ -57,6 +60,9 @@ class PrPipelineFlutter extends PrPipeline {
                 stage(PRE_MERGE, false) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
+                stage(CHECKOUT_FLUTTER_VERSION) {
+                    script.sh checkoutFlutterVersionCommand
+                },
                 stage(BUILD_ANDROID) {
                     FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
                             buildAndroidCommand,
@@ -64,6 +70,9 @@ class PrPipelineFlutter extends PrPipeline {
                             androidKeystorePropertiesCredentials)
                 },
                 node(NodeProvider.iOSFlutterNode, true, [
+                        stage(CHECKOUT_FLUTTER_VERSION) {
+                            script.sh checkoutFlutterVersionCommand
+                        },
                         stage(BUILD_IOS) {
                             FlutterPipelineHelper.buildStageBodyIOS(script,
                                     buildIOsCommand,
