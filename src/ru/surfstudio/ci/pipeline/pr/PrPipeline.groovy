@@ -228,7 +228,7 @@ abstract class PrPipeline extends ScmPipeline {
                                 ],
                                 [
                                         key  : AUTHOR_USERNAME_PARAMETER,
-                                        value: '$.pullrequest.author.username'
+                                        value: '$.pullrequest.author.account_id'
                                 ],
                                 [
                                         key  : 'repoUrl',
