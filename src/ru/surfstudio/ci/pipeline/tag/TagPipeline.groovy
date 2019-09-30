@@ -195,7 +195,7 @@ abstract class TagPipeline extends ScmPipeline {
     def static buildDiscarder(script) {
         return script.buildDiscarder(
                 script.logRotator(
-                        artifactDaysToKeepStr: '90',
+                        artifactDaysToKeepStr: '30',
                         artifactNumToKeepStr: '',
                         daysToKeepStr: '',
                         numToKeepStr: '')
