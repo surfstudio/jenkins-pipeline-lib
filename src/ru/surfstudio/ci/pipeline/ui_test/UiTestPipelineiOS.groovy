@@ -122,7 +122,15 @@ class UiTestPipelineiOS extends UiTestPipeline {
             //script.dir(sourcesDir) {
             //    CommonUtil.shWithRuby(script, "bundle install")
             //}
+            
+            script.dir(sourcesDir) { 
+            
+                 CommonUtil.safe(script) 
+                {
 
+                    CommonUtil.shWithRuby(script, "make set_token_for_snack")
+                }
+            }
 
             CommonUtil.shWithRuby(script, "set -x; expect -f calabash-expect.sh; set +x;")
 
