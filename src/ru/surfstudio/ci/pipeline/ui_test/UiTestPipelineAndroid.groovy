@@ -78,7 +78,8 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                             outputHtmlFile,
                             outputrerunTxtFile,
                             jiraAuthenticationName,
-                            "UI Tests ${taskKey} ${taskName}")
+                            "UI Tests ${taskKey} ${taskName}",
+                            reports)
 
                 }
 
