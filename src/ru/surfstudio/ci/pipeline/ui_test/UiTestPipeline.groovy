@@ -49,6 +49,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public sourcesDir = "src"
     public featuresDir = "features"
     public outputsDir = "outputs"
+    public reports = "reports"
 
     //files
     public featureForTest = "for_test.feature"
