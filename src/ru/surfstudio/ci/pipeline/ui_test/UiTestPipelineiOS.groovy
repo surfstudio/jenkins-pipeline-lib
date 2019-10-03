@@ -27,6 +27,17 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
     //files
     public simulatorIdentifierFile = "currentSim"
+    
+    public accounts = "accounts.csv"
+    public auth = "auth.csv"
+    public card_tokens = "card_tokens.csv"
+    public cards = "cards.csv"
+    public credits = "credits.csv"
+    public currency_rates = "currency_rates.csv"
+    public deposits = "deposits.csv"
+    public supported_versions = "supported_versions.csv"
+    
+    public reports = "${reports}"
 
     //environment
     public testDeviceName = "iPhone 7"
