@@ -155,6 +155,11 @@ class AndroidTestUtil {
                 testModuleName += "/$apkModuleName"
             }
 
+            script.echo("apkModuleName: " + apkModuleName
+                    + "\napkMainFolder: " + apkMainFolder
+                    + "\ntestReportFileNameSuffix: " + testReportFileNameSuffix
+                    + "\ntestModuleName: " + testModuleName)
+
             // Находим APK для androidTestBuildType, заданного в конфиге
             def testBuildTypeApkList = ApkUtil.getApkList(
                     script,
