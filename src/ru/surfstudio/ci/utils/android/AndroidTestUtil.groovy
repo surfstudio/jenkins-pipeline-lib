@@ -143,6 +143,8 @@ class AndroidTestUtil {
             def currentApkName = "$it"
             def apkMainFolder = ApkUtil.getApkFolderName(script, currentApkName).trim()
 
+            if (apkMainFolder == "template") return
+
             // Проверка, содержит ли проект модули
             def apkModuleName = ApkUtil.getApkModuleName(currentApkName, androidTestBuildType, ANDROID_TEST_APK_SUFFIX).trim()
             def testReportFileNameSuffix = apkMainFolder
@@ -154,11 +156,6 @@ class AndroidTestUtil {
                 testReportFileNameSuffix += "/$apkModuleName"
                 testModuleName += "/$apkModuleName"
             }
-
-            script.echo("apkModuleName: " + apkModuleName
-                    + "\napkMainFolder: " + apkMainFolder
-                    + "\ntestReportFileNameSuffix: " + testReportFileNameSuffix
-                    + "\ntestModuleName: " + testModuleName)
 
             // Находим APK для androidTestBuildType, заданного в конфиге
             def testBuildTypeApkList = ApkUtil.getApkList(
