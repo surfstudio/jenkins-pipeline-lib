@@ -119,7 +119,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
             CommonUtil.shWithRuby(script, "bundle install")
             
-                         script.dir(sourcesDir) { 
+            
+            script.dir(sourcesDir) { 
             
                  CommonUtil.safe(script) 
                 {
@@ -127,13 +128,10 @@ class UiTestPipelineiOS extends UiTestPipeline {
                     CommonUtil.shWithRuby(script, "make set_token_for_snack")
                 }
             }
-            
-         
+
             CommonUtil.shWithRuby(script, "set -x; expect -f calabash-expect.sh; set +x;")
             
-
-            
-             CommonUtil.safe(script) {
+            CommonUtil.safe(script) {
 
                 CommonUtil.shWithRuby(script, "ruby ${sourcesDir}/scripts/flatter.rb ${sourcesDir}/*.xcodeproj")
             }
