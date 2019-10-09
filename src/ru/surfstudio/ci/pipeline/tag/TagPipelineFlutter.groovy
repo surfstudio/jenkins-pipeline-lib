@@ -218,15 +218,20 @@ class TagPipelineFlutter extends TagPipeline {
     }
 
     private static void initStrategies(TagPipelineFlutter ctx) {
-        (ctx.getStage(BUILD_ANDROID) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
-        (ctx.getStage(BUILD_ANDROID_ARM64) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
-        (ctx.getStage(BETA_UPLOAD_ANDROID) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
+        def stageResolver = { skipStage -> skipStage ? StageStrategy.SKIP_STAGE : null }
+        def paramsMap =  [
+                (BUILD_ANDROID): stageResolver(ctx.shouldBuildAndroid),
+                (BUILD_ANDROID_ARM64): stageResolver(ctx.shouldBuildAndroid),
+                (BETA_UPLOAD_ANDROID): stageResolver(ctx.shouldBuildAndroid),
 
-        (ctx.getStage(BUILD_IOS_BETA) as StageWithStrategy).strategy = ctx.shouldBuildIosBeta ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
-        (ctx.getStage(BETA_UPLOAD_IOS) as StageWithStrategy).strategy = ctx.shouldBuildIosBeta ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
+                (BUILD_IOS_BETA): stageResolver(ctx.shouldBuildIosBeta),
+                (BETA_UPLOAD_IOS): stageResolver(ctx.shouldBuildIosBeta),
 
-        (ctx.getStage(BUILD_IOS_TESTFLIGHT) as StageWithStrategy).strategy = ctx.shouldBuildIosTestFlight ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
-        (ctx.getStage(TESTFLIGHT_UPLOAD_IOS) as StageWithStrategy).strategy = ctx.shouldBuildIosTestFlight ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
+                (BUILD_IOS_TESTFLIGHT):  stageResolver(ctx.shouldBuildIosTestFlight),
+                (TESTFLIGHT_UPLOAD_IOS):  stageResolver(ctx.shouldBuildIosTestFlight),
+        ]
+
+        CommonUtil.applyStrategiesFromParams(ctx, paramsMap)
     }
 
     def static calculateVersionCodesStageBody(TagPipelineFlutter ctx,
