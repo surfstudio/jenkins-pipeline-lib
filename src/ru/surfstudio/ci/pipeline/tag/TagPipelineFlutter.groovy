@@ -218,17 +218,17 @@ class TagPipelineFlutter extends TagPipeline {
     }
 
     private static void initStrategies(TagPipelineFlutter ctx) {
-        def stageResolver = { skipStage -> skipStage ? StageStrategy.SKIP_STAGE : null }
+        def skipResolver = { skipStage -> skipStage ? StageStrategy.SKIP_STAGE : null }
         def paramsMap =  [
-                (BUILD_ANDROID): stageResolver(ctx.shouldBuildAndroid),
-                (BUILD_ANDROID_ARM64): stageResolver(ctx.shouldBuildAndroid),
-                (BETA_UPLOAD_ANDROID): stageResolver(ctx.shouldBuildAndroid),
+                (BUILD_ANDROID): skipResolver(!ctx.shouldBuildAndroid),
+                (BUILD_ANDROID_ARM64): skipResolver(!ctx.shouldBuildAndroid),
+                (BETA_UPLOAD_ANDROID): skipResolver(!ctx.shouldBuildAndroid),
 
-                (BUILD_IOS_BETA): stageResolver(ctx.shouldBuildIosBeta),
-                (BETA_UPLOAD_IOS): stageResolver(ctx.shouldBuildIosBeta),
+                (BUILD_IOS_BETA): skipResolver(!ctx.shouldBuildIosBeta),
+                (BETA_UPLOAD_IOS): skipResolver(!ctx.shouldBuildIosBeta),
 
-                (BUILD_IOS_TESTFLIGHT):  stageResolver(ctx.shouldBuildIosTestFlight),
-                (TESTFLIGHT_UPLOAD_IOS):  stageResolver(ctx.shouldBuildIosTestFlight),
+                (BUILD_IOS_TESTFLIGHT):  skipResolver(!ctx.shouldBuildIosTestFlight),
+                (TESTFLIGHT_UPLOAD_IOS):  skipResolver(!ctx.shouldBuildIosTestFlight),
         ]
 
         CommonUtil.applyStrategiesFromParams(ctx, paramsMap)
