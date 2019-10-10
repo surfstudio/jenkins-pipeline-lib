@@ -44,6 +44,8 @@ class TagPipelineFlutter extends TagPipeline {
     public androidKeystoreCredentials = "no_credentials"
     public androidKeystorePropertiesCredentials = "no_credentials"
 
+    public jenkinsGoogleServiceAccountCredsId = "surf-jarvis-firebase-ss36-svcacc-json"
+
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
     public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
 
@@ -98,6 +100,7 @@ class TagPipelineFlutter extends TagPipeline {
 
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
+
 
         initializeBody = { initBodyFlutter(this) }
         propertiesProvider = {
@@ -156,9 +159,6 @@ class TagPipelineFlutter extends TagPipeline {
                 stage(STATIC_CODE_ANALYSIS) {
                     FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
-                stage(BETA_UPLOAD_ANDROID) {
-                    uploadStageBody(script, shBetaUploadCommandAndroid)
-                },
                 node(nodeIos, true, [
                         stage(CHECKOUT_FLUTTER_VERSION) {
                             script.sh checkoutFlutterVersionCommand
@@ -179,9 +179,13 @@ class TagPipelineFlutter extends TagPipeline {
                                     iOSCertfileCredentialId)
                         },
                         stage(TESTFLIGHT_UPLOAD_IOS) {
-                            uploadStageBody(script, shTestFlightUploadCommandIos)
+                            uploadStageTestFlight(script, shTestFlightUploadCommandIos)
                         }
                 ]),
+                //only when ios upload done
+                stage(BETA_UPLOAD_ANDROID) {
+                    uploadStageBody(script, shBetaUploadCommandAndroid)
+                },
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     versionPushStageBody(script,
                             repoTag,
@@ -261,8 +265,14 @@ class TagPipelineFlutter extends TagPipeline {
         script.echo "New arm64 versionCode: $ctx.arm64VersionCode"
     }
 
-    def static uploadStageBody(Object script, String shBetaUploadCommand) {
-        CommonUtil.shWithRuby(script, shBetaUploadCommand)
+    def uploadStageBody(Object script, String shBetaUploadCommand) {
+        script.withCredentials([script.file(credentialsId: jenkinsGoogleServiceAccountCredsId, variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+            CommonUtil.shWithRuby(script, shBetaUploadCommand)
+        }
+    }
+
+    def uploadStageTestFlight(Object script, String shUploadCommand) {
+        CommonUtil.shWithRuby(script, shUploadCommand)
     }
 
     def static versionUpdateStageBody(Object script,
