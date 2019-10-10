@@ -159,6 +159,10 @@ class TagPipelineFlutter extends TagPipeline {
                 stage(STATIC_CODE_ANALYSIS) {
                     FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
+                //only when ios upload done
+                stage(BETA_UPLOAD_ANDROID) {
+                    uploadStageBody(script, shBetaUploadCommandAndroid)
+                },
                 node(nodeIos, true, [
                         stage(CHECKOUT_FLUTTER_VERSION) {
                             script.sh checkoutFlutterVersionCommand
@@ -182,10 +186,6 @@ class TagPipelineFlutter extends TagPipeline {
                             uploadStageTestFlight(script, shTestFlightUploadCommandIos)
                         }
                 ]),
-                //only when ios upload done
-                stage(BETA_UPLOAD_ANDROID) {
-                    uploadStageBody(script, shBetaUploadCommandAndroid)
-                },
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     versionPushStageBody(script,
                             repoTag,
