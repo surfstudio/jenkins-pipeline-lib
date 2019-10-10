@@ -44,7 +44,7 @@ class TagPipelineFlutter extends TagPipeline {
     public androidKeystoreCredentials = "no_credentials"
     public androidKeystorePropertiesCredentials = "no_credentials"
 
-    public jenkinsGoogleServiceAccountCredsId = "surf-jarvis-firebase-ss36-svcacc-json"
+    public jenkinsGoogleServiceAccountCredsId = "surf-jarvis-firebase-token"
 
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
     public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
@@ -266,7 +266,7 @@ class TagPipelineFlutter extends TagPipeline {
     }
 
     def uploadStageBody(Object script, String shBetaUploadCommand) {
-        script.withCredentials([script.file(credentialsId: jenkinsGoogleServiceAccountCredsId, variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+        script.withCredentials([script.string(credentialsId: jenkinsGoogleServiceAccountCredsId, variable: 'FIREBASE_TOKEN')]) {
             CommonUtil.shWithRuby(script, shBetaUploadCommand)
         }
     }
