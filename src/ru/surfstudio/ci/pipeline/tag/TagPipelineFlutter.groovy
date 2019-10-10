@@ -84,6 +84,15 @@ class TagPipelineFlutter extends TagPipeline {
 
     def init() {
 
+        applyStrategiesFromParams = {
+            def params = script.params
+            CommonUtil.applyStrategiesFromParams(ctx, [
+                    (UNIT_TEST): params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
+                    (INSTRUMENTATION_TEST): params[INSTRUMENTATION_TEST_STAGE_STRATEGY_PARAMETER],
+                    (STATIC_CODE_ANALYSIS): params[STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER],
+            ])
+        }
+
         node = NodeProvider.androidFlutterNode
         nodeIos = NodeProvider.iOSFlutterNode
 
@@ -219,6 +228,7 @@ class TagPipelineFlutter extends TagPipeline {
 
     private static void initStrategies(TagPipelineFlutter ctx) {
         def skipResolver = { skipStage -> skipStage ? StageStrategy.SKIP_STAGE : null }
+        //todo resolve with values from params
         def paramsMap =  [
                 (BUILD_ANDROID): skipResolver(!ctx.shouldBuildAndroid),
                 (BUILD_ANDROID_ARM64): skipResolver(!ctx.shouldBuildAndroid),
