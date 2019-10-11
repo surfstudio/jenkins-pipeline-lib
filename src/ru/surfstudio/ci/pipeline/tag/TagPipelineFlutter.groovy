@@ -260,7 +260,7 @@ class TagPipelineFlutter extends TagPipeline {
             newMainVersionCode = minVersionCode
         }
         ctx.mainVersionCode = String.valueOf(newMainVersionCode)
-        ctx.arm64VersionCode = "64" + String.valueOf(newMainVersionCode)
+        ctx.arm64VersionCode = String.valueOf(newMainVersionCode)
         script.echo "New main versionCode: $ctx.mainVersionCode"
         script.echo "New arm64 versionCode: $ctx.arm64VersionCode"
     }
