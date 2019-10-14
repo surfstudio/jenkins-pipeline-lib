@@ -61,7 +61,6 @@ class AndroidTestUtil {
      * @param script контекст вызова
      * @param config конфигурация для эмулятора
      * @param androidTestBuildType build type для запуска инструментальных тестов
-     * @param getTestInstrumentationRunnerName функция, возвращающая имя текущего instrumentation runner
      * @param androidTestResultPathXml путь для сохранения xml-отчетов о результатах тестов
      * @param androidTestResultPathDirHtml путь для сохранения html-отчетов о результатах тестов
      * @param generateUniqueAvdNameForJob флаг, показывающий, должно ли имя AVD быть уникальным для текущего job'a
@@ -71,7 +70,6 @@ class AndroidTestUtil {
             Object script,
             AvdConfig config,
             String androidTestBuildType,
-            Closure getTestInstrumentationRunnerName,
             String androidTestResultPathXml,
             String androidTestResultPathDirHtml,
             Boolean generateUniqueAvdNameForJob,
@@ -89,7 +87,6 @@ class AndroidTestUtil {
                     script,
                     config,
                     androidTestBuildType,
-                    getTestInstrumentationRunnerName,
                     androidTestResultPathXml,
                     androidTestResultPathDirHtml,
                     instrumentationTestRetryCount
@@ -122,7 +119,6 @@ class AndroidTestUtil {
             Object script,
             AvdConfig config,
             String androidTestBuildType,
-            Closure getTestInstrumentationRunnerName,
             String androidTestResultPathXml,
             String androidTestResultPathDirHtml,
             Integer instrumentationTestRetryCount
@@ -169,67 +165,59 @@ class AndroidTestUtil {
             if (testBuildTypeApkList.size() > 0) {
                 def testBuildTypeApkName = testBuildTypeApkList[0]
                 if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) {
-//                    def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, apkModuleName).trim()
-//
-//                    // Проверка, определен ли testInstrumentationRunner для текущего модуля.
-//                    // Имя testInstrumentationRunner должно состоять из одного слова.
-//                    if (currentInstrumentationRunnerName.split().length == 1 &&
-//                            currentInstrumentationRunnerName != CommonUtil.EMPTY_STRING &&
-//                            currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {
-//
-//                        script.echo "currentInstrumentationRunnerName $currentInstrumentationRunnerName"
 
-                        String projectRootDir = "${script.sh(returnStdout: true, script: "pwd")}/"
-                        String spoonOutputDir = "${formatArgsForShellCommand(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
-                        script.sh "mkdir -p $spoonOutputDir"
+                    String projectRootDir = "${script.sh(returnStdout: true, script: "pwd")}/"
+                    String spoonOutputDir = "${formatArgsForShellCommand(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
+                    script.sh "mkdir -p $spoonOutputDir"
 
-                        deleteApk(script, testBuildTypeApkName, config.emulatorName)
-                        printMessage(script, "$RUN_TESTS_MESSAGE $testModuleName")
+                    deleteApk(script, testBuildTypeApkName, config.emulatorName)
+                    printMessage(script, "$RUN_TESTS_MESSAGE $testModuleName")
 
-                        int countOfLaunch = 0, testResultCode = 0
-                        while (countOfLaunch <= instrumentationTestRetryCount) {
-                            if (countOfLaunch > 0) {
-                                printMessage(script, "$REPEAT_TESTS_MESSAGE $testModuleName")
-                            }
+                    int countOfLaunch = 0, testResultCode = 0
+                    while (countOfLaunch <= instrumentationTestRetryCount) {
+                        if (countOfLaunch > 0) {
+                            printMessage(script, "$REPEAT_TESTS_MESSAGE $testModuleName")
+                        }
 
-                            def testResultLogs = script.sh(
-                                    returnStdout: true,
-                                    script: "java -jar $SPOON_JAR_NAME \
+                        def testResultLogs = script.sh(
+                                returnStdout: true,
+                                script: "java -jar $SPOON_JAR_NAME \
                                     --apk \"${formatArgsForShellCommand(projectRootDir, testBuildTypeApkName)}\" \
                                     --test-apk \"${formatArgsForShellCommand(projectRootDir, currentApkName)}\" \
                                     --output \"${formatArgsForShellCommand(spoonOutputDir)}\" \
                                     --adb-timeout $TIMEOUT_PER_TEST \
                                     --debug --grant-all --no-animations \
                                     -serial \"${formatArgsForShellCommand(config.emulatorName)}\""
-                            )
-                            script.echo testResultLogs
-                            testResultLogs = testResultLogs.split()
+                        )
+                        script.echo testResultLogs
+                        testResultLogs = testResultLogs.split()
 
-                            def testCountString = testResultLogs.find { it.contains(TEST_COUNT_STRING) }
-                            def testCount = testCountString.split().find { it.contains(TEST_COUNT_STRING) }.split(DIVIDER).last()
+                        def testCountString = testResultLogs.find { it.contains(TEST_COUNT_STRING) }
+                        def testCount = testCountString.split().find {
+                            it.contains(TEST_COUNT_STRING)
+                        }.split(DIVIDER).last()
 
-                            if (testCount == ZERO_STRING) {
-                                printMessage(script, "$NO_INSTRUMENTAL_TESTS_MESSAGE $testModuleName")
-                                break
-                            }
-
-                            def testFailureString = testResultLogs.find { it.contains(FAILURE_STRING) }
-                            testResultCode = testFailureString == null && testCountString != null ? SUCCESS_CODE : ERROR_CODE
-                            printMessage(script, "$TEST_RESULT_CODE_MESSAGE $testResultCode")
-
-                            if (testResultCode == SUCCESS_CODE) {
-                                break
-                            }
-
-                            countOfLaunch++
-                            deleteApk(script, testBuildTypeApkName, config.emulatorName)
+                        if (testCount == ZERO_STRING) {
+                            printMessage(script, "$NO_INSTRUMENTAL_TESTS_MESSAGE $testModuleName")
+                            break
                         }
 
-                        allTestsPassed = allTestsPassed && (testResultCode == SUCCESS_CODE)
+                        def testFailureString = testResultLogs.find { it.contains(FAILURE_STRING) }
+                        testResultCode = testFailureString == null && testCountString != null ? SUCCESS_CODE : ERROR_CODE
+                        printMessage(script, "$TEST_RESULT_CODE_MESSAGE $testResultCode")
 
-                        script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkModuleName}.xml"
-                        script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkModuleName}"
-                    //}
+                        if (testResultCode == SUCCESS_CODE) {
+                            break
+                        }
+
+                        countOfLaunch++
+                        deleteApk(script, testBuildTypeApkName, config.emulatorName)
+                    }
+
+                    allTestsPassed = allTestsPassed && (testResultCode == SUCCESS_CODE)
+
+                    script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkModuleName}.xml"
+                    script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkModuleName}"
                 } // if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) ...
             } // if (testBuildTypeApkList.size() > 0)...
         } // ApkUtil.getApkList...

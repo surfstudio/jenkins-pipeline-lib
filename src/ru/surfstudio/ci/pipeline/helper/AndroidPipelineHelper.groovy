@@ -16,10 +16,6 @@
 package ru.surfstudio.ci.pipeline.helper
 
 import ru.surfstudio.ci.RepositoryUtil
-import ru.surfstudio.ci.Result
-import ru.surfstudio.ci.pipeline.pr.PrPipeline
-import ru.surfstudio.ci.stage.SimpleStage
-import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.utils.android.AndroidTestUtil
 import ru.surfstudio.ci.utils.android.AndroidUtil
 import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
@@ -111,7 +107,6 @@ class AndroidPipelineHelper {
                     script,
                     config,
                     androidTestBuildType,
-                    getTestInstrumentationRunnerName,
                     androidTestConfig.instrumentalTestResultPathDirXml,
                     androidTestConfig.instrumentalTestResultPathDirHtml,
                     androidTestConfig.generateUniqueAvdNameForJob,
