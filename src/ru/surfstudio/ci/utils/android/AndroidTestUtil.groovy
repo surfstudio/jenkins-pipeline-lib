@@ -169,15 +169,15 @@ class AndroidTestUtil {
             if (testBuildTypeApkList.size() > 0) {
                 def testBuildTypeApkName = testBuildTypeApkList[0]
                 if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) {
-                    def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, apkModuleName).trim()
-
-                    // Проверка, определен ли testInstrumentationRunner для текущего модуля.
-                    // Имя testInstrumentationRunner должно состоять из одного слова.
-                    if (currentInstrumentationRunnerName.split().length == 1 &&
-                            currentInstrumentationRunnerName != CommonUtil.EMPTY_STRING &&
-                            currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {
-
-                        script.echo "currentInstrumentationRunnerName $currentInstrumentationRunnerName"
+//                    def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, apkModuleName).trim()
+//
+//                    // Проверка, определен ли testInstrumentationRunner для текущего модуля.
+//                    // Имя testInstrumentationRunner должно состоять из одного слова.
+//                    if (currentInstrumentationRunnerName.split().length == 1 &&
+//                            currentInstrumentationRunnerName != CommonUtil.EMPTY_STRING &&
+//                            currentInstrumentationRunnerName != NOT_DEFINED_INSTRUMENTATION_RUNNER_NAME) {
+//
+//                        script.echo "currentInstrumentationRunnerName $currentInstrumentationRunnerName"
 
                         String projectRootDir = "${script.sh(returnStdout: true, script: "pwd")}/"
                         String spoonOutputDir = "${formatArgsForShellCommand(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
@@ -229,7 +229,7 @@ class AndroidTestUtil {
 
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkModuleName}.xml"
                         script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkModuleName}"
-                    }
+                    //}
                 } // if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) ...
             } // if (testBuildTypeApkList.size() > 0)...
         } // ApkUtil.getApkList...
