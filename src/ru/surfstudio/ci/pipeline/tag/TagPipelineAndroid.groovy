@@ -56,16 +56,6 @@ class TagPipelineAndroid extends TagPipeline {
     // количество попыток перезапуска тестов для одного модуля при падении одного из них
     public instrumentationTestRetryCount = 0
 
-    /**
-     * Функция, возвращающая имя instrumentation runner для запуска инструментальных тестов.
-     *
-     * Если для всех модулей проекта используется одинаковый instrumentation runner,
-     * то функцию можно переопределить следующим образом:
-     *
-     * pipeline.getTestInstrumentationRunnerName = { script, prefix -> return "androidx.test.runner.AndroidJUnitRunner" }
-     */
-    public getTestInstrumentationRunnerName = { script, prefix -> return getDefaultTestInstrumentationRunnerName(script, prefix) }
-
     public AvdConfig avdConfig = new AvdConfig()
 
     TagPipelineAndroid(Object script) {
@@ -106,11 +96,10 @@ class TagPipelineAndroid extends TagPipeline {
                             unitTestResultPathDirHtml)
                 },
                 stage(INSTRUMENTATION_TEST) {
-                    AndroidPipelineHelper.instrumentationTestStageBodyAndroid(
+                    AndroidPipelineHelper.instrumentationTestStageAndroid(
                             script,
                             avdConfig,
                             androidTestBuildType,
-                            getTestInstrumentationRunnerName,
                             new AndroidTestConfig(
                                     instrumentalTestAssembleGradleTask,
                                     instrumentalTestResultPathDirXml,

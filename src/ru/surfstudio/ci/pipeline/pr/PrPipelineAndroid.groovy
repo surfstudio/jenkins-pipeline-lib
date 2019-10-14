@@ -49,16 +49,6 @@ class PrPipelineAndroid extends PrPipeline {
 
     private boolean hasChanges = false
 
-    /**
-     * Функция, возвращающая имя instrumentation runner для запуска инструментальных тестов.
-     *
-     * Если для всех модулей проекта используется одинаковый instrumentation runner,
-     * то функцию можно переопределить следующим образом:
-     *
-     * pipeline.getTestInstrumentationRunnerName = { script, prefix -> return "androidx.test.runner.AndroidJUnitRunner" }
-     */
-    public getTestInstrumentationRunnerName = { script, prefix -> return getDefaultTestInstrumentationRunnerName(script, prefix) }
-
     public AvdConfig avdConfig = new AvdConfig()
 
     PrPipelineAndroid(Object script) {
@@ -105,11 +95,10 @@ class PrPipelineAndroid extends PrPipeline {
                             unitTestResultPathDirHtml)
                 },
                 stage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    AndroidPipelineHelper.instrumentationTestStageBodyAndroid(
+                    AndroidPipelineHelper.instrumentationTestStageAndroid(
                             script,
                             avdConfig,
                             androidTestBuildType,
-                            getTestInstrumentationRunnerName,
                             new AndroidTestConfig(
                                     instrumentalTestAssembleGradleTask,
                                     instrumentalTestResultPathDirXml,
