@@ -15,6 +15,11 @@
  */
 package ru.surfstudio.ci.pipeline.helper
 
+import ru.surfstudio.ci.RepositoryUtil
+import ru.surfstudio.ci.Result
+import ru.surfstudio.ci.pipeline.pr.PrPipeline
+import ru.surfstudio.ci.stage.SimpleStage
+import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.utils.android.AndroidTestUtil
 import ru.surfstudio.ci.utils.android.AndroidUtil
 import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
@@ -143,5 +148,38 @@ class AndroidPipelineHelper {
                 reportFiles          : "*/$DEFAULT_HTML_RESULT_FILENAME",
                 reportName           : reportName
         ])
+    }
+
+    /**
+     * Форматирование исходного кода на котлин
+     */
+    static ktlintFormatStageAndroid(
+            Object script,
+            String sourceBranch,
+            String destinationBranch
+    ) {
+        def files = RepositoryUtil.filesDiffPr(script, sourceBranch, destinationBranch)
+        try {
+            AndroidUtil.withGradleBuildCacheCredentials(script) {
+                script.sh "./gradlew ktlintFilesFormat -PlintFiles=\"${files.join("\",\"")}\""
+            }
+        } catch (Exception ex) {
+            script.echo "Formatting exception $ex"
+        }
+    }
+
+    static boolean checkChangesAndUpdate(
+            Object script,
+            String repoUrl,
+            String repoCredentialsId
+    ) {
+        boolean hasChanges = RepositoryUtil.checkHasChanges(script)
+        if (hasChanges) {
+            script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1\""
+            RepositoryUtil.push(script, repoUrl, repoCredentialsId)
+        } else {
+            script.echo "No modification after code formatting. "
+        }
+        return hasChanges
     }
 }

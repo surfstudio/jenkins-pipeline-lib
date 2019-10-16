@@ -3,7 +3,7 @@ package ru.surfstudio.ci.stage
 import ru.surfstudio.ci.pipeline.Pipeline
 
 /**
- * Wrapper for run stages on specific node
+ * Wrapper for run stages in specific dir
  */
 public class DirStagesWrapper extends AbstractStagesWrapper {
     String dir

@@ -27,6 +27,8 @@ class iOSPipelineHelper {
                 script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
                 script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
         ]) {
+        
+            script.echo "Importing iOS certificate: ${certfileCredentialId}"
 
             script.sh('security default-keychain -s /Users/jenkins/Library/Keychains/login.keychain-db')
             script.sh('security -v unlock-keychain -p $KEYCHAIN_PASS')
@@ -41,8 +43,9 @@ class iOSPipelineHelper {
     }
 
     def static unitTestStageBodyiOS(Object script) {
-        script.echo "empty"
-        // TODO: Implement me
+        CommonUtil.shWithRuby(this, "make test")
+        junit 'fastlane/test_output/report.junit'
+        archiveArtifacts artifacts: 'fastlane/test_output/report.html'
     }
 
     def static instrumentationTestStageBodyiOS(Object script) {
@@ -51,6 +54,6 @@ class iOSPipelineHelper {
     }
 
     def static staticCodeAnalysisStageBodyiOS(Object script) {
-        script.sh "make sonar"
+        CommonUtil.shWithRuby(script, "make lint")
     }
 }

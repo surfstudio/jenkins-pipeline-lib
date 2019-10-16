@@ -22,7 +22,7 @@ import ru.surfstudio.ci.pipeline.helper.iOSPipelineHelper
 class PrPipelineiOS extends PrPipeline {
 
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
-    public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey"
+    public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
 
     PrPipelineiOS(Object script) {
         super(script)
@@ -36,7 +36,7 @@ class PrPipelineiOS extends PrPipeline {
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
-        initializeBody = {  initBody(this) }
+        initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }
 
         stages = [
