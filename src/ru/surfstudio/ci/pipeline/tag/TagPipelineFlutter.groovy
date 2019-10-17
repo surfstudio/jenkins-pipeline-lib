@@ -28,6 +28,9 @@ import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 
 class TagPipelineFlutter extends TagPipeline {
 
+    public static final String STAGE_ANDROID = 'Stage Android'
+    public static final String STAGE_IOS = 'Stage IOS'
+
     public static final String CALCULATE_VERSION_CODES = 'Calculate Version Codes'
     public static final String CLEAN_PREV_BUILD = 'Clean Previous Build'
     public static final String CHECKOUT_FLUTTER_VERSION = 'Checkout Flutter Project Version'
@@ -164,7 +167,8 @@ class TagPipelineFlutter extends TagPipeline {
                 stage(BETA_UPLOAD_ANDROID) {
                     uploadStageBody(script, shBetaUploadCommandAndroid)
                 },
-                node(nodeIos, true, [
+
+                node(STAGE_IOS, nodeIos, true, [
                         stage(CHECKOUT_FLUTTER_VERSION) {
                             script.sh checkoutFlutterVersionCommand
                         },

@@ -198,6 +198,13 @@ abstract class Pipeline implements Serializable {
     /**
      * Run stages on specific node
      */
+    def static node(String name, String node, boolean copyWorkspace, List<Stage> stages) {
+        return new NodeStagesWrapper(name, node, copyWorkspace, stages)
+    }
+
+    /**
+     * Run stages on specific node
+     */
     def static node(String node, boolean copyWorkspace, List<Stage> stages) {
         return new NodeStagesWrapper("Node: $node", node, copyWorkspace, stages)
     }
