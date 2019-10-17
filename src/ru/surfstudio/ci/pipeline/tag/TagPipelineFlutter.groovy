@@ -82,9 +82,6 @@ class TagPipelineFlutter extends TagPipeline {
 
     TagPipelineFlutter(Object script) {
         super(script)
-
-        //todo it's not good solution; need refactoring and split ios and android pipeline
-        nodeIos = NodeProvider.iOSFlutterNode
     }
 
     def init() {
@@ -99,6 +96,8 @@ class TagPipelineFlutter extends TagPipeline {
         }
 
         node = NodeProvider.androidFlutterNode
+        //todo it's not good solution; need refactoring and split ios and android pipeline
+        nodeIos = NodeProvider.iOSFlutterNode
 
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }

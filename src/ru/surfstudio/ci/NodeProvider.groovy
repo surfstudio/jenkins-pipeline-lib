@@ -29,7 +29,7 @@ class NodeProvider {
     }
 
     def static getiOSNode() {
-        return "ios"
+        return "ios-4"
     }
 
     def static getFlutterNode() {
