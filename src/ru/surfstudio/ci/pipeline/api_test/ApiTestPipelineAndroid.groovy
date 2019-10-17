@@ -55,7 +55,6 @@ class ApiTestPipelineAndroid extends ScmPipeline {
     }
 
     //main logic
-    @Override
     def init() {
         node = NodeProvider.getAndroidNode()
 
