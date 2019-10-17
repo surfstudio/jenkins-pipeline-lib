@@ -78,7 +78,7 @@ class TagPipelineFlutter extends TagPipeline {
     public arm64VersionCode = "<undefined>"
 
     //ios node
-    public nodeIos
+    public nodeIos = NodeProvider.iOSFlutterNode
 
     TagPipelineFlutter(Object script) {
         super(script)
@@ -96,7 +96,6 @@ class TagPipelineFlutter extends TagPipeline {
         }
 
         node = NodeProvider.androidFlutterNode
-        nodeIos = NodeProvider.iOSFlutterNode
 
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
