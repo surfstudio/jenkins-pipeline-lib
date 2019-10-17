@@ -78,7 +78,7 @@ class TagPipelineFlutter extends TagPipeline {
     public arm64VersionCode = "<undefined>"
 
     //ios node
-    public nodeIos = NodeProvider.iOSFlutterNode
+    public nodeIos
 
     TagPipelineFlutter(Object script) {
         super(script)
