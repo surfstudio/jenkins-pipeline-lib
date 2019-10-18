@@ -150,6 +150,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
                 message += "Обнаружены новые работающие методы API; $link"
             }
         }
+        ctx.script.echo "Message: $message"
         if (message) {
             JarvisUtil.sendMessageToGroup(ctx.script, message, ctx.repoUrl, "bitbucket", false)
         }
