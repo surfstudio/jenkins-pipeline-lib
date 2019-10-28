@@ -87,7 +87,7 @@ class CommonUtil {
     //endregion
 
     def static shWithRuby(Object script, String command, String version = "2.5.5") {
-        script.sh "hostname; set +x; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use $version; ls -la; ${command}"
+        script.sh "hostname; set +x; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use 2.5.5@flutter --create; ls -la; ${command}"
     }
 
     @Deprecated
