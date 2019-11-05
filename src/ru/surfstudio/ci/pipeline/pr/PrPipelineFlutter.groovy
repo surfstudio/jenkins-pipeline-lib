@@ -20,6 +20,7 @@ import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 
 class PrPipelineFlutter extends PrPipeline {
+    public static final String STAGE_IOS = 'Stage IOS'
 
     public static final String CHECKOUT_FLUTTER_VERSION = 'Checkout Flutter Project Version'
     public static final String BUILD_ANDROID = 'Build Android'
@@ -67,7 +68,7 @@ class PrPipelineFlutter extends PrPipeline {
                             androidKeystorePropertiesCredentials
                     )
                 },
-                node(NodeProvider.iOSFlutterNode, true, [
+                node(STAGE_IOS, NodeProvider.iOSFlutterNode, true, [
                         stage(CHECKOUT_FLUTTER_VERSION) {
                             script.sh checkoutFlutterVersionCommand
                         },
