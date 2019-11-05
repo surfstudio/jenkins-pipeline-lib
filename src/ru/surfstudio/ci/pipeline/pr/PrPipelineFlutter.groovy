@@ -90,8 +90,8 @@ class PrPipelineFlutter extends PrPipeline {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
                 parallel('Parallel build', [
-                        node(STAGE_ANDROID, true, androidStages),
-                        node(STAGE_IOS, true, iosStages)
+                        node(STAGE_ANDROID, node, true, androidStages),
+                        node(STAGE_IOS, NodeProvider.iOSFlutterNode, true, iosStages)
                 ]),
 
         ]
