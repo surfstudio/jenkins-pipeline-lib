@@ -20,6 +20,7 @@ import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 
 class PrPipelineFlutter extends PrPipeline {
+    public static final String STAGE_ANDROID = 'Stage Android'
     public static final String STAGE_IOS = 'Stage IOS'
 
     public static final String CHECKOUT_FLUTTER_VERSION = 'Checkout Flutter Project Version'
@@ -54,37 +55,44 @@ class PrPipelineFlutter extends PrPipeline {
         initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }
 
-        stages = [
-                stage(PRE_MERGE, false) {
-                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
-                },
+        def androidStages = [
                 stage(CHECKOUT_FLUTTER_VERSION) {
                     script.sh checkoutFlutterVersionCommand
+                },
+                stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                    FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
+                },
+                stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                    FlutterPipelineHelper.testStageBody(script, testCommand)
                 },
                 stage(BUILD_ANDROID) {
                     FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
                             buildAndroidCommand,
                             androidKeystoreCredentials,
-                            androidKeystorePropertiesCredentials
-                    )
+                            androidKeystorePropertiesCredentials)
                 },
-                node(STAGE_IOS, NodeProvider.iOSFlutterNode, true, [
-                        stage(CHECKOUT_FLUTTER_VERSION) {
-                            script.sh checkoutFlutterVersionCommand
-                        },
-                        stage(BUILD_IOS) {
-                            FlutterPipelineHelper.buildStageBodyIOS(script,
-                                    buildIOsCommand,
-                                    iOSKeychainCredenialId,
-                                    iOSCertfileCredentialId)
-                        },
+        ]
+
+        def iosStages = [
+                stage(CHECKOUT_FLUTTER_VERSION) {
+                    script.sh checkoutFlutterVersionCommand
+                },
+                stage(BUILD_IOS) {
+                    FlutterPipelineHelper.buildStageBodyIOS(script,
+                            buildIOsCommand,
+                            iOSKeychainCredenialId,
+                            iOSCertfileCredentialId)
+                },
+        ]
+
+        stages = [
+                stage(PRE_MERGE, false) {
+                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                },
+                parallel('Parallel build', [
+                        node(STAGE_ANDROID, true, androidStages),
+                        node(STAGE_IOS, true, iosStages)
                 ]),
-                stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    FlutterPipelineHelper.testStageBody(script, testCommand)
-                },
-                stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
-                },
 
         ]
         finalizeBody = { finalizeStageBody(this) }
