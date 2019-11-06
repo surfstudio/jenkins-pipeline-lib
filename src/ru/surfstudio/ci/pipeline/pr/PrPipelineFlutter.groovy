@@ -56,6 +56,11 @@ class PrPipelineFlutter extends PrPipeline {
         propertiesProvider = { properties(this) }
 
         def androidStages = [
+                stage(CHECKOUT, false) {
+                    checkout(script, repoUrl, sourceBranch, repoCredentialsId)
+                    saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
+                    abortDuplicateBuildsWithDescription(this)
+                },
                 stage(PRE_MERGE, false) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },

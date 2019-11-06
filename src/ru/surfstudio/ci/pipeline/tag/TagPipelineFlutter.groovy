@@ -83,6 +83,10 @@ class TagPipelineFlutter extends TagPipeline {
     //ios node
     public nodeIos
 
+    //stages
+    public androidStages
+    public iosStages
+
     TagPipelineFlutter(Object script) {
         super(script)
     }
@@ -99,7 +103,6 @@ class TagPipelineFlutter extends TagPipeline {
         }
 
         node = NodeProvider.androidFlutterNode
-        //todo it's not good solution; need refactoring and split ios and android pipeline
         nodeIos = NodeProvider.iOSFlutterNode
 
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
@@ -115,7 +118,7 @@ class TagPipelineFlutter extends TagPipeline {
             ]
         }
 
-        stages = [
+        androidStages = [
                 stage(CHECKOUT, false) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
@@ -163,33 +166,51 @@ class TagPipelineFlutter extends TagPipeline {
                 stage(STATIC_CODE_ANALYSIS) {
                     FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
-                //only when ios upload done
-                stage(BETA_UPLOAD_ANDROID) {
-                    uploadStageBody(script, shBetaUploadCommandAndroid)
-                },
+//                stage(BETA_UPLOAD_ANDROID) {
+//                    uploadStageBody(script, shBetaUploadCommandAndroid)
+//                },
+        ]
 
-                node(STAGE_IOS, nodeIos, true, [
-                        stage(CHECKOUT_FLUTTER_VERSION) {
-                            script.sh checkoutFlutterVersionCommand
-                        },
-                        stage(BUILD_IOS_BETA) {
-                            FlutterPipelineHelper.buildStageBodyIOS(script,
-                                    buildQaIOsCommand,
-                                    iOSKeychainCredenialId,
-                                    iOSCertfileCredentialId)
-                        },
-                        stage(BETA_UPLOAD_IOS) {
-                            uploadStageBody(script, shBetaUploadCommandIos)
-                        },
-                        stage(BUILD_IOS_TESTFLIGHT) {
-                            FlutterPipelineHelper.buildStageBodyIOS(script,
-                                    buildReleaseIOsCommand,
-                                    iOSKeychainCredenialId,
-                                    iOSCertfileCredentialId)
-                        },
-                        stage(TESTFLIGHT_UPLOAD_IOS) {
-                            uploadStageTestFlight(script, shTestFlightUploadCommandIos)
-                        }
+        iosStages = [
+                stage(CHECKOUT, false) {
+                    checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
+                },
+                stage(CALCULATE_VERSION_CODES) {
+                    calculateVersionCodesStageBody(this,
+                            configFile,
+                            compositeVersionNameVar,
+                            minVersionCode)
+                },
+                stage(CLEAN_PREV_BUILD) {
+                    script.sh cleanFlutterCommand
+                },
+                stage(CHECKOUT_FLUTTER_VERSION) {
+                    script.sh checkoutFlutterVersionCommand
+                },
+                stage(BUILD_IOS_BETA) {
+                    FlutterPipelineHelper.buildStageBodyIOS(script,
+                            buildQaIOsCommand,
+                            iOSKeychainCredenialId,
+                            iOSCertfileCredentialId)
+                },
+//                stage(BETA_UPLOAD_IOS) {
+//                    uploadStageBody(script, shBetaUploadCommandIos)
+//                },
+                stage(BUILD_IOS_TESTFLIGHT) {
+                    FlutterPipelineHelper.buildStageBodyIOS(script,
+                            buildReleaseIOsCommand,
+                            iOSKeychainCredenialId,
+                            iOSCertfileCredentialId)
+                },
+                stage(TESTFLIGHT_UPLOAD_IOS) {
+                    uploadStageTestFlight(script, shTestFlightUploadCommandIos)
+                }
+        ]
+
+        stages = [
+                parallel('Parallel stage:',[
+                        group(STAGE_ANDROID, androidStages),
+                        node(STAGE_IOS, nodeIos, false, iosStages)
                 ]),
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     versionPushStageBody(script,
