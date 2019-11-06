@@ -56,6 +56,9 @@ class PrPipelineFlutter extends PrPipeline {
         propertiesProvider = { properties(this) }
 
         def androidStages = [
+                stage(PRE_MERGE, false) {
+                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                },
                 stage(CHECKOUT_FLUTTER_VERSION) {
                     script.sh checkoutFlutterVersionCommand
                 },
@@ -74,6 +77,9 @@ class PrPipelineFlutter extends PrPipeline {
         ]
 
         def iosStages = [
+                stage(PRE_MERGE, false) {
+                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                },
                 stage(CHECKOUT_FLUTTER_VERSION) {
                     script.sh checkoutFlutterVersionCommand
                 },
@@ -85,17 +91,14 @@ class PrPipelineFlutter extends PrPipeline {
                 },
         ]
 
-        //todo premerge in stage set for platforms
         stages = [
-                stage(PRE_MERGE, false) {
-                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
-                },
                 parallel('Parallel build', [
-                        group(STAGE_ANDROID, true, androidStages),
-                        node(STAGE_IOS, NodeProvider.iOSFlutterNode, true, iosStages)
+                        group(STAGE_ANDROID, androidStages),
+                        node(STAGE_IOS, NodeProvider.iOSFlutterNode, false, iosStages)
                 ]),
 
         ]
+
         finalizeBody = { finalizeStageBody(this) }
     }
 }
