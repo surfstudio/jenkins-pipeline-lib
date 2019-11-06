@@ -166,9 +166,9 @@ class TagPipelineFlutter extends TagPipeline {
                 stage(STATIC_CODE_ANALYSIS) {
                     FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
-//                stage(BETA_UPLOAD_ANDROID) {
-//                    uploadStageBody(script, shBetaUploadCommandAndroid)
-//                },
+                stage(BETA_UPLOAD_ANDROID) {
+                    uploadStageBody(script, shBetaUploadCommandAndroid)
+                },
         ]
 
         iosStages = [
@@ -193,9 +193,9 @@ class TagPipelineFlutter extends TagPipeline {
                             iOSKeychainCredenialId,
                             iOSCertfileCredentialId)
                 },
-//                stage(BETA_UPLOAD_IOS) {
-//                    uploadStageBody(script, shBetaUploadCommandIos)
-//                },
+                stage(BETA_UPLOAD_IOS) {
+                    uploadStageBody(script, shBetaUploadCommandIos)
+                },
                 stage(BUILD_IOS_TESTFLIGHT) {
                     FlutterPipelineHelper.buildStageBodyIOS(script,
                             buildReleaseIOsCommand,
