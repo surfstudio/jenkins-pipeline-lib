@@ -27,6 +27,7 @@ import ru.surfstudio.ci.stage.SimpleStage
 import ru.surfstudio.ci.stage.StageGroup
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
+import ru.surfstudio.ci.stage.SimpleStageGroup
 import ru.surfstudio.ci.utils.StageTreeUtil
 
 /**
@@ -240,6 +241,51 @@ abstract class Pipeline implements Serializable {
      */
     def static wrapStages(String name, Closure stagesWrapperFunction, List<Stage> stages) {
         return new CustomStagesWrapper(name, stagesWrapperFunction, stages)
+    }
+
+    // ------------ Group ----------------
+
+    /**
+     * Grouped stages as one stage
+     * @param stages
+     * @return
+     */
+    def static group(List<Stage> stages) {
+        return new SimpleStageGroup("Group", false, stages)
+    }
+
+    /**
+     * Grouped stages as one stage
+     *
+     * @param copyWorkspace
+     * @param stages
+     * @return
+     */
+    def static group(boolean copyWorkspace, List<Stage> stages) {
+        return new SimpleStageGroup("Group", copyWorkspace, stages)
+    }
+
+    /**
+     * Grouped stages as one stage
+     *
+     * @param name
+     * @param stages
+     * @return
+     */
+    def static group(String name, List<Stage> stages) {
+        return new SimpleStageGroup(name, false, stages)
+    }
+
+    /**
+     * Grouped stages as one stage
+     *
+     * @param name
+     * @param copyWorkspace
+     * @param stages
+     * @return
+     */
+    def static group(String name, boolean copyWorkspace, List<Stage> stages) {
+        return new SimpleStageGroup(name, copyWorkspace, stages)
     }
 
     // ==================================== UTIL =========================================

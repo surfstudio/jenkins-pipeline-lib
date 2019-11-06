@@ -85,12 +85,13 @@ class PrPipelineFlutter extends PrPipeline {
                 },
         ]
 
+        //todo premerge in stage set for platforms
         stages = [
                 stage(PRE_MERGE, false) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
                 parallel('Parallel build', [
-                        node(STAGE_ANDROID, node, true, androidStages),
+                        group(STAGE_ANDROID, true, androidStages),
                         node(STAGE_IOS, NodeProvider.iOSFlutterNode, true, iosStages)
                 ]),
 
