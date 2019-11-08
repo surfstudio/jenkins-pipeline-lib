@@ -55,7 +55,11 @@ class PrPipelineFlutter extends PrPipeline {
         initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }
 
+
         def androidStages = [
+                stage(STAGE_ANDROID) {
+
+                },
                 stage(CHECKOUT, false) {
                     checkout(script, repoUrl, sourceBranch, repoCredentialsId)
                     saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
@@ -82,6 +86,9 @@ class PrPipelineFlutter extends PrPipeline {
         ]
 
         def iosStages = [
+                stage(STAGE_IOS) {
+
+                },
                 stage(PRE_MERGE, false) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
