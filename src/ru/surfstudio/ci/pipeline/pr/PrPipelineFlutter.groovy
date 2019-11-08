@@ -57,7 +57,7 @@ class PrPipelineFlutter extends PrPipeline {
 
 
         def androidStages = [
-                stage(STAGE_ANDROID) {
+                stage(STAGE_ANDROID, false) {
 
                 },
                 stage(CHECKOUT, false) {
@@ -86,7 +86,7 @@ class PrPipelineFlutter extends PrPipeline {
         ]
 
         def iosStages = [
-                stage(STAGE_IOS) {
+                stage(STAGE_IOS,false) {
 
                 },
                 stage(PRE_MERGE, false) {
