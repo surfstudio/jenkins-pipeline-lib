@@ -119,6 +119,9 @@ class TagPipelineFlutter extends TagPipeline {
         }
 
         androidStages = [
+                stage(STAGE_ANDROID, false) {
+                    // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
+                },
                 stage(CHECKOUT, false) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
@@ -172,6 +175,9 @@ class TagPipelineFlutter extends TagPipeline {
         ]
 
         iosStages = [
+                stage(STAGE_IOS, false) {
+                    // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
+                },
                 stage(CHECKOUT, false) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
