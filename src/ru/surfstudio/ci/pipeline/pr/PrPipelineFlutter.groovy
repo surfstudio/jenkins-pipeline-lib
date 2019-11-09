@@ -58,7 +58,7 @@ class PrPipelineFlutter extends PrPipeline {
 
         def androidStages = [
                 stage(STAGE_ANDROID, false) {
-
+                    // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                 },
                 stage(CHECKOUT, false) {
                     checkout(script, repoUrl, sourceBranch, repoCredentialsId)
@@ -86,8 +86,8 @@ class PrPipelineFlutter extends PrPipeline {
         ]
 
         def iosStages = [
-                stage(STAGE_IOS,false) {
-
+                stage(STAGE_IOS, false) {
+                    // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                 },
                 stage(PRE_MERGE, false) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
@@ -108,7 +108,6 @@ class PrPipelineFlutter extends PrPipeline {
                         group(STAGE_ANDROID, androidStages),
                         node(STAGE_IOS, NodeProvider.iOSFlutterNode, false, iosStages)
                 ]),
-
         ]
 
         finalizeBody = { finalizeStageBody(this) }
