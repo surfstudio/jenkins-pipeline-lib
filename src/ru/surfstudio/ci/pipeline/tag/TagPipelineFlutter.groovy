@@ -20,7 +20,6 @@ import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
-import ru.surfstudio.ci.stage.StageWithStrategy
 import ru.surfstudio.ci.utils.flutter.FlutterUtil
 import ru.surfstudio.ci.CommonUtil
 
@@ -34,6 +33,7 @@ class TagPipelineFlutter extends TagPipeline {
     public static final String CALCULATE_VERSION_CODES = 'Calculate Version Codes'
     public static final String CLEAN_PREV_BUILD = 'Clean Previous Build'
     public static final String CHECKOUT_FLUTTER_VERSION = 'Checkout Flutter Project Version'
+
     public static final String VERSION_UPDATE_FOR_ARM64 = 'Version Update For Arm64'
     public static final String BUILD_ANDROID = 'Build Android'
     public static final String BUILD_ANDROID_ARM64 = 'Build Android Arm64'
@@ -54,6 +54,7 @@ class TagPipelineFlutter extends TagPipeline {
 
     //build flags
     public boolean shouldBuildAndroid = true
+    public boolean shouldBuildIos = true
     public boolean shouldBuildIosBeta = true
     public boolean shouldBuildIosTestFlight = false
 
@@ -244,9 +245,13 @@ class TagPipelineFlutter extends TagPipeline {
         initBody(ctx)
 
         def script = ctx.script
-        extractValueFromParamsAndRun(script, PARAMETER_ANDROID_FULL_BETA) { value ->
+        extractValueFromParamsAndRun(script, PARAMETER_ANDROID_STAGE) { value ->
             ctx.shouldBuildAndroid = value
             script.echo "Android full build with upload to Beta(qa) : $ctx.shouldBuildAndroid"
+        }
+        extractValueFromParamsAndRun(script, PARAMETER_IOS_STAGE) { value ->
+            ctx.shouldBuildIos = value
+            script.echo "iOS full build : $ctx.shouldBuildAndroid"
         }
         extractValueFromParamsAndRun(script, PARAMETER_IOS_FOR_BETA) { value ->
             ctx.shouldBuildIosBeta = value
@@ -266,9 +271,8 @@ class TagPipelineFlutter extends TagPipeline {
         def skipResolver = { skipStage -> skipStage ? StageStrategy.SKIP_STAGE : null }
         //todo resolve with values from params
         def paramsMap =  [
-                (BUILD_ANDROID): skipResolver(!ctx.shouldBuildAndroid),
-                (BUILD_ANDROID_ARM64): skipResolver(!ctx.shouldBuildAndroid),
-                (BETA_UPLOAD_ANDROID): skipResolver(!ctx.shouldBuildAndroid),
+                (STAGE_ANDROID): skipResolver(!ctx.shouldBuildAndroid),
+                (STAGE_ANDROID): skipResolver(!ctx.shouldBuildIos),
 
                 (BUILD_IOS_BETA): skipResolver(!ctx.shouldBuildIosBeta),
                 (BETA_UPLOAD_IOS): skipResolver(!ctx.shouldBuildIosBeta),
@@ -327,7 +331,8 @@ class TagPipelineFlutter extends TagPipeline {
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
 
     // ======================================================  ↓↓↓ PARAMETERS ↓↓↓   ====================================================
-    public static final String PARAMETER_ANDROID_FULL_BETA = 'parameterAndroidFullBeta'
+    public static final String PARAMETER_ANDROID_STAGE = 'parameterAndroidStage'
+    public static final String PARAMETER_IOS_STAGE = 'parameterIosStage'
     public static final String PARAMETER_IOS_FOR_BETA = 'parameterIosForBeta'
     public static final String PARAMETER_IOS_FOR_TESTFLIGHT = 'parameterIosForTestFlight'
 
@@ -346,8 +351,13 @@ class TagPipelineFlutter extends TagPipeline {
                 ],
                 script.booleanParam(
                         defaultValue: true,
-                        name: PARAMETER_ANDROID_FULL_BETA,
-                        description: "Сборка Android(qa/release). Qa выгружается в Beta",
+                        name: PARAMETER_ANDROID_STAGE,
+                        description: "Сборка Android(qa/release). Пропусакет всю ветку",
+                ),
+                script.booleanParam(
+                        defaultValue: true,
+                        name: PARAMETER_IOS_STAGE,
+                        description: "Сборка ios. Позволяет пропустить всю ветку",
                 ),
                 script.booleanParam(
                         defaultValue: true,
