@@ -282,7 +282,7 @@ class TagPipelineFlutter extends TagPipeline {
         if (!ctx.shouldBuildAndroid) {
             for (stage in ctx.androidStages) {
                 additionalParams += [
-                        stage.name : skipResolver(true)
+                        (stage.name) : skipResolver(true)
                 ]
             }
         }
@@ -290,7 +290,7 @@ class TagPipelineFlutter extends TagPipeline {
         if (!ctx.shouldBuildIos) {
             for (stage in ctx.iosStages) {
                 additionalParams += [
-                        stage.name : skipResolver(true)
+                        (stage.name) : skipResolver(true)
                 ]
             }
         }
