@@ -280,14 +280,18 @@ class TagPipelineFlutter extends TagPipeline {
         ]
         def additionalParams = [:]
         if (!ctx.shouldBuildAndroid) {
-            additionalParams + ctx.androidStages.collectEntries { stage ->
-                [stage.name : skipResolver(true)]
+            for (stage in ctx.androidStages) {
+                additionalParams += [
+                        stage.name : skipResolver(true)
+                ]
             }
         }
 
         if (!ctx.shouldBuildIos) {
-            additionalParams + ctx.iosStages.collectEntries { stage ->
-                [stage.name : skipResolver(true)]
+            for (stage in ctx.iosStages) {
+                additionalParams += [
+                        stage.name : skipResolver(true)
+                ]
             }
         }
         paramsMap += additionalParams
