@@ -19,6 +19,7 @@ package ru.surfstudio.ci.pipeline.tag
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
+import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.flutter.FlutterUtil
 import ru.surfstudio.ci.CommonUtil
@@ -85,8 +86,8 @@ class TagPipelineFlutter extends TagPipeline {
     public nodeIos
 
     //stages
-    public androidStages
-    public iosStages
+    public List<Stage> androidStages
+    public List<Stage> iosStages
 
     TagPipelineFlutter(Object script) {
         super(script)
@@ -247,11 +248,11 @@ class TagPipelineFlutter extends TagPipeline {
         def script = ctx.script
         extractValueFromParamsAndRun(script, PARAMETER_ANDROID_STAGE) { value ->
             ctx.shouldBuildAndroid = value
-            script.echo "Android full build with upload to Beta(qa) : $ctx.shouldBuildAndroid"
+            script.echo "Android full build with upload to Beta(qa) : $ctx.shouldBuildAndroid| extracted $value"
         }
         extractValueFromParamsAndRun(script, PARAMETER_IOS_STAGE) { value ->
             ctx.shouldBuildIos = value
-            script.echo "iOS full build : $ctx.shouldBuildAndroid"
+            script.echo "iOS full build : $ctx.shouldBuildAndroid | extracted $value"
         }
         extractValueFromParamsAndRun(script, PARAMETER_IOS_FOR_BETA) { value ->
             ctx.shouldBuildIosBeta = value
@@ -271,15 +272,25 @@ class TagPipelineFlutter extends TagPipeline {
         def skipResolver = { skipStage -> skipStage ? StageStrategy.SKIP_STAGE : null }
         //todo resolve with values from params
         def paramsMap =  [
-                (STAGE_ANDROID): skipResolver(!ctx.shouldBuildAndroid),
-                (STAGE_ANDROID): skipResolver(!ctx.shouldBuildIos),
-
                 (BUILD_IOS_BETA): skipResolver(!ctx.shouldBuildIosBeta),
                 (BETA_UPLOAD_IOS): skipResolver(!ctx.shouldBuildIosBeta),
 
                 (BUILD_IOS_TESTFLIGHT):  skipResolver(!ctx.shouldBuildIosTestFlight),
                 (TESTFLIGHT_UPLOAD_IOS):  skipResolver(!ctx.shouldBuildIosTestFlight),
         ]
+        def additionalParams = [:]
+        if (!ctx.shouldBuildAndroid) {
+            additionalParams + ctx.androidStages.collectEntries { stage ->
+                [stage.name : skipResolver(true)]
+            }
+        }
+
+        if (!ctx.shouldBuildIos) {
+            additionalParams + ctx.iosStages.collectEntries { stage ->
+                [stage.name : skipResolver(true)]
+            }
+        }
+        paramsMap += additionalParams
 
         CommonUtil.applyStrategiesFromParams(ctx, paramsMap)
     }
