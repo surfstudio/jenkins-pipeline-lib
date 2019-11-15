@@ -106,7 +106,7 @@ class AndroidTestUtil {
 
     //region Stages of instrumental tests running
     private static void launchEmulator(Object script, AvdConfig config) {
-        script.sh "${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
+        script.sh "yes | ${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
         EmulatorUtil.createAndLaunchNewEmulator(script, config)
     }
 
