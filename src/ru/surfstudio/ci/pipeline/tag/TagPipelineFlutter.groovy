@@ -189,6 +189,13 @@ class TagPipelineFlutter extends TagPipeline {
                             compositeVersionNameVar,
                             minVersionCode)
                 },
+                stage(VERSION_UPDATE) {
+                    versionUpdateStageBody(script,
+                            repoTag,
+                            mainVersionCode,
+                            configFile,
+                            compositeVersionNameVar)
+                },
                 stage(CLEAN_PREV_BUILD) {
                     script.sh cleanFlutterCommand
                 },
