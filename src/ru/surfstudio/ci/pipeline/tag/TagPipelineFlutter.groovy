@@ -177,7 +177,7 @@ class TagPipelineFlutter extends TagPipeline {
         ]
 
         iosStages = [
-                stage("S IOS", false) {
+                stage(STAGE_IOS, false) {
                     // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                 },
                 stage(CHECKOUT, false) {
@@ -224,8 +224,8 @@ class TagPipelineFlutter extends TagPipeline {
 
         stages = [
                 parallel('Parallel stage:',[
-                        group(STAGE_ANDROID, androidStages),
-                        node(STAGE_IOS, nodeIos, false, iosStages)
+                        group(androidStages),
+                        node(nodeIos, false, iosStages)
                 ]),
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     versionPushStageBody(script,
