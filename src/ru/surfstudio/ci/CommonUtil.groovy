@@ -26,19 +26,19 @@ class CommonUtil {
     static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50
     static String EMPTY_STRING = ""
 
-    def static getBuildUrlHtmlLink(Object script){
-        return  "<a href=\"${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline\">build</a>"
+    def static getBuildUrlHtmlLink(Object script) {
+        return "<a href=\"${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline\">build</a>"
     }
 
-    def static getJiraTaskHtmlLink(String taskKey){
+    def static getJiraTaskHtmlLink(String taskKey) {
         return "<a href=\"${Constants.JIRA_URL}browse/${taskKey}\">${taskKey}</a>"
     }
 
-    def static getBuildUrlMarkdownLink(Object script){
-        return  "[build](${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline)"
+    def static getBuildUrlMarkdownLink(Object script) {
+        return "[build](${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline)"
     }
 
-    def static getJiraTaskMarkdownLink(String taskKey){
+    def static getJiraTaskMarkdownLink(String taskKey) {
         return "[${taskKey}](${Constants.JIRA_URL}browse/${taskKey})"
     }
 
@@ -96,14 +96,14 @@ class CommonUtil {
         tryAbortOlderBuildsWithDescription(script, buildIdentifier)
     }
 
-    def static setBuildDescription(Object script, String description){
+    def static setBuildDescription(Object script, String description) {
         script.currentBuild.rawBuild.setDescription(description)
     }
 
     def static abortDuplicateBuildsWithDescription(Object script, String abortStrategy, String buildDescription) {
-        switch (abortStrategy){
+        switch (abortStrategy) {
             case AbortDuplicateStrategy.SELF:
-                if(isOlderBuildWithDescriptionRunning(script, buildDescription)){
+                if (isOlderBuildWithDescriptionRunning(script, buildDescription)) {
                     script.echo "Aborting current build..."
                     throw new InterruptedException("Another build with identical description '$buildDescription' is running")
                 }
@@ -143,7 +143,7 @@ class CommonUtil {
 
         while (previousBuild != null && depth <= MAX_DEPTH_FOR_SEARCH_SAME_BUILDS) {
             depth++
-            if(previousBuild.isInProgress() && previousBuild.getDescription() == buildDescription) {
+            if (previousBuild.isInProgress() && previousBuild.getDescription() == buildDescription) {
                 script.echo "Build with description ${buildDescription} is running"
                 return true
             }
@@ -155,13 +155,13 @@ class CommonUtil {
     def static safe(Object script, Closure body) {
         try {
             body()
-        } catch (e){
+        } catch (e) {
             script.echo "^^^^ Ignored exception: ${e.toString()} ^^^^"
         }
     }
 
-    def static checkPipelineParameterDefined(Object script, Object parameterValue, String parameterName){
-        if(!parameterValue){
+    def static checkPipelineParameterDefined(Object script, Object parameterValue, String parameterName) {
+        if (!parameterValue) {
             script.error("Pipeline configuration parameter $parameterName must be set")
         }
     }
@@ -181,21 +181,21 @@ class CommonUtil {
     /**
      * Firstly extract from env, if empty, extract from params
      * Value sets to env when extracted from webhook body, so it with more priority
-     * @param actionWithValue {value -> }
+     * @param actionWithValue{value -> }
      */
     def static extractValueFromEnvOrParamsAndRun(Object script, String key, Closure actionWithValue) {
         runWithNotEmptyValue(script, key, script.env[key], script.params[key], actionWithValue)
     }
 
     /**
-     * @param actionWithValue {value -> }
+     * @param actionWithValue{value -> }
      */
     def static extractValueFromEnvAndRun(Object script, String key, Closure actionWithValue) {
         runWithNotEmptyValue(script, key, script.env[key], null, actionWithValue)
     }
 
     /**
-     * @param actionWithValue {value -> }
+     * @param actionWithValue{value -> }
      */
     def static extractValueFromParamsAndRun(Object script, String key, Closure actionWithValue) {
         runWithNotEmptyValue(script, key, null, script.params[key], actionWithValue)
@@ -225,10 +225,10 @@ class CommonUtil {
         script.echo "initial value of {$varName} is {$varValue}"
     }
 
-    def static unsuccessReasonsToString(List<Stage> stages){
+    def static unsuccessReasonsToString(List<Stage> stages) {
         def unsuccessReasons = ""
         StageTreeUtil.forStages(stages) { stage ->
-            if(stage instanceof StageWithResult) {
+            if (stage instanceof StageWithResult) {
                 if (stage.result && stage.result != Result.SUCCESS && stage.result != Result.NOT_BUILT) {
                     if (!unsuccessReasons.isEmpty()) {
                         unsuccessReasons += ", "
@@ -240,9 +240,9 @@ class CommonUtil {
         return unsuccessReasons
     }
 
-    def static printInitialStageStrategies(Pipeline pipeline){
+    def static printInitialStageStrategies(Pipeline pipeline) {
         pipeline.forStages { stage ->
-            if(stage instanceof StageWithStrategy) {
+            if (stage instanceof StageWithStrategy) {
                 printInitialVar(pipeline.script, stage.name + ".strategy", stage.strategy)
             }
         }
@@ -253,25 +253,24 @@ class CommonUtil {
      * @param strategiesFromParams - map, key - stageName, value - new strategy value
      */
     def static applyStrategiesFromParams(Pipeline pipeline, Map strategiesFromParamsMap) {
-        strategiesFromParamsMap.each{ stageName, strategyValue ->
-            if(strategyValue) {
-                def stages = pipeline.getStages(stageName)
-                stages.forEach(
-                        { stage ->
-                            if(stage == null) {
-                                pipeline.script.echo "applying strategy from params skipped because stage ${stageName} missing"
-                                return
-                            }
-                            if(stage instanceof StageWithStrategy) {
-                                stage.strategy = strategyValue
-                                pipeline.script.echo "value of ${stageName}.strategy sets from parameters to ${strategyValue}"
-                            } else {
-                                pipeline.script.error "stage with name ${stageName} is not StageWithStrategy"
-                            }
-                        }
-                )
-
+        strategiesFromParamsMap.each { stageName, strategyValue ->
+            if (strategyValue) {
+                def stage = pipeline.getStage(stageName)
+                if (stage == null) {
+                    pipeline.script.echo "applying strategy from params skipped because stage ${stageName} missing"
+                    return
+                }
+                applyStrategy(pipeline, stage, strategyValue)
             }
+        }
+    }
+
+    def static void applyStrategy(Pipeline pipeline, Stage stage, String strategyValue) {
+        if (stage instanceof StageWithStrategy) {
+            stage.strategy = strategyValue
+            pipeline.script.echo "value of ${stage.name}.strategy sets from parameters to ${strategyValue}"
+        } else {
+            pipeline.script.error "stage with name ${stage.name} is not StageWithStrategy"
         }
     }
 
@@ -286,7 +285,7 @@ class CommonUtil {
         def allParams = []
         allParams.addAll(currentBuildParams
                 .entrySet()
-                .collect({script.string(name: it.key, value: "${it.value}")})
+                .collect({ script.string(name: it.key, value: "${it.value}") })
         )
         allParams.addAll(extraParams)
         script.build job: script.env.JOB_NAME, parameters: allParams, wait: wait
@@ -297,7 +296,7 @@ class CommonUtil {
     }
 
     def static String removeQuotesFromTheEnds(String string) {
-        return string.substring(1, string.length()-1)
+        return string.substring(1, string.length() - 1)
     }
 
     def static isJobStartedByUser(Object script) {

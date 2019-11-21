@@ -24,6 +24,7 @@ import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.flutter.FlutterUtil
 import ru.surfstudio.ci.CommonUtil
 
+import static ru.surfstudio.ci.CommonUtil.applyStrategy
 import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 
 class TagPipelineFlutter extends TagPipeline {
@@ -276,8 +277,7 @@ class TagPipelineFlutter extends TagPipeline {
     }
 
     private static void initStrategies(TagPipelineFlutter ctx) {
-        def skipResolver = { skipStage -> skipStage ? StageStrategy.SKIP_STAGE : null }
-        //todo resolve with values from params
+        String skipResolver = { skipStage -> skipStage ? StageStrategy.SKIP_STAGE : null }
         def paramsMap = [
                 (BUILD_IOS_BETA)       : skipResolver(!ctx.shouldBuildIosBeta),
                 (BETA_UPLOAD_IOS)      : skipResolver(!ctx.shouldBuildIosBeta),
@@ -285,28 +285,17 @@ class TagPipelineFlutter extends TagPipeline {
                 (BUILD_IOS_TESTFLIGHT) : skipResolver(!ctx.shouldBuildIosTestFlight),
                 (TESTFLIGHT_UPLOAD_IOS): skipResolver(!ctx.shouldBuildIosTestFlight),
         ]
-        def additionalParams = [:]
         if (!ctx.shouldBuildAndroid) {
-            for (stage in ctx.androidStages) {
-                if (stage.name == STAGE_ANDROID) continue
-
-                additionalParams += [
-                        (stage.name): skipResolver(true)
-                ]
+            ctx.forStages(ctx.androidStages) { Stage stage ->
+                applyStrategy(ctx, stage, skipResolver(true))
             }
         }
 
         if (!ctx.shouldBuildIos) {
-            for (stage in ctx.iosStages) {
-                if (stage.name == STAGE_IOS) continue
-
-                additionalParams += [
-                        (stage.name): skipResolver(true)
-                ]
+            ctx.forStages(ctx.iosStages) { Stage stage ->
+                applyStrategy(ctx, stage, skipResolver(true))
             }
         }
-        paramsMap += additionalParams
-
         CommonUtil.applyStrategiesFromParams(ctx, paramsMap)
     }
 

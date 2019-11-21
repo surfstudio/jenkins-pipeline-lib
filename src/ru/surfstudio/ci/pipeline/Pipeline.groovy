@@ -146,7 +146,7 @@ abstract class Pipeline implements Serializable {
      * execute lambda with all stages in stage tree
      * @param lambda: { stage ->  ... }
      */
-    def forStages(Closure lambda) {
+    def forStages(List<Stage> stages = this.stages, Closure lambda, ) {
         return StageTreeUtil.forStages(stages, lambda)
     }
 
