@@ -224,8 +224,8 @@ class TagPipelineFlutter extends TagPipeline {
 
         stages = [
                 parallel('Parallel stage:',[
-                        group(androidStages),
-                        node(nodeIos, false, iosStages)
+                        group(STAGE_ANDROID, androidStages),
+                        node(STAGE_IOS, nodeIos, false, iosStages)
                 ]),
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     versionPushStageBody(script,
@@ -287,7 +287,7 @@ class TagPipelineFlutter extends TagPipeline {
         ]
         def additionalParams = [:]
         if (!ctx.shouldBuildAndroid) {
-            for (stage in ctx.androidStages) {
+            for (stage in ctx.androidStages.dropWhile {stage -> stage.name == STAGE_ANDROID}) {
                 additionalParams += [
                         (stage.name) : skipResolver(true)
                 ]
@@ -295,7 +295,7 @@ class TagPipelineFlutter extends TagPipeline {
         }
 
         if (!ctx.shouldBuildIos) {
-            for (stage in ctx.iosStages) {
+            for (stage in ctx.iosStages.dropWhile {stage -> stage.name == STAGE_IOS}) {
                 additionalParams += [
                         (stage.name) : skipResolver(true)
                 ]
