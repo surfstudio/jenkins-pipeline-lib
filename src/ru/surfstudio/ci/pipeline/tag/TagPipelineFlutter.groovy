@@ -62,7 +62,7 @@ class TagPipelineFlutter extends TagPipeline {
     public cleanFlutterCommand = "flutter clean"
     public checkoutFlutterVersionCommand = "./script/version.sh"
 
-    public buildAndroidCommand =  "./script/android/build.sh -qa " +
+    public buildAndroidCommand = "./script/android/build.sh -qa " +
             "&& ./script/android/build.sh -release "
     public buildAndroidCommandArm64 = "./script/android/build.sh -qa -x64 " +
             "&& ./script/android/build.sh -release -x64"
@@ -98,7 +98,7 @@ class TagPipelineFlutter extends TagPipeline {
         applyStrategiesFromParams = {
             def params = script.params
             CommonUtil.applyStrategiesFromParams(this, [
-                    (UNIT_TEST): params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
+                    (UNIT_TEST)           : params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
                     (INSTRUMENTATION_TEST): params[INSTRUMENTATION_TEST_STAGE_STRATEGY_PARAMETER],
                     (STATIC_CODE_ANALYSIS): params[STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER],
             ])
@@ -223,7 +223,7 @@ class TagPipelineFlutter extends TagPipeline {
         ]
 
         stages = [
-                parallel('Parallel stage:',[
+                parallel('Parallel stage:', [
                         group(STAGE_ANDROID, androidStages),
                         node(STAGE_IOS, nodeIos, false, iosStages)
                 ]),
@@ -278,26 +278,26 @@ class TagPipelineFlutter extends TagPipeline {
     private static void initStrategies(TagPipelineFlutter ctx) {
         def skipResolver = { skipStage -> skipStage ? StageStrategy.SKIP_STAGE : null }
         //todo resolve with values from params
-        def paramsMap =  [
-                (BUILD_IOS_BETA): skipResolver(!ctx.shouldBuildIosBeta),
-                (BETA_UPLOAD_IOS): skipResolver(!ctx.shouldBuildIosBeta),
+        def paramsMap = [
+                (BUILD_IOS_BETA)       : skipResolver(!ctx.shouldBuildIosBeta),
+                (BETA_UPLOAD_IOS)      : skipResolver(!ctx.shouldBuildIosBeta),
 
-                (BUILD_IOS_TESTFLIGHT):  skipResolver(!ctx.shouldBuildIosTestFlight),
-                (TESTFLIGHT_UPLOAD_IOS):  skipResolver(!ctx.shouldBuildIosTestFlight),
+                (BUILD_IOS_TESTFLIGHT) : skipResolver(!ctx.shouldBuildIosTestFlight),
+                (TESTFLIGHT_UPLOAD_IOS): skipResolver(!ctx.shouldBuildIosTestFlight),
         ]
         def additionalParams = [:]
         if (!ctx.shouldBuildAndroid) {
-            for (stage in ctx.androidStages.dropWhile { s -> s.name == STAGE_ANDROID}) {
+            for (stage in ctx.androidStages.dropWhile { it.name == STAGE_ANDROID }) {
                 additionalParams += [
-                        (stage.name) : skipResolver(true)
+                        (stage.name): skipResolver(true)
                 ]
             }
         }
 
         if (!ctx.shouldBuildIos) {
-            for (stage in ctx.iosStages.dropWhile { s -> s.name == STAGE_IOS}) {
+            for (stage in ctx.iosStages.dropWhile { it.name == STAGE_IOS }) {
                 additionalParams += [
-                        (stage.name) : skipResolver(true)
+                        (stage.name): skipResolver(true)
                 ]
             }
         }
