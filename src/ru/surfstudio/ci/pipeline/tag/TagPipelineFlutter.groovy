@@ -287,7 +287,7 @@ class TagPipelineFlutter extends TagPipeline {
         ]
         def additionalParams = [:]
         if (!ctx.shouldBuildAndroid) {
-            for (stage in ctx.androidStages.dropWhile { it.name == STAGE_ANDROID }) {
+            for (stage in (ctx.androidStages.dropWhile { it.name == STAGE_ANDROID })) {
                 additionalParams += [
                         (stage.name): skipResolver(true)
                 ]
@@ -295,7 +295,7 @@ class TagPipelineFlutter extends TagPipeline {
         }
 
         if (!ctx.shouldBuildIos) {
-            for (stage in ctx.iosStages.dropWhile { it.name == STAGE_IOS }) {
+            for (stage in (ctx.iosStages.dropWhile { it.name == STAGE_IOS })) {
                 additionalParams += [
                         (stage.name): skipResolver(true)
                 ]
