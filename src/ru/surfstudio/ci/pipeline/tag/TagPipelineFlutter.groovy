@@ -277,7 +277,7 @@ class TagPipelineFlutter extends TagPipeline {
     }
 
     private static void initStrategies(TagPipelineFlutter ctx) {
-        String skipResolver = { skipStage -> skipStage ? StageStrategy.SKIP_STAGE : null }
+        def skipResolver = { skipStage -> skipStage ? StageStrategy.SKIP_STAGE : null }
         def paramsMap = [
                 (BUILD_IOS_BETA)       : skipResolver(!ctx.shouldBuildIosBeta),
                 (BETA_UPLOAD_IOS)      : skipResolver(!ctx.shouldBuildIosBeta),
