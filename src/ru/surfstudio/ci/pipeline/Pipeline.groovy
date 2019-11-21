@@ -134,6 +134,15 @@ abstract class Pipeline implements Serializable {
     }
 
     /**
+     * Get stages by name
+     * @param stageName
+     * @return stage/[]
+     */
+    def getStages(String stageName) {
+        return StageTreeUtil.getStages(stages, stageName)
+    }
+
+    /**
      * execute lambda with all stages in stage tree
      * @param lambda: { stage ->  ... }
      */
