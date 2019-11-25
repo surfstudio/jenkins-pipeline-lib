@@ -50,6 +50,9 @@ class TagPipelineAndroid extends TagPipeline {
     public instrumentalTestResultPathDirXml = "build/outputs/androidTest-results/instrumental"
     public instrumentalTestResultPathDirHtml = "build/reports/androidTests/instrumental"
 
+
+
+
     // флаг, показывающий, должно ли имя AVD быть уникальным для текущего job'a
     public generateUniqueAvdNameForJob = true
 
@@ -64,7 +67,9 @@ class TagPipelineAndroid extends TagPipeline {
      *
      * pipeline.getTestInstrumentationRunnerName = { script, prefix -> return "androidx.test.runner.AndroidJUnitRunner" }
      */
-    public getTestInstrumentationRunnerName = { script, prefix -> return getDefaultTestInstrumentationRunnerName(script, prefix) }
+    public getTestInstrumentationRunnerName = { script, prefix -> 
+        return getDefaultTestInstrumentationRunnerName(script, prefix)
+    }
 
     public AvdConfig avdConfig = new AvdConfig()
 

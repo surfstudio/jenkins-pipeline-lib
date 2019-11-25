@@ -40,6 +40,9 @@ abstract class TagPipeline extends ScmPipeline {
     public static final String BETA_UPLOAD = 'Beta Upload'
     public static final String VERSION_PUSH = 'Version Push'
 
+
+
+
     //scm
     public tagRegexp = /(.*)?\d{1,4}\.\d{1,4}\.\d{1,4}(.*)?/
     public repoTag = ""
