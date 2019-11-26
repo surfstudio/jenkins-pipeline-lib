@@ -35,7 +35,7 @@ class CommonUtil {
     }
 
     def static getBuildUrlMarkdownLink(Object script){
-        return  "[build](${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline)"
+        return  "${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline"
     }
 
     def static getJiraTaskMarkdownLink(String taskKey){
