@@ -76,6 +76,8 @@ class SimpleStage implements Stage, StageWithStrategy, StageWithResult {
                         stage.result = Result.FAILURE
                         if (stage.strategy == StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                             throw e
+                        } else if (stage.strategy == StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                            script.unstable("${e.toString()}")
                         }
                     }
                 } finally {
