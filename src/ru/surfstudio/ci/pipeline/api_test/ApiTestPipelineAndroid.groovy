@@ -134,7 +134,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
     }
 
     def static finalizeStageBody(ApiTestPipelineAndroid ctx) { //todo выводить количество пройденных и непройденных тестов
-        def link = "${CommonUtil.getBuildUrlMarkdownLink(ctx.script)}"
+        def link = "${CommonUtil.getBuildUrlSlackLink(ctx.script)}"
         def message
         if (ctx.jobResult == Result.FAILURE) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)

@@ -251,7 +251,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
 
     def static sendStartNotification(UiTestPipeline ctx) {
-        def jenkinsLink = CommonUtil.getBuildUrlMarkdownLink(ctx.script)
+        def jenkinsLink = CommonUtil.getBuildUrlSlackLink(ctx.script)
         if(isBulkJob(ctx)){
             sendMessage(ctx,"Запущено параллельное выполнение тестов прогонов ${ctx.taskKey}. ${jenkinsLink}", true)
         } else {
@@ -263,7 +263,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     def static sendFinishNotification(UiTestPipeline ctx) {
         def testExecutionLink = CommonUtil.getJiraTaskMarkdownLink(ctx.taskKey)
-        def jenkinsLink = CommonUtil.getBuildUrlMarkdownLink(ctx.script)
+        def jenkinsLink = CommonUtil.getBuildUrlSlackLink(ctx.script)
         def testExecutionName = ctx.taskName ? "\"${ctx.taskName}\"" : ""
         if (ctx.jobResult != Result.SUCCESS) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
