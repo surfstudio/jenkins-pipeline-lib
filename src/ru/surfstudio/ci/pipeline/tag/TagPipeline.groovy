@@ -39,7 +39,7 @@ abstract class TagPipeline extends ScmPipeline {
     public static final String STATIC_CODE_ANALYSIS = 'Static Code Analysis'
     public static final String BETA_UPLOAD = 'Beta Upload'
     public static final String VERSION_PUSH = 'Version Push'
-
+    public static final String VERSION_PUSH2 = 'Version Push'
 
 
 

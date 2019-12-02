@@ -42,6 +42,7 @@ class TagPipelineAndroid extends TagPipeline {
     public unitTestGradleTask = "testQaUnitTest -PtestType=unit"
     public unitTestResultPathXml = "**/test-results/testQaUnitTest/*.xml"
     public unitTestResultPathDirHtml = "app/build/reports/tests/testQaUnitTest/"
+    public unitTestResultPathDirHtml2 = "app/build/reports/tests/testQaUnitTest/"
 
     // buildType, для которого будут выполняться инструментальные тесты
     public androidTestBuildType = "qa"
@@ -49,7 +50,7 @@ class TagPipelineAndroid extends TagPipeline {
     public instrumentalTestAssembleGradleTask = "assembleAndroidTest"
     public instrumentalTestResultPathDirXml = "build/outputs/androidTest-results/instrumental"
     public instrumentalTestResultPathDirHtml = "build/reports/androidTests/instrumental"
-
+     public instrumentalTestResultPathDirHtml2 = "build/reports/androidTests/instrumental"
 
 
 
