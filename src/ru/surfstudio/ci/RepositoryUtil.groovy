@@ -188,7 +188,7 @@ class RepositoryUtil {
             String sourceBranch,
             String destinationBranch
     ) {
-        return script.sh(returnStdout: true, script: "git diff --name-only $sourceBranch origin/$destinationBranch")
+        return script.sh(returnStdout: true, script: "git log --no-merges --first-parent --oneline --name-only origin/${destinationBranch}..${sourceBranch} | grep \".kt\"")
                 .split("\n")
     }
 
