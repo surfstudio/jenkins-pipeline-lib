@@ -39,6 +39,12 @@ class TagPipelineAndroid extends TagPipeline {
     public buildGradleTask = "clean assembleQa assembleRelease"
     public betaUploadGradleTask = "crashlyticsUploadDistributionQa"
 
+    //required for firebase app distribution
+    public firebaseAppDistributionTask = "appDistributionUploadQa"
+    public firebaseJsonCredentials = ""
+
+    public useCrashlitycsDistribution = true
+
     public unitTestGradleTask = "testQaUnitTest -PtestType=unit"
     public unitTestResultPathXml = "**/test-results/testQaUnitTest/*.xml"
     public unitTestResultPathDirHtml = "app/build/reports/tests/testQaUnitTest/"
@@ -124,10 +130,21 @@ class TagPipelineAndroid extends TagPipeline {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
                 stage(BETA_UPLOAD) {
-                    betaUploadWithKeystoreStageBodyAndroid(script,
+                     if (useCrashlitycsDistribution) {
+                        betaUploadWithKeystoreStageBodyAndroid(
+                            script,
                             betaUploadGradleTask,
                             keystoreCredentials,
-                            keystorePropertiesCredentials)
+                            keystorePropertiesCredentials
+                        )
+                    } else {
+                        firebaseAppDistribution(
+                            script,
+                            firebaseJsonCredentials,
+                            firebaseAppDistributionTask
+                        )
+                    }
+                    
                 },
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     versionPushStageBody(script,
@@ -154,6 +171,12 @@ class TagPipelineAndroid extends TagPipeline {
                                                       String keystorePropertiesCredentials) {
         AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
             betaUploadStageBodyAndroid(script, betaUploadGradleTask)
+        }  
+    }
+
+    def static firebaseAppDistribution(Object script, String firebaseJsonCredentials, String firebaseAppDistributionTask) {
+        AndroidUtil.firebaseAppDistribution(script, firebaseJsonCredentials) {
+            betaUploadStageBodyAndroid(script, firebaseAppDistributionTask)
         }
     }
 

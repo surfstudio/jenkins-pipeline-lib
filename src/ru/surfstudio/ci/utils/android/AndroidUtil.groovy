@@ -68,6 +68,16 @@ class AndroidUtil {
         }
     }
 
+    def static firebaseAppDistribution(Object script, String jsonCredentials, Closure body) {
+        script.echo "start extract JsonCredentials: $jsonCredentials"
+        script.withCredentials([
+                script.file(credentialsId: jsonCredentials, variable: 'GOOGLE_APPLICATION_CREDENTIALS')
+        ]) {
+            script.echo "extracted JsonCredentials $script.GOOGLE_APPLICATION_CREDENTIALS"
+            body()
+        }
+    }
+
     /**
      * Execute body with global variables 'GRADLE_BUILD_CACHE_USER' and 'GRADLE_BUILD_CACHE_PASS'
      */
