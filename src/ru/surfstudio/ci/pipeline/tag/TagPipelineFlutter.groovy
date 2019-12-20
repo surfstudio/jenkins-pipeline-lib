@@ -28,6 +28,9 @@ import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 
 class TagPipelineFlutter extends TagPipeline {
 
+    public static final String STAGE_ANDROID = 'Stage Android'
+    public static final String STAGE_IOS = 'Stage IOS'
+
     public static final String CALCULATE_VERSION_CODES = 'Calculate Version Codes'
     public static final String CLEAN_PREV_BUILD = 'Clean Previous Build'
     public static final String CHECKOUT_FLUTTER_VERSION = 'Checkout Flutter Project Version'
@@ -43,6 +46,8 @@ class TagPipelineFlutter extends TagPipeline {
     //required initial configuration
     public androidKeystoreCredentials = "no_credentials"
     public androidKeystorePropertiesCredentials = "no_credentials"
+
+    public jenkinsGoogleServiceAccountCredsId = "surf-jarvis-firebase-token"
 
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
     public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
@@ -66,7 +71,7 @@ class TagPipelineFlutter extends TagPipeline {
     public configFile = "pubspec.yaml"
     public compositeVersionNameVar = "version"
 
-    public shBetaUploadCommandAndroid = "cd android && fastlane android beta" //todo android release build?
+    public shBetaUploadCommandAndroid = "cd android && bundle exec fastlane android beta" //todo android release build?
     public shBetaUploadCommandIos = "make -C ios/ beta"
     public shTestFlightUploadCommandIos = "make -C ios/ release"
 
@@ -84,11 +89,22 @@ class TagPipelineFlutter extends TagPipeline {
 
     def init() {
 
+        applyStrategiesFromParams = {
+            def params = script.params
+            CommonUtil.applyStrategiesFromParams(this, [
+                    (UNIT_TEST): params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
+                    (INSTRUMENTATION_TEST): params[INSTRUMENTATION_TEST_STAGE_STRATEGY_PARAMETER],
+                    (STATIC_CODE_ANALYSIS): params[STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER],
+            ])
+        }
+
         node = NodeProvider.androidFlutterNode
+        //todo it's not good solution; need refactoring and split ios and android pipeline
         nodeIos = NodeProvider.iOSFlutterNode
 
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
+
 
         initializeBody = { initBodyFlutter(this) }
         propertiesProvider = {
@@ -147,10 +163,12 @@ class TagPipelineFlutter extends TagPipeline {
                 stage(STATIC_CODE_ANALYSIS) {
                     FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
+                //only when ios upload done
                 stage(BETA_UPLOAD_ANDROID) {
                     uploadStageBody(script, shBetaUploadCommandAndroid)
                 },
-                node(nodeIos, true, [
+
+                node(STAGE_IOS, nodeIos, true, [
                         stage(CHECKOUT_FLUTTER_VERSION) {
                             script.sh checkoutFlutterVersionCommand
                         },
@@ -170,7 +188,7 @@ class TagPipelineFlutter extends TagPipeline {
                                     iOSCertfileCredentialId)
                         },
                         stage(TESTFLIGHT_UPLOAD_IOS) {
-                            uploadStageBody(script, shTestFlightUploadCommandIos)
+                            uploadStageTestFlight(script, shTestFlightUploadCommandIos)
                         }
                 ]),
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
@@ -218,15 +236,21 @@ class TagPipelineFlutter extends TagPipeline {
     }
 
     private static void initStrategies(TagPipelineFlutter ctx) {
-        (ctx.getStage(BUILD_ANDROID) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
-        (ctx.getStage(BUILD_ANDROID_ARM64) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
-        (ctx.getStage(BETA_UPLOAD_ANDROID) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
+        def skipResolver = { skipStage -> skipStage ? StageStrategy.SKIP_STAGE : null }
+        //todo resolve with values from params
+        def paramsMap =  [
+                (BUILD_ANDROID): skipResolver(!ctx.shouldBuildAndroid),
+                (BUILD_ANDROID_ARM64): skipResolver(!ctx.shouldBuildAndroid),
+                (BETA_UPLOAD_ANDROID): skipResolver(!ctx.shouldBuildAndroid),
 
-        (ctx.getStage(BUILD_IOS_BETA) as StageWithStrategy).strategy = ctx.shouldBuildIosBeta ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
-        (ctx.getStage(BETA_UPLOAD_IOS) as StageWithStrategy).strategy = ctx.shouldBuildIosBeta ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
+                (BUILD_IOS_BETA): skipResolver(!ctx.shouldBuildIosBeta),
+                (BETA_UPLOAD_IOS): skipResolver(!ctx.shouldBuildIosBeta),
 
-        (ctx.getStage(BUILD_IOS_TESTFLIGHT) as StageWithStrategy).strategy = ctx.shouldBuildIosTestFlight ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
-        (ctx.getStage(TESTFLIGHT_UPLOAD_IOS) as StageWithStrategy).strategy = ctx.shouldBuildIosTestFlight ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
+                (BUILD_IOS_TESTFLIGHT):  skipResolver(!ctx.shouldBuildIosTestFlight),
+                (TESTFLIGHT_UPLOAD_IOS):  skipResolver(!ctx.shouldBuildIosTestFlight),
+        ]
+
+        CommonUtil.applyStrategiesFromParams(ctx, paramsMap)
     }
 
     def static calculateVersionCodesStageBody(TagPipelineFlutter ctx,
@@ -241,13 +265,19 @@ class TagPipelineFlutter extends TagPipeline {
             newMainVersionCode = minVersionCode
         }
         ctx.mainVersionCode = String.valueOf(newMainVersionCode)
-        ctx.arm64VersionCode = "64" + String.valueOf(newMainVersionCode)
+        ctx.arm64VersionCode = String.valueOf(newMainVersionCode)
         script.echo "New main versionCode: $ctx.mainVersionCode"
         script.echo "New arm64 versionCode: $ctx.arm64VersionCode"
     }
 
-    def static uploadStageBody(Object script, String shBetaUploadCommand) {
-        CommonUtil.shWithRuby(script, shBetaUploadCommand)
+    def uploadStageBody(Object script, String shBetaUploadCommand) {
+        script.withCredentials([script.string(credentialsId: jenkinsGoogleServiceAccountCredsId, variable: 'FIREBASE_TOKEN')]) {
+            CommonUtil.shWithRuby(script, shBetaUploadCommand)
+        }
+    }
+
+    def uploadStageTestFlight(Object script, String shUploadCommand) {
+        CommonUtil.shWithRuby(script, shUploadCommand)
     }
 
     def static versionUpdateStageBody(Object script,
