@@ -16,6 +16,7 @@
 package ru.surfstudio.ci.pipeline.pr
 
 import ru.surfstudio.ci.NodeProvider
+import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
@@ -45,7 +46,9 @@ class PrPipelineAndroid extends PrPipeline {
 
     // количество попыток перезапуска тестов для одного модуля при падении одного из них
     public instrumentationTestRetryCount = 1
-    
+
+    private boolean hasChanges = false
+
     /**
      * Функция, возвращающая имя instrumentation runner для запуска инструментальных тестов.
      *
@@ -68,12 +71,26 @@ class PrPipelineAndroid extends PrPipeline {
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
-        initializeBody = { initBody(this) }
+        initializeBody = { initBodyWithOutAbortDuplicateBuilds(this) }
         propertiesProvider = { properties(this) }
 
         stages = [
-                stage(PRE_MERGE, false) {
-                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                stage(CHECKOUT, false) {
+                    checkout(script, repoUrl, sourceBranch, repoCredentialsId)
+                    saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
+                    abortDuplicateBuildsWithDescription(this)
+                },
+                stage(CODE_STYLE_FORMATTING, StageStrategy.SKIP_STAGE) {
+                    AndroidPipelineHelper.ktlintFormatStageAndroid(script, sourceBranch, destinationBranch)
+                    hasChanges = AndroidPipelineHelper.checkChangesAndUpdate(script, repoUrl, repoCredentialsId)
+                },
+                stage(UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT, StageStrategy.SKIP_STAGE, false) {
+                    if (hasChanges) {
+                        RepositoryUtil.saveCurrentGitCommitHash(script)
+                    }
+                },
+                stage(PRE_MERGE) {
+                    mergeLocal(script, destinationBranch)
                 },
                 stage(BUILD) {
                     AndroidPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
@@ -104,8 +121,7 @@ class PrPipelineAndroid extends PrPipeline {
                 },
                 stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
-                },
-
+                }
         ]
         finalizeBody = { finalizeStageBody(this) }
     }
@@ -125,7 +141,7 @@ class PrPipelineAndroid extends PrPipeline {
         def defaultInstrumentationRunnerGradleTaskName = "printTestInstrumentationRunnerName"
         return script.sh(
                 returnStdout: true,
-                script: "./gradlew :$prefix:$defaultInstrumentationRunnerGradleTaskName | tail -4 | head -1"
-        )
+                script: "./gradlew -q :$prefix:$defaultInstrumentationRunnerGradleTaskName"
+        ).split("\n").last()
     }
 }

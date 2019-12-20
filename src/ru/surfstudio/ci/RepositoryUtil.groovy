@@ -84,8 +84,12 @@ class RepositoryUtil {
      * call this after checkout for save source commit hash
      */
     def static saveCurrentGitCommitHash(Object script) {
-        script.env.COMMIT_HASH = script.sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+        script.env.COMMIT_HASH = getCurrentCommitHash(script)
         script.echo "Set global variable COMMIT_HASH to $script.env.COMMIT_HASH"
+    }
+
+    def static getCurrentCommitHash(script) {
+        return script.sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
     }
 
     /**
@@ -175,7 +179,24 @@ class RepositoryUtil {
             throw new InterruptedException("Job aborted, because it triggered automatically and last commit message contains $RepositoryUtil.SKIP_CI_LABEL1 label")
         }
     }
+    static checkHasChanges(Object script) {
+        return !script.sh(returnStdout: true, script: "git status --porcelain --untracked-files=no").isEmpty()
+    }
 
+    static Collection<String> filesDiffPr(
+            Object script,
+            String sourceBranch,
+            String destinationBranch
+    ) {
+        return script.sh(returnStdout: true, script: "git log --no-merges --first-parent --oneline --name-only origin/${destinationBranch}..${sourceBranch} | grep \".kt\"")
+                .split("\n")
+    }
 
-
+    static revertUncommittedChanges(
+            Object script
+    ) {
+        script.sh "git reset"
+        script.sh "git checkout ."
+        script.sh "git clean -fdx"
+    }
 }

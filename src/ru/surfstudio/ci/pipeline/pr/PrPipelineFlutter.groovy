@@ -16,11 +16,8 @@
 package ru.surfstudio.ci.pipeline.pr
 
 import ru.surfstudio.ci.NodeProvider
-import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
-import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
-import ru.surfstudio.ci.utils.android.config.AvdConfig
 
 class PrPipelineFlutter extends PrPipeline {
 
@@ -67,7 +64,8 @@ class PrPipelineFlutter extends PrPipeline {
                     FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
                             buildAndroidCommand,
                             androidKeystoreCredentials,
-                            androidKeystorePropertiesCredentials)
+                            androidKeystorePropertiesCredentials
+                    )
                 },
                 node(NodeProvider.iOSFlutterNode, true, [
                         stage(CHECKOUT_FLUTTER_VERSION) {

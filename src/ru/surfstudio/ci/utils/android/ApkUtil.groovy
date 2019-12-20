@@ -103,15 +103,11 @@ class ApkUtil {
     }
 
     /**
-     * Функция, возвращающая имя модуля, в котором содержится APK-файл.
-     *
-     * В большинстве случаев, APK-файл находится в папке APK_FOLDER/build,
-     * но если проект содержит вложенный многомодульный проект,
-     * например, template в android-standard,
-     * то имя модуля будет отличаться от имени директории APK-файла.
+     * Функция, возвращающая имя модуля, в котором содержится APK-файл, по названию APK-файла
      */
-    static String getApkModuleName(Object script, String apkFullName) {
-        return getApkInfo(script, apkFullName, 2)
+    static String getApkModuleName(String apkFullName, String androidTestBuildType, String androidTestSuffix) {
+        String[] split = apkFullName.split("/")
+        return split[split.length - 1].replace("-$androidTestBuildType-${androidTestSuffix}.apk", "")
     }
 
     /**

@@ -55,7 +55,6 @@ class ApiTestPipelineAndroid extends ScmPipeline {
     }
 
     //main logic
-    @Override
     def init() {
         node = NodeProvider.getAndroidNode()
 
@@ -85,8 +84,10 @@ class ApiTestPipelineAndroid extends ScmPipeline {
         CommonUtil.printInitialStageStrategies(ctx)
 
         //Достаем main branch для sourceRepo, если не указали в параметрах
-        extractValueFromParamsAndRun(script, SOURCE_BRANCH_PARAMETER) {
-            value -> ctx.sourceBranch = value
+        extractValueFromParamsAndRun(script, SOURCE_BRANCH_PARAMETER) { value -> 
+            if(value != ctx.UNDEFINED_BRANCH) {
+                ctx.sourceBranch = value
+            }
         }
         if (!ctx.sourceBranch || ctx.sourceBranch == ctx.UNDEFINED_BRANCH) {
             ctx.sourceBranch = JarvisUtil.getMainBranch(ctx.script, ctx.repoUrl)
@@ -104,8 +105,6 @@ class ApiTestPipelineAndroid extends ScmPipeline {
                 branch: branch,
                 poll: true
         )
-
-        RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
 
         RepositoryUtil.saveCurrentGitCommitHash(script)
     }
@@ -135,22 +134,23 @@ class ApiTestPipelineAndroid extends ScmPipeline {
     }
 
     def static finalizeStageBody(ApiTestPipelineAndroid ctx) { //todo выводить количество пройденных и непройденных тестов
-        def link = "${CommonUtil.getBuildUrlMarkdownLink(ctx.script)}"
+        def link = "${CommonUtil.getBuildUrlSlackLink(ctx.script)}"
         def message
         if (ctx.jobResult == Result.FAILURE) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
             message = "Ошибка прогона апи тестов из-за этапов: ${unsuccessReasons}; $link"
 
         } else if(ctx.jobResult == Result.UNSTABLE) {
-            if(ctx.getStage(CHECK_API_TEST).result == Result.UNSTABLE) {
+            if(ctx.getStage(CHECK_API_TEST).result == Result.FAILURE) {
                 message = "Обнаружены нерабочие методы API; $link"
             }
-            if(ctx.getStage(WAIT_API_TEST).result == Result.UNSTABLE) {
+            if(ctx.getStage(WAIT_API_TEST).result == Result.FAILURE) {
                 if(message) message+= "\n"
                 else message = ""
                 message += "Обнаружены новые работающие методы API; $link"
             }
         }
+        ctx.script.echo "Message: $message"
         if (message) {
             JarvisUtil.sendMessageToGroup(ctx.script, message, ctx.repoUrl, "bitbucket", false)
         }

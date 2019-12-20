@@ -22,8 +22,8 @@ import ru.surfstudio.ci.stage.StageStrategy
 class UiTestPipelineAndroid extends UiTestPipeline {
 
     public artifactForTest = "for_test.apk"
-    public buildGradleTask = "clean assembleQa"
-    public builtApkPattern = "${sourcesDir}/**/*qa*.apk"
+    public buildGradleTask = "clean assembleDebug"
+    public builtApkPattern = "${sourcesDir}/**/**.apk"
 
     UiTestPipelineAndroid(Object script) {
         super(script)
@@ -38,11 +38,11 @@ class UiTestPipelineAndroid extends UiTestPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                stage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, sourceRepoCredentialsId)
-                },
                 stage(CHECKOUT_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     checkoutTestsStageBody(script, repoUrl, testBranch, testRepoCredentialsId)
+                },
+                stage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                    checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, sourceRepoCredentialsId)
                 },
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     buildStageBodyAndroid(script, sourcesDir, buildGradleTask)
@@ -118,57 +118,43 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                                     String outputsIdsDiff
                                     ) {
 
-
-        script.echo "Tests started"
-        script.echo "start tests for $artifactForTest $taskKey"
-        CommonUtil.safe(script) {
-            script.sh "mkdir $outputsDir"
-        }
-
-        CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; bundle install")
-
-        CommonUtil.safe(script) {
-            script.sh "rm arhive.zip"
-        }
-        CommonUtil.safe(script) {
-            script.sh "rm -rf arhive"
-        }
-        CommonUtil.safe(script) {
-            script.sh "rm -rf ./test_servers/*"
-        }
-        CommonUtil.safe(script) {
-            script.sh "rm -rf ./${outputsDir}/*"
-        }
-
-        def platform = 'android'
-
-        //single run
-        //CommonUtil.shWithRuby(script, "calabash-android run ${artifactForTest} -p ${platform} ${featuresDir}/${featureFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile}")
-
-        try {
-            CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  -p json_report\" ${featuresDir}/${featureFile} --concurrent")
-
-            }
-        finally {
-            /*CommonUtil.safe(script) 
-            {
-                script.sh "ls && cp ./fullScript.sh sources"
-
-                script.dir(sourcesDir) {
-                        script.sh "source ~/.bashrc; /bin/bash ./fullScript.sh"
-                         }
-
-                script.sh "source ~/.bashrc; /bin/bash ./find_id.sh"
-                script.sh "mv sources/idFullA.txt ."
-                script.sh "source ~/.bashrc; /bin/bash ./match.sh"                
-            }
-            */
-            CommonUtil.shWithRuby(script, "ruby -r \'./find_id.rb\' -e \"Find.new.get_miss_id(\'./${sourcesDir}\', \'./features/android/pages\')\"")
-            script.step([$class: 'ArtifactArchiver', artifacts: outputsIdsDiff, allowEmptyArchive: true])
+        script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
+            script.echo "Tests started"
+            script.echo "start tests for $artifactForTest $taskKey"
             CommonUtil.safe(script) {
-                script.sh "mkdir arhive"
+                script.sh "mkdir $outputsDir"
             }
-            script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
+
+            CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; bundle install")
+
+            CommonUtil.safe(script) {
+                script.sh "rm arhive.zip"
+            }
+            CommonUtil.safe(script) {
+                script.sh "rm -rf arhive"
+            }
+            CommonUtil.safe(script) {
+                script.sh "rm -rf ./test_servers/*"
+           }
+            CommonUtil.safe(script) {
+                script.sh "rm -rf ./${outputsDir}/*"
+            }
+    
+            def platform = 'android'
+
+       
+            try {
+                CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  -p json_report\" ${featuresDir}/${featureFile} --concurrent")
+            }
+            finally {
+      
+                CommonUtil.shWithRuby(script, "ruby -r \'./find_id.rb\' -e \"Find.new.get_miss_id(\'./${sourcesDir}\', \'./features/android/pages\')\"")
+                script.step([$class: 'ArtifactArchiver', artifacts: outputsIdsDiff, allowEmptyArchive: true])
+                CommonUtil.safe(script) {
+                    script.sh "mkdir arhive"
+                }
+                script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
+            }
         }
     }
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================

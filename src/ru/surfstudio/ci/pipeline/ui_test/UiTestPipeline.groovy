@@ -46,9 +46,10 @@ abstract class UiTestPipeline extends ScmPipeline {
     public defaultTaskKey  //task for run periodically
 
     //dirs
-    public sourcesDir = "sources"
+    public sourcesDir = "src"
     public featuresDir = "features"
     public outputsDir = "outputs"
+    public reports = "reports"
 
     //files
     public featureForTest = "for_test.feature"
@@ -82,7 +83,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     //ios
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
-    public iOSCertfileCredentialId = "IvanSmetanin_iOS_Dev_CertKey"
+    public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
 
     UiTestPipeline(Object script) {
         super(script)
@@ -250,7 +251,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
 
     def static sendStartNotification(UiTestPipeline ctx) {
-        def jenkinsLink = CommonUtil.getBuildUrlMarkdownLink(ctx.script)
+        def jenkinsLink = CommonUtil.getBuildUrlSlackLink(ctx.script)
         if(isBulkJob(ctx)){
             sendMessage(ctx,"Запущено параллельное выполнение тестов прогонов ${ctx.taskKey}. ${jenkinsLink}", true)
         } else {
@@ -262,7 +263,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     def static sendFinishNotification(UiTestPipeline ctx) {
         def testExecutionLink = CommonUtil.getJiraTaskMarkdownLink(ctx.taskKey)
-        def jenkinsLink = CommonUtil.getBuildUrlMarkdownLink(ctx.script)
+        def jenkinsLink = CommonUtil.getBuildUrlSlackLink(ctx.script)
         def testExecutionName = ctx.taskName ? "\"${ctx.taskName}\"" : ""
         if (ctx.jobResult != Result.SUCCESS) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)

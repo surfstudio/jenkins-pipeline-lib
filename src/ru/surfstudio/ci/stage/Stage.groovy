@@ -6,7 +6,7 @@ import ru.surfstudio.ci.pipeline.Pipeline;
  * Base stage for {@link Pipeline}
  * Can be wrapper over other stagea
  */
-public interface Stage {
+interface Stage {
 
     String getName()
 

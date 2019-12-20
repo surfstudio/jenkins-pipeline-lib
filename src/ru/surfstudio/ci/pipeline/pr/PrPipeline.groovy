@@ -29,11 +29,14 @@ import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
 abstract class PrPipeline extends ScmPipeline {
 
     //stage names
+    public static final String CHECKOUT = "Checkout"
     public static final String PRE_MERGE = 'PreMerge'
     public static final String BUILD = 'Build'
     public static final String UNIT_TEST = 'Unit Test'
     public static final String INSTRUMENTATION_TEST = 'Instrumentation Test'
+    public static final String CODE_STYLE_FORMATTING = 'Code Style Formatting'
     public static final String STATIC_CODE_ANALYSIS = 'Static Code Analysis'
+    public static final String UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT = "Update current commit hash after format"
 
     //scm
     public sourceBranch = ""
@@ -42,7 +45,7 @@ abstract class PrPipeline extends ScmPipeline {
     public boolean targetBranchChanged = false
 
     //other config
-    public stagesForTargetBranchChangedMode = [PRE_MERGE]
+    public stagesForTargetBranchChangedMode = [CHECKOUT, PRE_MERGE]
 
 
     PrPipeline(Object script) {
@@ -52,6 +55,11 @@ abstract class PrPipeline extends ScmPipeline {
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
     def static initBody(PrPipeline ctx) {
+        initBodyWithOutAbortDuplicateBuilds(ctx)
+        abortDuplicateBuildsWithDescription(ctx)
+    }
+
+    def static initBodyWithOutAbortDuplicateBuilds(PrPipeline ctx) {
         def script = ctx.script
         CommonUtil.printInitialStageStrategies(ctx)
 
@@ -86,21 +94,26 @@ abstract class PrPipeline extends ScmPipeline {
             }
         }
 
-        def buildDescription = ctx.targetBranchChanged ?
-                        "$ctx.sourceBranch to $ctx.destinationBranch: target branch changed" :
-                        "$ctx.sourceBranch to $ctx.destinationBranch"
-
-        CommonUtil.setBuildDescription(script, buildDescription)
-        CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.ANOTHER, buildDescription)
+        CommonUtil.setBuildDescription(script, ctx.buildDescription())
     }
 
+    def static abortDuplicateBuildsWithDescription(PrPipeline ctx) {
+        CommonUtil.abortDuplicateBuildsWithDescription(ctx.script, AbortDuplicateStrategy.ANOTHER, ctx.buildDescription())
+    }
 
     def static preMergeStageBody(Object script, String url, String sourceBranch, String destinationBranch, String credentialsId) {
+        checkout(script, url, sourceBranch, credentialsId)
+        mergeLocal(script, destinationBranch)
+        saveCommitHashAndCheckSkipCi(script, false)
+    }
+
+    def static checkout(Object script, String url, String sourceBranch, String credentialsId) {
         //script.sh 'git config --global user.name "Jenkins"'
         //script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
 
         CommonUtil.safe(script) {
             script.sh "git reset --merge" //revert previous failed merge
+            RepositoryUtil.revertUncommittedChanges(script)
         }
 
         script.git(
@@ -108,17 +121,24 @@ abstract class PrPipeline extends ScmPipeline {
                 credentialsId: credentialsId,
                 branch: sourceBranch
         )
+    }
 
-        RepositoryUtil.saveCurrentGitCommitHash(script)
-
+    def static mergeLocal(Object script, String destinationBranch) {
         //local merge with destination
-        script.sh "git merge origin/$destinationBranch --no-ff"
+        script.sh "git merge origin/$destinationBranch --no-ff --no-commit"
+    }
+
+    def static saveCommitHashAndCheckSkipCi(Object script, boolean targetBranchChanged) {
+        RepositoryUtil.saveCurrentGitCommitHash(script)
+        if (!targetBranchChanged) {
+            RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
+        }
     }
 
     def static prepareMessageForPipeline(PrPipeline ctx, Closure handler) {
         if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
-            def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlMarkdownLink(ctx.script)}"
+            def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlSlackLink(ctx.script)}"
             handler(message)
         }
     }
@@ -143,6 +163,13 @@ abstract class PrPipeline extends ScmPipeline {
     def static postExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
         RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
     }
+
+    String buildDescription() {
+        return targetBranchChanged ?
+                "$sourceBranch to $destinationBranch: target branch changed" :
+                "$sourceBranch to $destinationBranch"
+    }
+
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
 
 
@@ -154,7 +181,7 @@ abstract class PrPipeline extends ScmPipeline {
     public static final String AUTHOR_USERNAME_PARAMETER = 'authorUsername'
     public static final String TARGET_BRANCH_CHANGED_PARAMETER = 'targetBranchChanged'
 
-    def static List<Object> properties(PrPipeline ctx) {
+    static List<Object> properties(ScmPipeline ctx) {
         def script = ctx.script
         return [
                 buildDiscarder(script),
@@ -201,7 +228,7 @@ abstract class PrPipeline extends ScmPipeline {
                                 ],
                                 [
                                         key  : AUTHOR_USERNAME_PARAMETER,
-                                        value: '$.pullrequest.author.username'
+                                        value: '$.pullrequest.author.account_id'
                                 ],
                                 [
                                         key  : 'repoUrl',
