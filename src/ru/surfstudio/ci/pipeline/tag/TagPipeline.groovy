@@ -98,7 +98,7 @@ abstract class TagPipeline extends ScmPipeline {
     def static prepareMessageForPipeline(TagPipeline ctx, Closure handler) {
         if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
-            def message = "Завершена сборка по тэгу: ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlMarkdownLink(ctx.script)}"
+            def message = "Завершена сборка по тэгу: ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlSlackLink(ctx.script)}"
             handler(message)
         }
     }

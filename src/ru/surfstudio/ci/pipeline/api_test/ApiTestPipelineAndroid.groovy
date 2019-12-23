@@ -55,7 +55,6 @@ class ApiTestPipelineAndroid extends ScmPipeline {
     }
 
     //main logic
-    @Override
     def init() {
         node = NodeProvider.getAndroidNode()
 
@@ -135,22 +134,23 @@ class ApiTestPipelineAndroid extends ScmPipeline {
     }
 
     def static finalizeStageBody(ApiTestPipelineAndroid ctx) { //todo выводить количество пройденных и непройденных тестов
-        def link = "${CommonUtil.getBuildUrlMarkdownLink(ctx.script)}"
+        def link = "${CommonUtil.getBuildUrlSlackLink(ctx.script)}"
         def message
         if (ctx.jobResult == Result.FAILURE) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
             message = "Ошибка прогона апи тестов из-за этапов: ${unsuccessReasons}; $link"
 
         } else if(ctx.jobResult == Result.UNSTABLE) {
-            if(ctx.getStage(CHECK_API_TEST).result == Result.UNSTABLE) {
+            if(ctx.getStage(CHECK_API_TEST).result == Result.FAILURE) {
                 message = "Обнаружены нерабочие методы API; $link"
             }
-            if(ctx.getStage(WAIT_API_TEST).result == Result.UNSTABLE) {
+            if(ctx.getStage(WAIT_API_TEST).result == Result.FAILURE) {
                 if(message) message+= "\n"
                 else message = ""
                 message += "Обнаружены новые работающие методы API; $link"
             }
         }
+        ctx.script.echo "Message: $message"
         if (message) {
             JarvisUtil.sendMessageToGroup(ctx.script, message, ctx.repoUrl, "bitbucket", false)
         }
