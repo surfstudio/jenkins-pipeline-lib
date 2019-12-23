@@ -145,13 +145,13 @@ abstract class PrPipeline extends ScmPipeline {
 
     def static finalizeStageBody(PrPipeline ctx){
         prepareMessageForPipeline(ctx, { message ->
-            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "bitbucket")
+            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
         })
     }
 
     def static debugFinalizeStageBody(PrPipeline ctx) {
         prepareMessageForPipeline(ctx, { message ->
-            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "bitbucket")
+            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
             JarvisUtil.sendMessageToGroup(ctx.script, message, "9d0c617e-d14a-490e-9914-83820b135cfc", "stride", false)
         })
     }
@@ -220,19 +220,19 @@ abstract class PrPipeline extends ScmPipeline {
                         genericVariables: [
                                 [
                                         key  : SOURCE_BRANCH_PARAMETER,
-                                        value: '$.pullrequest.source.branch.name'
+                                        value: '$.object_attributes.source_branch'
                                 ],
                                 [
                                         key  : DESTINATION_BRANCH_PARAMETER,
-                                        value: '$.pullrequest.destination.branch.name'
+                                        value: '$.object_attributes.target_branch'
                                 ],
                                 [
                                         key  : AUTHOR_USERNAME_PARAMETER,
-                                        value: '$.pullrequest.author.account_id'
+                                        value: '$.object_attributes.last_commit.author.email'
                                 ],
                                 [
                                         key  : 'repoUrl',
-                                        value: '$.repository.links.html.href'
+                                        value: '$.project.web_url'
                                 ],
                                 [
                                         key  : TARGET_BRANCH_CHANGED_PARAMETER,
@@ -241,7 +241,7 @@ abstract class PrPipeline extends ScmPipeline {
                         ],
                         printContributedVariables: true,
                         printPostContent: true,
-                        causeString: 'Triggered by Bitbucket',
+                        causeString: 'Triggered by GitLab',
                         regexpFilterExpression: '^'+"$repoUrl"+'$',
                         regexpFilterText: '$repoUrl'
                 ),
