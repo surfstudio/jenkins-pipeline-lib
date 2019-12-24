@@ -83,6 +83,9 @@ class TagPipelineFlutter extends TagPipeline {
     //ios node
     public nodeIos
 
+    //backward compatibility for beta
+    public versionPrefix = "";
+
     TagPipelineFlutter(Object script) {
         super(script)
     }
@@ -265,7 +268,7 @@ class TagPipelineFlutter extends TagPipeline {
             newMainVersionCode = minVersionCode
         }
         ctx.mainVersionCode = String.valueOf(newMainVersionCode)
-        ctx.arm64VersionCode = String.valueOf(newMainVersionCode)
+        ctx.arm64VersionCode = ctx.versionPrefix + String.valueOf(newMainVersionCode)
         script.echo "New main versionCode: $ctx.mainVersionCode"
         script.echo "New arm64 versionCode: $ctx.arm64VersionCode"
     }
