@@ -29,12 +29,15 @@ import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 
 class TagPipelineFlutter extends TagPipeline {
 
-    public static final String STAGE_ANDROID = 'Stage Android'
-    public static final String STAGE_IOS = 'Stage IOS'
+    public static final String STAGE_ANDROID = 'Android'
+    public static final String STAGE_IOS = 'IOS'
 
-    public static final String CALCULATE_VERSION_CODES = 'Calculate Version Codes'
-    public static final String CLEAN_PREV_BUILD = 'Clean Previous Build'
-    public static final String CHECKOUT_FLUTTER_VERSION = 'Checkout Flutter Project Version'
+    public static final String CALCULATE_VERSION_CODES_ANDROID = 'Calculate Version Codes (Android)'
+    public static final String CALCULATE_VERSION_CODES_IOS = 'Calculate Version Codes (iOS)'
+    public static final String CLEAN_PREV_BUILD_ANDROID = 'Clean Previous Build (Android)'
+    public static final String CLEAN_PREV_BUILD_IOS = 'Clean Previous Build (iOS)'
+    public static final String CHECKOUT_FLUTTER_VERSION_ANDROID = 'Checkout Flutter Project Version (Android)'
+    public static final String CHECKOUT_FLUTTER_VERSION_IOS = 'Checkout Flutter Project Version (iOS)'
 
     public static final String VERSION_UPDATE_FOR_ARM64 = 'Version Update For Arm64'
     public static final String BUILD_ANDROID = 'Build Android'
@@ -128,16 +131,16 @@ class TagPipelineFlutter extends TagPipeline {
                 stage(CHECKOUT, false) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
-                stage(CALCULATE_VERSION_CODES) {
+                stage(CALCULATE_VERSION_CODES_ANDROID) {
                     calculateVersionCodesStageBody(this,
                             configFile,
                             compositeVersionNameVar,
                             minVersionCode)
                 },
-                stage(CLEAN_PREV_BUILD) {
+                stage(CLEAN_PREV_BUILD_ANDROID) {
                     script.sh cleanFlutterCommand
                 },
-                stage(CHECKOUT_FLUTTER_VERSION) {
+                stage(CHECKOUT_FLUTTER_VERSION_ANDROID) {
                     script.sh checkoutFlutterVersionCommand
                 },
                 stage(VERSION_UPDATE_FOR_ARM64) {
@@ -184,16 +187,16 @@ class TagPipelineFlutter extends TagPipeline {
                 stage(CHECKOUT, false) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
-                stage(CALCULATE_VERSION_CODES) {
+                stage(CALCULATE_VERSION_CODES_IOS) {
                     calculateVersionCodesStageBody(this,
                             configFile,
                             compositeVersionNameVar,
                             minVersionCode)
                 },
-                stage(CLEAN_PREV_BUILD) {
+                stage(CLEAN_PREV_BUILD_IOS) {
                     script.sh cleanFlutterCommand
                 },
-                stage(CHECKOUT_FLUTTER_VERSION) {
+                stage(CHECKOUT_FLUTTER_VERSION_IOS) {
                     script.sh checkoutFlutterVersionCommand
                 },
                 stage(VERSION_UPDATE) {
