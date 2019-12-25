@@ -28,14 +28,17 @@ import static ru.surfstudio.ci.CommonUtil.applyStrategy
 import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 
 class TagPipelineFlutter extends TagPipeline {
+    public static final String STAGE_PARALLEL = 'Parallel Pipeline'
 
     public static final String STAGE_ANDROID = 'Android'
     public static final String STAGE_IOS = 'IOS'
 
     public static final String CALCULATE_VERSION_CODES_ANDROID = 'Calculate Version Codes (Android)'
     public static final String CALCULATE_VERSION_CODES_IOS = 'Calculate Version Codes (iOS)'
+
     public static final String CLEAN_PREV_BUILD_ANDROID = 'Clean Previous Build (Android)'
     public static final String CLEAN_PREV_BUILD_IOS = 'Clean Previous Build (iOS)'
+
     public static final String CHECKOUT_FLUTTER_VERSION_ANDROID = 'Checkout Flutter Project Version (Android)'
     public static final String CHECKOUT_FLUTTER_VERSION_IOS = 'Checkout Flutter Project Version (iOS)'
 
@@ -230,7 +233,7 @@ class TagPipelineFlutter extends TagPipeline {
         ]
 
         stages = [
-                parallel('Parallel stage:', [
+                parallel(STAGE_PARALLEL, [
                         group(STAGE_ANDROID, androidStages),
                         node(STAGE_IOS, nodeIos, false, iosStages)
                 ]),

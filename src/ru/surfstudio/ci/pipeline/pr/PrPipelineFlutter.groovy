@@ -20,10 +20,14 @@ import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 
 class PrPipelineFlutter extends PrPipeline {
-    public static final String STAGE_ANDROID = 'Stage Android'
-    public static final String STAGE_IOS = 'Stage IOS'
+    public static final String STAGE_PARALLEL = 'Parallel Pipeline'
 
-    public static final String CHECKOUT_FLUTTER_VERSION = 'Checkout Flutter Project Version'
+    public static final String STAGE_ANDROID = 'Android'
+    public static final String STAGE_IOS = 'IOS'
+
+    public static final String CHECKOUT_FLUTTER_VERSION_ANDROID = 'Checkout Flutter Project Version (Android)'
+    public static final String CHECKOUT_FLUTTER_VERSION_IOS = 'Checkout Flutter Project Version (iOS)'
+
     public static final String BUILD_ANDROID = 'Build Android'
     public static final String BUILD_IOS = 'Build iOS'
 
@@ -68,7 +72,7 @@ class PrPipelineFlutter extends PrPipeline {
                 stage(PRE_MERGE, false) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
-                stage(CHECKOUT_FLUTTER_VERSION) {
+                stage(CHECKOUT_FLUTTER_VERSION_ANDROID) {
                     script.sh checkoutFlutterVersionCommand
                 },
                 stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
@@ -92,7 +96,7 @@ class PrPipelineFlutter extends PrPipeline {
                 stage(PRE_MERGE, false) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
-                stage(CHECKOUT_FLUTTER_VERSION) {
+                stage(CHECKOUT_FLUTTER_VERSION_IOS) {
                     script.sh checkoutFlutterVersionCommand
                 },
                 stage(BUILD_IOS) {
@@ -104,7 +108,7 @@ class PrPipelineFlutter extends PrPipeline {
         ]
 
         stages = [
-                parallel('Parallel build', [
+                parallel(STAGE_PARALLEL, [
                         group(STAGE_ANDROID, androidStages),
                         node(STAGE_IOS, NodeProvider.iOSFlutterNode, false, iosStages)
                 ]),
