@@ -181,6 +181,7 @@ class TagPipelineFlutter extends TagPipeline {
                 stage(BETA_UPLOAD_ANDROID) {
                     uploadStageBody(script, shBetaUploadCommandAndroid)
                 },
+        ]
 
         iosStages = [
                 stage(STAGE_IOS, false) {
@@ -245,8 +246,6 @@ class TagPipelineFlutter extends TagPipeline {
                                     compositeVersionNameVar
                             ))
                 },
-
-
         ]
 
 

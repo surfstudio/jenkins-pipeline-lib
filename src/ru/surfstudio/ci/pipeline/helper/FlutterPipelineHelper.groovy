@@ -83,36 +83,4 @@ class FlutterPipelineHelper {
         script.echo "empty"
         //todo
     }
-
-    /**
-     * Get current version of framework
-     * @param script
-     * @return version
-     */
-    static String getCurrentFlutterVersion(Object script) {
-        String versionJson = script.sh(
-                returnStdout: true,
-                script: "flutter --version --machine"
-        )
-        def jsonSlurper = new JsonSlurper()
-
-        def data = jsonSlurper.parseText(versionJson)
-        return  data['frameworkVersion']
-    }
-
-    static boolean needSwitchVersion(String version, String currentVersion) {
-        return version != currentVersion
-    }
-
-    /**
-     * Checkout flutter vesrion for current project from config file
-     * @param script
-     * @param filename Config file
-     * @param checkoutCommand
-     */
-    static void checkoutFlutterVersionFromFile(Object script, String filename, String checkoutCommand) {
-        def jsonSlurper = new JsonSlurper()
-        def data = jsonSlurper.parse(new File(filename))
-        script.sh "$checkoutCommand v${data['version']}"
-    }
 }
