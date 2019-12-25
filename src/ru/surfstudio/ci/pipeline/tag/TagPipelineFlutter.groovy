@@ -89,6 +89,9 @@ class TagPipelineFlutter extends TagPipeline {
     //ios node
     public nodeIos
 
+    //backward compatibility for beta
+    public versionPrefix = ""; //todo remove after moving to fad finished
+
     //stages
     public List<Stage> androidStages
     public List<Stage> iosStages
@@ -178,7 +181,6 @@ class TagPipelineFlutter extends TagPipeline {
                 stage(BETA_UPLOAD_ANDROID) {
                     uploadStageBody(script, shBetaUploadCommandAndroid)
                 },
-        ]
 
         iosStages = [
                 stage(STAGE_IOS, false) {
@@ -314,7 +316,7 @@ class TagPipelineFlutter extends TagPipeline {
             newMainVersionCode = minVersionCode
         }
         ctx.mainVersionCode = String.valueOf(newMainVersionCode)
-        ctx.arm64VersionCode = String.valueOf(newMainVersionCode)
+        ctx.arm64VersionCode = ctx.versionPrefix + String.valueOf(newMainVersionCode)
         script.echo "New main versionCode: $ctx.mainVersionCode"
         script.echo "New arm64 versionCode: $ctx.arm64VersionCode"
     }
