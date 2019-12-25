@@ -20,9 +20,14 @@ import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 
 class PrPipelineFlutter extends PrPipeline {
-    public static final String STAGE_IOS = 'Stage IOS'
+    public static final String STAGE_PARALLEL = 'Parallel Pipeline'
 
-    public static final String CHECKOUT_FLUTTER_VERSION = 'Checkout Flutter Project Version'
+    public static final String STAGE_ANDROID = 'Android'
+    public static final String STAGE_IOS = 'IOS'
+
+    public static final String CHECKOUT_FLUTTER_VERSION_ANDROID = 'Checkout Flutter Project Version (Android)'
+    public static final String CHECKOUT_FLUTTER_VERSION_IOS = 'Checkout Flutter Project Version (iOS)'
+
     public static final String BUILD_ANDROID = 'Build Android'
     public static final String BUILD_IOS = 'Build iOS'
 
@@ -54,39 +59,61 @@ class PrPipelineFlutter extends PrPipeline {
         initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }
 
-        stages = [
+
+        def androidStages = [
+                stage(STAGE_ANDROID, false) {
+                    // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
+                },
+                stage(CHECKOUT, false) {
+                    checkout(script, repoUrl, sourceBranch, repoCredentialsId)
+                    saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
+                    abortDuplicateBuildsWithDescription(this)
+                },
                 stage(PRE_MERGE, false) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
-                stage(CHECKOUT_FLUTTER_VERSION) {
+                stage(CHECKOUT_FLUTTER_VERSION_ANDROID) {
                     script.sh checkoutFlutterVersionCommand
+                },
+                stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                    FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
+                },
+                stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                    FlutterPipelineHelper.testStageBody(script, testCommand)
                 },
                 stage(BUILD_ANDROID) {
                     FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
                             buildAndroidCommand,
                             androidKeystoreCredentials,
-                            androidKeystorePropertiesCredentials
-                    )
+                            androidKeystorePropertiesCredentials)
                 },
-                node(STAGE_IOS, NodeProvider.iOSFlutterNode, true, [
-                        stage(CHECKOUT_FLUTTER_VERSION) {
-                            script.sh checkoutFlutterVersionCommand
-                        },
-                        stage(BUILD_IOS) {
-                            FlutterPipelineHelper.buildStageBodyIOS(script,
-                                    buildIOsCommand,
-                                    iOSKeychainCredenialId,
-                                    iOSCertfileCredentialId)
-                        },
-                ]),
-                stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    FlutterPipelineHelper.testStageBody(script, testCommand)
-                },
-                stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
-                },
-
         ]
+
+        def iosStages = [
+                stage(STAGE_IOS, false) {
+                    // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
+                },
+                stage(PRE_MERGE, false) {
+                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                },
+                stage(CHECKOUT_FLUTTER_VERSION_IOS) {
+                    script.sh checkoutFlutterVersionCommand
+                },
+                stage(BUILD_IOS) {
+                    FlutterPipelineHelper.buildStageBodyIOS(script,
+                            buildIOsCommand,
+                            iOSKeychainCredenialId,
+                            iOSCertfileCredentialId)
+                },
+        ]
+
+        stages = [
+                parallel(STAGE_PARALLEL, [
+                        group(STAGE_ANDROID, androidStages),
+                        node(STAGE_IOS, NodeProvider.iOSFlutterNode, false, iosStages)
+                ]),
+        ]
+
         finalizeBody = { finalizeStageBody(this) }
     }
 }

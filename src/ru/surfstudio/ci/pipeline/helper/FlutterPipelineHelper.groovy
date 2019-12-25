@@ -15,6 +15,7 @@
  */
 package ru.surfstudio.ci.pipeline.helper
 
+import groovy.json.JsonSlurper
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.utils.android.AndroidTestUtil
