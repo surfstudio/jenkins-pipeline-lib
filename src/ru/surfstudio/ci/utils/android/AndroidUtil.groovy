@@ -68,12 +68,10 @@ class AndroidUtil {
         }
     }
 
-    def static firebaseAppDistribution(Object script, String jsonCredentials, Closure body) {
-        script.echo "start extract JsonCredentials: $jsonCredentials"
+    def static firebaseAppDistribution(Object script, String jenkinsGoogleServiceAccountCredsId, Closure body) {
         script.withCredentials([
-                script.file(credentialsId: jsonCredentials, variable: 'GOOGLE_APPLICATION_CREDENTIALS')
+                script.string(credentialsId: jenkinsGoogleServiceAccountCredsId, variable: 'FIREBASE_TOKEN')
         ]) {
-            script.echo "extracted JsonCredentials $script.GOOGLE_APPLICATION_CREDENTIALS"
             body()
         }
     }

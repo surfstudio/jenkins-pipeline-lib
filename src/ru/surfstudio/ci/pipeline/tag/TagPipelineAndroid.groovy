@@ -41,7 +41,7 @@ class TagPipelineAndroid extends TagPipeline {
 
     //required for firebase app distribution
     public firebaseAppDistributionTask = "appDistributionUploadQa"
-    public firebaseJsonCredentials = ""
+    public jenkinsGoogleServiceAccountCredsId = "surf-jarvis-firebase-token"
 
     public useCrashlitycsDistribution = true
 
@@ -140,7 +140,7 @@ class TagPipelineAndroid extends TagPipeline {
                     } else {
                         firebaseAppDistribution(
                             script,
-                            firebaseJsonCredentials,
+                            jenkinsGoogleServiceAccountCredsId,
                             firebaseAppDistributionTask
                         )
                     }
@@ -174,8 +174,8 @@ class TagPipelineAndroid extends TagPipeline {
         }  
     }
 
-    def static firebaseAppDistribution(Object script, String firebaseJsonCredentials, String firebaseAppDistributionTask) {
-        AndroidUtil.firebaseAppDistribution(script, firebaseJsonCredentials) {
+    def static firebaseAppDistribution(Object script, String jenkinsGoogleServiceAccountCredsId, String firebaseAppDistributionTask) {
+        AndroidUtil.firebaseAppDistribution(script, jenkinsGoogleServiceAccountCredsId) {
             betaUploadStageBodyAndroid(script, firebaseAppDistributionTask)
         }
     }
