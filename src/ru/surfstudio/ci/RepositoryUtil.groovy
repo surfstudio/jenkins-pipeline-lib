@@ -17,6 +17,7 @@ package ru.surfstudio.ci
 
 import com.cloudbees.plugins.credentials.CredentialsProvider
 import com.cloudbees.plugins.credentials.common.IdCredentials
+import groovyx.gpars.dataflow.operator.Pipeline
 import org.eclipse.jgit.transport.URIish
 import org.jenkinsci.plugins.gitclient.Git
 
@@ -25,6 +26,12 @@ class RepositoryUtil {
     def static SKIP_CI_LABEL1 = "[skip ci]"
     def static SKIP_CI_LABEL2 = "[ci skip]"
     def static VERSION_LABEL1 = "[version]"
+
+    @Deprecated
+    def static notifyGitlabAboutStageFinis(Object script, String stageName, String result){
+        def projectID = "$.project.id"
+        script.gitlabCommitStatus(name: stageName, builds: [projectId: projectID, revisionHash: ])
+    }
 
     def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName){
         def bitbucketStatus = 'INPROGRESS'
