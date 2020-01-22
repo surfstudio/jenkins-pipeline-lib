@@ -43,7 +43,8 @@ class TagPipelineAndroid extends TagPipeline {
     public firebaseAppDistributionTask = "appDistributionUploadQa"
     public jenkinsGoogleServiceAccountCredsId = "surf-jarvis-firebase-token"
 
-    public useCrashlitycsDistribution = true
+    // todo при увеличении версии библиотеки заменить значение на true
+    public useFirebaseDistribution = false
 
     public unitTestGradleTask = "testQaUnitTest -PtestType=unit"
     public unitTestResultPathXml = "**/test-results/testQaUnitTest/*.xml"
@@ -130,18 +131,20 @@ class TagPipelineAndroid extends TagPipeline {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
                 stage(BETA_UPLOAD) {
-                     if (useCrashlitycsDistribution) {
+                     if (useFirebaseDistribution) {
+                        firebaseUploadWithKeystoreStageBodyAndroid(
+                            script,
+                            jenkinsGoogleServiceAccountCredsId,
+                            firebaseAppDistributionTask,
+                            keystoreCredentials,
+                            keystorePropertiesCredentials
+                        )
+                    } else {
                         betaUploadWithKeystoreStageBodyAndroid(
                             script,
                             betaUploadGradleTask,
                             keystoreCredentials,
                             keystorePropertiesCredentials
-                        )
-                    } else {
-                        firebaseAppDistribution(
-                            script,
-                            jenkinsGoogleServiceAccountCredsId,
-                            firebaseAppDistributionTask
                         )
                     }
                     
@@ -164,19 +167,25 @@ class TagPipelineAndroid extends TagPipeline {
     }
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ ======================================================
-
+    @Deprecated
     def static betaUploadWithKeystoreStageBodyAndroid(Object script,
                                                       String betaUploadGradleTask,
                                                       String keystoreCredentials,
                                                       String keystorePropertiesCredentials) {
         AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
-            betaUploadStageBodyAndroid(script, betaUploadGradleTask)
+            gradleTaskWithBuildCache(script, betaUploadGradleTask)
         }  
     }
 
-    def static firebaseAppDistribution(Object script, String jenkinsGoogleServiceAccountCredsId, String firebaseAppDistributionTask) {
-        AndroidUtil.firebaseAppDistribution(script, jenkinsGoogleServiceAccountCredsId) {
-            betaUploadStageBodyAndroid(script, firebaseAppDistributionTask)
+    def static firebaseUploadWithKeystoreStageBodyAndroid(Object script,
+                                                          String jenkinsGoogleServiceAccountCredsId,
+                                                          String firebaseAppDistributionTask,
+                                                          String keystoreCredentials,
+                                                          String keystorePropertiesCredentials) {
+        AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
+            AndroidUtil.withFirebaseToken(script, jenkinsGoogleServiceAccountCredsId) {
+                gradleTaskWithBuildCache(script, firebaseAppDistributionTask)
+            }
         }
     }
 
@@ -203,9 +212,9 @@ class TagPipelineAndroid extends TagPipeline {
 
     }
 
-    def static betaUploadStageBodyAndroid(Object script, String betaUploadGradleTask) {
+    def static gradleTaskWithBuildCache(Object script, String gradleTask) {
         AndroidUtil.withGradleBuildCacheCredentials(script) {
-            script.sh "./gradlew ${betaUploadGradleTask}"
+            script.sh "./gradlew ${gradleTask}"
         }
     }
 

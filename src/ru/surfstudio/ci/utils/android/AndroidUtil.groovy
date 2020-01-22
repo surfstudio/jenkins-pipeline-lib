@@ -68,7 +68,7 @@ class AndroidUtil {
         }
     }
 
-    def static firebaseAppDistribution(Object script, String jenkinsGoogleServiceAccountCredsId, Closure body) {
+    def static withFirebaseToken(Object script, String jenkinsGoogleServiceAccountCredsId, Closure body) {
         script.withCredentials([
                 script.string(credentialsId: jenkinsGoogleServiceAccountCredsId, variable: 'FIREBASE_TOKEN')
         ]) {
