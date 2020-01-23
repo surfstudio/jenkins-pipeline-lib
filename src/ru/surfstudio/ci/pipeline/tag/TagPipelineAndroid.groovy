@@ -41,7 +41,7 @@ class TagPipelineAndroid extends TagPipeline {
 
     //required for firebase app distribution
     public firebaseAppDistributionTask = "appDistributionUploadQa"
-    public jenkinsGoogleServiceAccountCredsId = "surf-jarvis-firebase-token"
+    public googleServiceAccountCredsId = "surf-jarvis-firebase-token"
 
     // todo при увеличении версии библиотеки заменить значение на true
     public useFirebaseDistribution = false
@@ -134,7 +134,7 @@ class TagPipelineAndroid extends TagPipeline {
                      if (useFirebaseDistribution) {
                         firebaseUploadWithKeystoreStageBodyAndroid(
                             script,
-                            jenkinsGoogleServiceAccountCredsId,
+                            googleServiceAccountCredsId,
                             firebaseAppDistributionTask,
                             keystoreCredentials,
                             keystorePropertiesCredentials
@@ -173,17 +173,17 @@ class TagPipelineAndroid extends TagPipeline {
                                                       String keystoreCredentials,
                                                       String keystorePropertiesCredentials) {
         AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
-            gradleTaskWithBuildCache(script, betaUploadGradleTask)
+            betaUploadStageBodyAndroid(script, betaUploadGradleTask)
         }  
     }
 
     def static firebaseUploadWithKeystoreStageBodyAndroid(Object script,
-                                                          String jenkinsGoogleServiceAccountCredsId,
+                                                          String googleServiceAccountCredsId,
                                                           String firebaseAppDistributionTask,
                                                           String keystoreCredentials,
                                                           String keystorePropertiesCredentials) {
         AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
-            AndroidUtil.withFirebaseToken(script, jenkinsGoogleServiceAccountCredsId) {
+            withFirebaseToken(script, googleServiceAccountCredsId) {
                 gradleTaskWithBuildCache(script, firebaseAppDistributionTask)
             }
         }
@@ -212,7 +212,20 @@ class TagPipelineAndroid extends TagPipeline {
 
     }
 
-    def static gradleTaskWithBuildCache(Object script, String gradleTask) {
+    @Deprecated
+    def static betaUploadStageBodyAndroid(Object script, String betaUploadGradleTask) {
+        gradleTaskWithBuildCache(script, betaUploadGradleTask)
+    }
+
+    def static withFirebaseToken(Object script, String googleServiceAccountCredsId, Closure body) {
+        script.withCredentials([
+                script.string(credentialsId: googleServiceAccountCredsId, variable: 'FIREBASE_TOKEN')
+        ]) {
+            body()
+        }
+    }
+
+    private def static gradleTaskWithBuildCache(Object script, String gradleTask) {
         AndroidUtil.withGradleBuildCacheCredentials(script) {
             script.sh "./gradlew ${gradleTask}"
         }

@@ -68,14 +68,6 @@ class AndroidUtil {
         }
     }
 
-    def static withFirebaseToken(Object script, String jenkinsGoogleServiceAccountCredsId, Closure body) {
-        script.withCredentials([
-                script.string(credentialsId: jenkinsGoogleServiceAccountCredsId, variable: 'FIREBASE_TOKEN')
-        ]) {
-            body()
-        }
-    }
-
     /**
      * Execute body with global variables 'GRADLE_BUILD_CACHE_USER' and 'GRADLE_BUILD_CACHE_PASS'
      */
