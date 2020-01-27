@@ -17,7 +17,6 @@ package ru.surfstudio.ci
 
 import com.cloudbees.plugins.credentials.CredentialsProvider
 import com.cloudbees.plugins.credentials.common.IdCredentials
-import groovyx.gpars.dataflow.operator.Pipeline
 import org.eclipse.jgit.transport.URIish
 import org.jenkinsci.plugins.gitclient.Git
 
@@ -27,13 +26,39 @@ class RepositoryUtil {
     def static SKIP_CI_LABEL2 = "[ci skip]"
     def static VERSION_LABEL1 = "[version]"
 
-    @Deprecated
-    def static notifyGitlabAboutStageFinis(Object script, String stageName, String result){
-        def projectID = "$.project.id"
-        script.gitlabCommitStatus(name: stageName, builds: [projectId: projectID, revisionHash: ])
+    def static notifyBitbucketAboutStageFinish(Object script, String repoUrl, String stageName, String result){
+        def commit = getSavedGitCommitHash(script)
+        def slug = getCurrentBitbucketRepoSlug(script, repoUrl)
+        switch (result){
+            case Result.SUCCESS:
+                script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $result"
+                //script.gitlabCommitStatus(name: "$stageName", builds: [ [projectId: "surfstudio/projects/inventiveretail-android", revisionHash: "$commit"],]) { }
+                script.updateGitlabCommitStatus(name: "$stageName", state: "success")
+                break
+            case Result.ABORTED:
+                script.updateGitlabCommitStatus(name: "$stageName", state: "canceled")
+                break
+            case Result.FAILURE:
+            case Result.UNSTABLE:
+                script.updateGitlabCommitStatus(name: "$stageName", state: "failed")
+                break
+            default:
+                script.error "Unsupported Result: ${result}"
+        }
     }
 
     def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName){
+        def gitlabStatus = 'running'
+        def slug = getCurrentBitbucketRepoSlug(script, repoUrl)
+        def commit = getSavedGitCommitHash(script)
+        if (!commit) {
+            script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
+        }
+        script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $gitlabStatus"
+        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus")
+    }
+
+    /*def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName){
         def bitbucketStatus = 'INPROGRESS'
         def slug = getCurrentBitbucketRepoSlug(script, repoUrl)
         def commit = getSavedGitCommitHash(script)
@@ -48,9 +73,9 @@ class RepositoryUtil {
                 repoSlug: slug,
                 commitId: commit
         )
-    }
+    }*/
 
-    def static notifyBitbucketAboutStageFinish(Object script, String repoUrl, String stageName, String result){
+    /*def static notifyBitbucketAboutStageFinish(Object script, String repoUrl, String stageName, String result){
         def bitbucketStatus = ""
 
         switch (result){
@@ -80,7 +105,7 @@ class RepositoryUtil {
                 repoSlug: slug,
                 commitId: commit
         )
-    }
+    }*/
 
     def static getCurrentBitbucketRepoSlug(Object script, String repoUrl){
         def splittedUrl = repoUrl.split("/")

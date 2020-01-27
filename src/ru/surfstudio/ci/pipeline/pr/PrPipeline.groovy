@@ -242,7 +242,7 @@ abstract class PrPipeline extends ScmPipeline {
                         printContributedVariables: true,
                         printPostContent: true,
                         causeString: 'Triggered by GitLab',
-                        regexpFilterExpression: '^'+"$repoUrl"+'$',
+                        regexpFilterExpression: "$repoUrl",
                         regexpFilterText: '$repoUrl'
                 ),
                 script.pollSCM('')
