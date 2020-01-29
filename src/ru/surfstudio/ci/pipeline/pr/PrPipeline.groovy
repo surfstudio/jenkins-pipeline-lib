@@ -43,7 +43,6 @@ abstract class PrPipeline extends ScmPipeline {
     public destinationBranch = ""
     public authorUsername = ""
     public boolean targetBranchChanged = false
-
     //other config
     public stagesForTargetBranchChangedMode = [CHECKOUT, PRE_MERGE]
 
@@ -157,11 +156,11 @@ abstract class PrPipeline extends ScmPipeline {
     }
 
     def static preExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
-        RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
+        RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, stage.name)
     }
 
     def static postExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
-        RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
+        RepositoryUtil.notifyGitlabAboutStageFinish(script, repoUrl, stage.name, stage.result)
     }
 
     String buildDescription() {
@@ -180,6 +179,7 @@ abstract class PrPipeline extends ScmPipeline {
     public static final String DESTINATION_BRANCH_PARAMETER = 'destinationBranch'
     public static final String AUTHOR_USERNAME_PARAMETER = 'authorUsername'
     public static final String TARGET_BRANCH_CHANGED_PARAMETER = 'targetBranchChanged'
+    public static final String GITLAB_CONNECTION = "Gitlab Surf"
 
     static List<Object> properties(ScmPipeline ctx) {
         def script = ctx.script
@@ -187,12 +187,8 @@ abstract class PrPipeline extends ScmPipeline {
                 buildDiscarder(script),
                 parameters(script),
                 triggers(script, ctx.repoUrl),
-                gitLabConnection(script)
+                script.gitLabConnection(GITLAB_CONNECTION)
         ]
-    }
-
-    def static gitLabConnection(script) {
-        return script.gitLabConnection('GitLab-Surf')
     }
 
     def static buildDiscarder(script) {
