@@ -115,7 +115,7 @@ class RepositoryUtil {
     }
 
     def static getCurrentBitbucketRepoSlug(Object script, String repoUrl){
-        def splittedUrl = repoUrl.split("/")
+        def splittedUrl = repoUrl.split("https://gitlab.com/")
         return splittedUrl[splittedUrl.length - 1]
     }
 
