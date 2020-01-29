@@ -192,7 +192,7 @@ abstract class PrPipeline extends ScmPipeline {
     }
 
     def static gitLabConnection(script) {
-        return script.properties([script.gitLabConnection('GitLab-Surf')])
+        return script.gitLabConnection('GitLab-Surf')
     }
 
     def static buildDiscarder(script) {
