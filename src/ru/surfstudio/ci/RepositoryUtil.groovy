@@ -33,7 +33,7 @@ class RepositoryUtil {
             case Result.SUCCESS:
                 script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $result"
                 //script.gitlabCommitStatus(name: "$stageName", connection: script.gitLabConnection('GitLab-Surf'), builds: [ [projectId: "surfstudio/projects/inventiveretail-android", revisionHash: "$commit"],]) { }
-                script.updateGitlabCommitStatus(name: "$stageName", state: "success")
+                script.updateGitlabCommitStatus(name: "$stageName", state: "success", builds: [[projectId: "surfstudio/projects/inventiveretail-android", revisionHash: "$commit"]])
                 break
             case Result.ABORTED:
                 script.updateGitlabCommitStatus(name: "$stageName", state: "canceled")
@@ -56,7 +56,7 @@ class RepositoryUtil {
         }
         script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $gitlabStatus"
         //script.gitlabCommitStatus(name: "$stageName", connection: script.gitLabConnection('GitLab-Surf'), builds: [ [projectId: "surfstudio/projects/inventiveretail-android", revisionHash: "$commit"],]) { }
-        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus")
+        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "surfstudio/projects/inventiveretail-android", revisionHash: "$commit"]])
     }
 
     /*def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName){
