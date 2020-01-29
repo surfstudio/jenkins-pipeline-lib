@@ -32,8 +32,8 @@ class RepositoryUtil {
         switch (result){
             case Result.SUCCESS:
                 script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $result"
-                script.gitlabCommitStatus(name: "$stageName", connection: script.gitLabConnection('GitLab-Surf'), builds: [ [projectId: "surfstudio/projects/inventiveretail-android", revisionHash: "$commit"],]) { }
-                //script.updateGitlabCommitStatus(name: "$stageName", state: "success")
+                //script.gitlabCommitStatus(name: "$stageName", connection: script.gitLabConnection('GitLab-Surf'), builds: [ [projectId: "surfstudio/projects/inventiveretail-android", revisionHash: "$commit"],]) { }
+                script.updateGitlabCommitStatus(name: "$stageName", state: "success")
                 break
             case Result.ABORTED:
                 script.updateGitlabCommitStatus(name: "$stageName", state: "canceled")
@@ -55,8 +55,8 @@ class RepositoryUtil {
             script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
         }
         script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $gitlabStatus"
-        script.gitlabCommitStatus(name: "$stageName", connection: script.gitLabConnection('GitLab-Surf'), builds: [ [projectId: "surfstudio/projects/inventiveretail-android", revisionHash: "$commit"],]) { }
-        //script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus")
+        //script.gitlabCommitStatus(name: "$stageName", connection: script.gitLabConnection('GitLab-Surf'), builds: [ [projectId: "surfstudio/projects/inventiveretail-android", revisionHash: "$commit"],]) { }
+        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus")
     }
 
     /*def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName){
