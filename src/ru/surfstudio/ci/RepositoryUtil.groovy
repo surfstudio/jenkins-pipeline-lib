@@ -17,6 +17,7 @@ package ru.surfstudio.ci
 
 import com.cloudbees.plugins.credentials.CredentialsProvider
 import com.cloudbees.plugins.credentials.common.IdCredentials
+import org.apache.tools.ant.types.selectors.SelectSelector
 import org.eclipse.jgit.transport.URIish
 import org.jenkinsci.plugins.gitclient.Git
 
@@ -25,10 +26,11 @@ class RepositoryUtil {
     def static SKIP_CI_LABEL1 = "[skip ci]"
     def static SKIP_CI_LABEL2 = "[ci skip]"
     def static VERSION_LABEL1 = "[version]"
+    def static DEFAULT_GITLAB_CONNECTION = "Gitlab Surf"
 
     def static notifyGitlabAboutStageStart(Object script, String repoUrl, String stageName){
         def gitlabStatus = "running"
-        def slug = getCurrentBitbucketRepoSlug(script, repoUrl)
+        def slug = getCurrentGitlabRepoSlug(script, repoUrl)
         def commit = getSavedGitCommitHash(script)
         if (!commit) {
             script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
@@ -55,7 +57,7 @@ class RepositoryUtil {
                 script.error "Unsupported Result: ${result}"
         }
         def commit = getSavedGitCommitHash(script)
-        def slug = getCurrentBitbucketRepoSlug(script, repoUrl)
+        def slug = getCurrentGitlabRepoSlug(script, repoUrl)
         if (!commit) {
             script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
         }
@@ -63,7 +65,6 @@ class RepositoryUtil {
         script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "$commit"]])
     }
 
-    @Deprecated
     def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName){
         def bitbucketStatus = 'INPROGRESS'
         def slug = getCurrentBitbucketRepoSlug(script, repoUrl)
@@ -81,7 +82,6 @@ class RepositoryUtil {
         )
     }
 
-    @Deprecated
     def static notifyBitbucketAboutStageFinish(Object script, String repoUrl, String stageName, String result){
         def bitbucketStatus = ""
 
@@ -114,8 +114,22 @@ class RepositoryUtil {
         )
     }
 
+    def static getCurrentGitlabRepoSlug(Object script, String repoUrl){
+        def splittedUrlString = ""
+        def splittedUrlArray = repoUrl.split("/")
+        for (def i = 3; i < splittedUrlArray.length; i++)
+            if(i == splittedUrlArray.length - 1) {
+                splittedUrlString += splittedUrlArray[i]
+            }
+            else {
+                splittedUrlString += splittedUrlArray[i]
+                splittedUrlString += "/"
+            }
+        return splittedUrlString
+    }
+
     def static getCurrentBitbucketRepoSlug(Object script, String repoUrl){
-        def splittedUrl = repoUrl.split("https://gitlab.com/")
+        def splittedUrl = repoUrl.split("/")
         return splittedUrl[splittedUrl.length - 1]
     }
 

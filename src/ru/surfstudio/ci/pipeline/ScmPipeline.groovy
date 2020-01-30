@@ -33,6 +33,7 @@ abstract class ScmPipeline extends Pipeline {
     //required initial configuration
     public repoUrl = ""
     public repoCredentialsId = Constants.BITBUCKET_BUILDER_CREDENTIALS_ID
+    public gitlabConnection = RepositoryUtil.DEFAULT_GITLAB_CONNECTION
 
     ScmPipeline(Object script) {
         super(script)
