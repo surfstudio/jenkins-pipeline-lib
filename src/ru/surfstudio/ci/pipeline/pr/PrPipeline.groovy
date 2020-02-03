@@ -179,7 +179,6 @@ abstract class PrPipeline extends ScmPipeline {
     public static final String DESTINATION_BRANCH_PARAMETER = 'destinationBranch'
     public static final String AUTHOR_USERNAME_PARAMETER = 'authorUsername'
     public static final String TARGET_BRANCH_CHANGED_PARAMETER = 'targetBranchChanged'
-    public static final String GITLAB_CONNECTION = "Gitlab Surf"
 
     static List<Object> properties(ScmPipeline ctx) {
         def script = ctx.script
@@ -187,7 +186,7 @@ abstract class PrPipeline extends ScmPipeline {
                 buildDiscarder(script),
                 parameters(script),
                 triggers(script, ctx.repoUrl),
-                script.gitLabConnection(GITLAB_CONNECTION)
+                script.gitLabConnection(ctx.gitlabConnection)
         ]
     }
 
@@ -211,7 +210,7 @@ abstract class PrPipeline extends ScmPipeline {
                         description: 'Ветка, в которую будет мержиться пр, обязательный параметр'),
                 script.string(
                         name: AUTHOR_USERNAME_PARAMETER,
-                        description: 'username в bitbucket создателя пр, нужно для отправки собщений, обязательный параметр')
+                        description: 'username в gitlab создателя пр, нужно для отправки собщений, обязательный параметр')
         ])
     }
 
