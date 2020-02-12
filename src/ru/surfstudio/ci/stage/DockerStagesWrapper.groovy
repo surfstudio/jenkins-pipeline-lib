@@ -13,7 +13,7 @@ class DockerStagesWrapper extends AbstractStagesWrapper {
 
     @Override
     def wrapStages(Object script, Pipeline context, Closure executeStagesBody) {
-        script.echp "Wrap into docker container"
+        script.echo "Wrap into docker container"
         script.docker.image("cirrusci/flutter:latest").inside {
             script.echo "Inside docker"
             executeStagesBody()
