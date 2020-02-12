@@ -304,6 +304,7 @@ class TagPipelineFlutter extends TagPipeline {
                 applyStrategy(ctx, stage, skipResolver(true))
             }
         }
+
         CommonUtil.applyStrategiesFromParams(ctx, paramsMap)
     }
 
@@ -326,12 +327,12 @@ class TagPipelineFlutter extends TagPipeline {
 
     def uploadStageBody(Object script, String shBetaUploadCommand) {
         script.withCredentials([script.string(credentialsId: jenkinsGoogleServiceAccountCredsId, variable: 'FIREBASE_TOKEN')]) {
-            CommonUtil.shWithRuby(script, shBetaUploadCommand)
+            CommonUtil.shWithRuby2(script, shBetaUploadCommand)
         }
     }
 
     def uploadStageTestFlight(Object script, String shUploadCommand) {
-        CommonUtil.shWithRuby(script, shUploadCommand)
+        CommonUtil.shWithRuby2(script, shUploadCommand)
     }
 
     def static versionUpdateStageBody(Object script,

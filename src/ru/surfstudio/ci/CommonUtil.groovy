@@ -91,6 +91,14 @@ class CommonUtil {
     //endregion
 
     def static shWithRuby(Object script, String command, String version = "2.5.5") {
+        script.sh "hostname; set +x; source ~/.bashrc; source ~/.rvm/scripts/rvm; rvm use $version; echo \" Gameset name : \$(rvm gemset name) \"; ls -la; ${command}"
+    }
+
+    /**
+     *  dirty hack due to merge to main branch
+     *  Flutter scheme for ruby initialization conflicts with current
+     */
+    def static shWithRuby2(Object script, String command) {
         script.sh "hostname; set +x; source ~/.bashrc; source ~/.rvm/scripts/rvm; echo \" Gameset name : \$(rvm gemset name) \"; ls -la; ${command}"
     }
 
