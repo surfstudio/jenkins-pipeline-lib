@@ -60,35 +60,37 @@ class PrPipelineFlutter extends PrPipeline {
         propertiesProvider = { properties(this) }
 
 
-        def androidStages = docker ("test",[
-                stage(STAGE_ANDROID, false) {
-                    // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
-                },
-                stage(CHECKOUT, false) {
-                    checkout(script, repoUrl, sourceBranch, repoCredentialsId)
-                    saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
-                    abortDuplicateBuildsWithDescription(this)
-                },
-                stage(PRE_MERGE, false) {
-                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
-                },
-                stage(CHECKOUT_FLUTTER_VERSION_ANDROID) {
-                    script.sh checkoutFlutterVersionCommand
-                },
-                stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
-                },
-                stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    FlutterPipelineHelper.testStageBody(script, testCommand)
-                },
-                stage(BUILD_ANDROID) {
-                    FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
-                            buildAndroidCommand,
-                            androidKeystoreCredentials,
-                            androidKeystorePropertiesCredentials)
-                },
+        def androidStages = [
+                docker("test", [
+                        stage(STAGE_ANDROID, false) {
+                            // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
+                        },
+                        stage(CHECKOUT, false) {
+                            checkout(script, repoUrl, sourceBranch, repoCredentialsId)
+                            saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
+                            abortDuplicateBuildsWithDescription(this)
+                        },
+                        stage(PRE_MERGE, false) {
+                            preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                        },
+                        stage(CHECKOUT_FLUTTER_VERSION_ANDROID) {
+                            script.sh checkoutFlutterVersionCommand
+                        },
+                        stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                            FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
+                        },
+                        stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                            FlutterPipelineHelper.testStageBody(script, testCommand)
+                        },
+                        stage(BUILD_ANDROID) {
+                            FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
+                                    buildAndroidCommand,
+                                    androidKeystoreCredentials,
+                                    androidKeystorePropertiesCredentials)
+                        },
+                ]
+                )
         ]
-        )
 
         def iosStages = [
                 stage(STAGE_IOS, false) {
