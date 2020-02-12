@@ -15,6 +15,7 @@
  */
 package ru.surfstudio.ci.pipeline.helper
 
+import groovy.json.JsonSlurper
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.utils.android.AndroidTestUtil
@@ -59,14 +60,14 @@ class FlutterPipelineHelper {
 
             script.echo "Importing iOS certificate: ${certfileCredentialId}"
 
-            CommonUtil.shWithRuby(script, 'security -v unlock-keychain -p $KEYCHAIN_PASS')
-            CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
-            CommonUtil.shWithRuby(script, 'security set-key-partition-list -S apple-tool:,apple: -s -k $KEYCHAIN_PASS ~/Library/Keychains/login.keychain-db')
-            CommonUtil.shWithRuby(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
-            CommonUtil.shWithRuby(script, 'ls ios/; open ../../scripts/xcode.app ./ios/$(ls ./ios/ | grep xcworkspace)')
+            CommonUtil.shWithRuby2(script, 'security -v unlock-keychain -p $KEYCHAIN_PASS')
+            CommonUtil.shWithRuby2(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
+            CommonUtil.shWithRuby2(script, 'security set-key-partition-list -S apple-tool:,apple: -s -k $KEYCHAIN_PASS ~/Library/Keychains/login.keychain-db')
+            CommonUtil.shWithRuby2(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
+            CommonUtil.shWithRuby2(script, 'ls ios/; open ../../scripts/xcode.app ./ios/$(ls ./ios/ | grep xcworkspace)')
 
-            CommonUtil.shWithRuby(script, "make -C ios/ init")
-            CommonUtil.shWithRuby(script, buildShCommand)
+            CommonUtil.shWithRuby2(script, "make -C ios/ init")
+            CommonUtil.shWithRuby2(script, buildShCommand)
         }
     }
 
