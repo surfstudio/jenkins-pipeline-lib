@@ -27,6 +27,7 @@ import ru.surfstudio.ci.stage.SimpleStage
 import ru.surfstudio.ci.stage.StageGroup
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
+import ru.surfstudio.ci.stage.SimpleStageGroup
 import ru.surfstudio.ci.utils.StageTreeUtil
 
 /**
@@ -133,10 +134,19 @@ abstract class Pipeline implements Serializable {
     }
 
     /**
+     * Get stages by name
+     * @param stageName
+     * @return stage/[]
+     */
+    def getStages(String stageName) {
+        return StageTreeUtil.getStages(stages, stageName)
+    }
+
+    /**
      * execute lambda with all stages in stage tree
      * @param lambda: { stage ->  ... }
      */
-    def forStages(Closure lambda) {
+    def forStages(List<Stage> stages = this.stages, Closure lambda) {
         return StageTreeUtil.forStages(stages, lambda)
     }
 
@@ -198,6 +208,13 @@ abstract class Pipeline implements Serializable {
     /**
      * Run stages on specific node
      */
+    def static node(String name, String node, boolean copyWorkspace, List<Stage> stages) {
+        return new NodeStagesWrapper(name, node, copyWorkspace, stages)
+    }
+
+    /**
+     * Run stages on specific node
+     */
     def static node(String node, boolean copyWorkspace, List<Stage> stages) {
         return new NodeStagesWrapper("Node: $node", node, copyWorkspace, stages)
     }
@@ -233,6 +250,51 @@ abstract class Pipeline implements Serializable {
      */
     def static wrapStages(String name, Closure stagesWrapperFunction, List<Stage> stages) {
         return new CustomStagesWrapper(name, stagesWrapperFunction, stages)
+    }
+
+    // ------------ Group ----------------
+
+    /**
+     * Grouped stages as one stage
+     * @param stages
+     * @return
+     */
+    def static group(List<Stage> stages) {
+        return new SimpleStageGroup("Group", false, stages)
+    }
+
+    /**
+     * Grouped stages as one stage
+     *
+     * @param copyWorkspace
+     * @param stages
+     * @return
+     */
+    def static group(boolean copyWorkspace, List<Stage> stages) {
+        return new SimpleStageGroup("Group", copyWorkspace, stages)
+    }
+
+    /**
+     * Grouped stages as one stage
+     *
+     * @param name
+     * @param stages
+     * @return
+     */
+    def static group(String name, List<Stage> stages) {
+        return new SimpleStageGroup(name, false, stages)
+    }
+
+    /**
+     * Grouped stages as one stage
+     *
+     * @param name
+     * @param copyWorkspace
+     * @param stages
+     * @return
+     */
+    def static group(String name, boolean copyWorkspace, List<Stage> stages) {
+        return new SimpleStageGroup(name, copyWorkspace, stages)
     }
 
     // ==================================== UTIL =========================================

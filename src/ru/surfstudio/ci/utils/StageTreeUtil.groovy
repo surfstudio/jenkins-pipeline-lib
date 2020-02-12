@@ -51,6 +51,24 @@ class StageTreeUtil {
     }
 
     /**
+     * Get stages by name
+     * @param stageName
+     * @param stagesTree - tree of stagesTree
+     * @return stages / []
+     */
+    def static getStages(List<Stage> stagesTree, String stageName) {
+        def result = [];
+        for(Stage stage in stagesTree){
+            if(stage.name == stageName) {
+                result += stage
+            } else if (stage instanceof StageGroup){
+                result += getStage(stage.stages, stageName)
+            }
+        }
+        return result
+    }
+
+    /**
      * execute lambda with all stagesTree in stage three
      * @param lambda: { stage ->  ... }
      * @param stagesTree - tree of stagesTree

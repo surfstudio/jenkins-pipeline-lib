@@ -80,9 +80,10 @@ abstract class PrPipeline extends ScmPipeline {
         if(ctx.targetBranchChanged) {
             script.echo "Build triggered by target branch changes, run only ${ctx.stagesForTargetBranchChangedMode} stages"
             ctx.forStages { stage ->
-                if(!stage instanceof SimpleStage){
-                    return 
+                if(!(stage instanceof SimpleStage)){
+                    return
                 }
+
                 def executeStage = false
                 for(stageNameForTargetBranchChangedMode in ctx.stagesForTargetBranchChangedMode){
                     executeStage = executeStage || (stageNameForTargetBranchChangedMode == stage.getName())
@@ -135,7 +136,7 @@ abstract class PrPipeline extends ScmPipeline {
     }
 
     def static prepareMessageForPipeline(PrPipeline ctx, Closure handler) {
-        if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED) {
+        if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED && ctx.jobResult != Result.NOT_BUILT) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
             def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlSlackLink(ctx.script)}"
             handler(message)
