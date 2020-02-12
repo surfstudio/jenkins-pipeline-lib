@@ -60,7 +60,7 @@ class PrPipelineFlutter extends PrPipeline {
         propertiesProvider = { properties(this) }
 
 
-        def androidStages = [
+        def androidStages = docker ("test",[
                 stage(STAGE_ANDROID, false) {
                     // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                 },
@@ -88,6 +88,7 @@ class PrPipelineFlutter extends PrPipeline {
                             androidKeystorePropertiesCredentials)
                 },
         ]
+        )
 
         def iosStages = [
                 stage(STAGE_IOS, false) {
