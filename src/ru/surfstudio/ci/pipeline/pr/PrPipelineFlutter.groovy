@@ -45,6 +45,8 @@ class PrPipelineFlutter extends PrPipeline {
     public buildIOsCommand = "./script/ios/build.sh -qa"
     public testCommand = "flutter test"
 
+    //docker
+    public dockerImageName = "cirrusci/flutter:latest"
 
     PrPipelineFlutter(Object script) {
         super(script)
@@ -61,7 +63,7 @@ class PrPipelineFlutter extends PrPipeline {
 
 
         def androidStages = [
-                docker("test", [
+                docker("Docker stage", dockerImageName,  [
                         stage(STAGE_ANDROID, false) {
                             // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                         },

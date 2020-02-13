@@ -236,8 +236,8 @@ abstract class Pipeline implements Serializable {
      * @param stages
      * @return
      */
-    def static docker(String name, List<Stage> stages) {
-        return new DockerStagesWrapper(name, stages)
+    def static docker(String name, String imageName = "cirrusci/flutter:latest",  List<Stage> stages) {
+        return new DockerStagesWrapper(name, imageName, stages)
     }
 
     // ------------ Dir ----------------
