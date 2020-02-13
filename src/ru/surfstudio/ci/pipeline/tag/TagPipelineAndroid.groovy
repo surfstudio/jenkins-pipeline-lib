@@ -39,6 +39,13 @@ class TagPipelineAndroid extends TagPipeline {
     public buildGradleTask = "clean assembleQa assembleRelease"
     public betaUploadGradleTask = "crashlyticsUploadDistributionQa"
 
+    //required for firebase app distribution
+    public firebaseAppDistributionTask = "appDistributionUploadQa"
+    public googleServiceAccountCredsId = "surf-jarvis-firebase-token"
+
+    // todo при увеличении версии библиотеки заменить значение на true
+    public useFirebaseDistribution = false
+
     public unitTestGradleTask = "testQaUnitTest -PtestType=unit"
     public unitTestResultPathXml = "**/test-results/testQaUnitTest/*.xml"
     public unitTestResultPathDirHtml = "app/build/reports/tests/testQaUnitTest/"
@@ -124,10 +131,23 @@ class TagPipelineAndroid extends TagPipeline {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
                 stage(BETA_UPLOAD) {
-                    betaUploadWithKeystoreStageBodyAndroid(script,
+                     if (useFirebaseDistribution) {
+                        firebaseUploadWithKeystoreStageBodyAndroid(
+                            script,
+                            googleServiceAccountCredsId,
+                            firebaseAppDistributionTask,
+                            keystoreCredentials,
+                            keystorePropertiesCredentials
+                        )
+                    } else {
+                        betaUploadWithKeystoreStageBodyAndroid(
+                            script,
                             betaUploadGradleTask,
                             keystoreCredentials,
-                            keystorePropertiesCredentials)
+                            keystorePropertiesCredentials
+                        )
+                    }
+                    
                 },
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     versionPushStageBody(script,
@@ -147,13 +167,25 @@ class TagPipelineAndroid extends TagPipeline {
     }
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ ======================================================
-
+    @Deprecated
     def static betaUploadWithKeystoreStageBodyAndroid(Object script,
                                                       String betaUploadGradleTask,
                                                       String keystoreCredentials,
                                                       String keystorePropertiesCredentials) {
         AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
             betaUploadStageBodyAndroid(script, betaUploadGradleTask)
+        }  
+    }
+
+    def static firebaseUploadWithKeystoreStageBodyAndroid(Object script,
+                                                          String googleServiceAccountCredsId,
+                                                          String firebaseAppDistributionTask,
+                                                          String keystoreCredentials,
+                                                          String keystorePropertiesCredentials) {
+        AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
+            withFirebaseToken(script, googleServiceAccountCredsId) {
+                gradleTaskWithBuildCache(script, firebaseAppDistributionTask)
+            }
         }
     }
 
@@ -180,9 +212,22 @@ class TagPipelineAndroid extends TagPipeline {
 
     }
 
+    @Deprecated
     def static betaUploadStageBodyAndroid(Object script, String betaUploadGradleTask) {
+        gradleTaskWithBuildCache(script, betaUploadGradleTask)
+    }
+
+    def static withFirebaseToken(Object script, String googleServiceAccountCredsId, Closure body) {
+        script.withCredentials([
+                script.string(credentialsId: googleServiceAccountCredsId, variable: 'FIREBASE_TOKEN')
+        ]) {
+            body()
+        }
+    }
+
+    private def static gradleTaskWithBuildCache(Object script, String gradleTask) {
         AndroidUtil.withGradleBuildCacheCredentials(script) {
-            script.sh "./gradlew ${betaUploadGradleTask}"
+            script.sh "./gradlew ${gradleTask}"
         }
     }
 

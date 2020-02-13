@@ -89,6 +89,8 @@ pipeline.run()
 * JUnit Attachments Plugin
 * Poll SCM plugin
 * [Bitbucket Build Status Notifier Plugin](https://github.com/surfstudio/bitbucket-build-status-notifier-plugin) surf fork
+* [GitLab Build Status Notifier Plugin](https://github.com/surfstudio/gitlab-plugin) surf fork
+
 
 ### Конфигурация Job
 Для большинства случаев используются jeninsFile (см пакет templates), размещенные в репозитории с исходным кодом.
