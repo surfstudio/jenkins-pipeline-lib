@@ -39,7 +39,7 @@ class PrPipelineFlutter extends PrPipeline {
     public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
 
     //sh commands
-    public checkoutFlutterVersionCommand = "mkdir test/ ; flutter doctor"
+    public checkoutFlutterVersionCommand = "mkdir test2/ ; flutter doctor"
 
     public buildAndroidCommand = "./script/android/build.sh -qa && ./script/android/build.sh -qa -x64"
     public buildIOsCommand = "./script/ios/build.sh -qa"
