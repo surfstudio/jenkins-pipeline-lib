@@ -7,21 +7,22 @@ import ru.surfstudio.ci.pipeline.Pipeline
  */
 class DockerStagesWrapper extends AbstractStagesWrapper {
     String imageName
+    String arguments
 
-    DockerStagesWrapper(String name, String imageName, List<Stage> stages) {
+    DockerStagesWrapper(String name = "", String imageName = "", String arguments = "",  List<Stage> stages) {
         super(name, stages)
 
         this.imageName = imageName
+        this.arguments = arguments
     }
 
     @Override
     def wrapStages(Object script, Pipeline context, Closure executeStagesBody) {
         script.echo "Wrap into docker container"
         //todo add possibility to change image
-        script.docker.image(imageName).inside {
+        script.docker.image(imageName).inside(arguments) {
             script.echo "Inside docker"
             executeStagesBody()
         }
-        return null
     }
 }
