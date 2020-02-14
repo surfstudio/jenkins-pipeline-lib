@@ -19,18 +19,29 @@ package ru.surfstudio.ci.pipeline.tag
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
+import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
-import ru.surfstudio.ci.stage.StageWithStrategy
 import ru.surfstudio.ci.utils.flutter.FlutterUtil
 import ru.surfstudio.ci.CommonUtil
 
+import static ru.surfstudio.ci.CommonUtil.applyStrategy
 import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 
 class TagPipelineFlutter extends TagPipeline {
+    public static final String STAGE_PARALLEL = 'Parallel Pipeline'
 
-    public static final String CALCULATE_VERSION_CODES = 'Calculate Version Codes'
-    public static final String CLEAN_PREV_BUILD = 'Clean Previous Build'
-    public static final String CHECKOUT_FLUTTER_VERSION = 'Checkout Flutter Project Version'
+    public static final String STAGE_ANDROID = 'Android'
+    public static final String STAGE_IOS = 'IOS'
+
+    public static final String CALCULATE_VERSION_CODES_ANDROID = 'Calculate Version Codes (Android)'
+    public static final String CALCULATE_VERSION_CODES_IOS = 'Calculate Version Codes (iOS)'
+
+    public static final String CLEAN_PREV_BUILD_ANDROID = 'Clean Previous Build (Android)'
+    public static final String CLEAN_PREV_BUILD_IOS = 'Clean Previous Build (iOS)'
+
+    public static final String CHECKOUT_FLUTTER_VERSION_ANDROID = 'Checkout Flutter Project Version (Android)'
+    public static final String CHECKOUT_FLUTTER_VERSION_IOS = 'Checkout Flutter Project Version (iOS)'
+
     public static final String VERSION_UPDATE_FOR_ARM64 = 'Version Update For Arm64'
     public static final String BUILD_ANDROID = 'Build Android'
     public static final String BUILD_ANDROID_ARM64 = 'Build Android Arm64'
@@ -44,19 +55,21 @@ class TagPipelineFlutter extends TagPipeline {
     public androidKeystoreCredentials = "no_credentials"
     public androidKeystorePropertiesCredentials = "no_credentials"
 
+    public jenkinsGoogleServiceAccountCredsId = "surf-jarvis-firebase-token"
 
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
-    public iOSCertfileCredentialId = "AppleIDDev.p12"
+    public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
 
     //build flags
     public boolean shouldBuildAndroid = true
+    public boolean shouldBuildIos = true
     public boolean shouldBuildIosBeta = true
     public boolean shouldBuildIosTestFlight = false
 
     public cleanFlutterCommand = "flutter clean"
     public checkoutFlutterVersionCommand = "./script/version.sh"
 
-    public buildAndroidCommand =  "./script/android/build.sh -qa " +
+    public buildAndroidCommand = "./script/android/build.sh -qa " +
             "&& ./script/android/build.sh -release "
     public buildAndroidCommandArm64 = "./script/android/build.sh -qa -x64 " +
             "&& ./script/android/build.sh -release -x64"
@@ -67,7 +80,7 @@ class TagPipelineFlutter extends TagPipeline {
     public configFile = "pubspec.yaml"
     public compositeVersionNameVar = "version"
 
-    public shBetaUploadCommandAndroid = "cd android && fastlane android beta" //todo android release build?
+    public shBetaUploadCommandAndroid = "make -C android/ init && make -C android/ beta"
     public shBetaUploadCommandIos = "make -C ios/ beta"
     public shTestFlightUploadCommandIos = "make -C ios/ release"
 
@@ -76,16 +89,37 @@ class TagPipelineFlutter extends TagPipeline {
     public mainVersionCode = "<undefined>"
     public arm64VersionCode = "<undefined>"
 
+    //ios node
+    public nodeIos
+
+    //backward compatibility for beta
+    public versionPrefix = ""; //todo remove after moving to fad finished
+
+    //stages
+    public List<Stage> androidStages
+    public List<Stage> iosStages
+
     TagPipelineFlutter(Object script) {
         super(script)
     }
 
     def init() {
 
+        applyStrategiesFromParams = {
+            def params = script.params
+            CommonUtil.applyStrategiesFromParams(this, [
+                    (UNIT_TEST)           : params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
+                    (INSTRUMENTATION_TEST): params[INSTRUMENTATION_TEST_STAGE_STRATEGY_PARAMETER],
+                    (STATIC_CODE_ANALYSIS): params[STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER],
+            ])
+        }
+
         node = NodeProvider.androidFlutterNode
+        nodeIos = NodeProvider.iOSFlutterNode
 
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
+
 
         initializeBody = { initBodyFlutter(this) }
         propertiesProvider = {
@@ -96,20 +130,23 @@ class TagPipelineFlutter extends TagPipeline {
             ]
         }
 
-        stages = [
+        androidStages = [
+                stage(STAGE_ANDROID, false) {
+                    // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
+                },
                 stage(CHECKOUT, false) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
-                stage(CALCULATE_VERSION_CODES) {
+                stage(CALCULATE_VERSION_CODES_ANDROID) {
                     calculateVersionCodesStageBody(this,
                             configFile,
                             compositeVersionNameVar,
                             minVersionCode)
                 },
-                stage(CLEAN_PREV_BUILD) {
+                stage(CLEAN_PREV_BUILD_ANDROID) {
                     script.sh cleanFlutterCommand
                 },
-                stage(CHECKOUT_FLUTTER_VERSION) {
+                stage(CHECKOUT_FLUTTER_VERSION_ANDROID) {
                     script.sh checkoutFlutterVersionCommand
                 },
                 stage(VERSION_UPDATE_FOR_ARM64) {
@@ -147,28 +184,58 @@ class TagPipelineFlutter extends TagPipeline {
                 stage(BETA_UPLOAD_ANDROID) {
                     uploadStageBody(script, shBetaUploadCommandAndroid)
                 },
-                node(NodeProvider.iOSFlutterNode, true, [
-                        stage(CHECKOUT_FLUTTER_VERSION) {
-                            script.sh checkoutFlutterVersionCommand
-                        },
-                        stage(BUILD_IOS_BETA) {
-                            FlutterPipelineHelper.buildStageBodyIOS(script,
-                                    buildQaIOsCommand,
-                                    iOSKeychainCredenialId,
-                                    iOSCertfileCredentialId)
-                        },
-                        stage(BETA_UPLOAD_IOS) {
-                            uploadStageBody(script, shBetaUploadCommandIos)
-                        },
-                        stage(BUILD_IOS_TESTFLIGHT) {
-                            FlutterPipelineHelper.buildStageBodyIOS(script,
-                                    buildReleaseIOsCommand,
-                                    iOSKeychainCredenialId,
-                                    iOSCertfileCredentialId)
-                        },
-                        stage(TESTFLIGHT_UPLOAD_IOS) {
-                            uploadStageBody(script, shTestFlightUploadCommandIos)
-                        }
+        ]
+
+        iosStages = [
+                stage(STAGE_IOS, false) {
+                    // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
+                },
+                stage(CHECKOUT, false) {
+                    checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
+                },
+                stage(CALCULATE_VERSION_CODES_IOS) {
+                    calculateVersionCodesStageBody(this,
+                            configFile,
+                            compositeVersionNameVar,
+                            minVersionCode)
+                },
+                stage(CLEAN_PREV_BUILD_IOS) {
+                    script.sh cleanFlutterCommand
+                },
+                stage(CHECKOUT_FLUTTER_VERSION_IOS) {
+                    script.sh checkoutFlutterVersionCommand
+                },
+                stage(VERSION_UPDATE) {
+                    versionUpdateStageBody(script,
+                            repoTag,
+                            mainVersionCode,
+                            configFile,
+                            compositeVersionNameVar)
+                },
+                stage(BUILD_IOS_BETA) {
+                    FlutterPipelineHelper.buildStageBodyIOS(script,
+                            buildQaIOsCommand,
+                            iOSKeychainCredenialId,
+                            iOSCertfileCredentialId)
+                },
+                stage(BETA_UPLOAD_IOS) {
+                    uploadStageBody(script, shBetaUploadCommandIos)
+                },
+                stage(BUILD_IOS_TESTFLIGHT) {
+                    FlutterPipelineHelper.buildStageBodyIOS(script,
+                            buildReleaseIOsCommand,
+                            iOSKeychainCredenialId,
+                            iOSCertfileCredentialId)
+                },
+                stage(TESTFLIGHT_UPLOAD_IOS) {
+                    uploadStageTestFlight(script, shTestFlightUploadCommandIos)
+                }
+        ]
+
+        stages = [
+                parallel(STAGE_PARALLEL, [
+                        group(STAGE_ANDROID, androidStages),
+                        node(STAGE_IOS, nodeIos, false, iosStages)
                 ]),
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     versionPushStageBody(script,
@@ -182,8 +249,6 @@ class TagPipelineFlutter extends TagPipeline {
                                     compositeVersionNameVar
                             ))
                 },
-
-
         ]
 
 
@@ -196,9 +261,13 @@ class TagPipelineFlutter extends TagPipeline {
         initBody(ctx)
 
         def script = ctx.script
-        extractValueFromParamsAndRun(script, PARAMETER_ANDROID_FULL_BETA) { value ->
+        extractValueFromParamsAndRun(script, PARAMETER_ANDROID_STAGE) { value ->
             ctx.shouldBuildAndroid = value
-            script.echo "Android full build with upload to Beta(qa) : $ctx.shouldBuildAndroid"
+            script.echo "Android full build with upload to Beta(qa) : $ctx.shouldBuildAndroid| extracted $value"
+        }
+        extractValueFromParamsAndRun(script, PARAMETER_IOS_STAGE) { value ->
+            ctx.shouldBuildIos = value
+            script.echo "iOS full build : $ctx.shouldBuildAndroid | extracted $value"
         }
         extractValueFromParamsAndRun(script, PARAMETER_IOS_FOR_BETA) { value ->
             ctx.shouldBuildIosBeta = value
@@ -215,15 +284,28 @@ class TagPipelineFlutter extends TagPipeline {
     }
 
     private static void initStrategies(TagPipelineFlutter ctx) {
-        (ctx.getStage(BUILD_ANDROID) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
-        (ctx.getStage(BUILD_ANDROID_ARM64) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
-        (ctx.getStage(BETA_UPLOAD_ANDROID) as StageWithStrategy).strategy = ctx.shouldBuildAndroid ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
+        def skipResolver = { skipStage -> skipStage ? StageStrategy.SKIP_STAGE : DEFAULT_STAGE_STRATEGY }
+        def paramsMap = [
+                (BUILD_IOS_BETA)       : skipResolver(!ctx.shouldBuildIosBeta),
+                (BETA_UPLOAD_IOS)      : skipResolver(!ctx.shouldBuildIosBeta),
 
-        (ctx.getStage(BUILD_IOS_BETA) as StageWithStrategy).strategy = ctx.shouldBuildIosBeta ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
-        (ctx.getStage(BETA_UPLOAD_IOS) as StageWithStrategy).strategy = ctx.shouldBuildIosBeta ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
+                (BUILD_IOS_TESTFLIGHT) : skipResolver(!ctx.shouldBuildIosTestFlight),
+                (TESTFLIGHT_UPLOAD_IOS): skipResolver(!ctx.shouldBuildIosTestFlight),
+        ]
 
-        (ctx.getStage(BUILD_IOS_TESTFLIGHT) as StageWithStrategy).strategy = ctx.shouldBuildIosTestFlight ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
-        (ctx.getStage(TESTFLIGHT_UPLOAD_IOS) as StageWithStrategy).strategy = ctx.shouldBuildIosTestFlight ? DEFAULT_STAGE_STRATEGY : StageStrategy.SKIP_STAGE
+        if (!ctx.shouldBuildAndroid) {
+            ctx.forStages(ctx.androidStages) { Stage stage ->
+                applyStrategy(ctx, stage, skipResolver(true))
+            }
+        }
+
+        if (!ctx.shouldBuildIos) {
+            ctx.forStages(ctx.iosStages) { Stage stage ->
+                applyStrategy(ctx, stage, skipResolver(true))
+            }
+        }
+
+        CommonUtil.applyStrategiesFromParams(ctx, paramsMap)
     }
 
     def static calculateVersionCodesStageBody(TagPipelineFlutter ctx,
@@ -238,13 +320,19 @@ class TagPipelineFlutter extends TagPipeline {
             newMainVersionCode = minVersionCode
         }
         ctx.mainVersionCode = String.valueOf(newMainVersionCode)
-        ctx.arm64VersionCode = "64" + String.valueOf(newMainVersionCode)
+        ctx.arm64VersionCode = ctx.versionPrefix + String.valueOf(newMainVersionCode)
         script.echo "New main versionCode: $ctx.mainVersionCode"
         script.echo "New arm64 versionCode: $ctx.arm64VersionCode"
     }
 
-    def static uploadStageBody(Object script, String shBetaUploadCommand) {
-        CommonUtil.shWithRuby(script, shBetaUploadCommand)
+    def uploadStageBody(Object script, String shBetaUploadCommand) {
+        script.withCredentials([script.string(credentialsId: jenkinsGoogleServiceAccountCredsId, variable: 'FIREBASE_TOKEN')]) {
+            CommonUtil.shWithRuby2(script, shBetaUploadCommand)
+        }
+    }
+
+    def uploadStageTestFlight(Object script, String shUploadCommand) {
+        CommonUtil.shWithRuby2(script, shUploadCommand)
     }
 
     def static versionUpdateStageBody(Object script,
@@ -267,7 +355,8 @@ class TagPipelineFlutter extends TagPipeline {
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
 
     // ======================================================  ↓↓↓ PARAMETERS ↓↓↓   ====================================================
-    public static final String PARAMETER_ANDROID_FULL_BETA = 'parameterAndroidFullBeta'
+    public static final String PARAMETER_ANDROID_STAGE = 'parameterAndroidStage'
+    public static final String PARAMETER_IOS_STAGE = 'parameterIosStage'
     public static final String PARAMETER_IOS_FOR_BETA = 'parameterIosForBeta'
     public static final String PARAMETER_IOS_FOR_TESTFLIGHT = 'parameterIosForTestFlight'
 
@@ -286,8 +375,13 @@ class TagPipelineFlutter extends TagPipeline {
                 ],
                 script.booleanParam(
                         defaultValue: true,
-                        name: PARAMETER_ANDROID_FULL_BETA,
-                        description: "Сборка Android(qa/release). Qa выгружается в Beta",
+                        name: PARAMETER_ANDROID_STAGE,
+                        description: "Сборка Android(qa/release). Пропусакет всю ветку",
+                ),
+                script.booleanParam(
+                        defaultValue: true,
+                        name: PARAMETER_IOS_STAGE,
+                        description: "Сборка ios. Позволяет пропустить всю ветку",
                 ),
                 script.booleanParam(
                         defaultValue: true,
