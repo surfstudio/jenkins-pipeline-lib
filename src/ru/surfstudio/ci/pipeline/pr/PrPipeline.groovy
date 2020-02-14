@@ -56,6 +56,7 @@ abstract class PrPipeline extends ScmPipeline {
     def static initBody(PrPipeline ctx) {
         initBodyWithOutAbortDuplicateBuilds(ctx)
         abortDuplicateBuildsWithDescription(ctx)
+        notifyGitlabAboutStagesPending(ctx.script, )
     }
 
     def static initBodyWithOutAbortDuplicateBuilds(PrPipeline ctx) {
@@ -168,6 +169,12 @@ abstract class PrPipeline extends ScmPipeline {
         return targetBranchChanged ?
                 "$sourceBranch to $destinationBranch: target branch changed" :
                 "$sourceBranch to $destinationBranch"
+    }
+
+    def static notifyGitlabAboutStagesPending(Object script, PrPipeline ctx){
+        if(ctx.stages.strategy != StageStrategy.SKIP_STAGE){
+            script.updateGitlabCommitStatus(name: CHECKOUT, state: "pending", builds: [[projectId: "surfstudio/projects/irg/inventiveretail-android-test", revisionHash: "master"]])
+        }
     }
 
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
