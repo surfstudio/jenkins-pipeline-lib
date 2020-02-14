@@ -55,14 +55,24 @@ abstract class PrPipeline extends ScmPipeline {
 
     def static initBody(PrPipeline ctx) {
         initBodyWithOutAbortDuplicateBuilds(ctx)
-        abortDuplicateBuildsWithDescription(ctx)
-        notifyGitlabAboutStagesPending(ctx.script, )
+        //abortDuplicateBuildsWithDescription(ctx)
+        notifyGitlabAboutStagesPending(ctx)
+    }
+
+    def static notifyGitlabAboutStagesPending(PrPipeline ctx) {
+        def script = ctx.script
+
+        ctx.forStages { stage ->
+            if (stage.strategy != StageStrategy.SKIP_STAGE) {
+                script.echo "Stage $stage.name - set pending"
+                script.updateGitlabCommitStatus(name: PRE_MERGE, state: "pending", builds: [[projectId: "surfstudio/projects/irg/inventiveretail-android-test", revisionHash: ctx.destinationBranch]])
+            }
+        }
     }
 
     def static initBodyWithOutAbortDuplicateBuilds(PrPipeline ctx) {
         def script = ctx.script
         CommonUtil.printInitialStageStrategies(ctx)
-
 
         //если триггером был webhook параметры устанавливаются как env, если запустили вручную, то устанавливается как params
         extractValueFromEnvOrParamsAndRun(script, SOURCE_BRANCH_PARAMETER) {
@@ -138,6 +148,7 @@ abstract class PrPipeline extends ScmPipeline {
 
     def static prepareMessageForPipeline(PrPipeline ctx, Closure handler) {
         if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED && ctx.jobResult != Result.NOT_BUILT) {
+            ctx.script.updateGitlabCommitStatus(name: ctx.stages.name, state: "failed", builds: [[projectId: "surfstudio/projects/irg/inventiveretail-android-test", revisionHash: "master"]])
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
             def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlSlackLink(ctx.script)}"
             handler(message)
@@ -171,11 +182,7 @@ abstract class PrPipeline extends ScmPipeline {
                 "$sourceBranch to $destinationBranch"
     }
 
-    def static notifyGitlabAboutStagesPending(Object script, PrPipeline ctx){
-        if(ctx.stages.strategy != StageStrategy.SKIP_STAGE){
-            script.updateGitlabCommitStatus(name: CHECKOUT, state: "pending", builds: [[projectId: "surfstudio/projects/irg/inventiveretail-android-test", revisionHash: "master"]])
-        }
-    }
+
 
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
 

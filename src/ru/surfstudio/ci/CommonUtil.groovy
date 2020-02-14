@@ -259,7 +259,6 @@ class CommonUtil {
             }
         }
     }
-
     /**
      * @param pipeline
      * @param strategiesFromParams - map, key - stageName, value - new strategy value
