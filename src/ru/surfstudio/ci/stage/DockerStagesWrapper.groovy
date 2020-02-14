@@ -9,7 +9,7 @@ class DockerStagesWrapper extends AbstractStagesWrapper {
     String imageName
     String arguments
 
-    DockerStagesWrapper(String name = "", String imageName = "", String arguments = "",  List<Stage> stages) {
+    DockerStagesWrapper(String name = "", String imageName, String arguments = "",  List<Stage> stages) {
         super(name, stages)
 
         this.imageName = imageName
@@ -18,11 +18,15 @@ class DockerStagesWrapper extends AbstractStagesWrapper {
 
     @Override
     def wrapStages(Object script, Pipeline context, Closure executeStagesBody) {
-        script.echo "Wrap into docker container"
-        //todo add possibility to change image
-        script.docker.image(imageName).inside(arguments) {
-            script.echo "Inside docker"
-            executeStagesBody()
+        try {
+            script.echo "Wrap into docker container: $imageName"
+            script.docker.image(imageName).inside(arguments) {
+                script.echo "Inside docker"
+                executeStagesBody()
+            }
+        } finally {
+            script.echo "Return from docker"
         }
+
     }
 }

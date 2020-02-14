@@ -25,6 +25,7 @@ class PrPipelineFlutter extends PrPipeline {
     public static final String STAGE_ANDROID = 'Android'
     public static final String STAGE_IOS = 'IOS'
 
+    public static final String STAGE_DOCKER = "Docker Flutter"
     public static final String CHECKOUT_FLUTTER_VERSION_ANDROID = 'Checkout Flutter Project Version (Android)'
     public static final String CHECKOUT_FLUTTER_VERSION_IOS = 'Checkout Flutter Project Version (iOS)'
 
@@ -39,7 +40,7 @@ class PrPipelineFlutter extends PrPipeline {
     public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
 
     //sh commands
-    public checkoutFlutterVersionCommand = "mkdir test2/ ; flutter doctor"
+    public checkoutFlutterVersionCommand = "echo \"Deprecated\""
 
     public buildAndroidCommand = "./script/android/build.sh -qa && ./script/android/build.sh -qa -x64"
     public buildIOsCommand = "./script/ios/build.sh -qa"
@@ -64,7 +65,7 @@ class PrPipelineFlutter extends PrPipeline {
 
 
         def androidStages = [
-                docker("Docker stage", dockerImageName, dockerArguments,  [
+                docker(STAGE_DOCKER, dockerImageName, dockerArguments,  [
                         stage(STAGE_ANDROID, false) {
                             // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                         },
