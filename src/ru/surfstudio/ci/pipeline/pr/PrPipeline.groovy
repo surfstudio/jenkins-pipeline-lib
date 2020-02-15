@@ -65,7 +65,7 @@ abstract class PrPipeline extends ScmPipeline {
         ctx.forStages { stage ->
             if (stage.strategy != StageStrategy.SKIP_STAGE) {
                 script.echo "Stage $stage.name - set pending"
-                script.updateGitlabCommitStatus(name: PRE_MERGE, state: "pending", builds: [[projectId: "surfstudio/projects/irg/inventiveretail-android-test", revisionHash: ctx.destinationBranch]])
+                script.updateGitlabCommitStatus(name: PRE_MERGE, state: "pending", builds: [[projectId: "surfstudio/projects/irg/inventiveretail-android-test", revisionHash: ctx.sourceBranch]])
             }
         }
     }
