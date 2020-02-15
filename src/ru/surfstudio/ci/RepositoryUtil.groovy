@@ -27,7 +27,7 @@ class RepositoryUtil {
     def static SKIP_CI_LABEL2 = "[ci skip]"
     def static VERSION_LABEL1 = "[version]"
     def static DEFAULT_GITLAB_CONNECTION = "Gitlab Surf"
-
+    def static var = PrPipeline.sourceBranch
     def static notifyGitlabAboutStageStart(Object script, String repoUrl, String stageName){
         def gitlabStatus = "running"
         def slug = getCurrentGitlabRepoSlug(script, repoUrl)
@@ -36,7 +36,7 @@ class RepositoryUtil {
             script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
         }
         script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $gitlabStatus"
-        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: PrPipeline.sourceBranch]])
+        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: var]])
     }
 
     def static notifyGitlabAboutStageFinish(Object script, String repoUrl, String stageName, String result){
@@ -61,8 +61,9 @@ class RepositoryUtil {
         if (!commit) {
             script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
         }
+        def var =
         script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $result"
-        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: Pipeline.sourceBranch]])
+        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: var]])
     }
 
     def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName){
