@@ -15,6 +15,7 @@
  */
 package ru.surfstudio.ci
 
+import ru.surfstudio.ci.pipeline.pr.PrPipeline
 import com.cloudbees.plugins.credentials.CredentialsProvider
 import com.cloudbees.plugins.credentials.common.IdCredentials
 import org.apache.tools.ant.types.selectors.SelectSelector
