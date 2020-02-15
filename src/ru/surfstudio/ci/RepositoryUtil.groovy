@@ -35,7 +35,7 @@ class RepositoryUtil {
             script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
         }
         script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $gitlabStatus"
-        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "dev/sprint-00"]])
+        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "$commit"]])
     }
 
     def static notifyGitlabAboutStageFinish(Object script, String repoUrl, String stageName, String result){
@@ -62,7 +62,7 @@ class RepositoryUtil {
         }
         def var =
         script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $result"
-        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "dev/sprint-00"]])
+        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "$commit"]])
     }
 
     def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName){
