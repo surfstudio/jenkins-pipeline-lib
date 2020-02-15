@@ -15,7 +15,6 @@
  */
 package ru.surfstudio.ci
 
-import ru.surfstudio.ci.pipeline.pr.PrPipeline
 import com.cloudbees.plugins.credentials.CredentialsProvider
 import com.cloudbees.plugins.credentials.common.IdCredentials
 import org.apache.tools.ant.types.selectors.SelectSelector
@@ -28,7 +27,6 @@ class RepositoryUtil {
     def static SKIP_CI_LABEL2 = "[ci skip]"
     def static VERSION_LABEL1 = "[version]"
     def static DEFAULT_GITLAB_CONNECTION = "Gitlab Surf"
-    def static var = PrPipeline.sourceBranch
     def static notifyGitlabAboutStageStart(Object script, String repoUrl, String stageName){
         def gitlabStatus = "running"
         def slug = getCurrentGitlabRepoSlug(script, repoUrl)
@@ -37,7 +35,7 @@ class RepositoryUtil {
             script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
         }
         script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $gitlabStatus"
-        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: var]])
+        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "dev/sprint-00"]])
     }
 
     def static notifyGitlabAboutStageFinish(Object script, String repoUrl, String stageName, String result){
@@ -64,7 +62,7 @@ class RepositoryUtil {
         }
         def var =
         script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $result"
-        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: var]])
+        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "dev/sprint-00"]])
     }
 
     def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName){
