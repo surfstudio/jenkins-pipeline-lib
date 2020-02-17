@@ -53,14 +53,13 @@ abstract class PrPipeline extends ScmPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
-    def static initBody(PrPipeline ctx) {
+    def static initBody(PrPipeline ctx, String repoUrl) {
         initBodyWithOutAbortDuplicateBuilds(ctx)
         //abortDuplicateBuildsWithDescription(ctx)
-        notifyGitlabAboutStagesPending(ctx)
+        notifyGitlabAboutStagesPending(ctx, repoUrl)
     }
 
-    def static notifyGitlabAboutStagesPending(PrPipeline ctx, String [] exclude = [CHECKOUT, PRE_MERGE, ]) {
-        def repoUrl = ScmPipeline.repoUrl
+    def static notifyGitlabAboutStagesPending(PrPipeline ctx, String [] exclude = [CHECKOUT, PRE_MERGE, ], String repoUrl) {
         def script = ctx.script
 
         ctx.forStages { stage ->

@@ -71,7 +71,7 @@ class PrPipelineAndroid extends PrPipeline {
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
-        initializeBody = { initBody(this) }
+        initializeBody = { initBody(this, repoUrl) }
         propertiesProvider = { properties(this) }
 
         stages = [
