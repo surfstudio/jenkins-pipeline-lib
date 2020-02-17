@@ -59,7 +59,7 @@ abstract class PrPipeline extends ScmPipeline {
         notifyGitlabAboutStagesPending(ctx, repoUrl)
     }
 
-    def static notifyGitlabAboutStagesPending(PrPipeline ctx, String [] exclude = [CHECKOUT, PRE_MERGE, ], String repoUrl) {
+    def static notifyGitlabAboutStagesPending(PrPipeline ctx, String [] exclude = [PRE_MERGE, BUILD], String repoUrl) {
         def script = ctx.script
 
         ctx.forStages { stage ->
@@ -157,7 +157,7 @@ abstract class PrPipeline extends ScmPipeline {
             handler(message)
         }
     }
-    
+
     def static finalizeStageBody(PrPipeline ctx){
         prepareMessageForPipeline(ctx, { message ->
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
