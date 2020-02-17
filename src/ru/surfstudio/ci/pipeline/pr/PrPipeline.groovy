@@ -66,7 +66,7 @@ abstract class PrPipeline extends ScmPipeline {
         ctx.forStages { stage ->
             if (stage.strategy != StageStrategy.SKIP_STAGE && !(stage.name in exclude)) {
                 script.echo "Stage $stage.name - set pending"
-                script.updateGitlabCommitStatus(name: "Pipeline", state: "pending", builds: [[projectId: repoSlug, revisionHash: ctx.sourceBranch]])
+                script.updateGitlabCommitStatus(name: null, state: "pending", builds: [[projectId: repoSlug, revisionHash: ctx.sourceBranch]])
             }
         }
     }
@@ -159,7 +159,7 @@ abstract class PrPipeline extends ScmPipeline {
         prepareMessageForPipeline(ctx, { message ->
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
         })
-        def stageName = "Pipeline"
+        def stageName = null
         RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, stageName, ctx.jobResult)
     }
 
@@ -174,7 +174,7 @@ abstract class PrPipeline extends ScmPipeline {
         def repoSlug = RepositoryUtil.getCurrentGitlabRepoSlug(script, repoUrl)
 
         RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, stage.name)
-        script.updateGitlabCommitStatus(name: "Pipeline", state: "running", builds: [[projectId: repoSlug, revisionHash: ctx.sourceBranch]])
+        script.updateGitlabCommitStatus(name: null, state: "running", builds: [[projectId: repoSlug, revisionHash: ctx.sourceBranch]])
     }
 
     def static postExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
