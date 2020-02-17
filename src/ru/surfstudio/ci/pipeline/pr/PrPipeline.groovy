@@ -155,7 +155,7 @@ abstract class PrPipeline extends ScmPipeline {
         }
     }
 
-    def static finalizeStageBody(PrPipeline ctx, String repoUrl){
+    def static finalizeStageBody(PrPipeline ctx){
         prepareMessageForPipeline(ctx, { message ->
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
         })
@@ -170,11 +170,11 @@ abstract class PrPipeline extends ScmPipeline {
         })
     }
 
-    def static preExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
+    def static preExecuteStageBodyPr(PrPipeline ctx, Object script, SimpleStage stage, String repoUrl) {
         def repoSlug = RepositoryUtil.getCurrentGitlabRepoSlug(script, repoUrl)
 
         RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, stage.name)
-        script.updateGitlabCommitStatus(name: "Pipeline", state: "running", builds: [[projectId: repoSlug, revisionHash: this.sourceBranch]])
+        script.updateGitlabCommitStatus(name: "Pipeline", state: "running", builds: [[projectId: repoSlug, revisionHash: ctx.sourceBranch]])
     }
 
     def static postExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {

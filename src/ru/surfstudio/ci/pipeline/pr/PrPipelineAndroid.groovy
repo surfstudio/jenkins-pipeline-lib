@@ -68,7 +68,7 @@ class PrPipelineAndroid extends PrPipeline {
     def init() {
         node = NodeProvider.androidFlutterNode
 
-        preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
+        preExecuteStageBody = { stage -> preExecuteStageBodyPr(this, script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
         initializeBody = { initBody(this) }
@@ -123,7 +123,7 @@ class PrPipelineAndroid extends PrPipeline {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
                 }
         ]
-        finalizeBody = { finalizeStageBody(this, repoUrl) }
+        finalizeBody = { finalizeStageBody(this) }
     }
 
     /**
