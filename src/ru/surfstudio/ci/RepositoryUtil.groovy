@@ -46,6 +46,7 @@ class RepositoryUtil {
                 gitlabStatus = "success"
                 break
             case Result.ABORTED:
+            case Result.NOT_BUILT:
                 gitlabStatus = "canceled"
                 break
             case Result.FAILURE:

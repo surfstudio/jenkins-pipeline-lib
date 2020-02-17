@@ -53,20 +53,20 @@ abstract class PrPipeline extends ScmPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
-    def static initBody(PrPipeline ctx, String repoUrl) {
+    def static initBody(PrPipeline ctx) {
         initBodyWithOutAbortDuplicateBuilds(ctx)
         //abortDuplicateBuildsWithDescription(ctx)
-        notifyGitlabAboutStagesPending(ctx, repoUrl)
+        notifyGitlabAboutStagesPending(ctx, ctx.repoUrl)
     }
 
-    def static notifyGitlabAboutStagesPending(PrPipeline ctx, String [] exclude = [BUILD, ], String repoUrl) {
+    def static notifyGitlabAboutStagesPending(PrPipeline ctx, String repoUrl, String [] exclude = []) {
         def script = ctx.script
         def repoSlug = RepositoryUtil.getCurrentGitlabRepoSlug(ctx.script, repoUrl)
 
         ctx.forStages { stage ->
-            if (stage.strategy != StageStrategy.SKIP_STAGE && stage.name in exclude) {
+            if (stage.strategy != StageStrategy.SKIP_STAGE && !(stage.name in exclude)) {
                 script.echo "Stage $stage.name - set pending"
-                script.updateGitlabCommitStatus(name: stage.name, state: "pending", builds: [[projectId: repoSlug, revisionHash: ctx.sourceBranch]])
+                script.updateGitlabCommitStatus(name: null, state: "pending", builds: [[projectId: repoSlug, revisionHash: ctx.sourceBranch]])
             }
         }
     }
@@ -156,12 +156,12 @@ abstract class PrPipeline extends ScmPipeline {
     }
 
     def static notifyGitlabAboutStageFinishFinalize(PrPipeline ctx, String repoUrl) {
-        if (ctx.jobResult != Result.SUCCESS){
+        if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.NOT_BUILT){
             def repoSlug = RepositoryUtil.getCurrentGitlabRepoSlug(ctx.script, repoUrl)
             ctx.script.echo "notify stage"
             ctx.script.updateGitlabCommitStatus(name: BUILD, state: "failed", builds: [[projectId: repoSlug, revisionHash: ctx.sourceBranch]])
         }
-        
+
         //postExecuteStageBodyPr(ctx.script, stage.name, repoUrl)
     }
 
@@ -181,6 +181,7 @@ abstract class PrPipeline extends ScmPipeline {
 
     def static preExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
         RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, stage.name)
+
     }
 
     def static postExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
