@@ -56,14 +56,14 @@ abstract class PrPipeline extends ScmPipeline {
     def static initBody(PrPipeline ctx) {
         initBodyWithOutAbortDuplicateBuilds(ctx)
         //abortDuplicateBuildsWithDescription(ctx)
-       // notifyGitlabAboutStagesPending(ctx)
+        notifyGitlabAboutStagesPending(ctx)
     }
 
-    def static notifyGitlabAboutStagesPending(PrPipeline ctx) {
+    def static notifyGitlabAboutStagesPending(PrPipeline ctx, String [] exclude = [CHECKOUT, PRE_MERGE]) {
         def script = ctx.script
 
         ctx.forStages { stage ->
-            if (stage.strategy != StageStrategy.SKIP_STAGE) {
+            if (stage.strategy != StageStrategy.SKIP_STAGE && stage.name == exclude) {
                 script.echo "Stage $stage.name - set pending"
                 script.updateGitlabCommitStatus(name: stage.name, state: "pending", builds: [[projectId: "surfstudio/projects/irg/inventiveretail-android-test", revisionHash: ctx.sourceBranch]])
             }
