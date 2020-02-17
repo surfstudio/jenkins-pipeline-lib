@@ -166,12 +166,12 @@ abstract class PrPipeline extends ScmPipeline {
     }
 
     def static notifyGitlabAboutStageFinishFinalize(PrPipeline ctx, String repoUrl) {
-        ctx.forStages { stage ->
             if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.NOT_BUILT) {
+                def repoSlug = RepositoryUtil.getCurrentGitlabRepoSlug(ctx.script, repoUrl)
                 ctx.script.echo "notify stage"
-                postExecuteStageBodyPr(ctx.script, stage.name, repoUrl)
+                ctx.script.updateGitlabCommitStatus(name: BUILD, state: "failed", builds: [[projectId: repoSlug, revisionHash: ctx.sourceBranch]])
+                //postExecuteStageBodyPr(ctx.script, stage.name, repoUrl)
             }
-        }
     }
 
     def static debugFinalizeStageBody(PrPipeline ctx) {
