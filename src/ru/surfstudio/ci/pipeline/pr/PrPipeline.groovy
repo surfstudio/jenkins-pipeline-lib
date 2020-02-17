@@ -157,8 +157,7 @@ abstract class PrPipeline extends ScmPipeline {
             handler(message)
         }
     }
-
-    def static notifyGitlabAboutStageFinishFinalize(repoUrl )
+    
     def static finalizeStageBody(PrPipeline ctx){
         prepareMessageForPipeline(ctx, { message ->
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
