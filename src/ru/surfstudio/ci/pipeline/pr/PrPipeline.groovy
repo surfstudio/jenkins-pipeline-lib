@@ -149,6 +149,7 @@ abstract class PrPipeline extends ScmPipeline {
     def static prepareMessageForPipeline(PrPipeline ctx, Closure handler) {
         if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED && ctx.jobResult != Result.NOT_BUILT) {
             ctx.script.updateGitlabCommitStatus(name: 'Checkout', state: "failed", builds: [[projectId: "surfstudio/projects/irg/inventiveretail-android-test", revisionHash: "dev/sprint-02"]])
+            ctx.script.echo "Stage failed is $ctx.stages"
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
             def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlSlackLink(ctx.script)}"
             handler(message)
