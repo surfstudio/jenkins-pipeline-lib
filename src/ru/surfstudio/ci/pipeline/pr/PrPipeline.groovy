@@ -59,14 +59,14 @@ abstract class PrPipeline extends ScmPipeline {
         notifyGitlabAboutStagesPending(ctx, repoUrl)
     }
 
-    def static notifyGitlabAboutStagesPending(PrPipeline ctx, String [] exclude = [PRE_MERGE, BUILD], String repoUrl) {
+    def static notifyGitlabAboutStagesPending(PrPipeline ctx, String [] exclude = [BUILD, ], String repoUrl) {
         def script = ctx.script
+        def repoSlug = RepositoryUtil.getCurrentGitlabRepoSlug(ctx.script, repoUrl)
 
         ctx.forStages { stage ->
             if (stage.strategy != StageStrategy.SKIP_STAGE && stage.name in exclude) {
-              //  RepositoryUtil.notifyGitlabAboutStageStart(ctx.script, ScmPipeline.repoUrl, stage.name)
                 script.echo "Stage $stage.name - set pending"
-                script.updateGitlabCommitStatus(name: stage.name, state: "pending", builds: [[projectId: RepositoryUtil.getCurrentGitlabRepoSlug(ctx.script, repoUrl), revisionHash: ctx.sourceBranch]])
+                script.updateGitlabCommitStatus(name: stage.name, state: "pending", builds: [[projectId: repoSlug, revisionHash: ctx.sourceBranch]])
             }
         }
     }
@@ -149,13 +149,20 @@ abstract class PrPipeline extends ScmPipeline {
 
     def static prepareMessageForPipeline(PrPipeline ctx, Closure handler) {
         if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED && ctx.jobResult != Result.NOT_BUILT) {
-            postExecuteStageBodyPr(ctx.script, ctx.stages, ctx.repoUrl)
-           // ctx.script.updateGitlabCommitStatus(name: 'Checkout', state: "failed", builds: [[projectId: "surfstudio/projects/irg/inventiveretail-android-test", revisionHash: "dev/sprint-02"]])
-            ctx.script.echo "Stage failed is $ctx.stages"
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
             def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlSlackLink(ctx.script)}"
             handler(message)
         }
+    }
+
+    def static notifyGitlabAboutStageFinishFinalize(PrPipeline ctx, String repoUrl) {
+        if (ctx.jobResult != Result.SUCCESS){
+            def repoSlug = RepositoryUtil.getCurrentGitlabRepoSlug(ctx.script, repoUrl)
+            ctx.script.echo "notify stage"
+            ctx.script.updateGitlabCommitStatus(name: BUILD, state: "failed", builds: [[projectId: repoSlug, revisionHash: ctx.sourceBranch]])
+        }
+        
+        //postExecuteStageBodyPr(ctx.script, stage.name, repoUrl)
     }
 
     def static finalizeStageBody(PrPipeline ctx, String repoUrl){
@@ -163,13 +170,6 @@ abstract class PrPipeline extends ScmPipeline {
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
         })
         notifyGitlabAboutStageFinishFinalize(ctx, repoUrl)
-    }
-
-    def static notifyGitlabAboutStageFinishFinalize(PrPipeline ctx, String repoUrl) {
-                def repoSlug = RepositoryUtil.getCurrentGitlabRepoSlug(ctx.script, repoUrl)
-                ctx.script.echo "notify stage"
-                ctx.script.updateGitlabCommitStatus(name: BUILD, state: "failed", builds: [[projectId: repoSlug, revisionHash: ctx.sourceBranch]])
-                //postExecuteStageBodyPr(ctx.script, stage.name, repoUrl)
     }
 
     def static debugFinalizeStageBody(PrPipeline ctx) {
