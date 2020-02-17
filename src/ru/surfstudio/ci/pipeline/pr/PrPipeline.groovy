@@ -60,12 +60,14 @@ abstract class PrPipeline extends ScmPipeline {
     }
 
     def static notifyGitlabAboutStagesPending(PrPipeline ctx, String [] exclude = [CHECKOUT, PRE_MERGE, ]) {
+        def repoUrl = ScmPipeline.repoUrl
         def script = ctx.script
 
         ctx.forStages { stage ->
             if (stage.strategy != StageStrategy.SKIP_STAGE && stage.name in exclude) {
+              //  RepositoryUtil.notifyGitlabAboutStageStart(ctx.script, ScmPipeline.repoUrl, stage.name)
                 script.echo "Stage $stage.name - set pending"
-                script.updateGitlabCommitStatus(name: stage.name, state: "pending", builds: [[projectId: "surfstudio/projects/irg/inventiveretail-android-test", revisionHash: ctx.sourceBranch]])
+                script.updateGitlabCommitStatus(name: stage.name, state: "pending", builds: [[projectId: RepositoryUtil.getCurrentGitlabRepoSlug(ctx.script, repoUrl), revisionHash: ctx.sourceBranch]])
             }
         }
     }
