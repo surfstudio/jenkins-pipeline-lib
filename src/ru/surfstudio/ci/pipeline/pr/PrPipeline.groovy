@@ -63,7 +63,7 @@ abstract class PrPipeline extends ScmPipeline {
         def script = ctx.script
 
         ctx.forStages { stage ->
-            if (stage.strategy != StageStrategy.SKIP_STAGE && exclude.containsValue(stage.name)) {
+            if (stage.strategy != StageStrategy.SKIP_STAGE && stage.name in exclude) {
                 script.echo "Stage $stage.name - set pending"
                 script.updateGitlabCommitStatus(name: stage.name, state: "pending", builds: [[projectId: "surfstudio/projects/irg/inventiveretail-android-test", revisionHash: ctx.sourceBranch]])
             }
