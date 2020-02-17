@@ -59,7 +59,7 @@ abstract class PrPipeline extends ScmPipeline {
         notifyGitlabAboutStagesPending(ctx)
     }
 
-    def static notifyGitlabAboutStagesPending(PrPipeline ctx, String [] exclude = [CHECKOUT, PRE_MERGE]) {
+    def static notifyGitlabAboutStagesPending(PrPipeline ctx, String [] exclude = [PRE_MERGE, ]) {
         def script = ctx.script
 
         ctx.forStages { stage ->
@@ -148,7 +148,7 @@ abstract class PrPipeline extends ScmPipeline {
 
     def static prepareMessageForPipeline(PrPipeline ctx, Closure handler) {
         if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED && ctx.jobResult != Result.NOT_BUILT) {
-            ctx.script.updateGitlabCommitStatus(name: ctx.stages.name, state: "failed", builds: [[projectId: "surfstudio/projects/irg/inventiveretail-android-test", revisionHash: "master"]])
+            ctx.script.updateGitlabCommitStatus(name: 'Checkout', state: "failed", builds: [[projectId: "surfstudio/projects/irg/inventiveretail-android-test", revisionHash: "master"]])
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
             def message = "Ветка ${ctx.sourceBranch} в состоянии ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlSlackLink(ctx.script)}"
             handler(message)
