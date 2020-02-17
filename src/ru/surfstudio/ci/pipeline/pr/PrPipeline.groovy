@@ -59,7 +59,7 @@ abstract class PrPipeline extends ScmPipeline {
         notifyGitlabAboutStagesPending(ctx)
     }
 
-    def static notifyGitlabAboutStagesPending(PrPipeline ctx, String [] exclude = [PRE_MERGE, ]) {
+    def static notifyGitlabAboutStagesPending(PrPipeline ctx, String [] exclude = [CHECKOUT, PRE_MERGE, ]) {
         def script = ctx.script
 
         ctx.forStages { stage ->
