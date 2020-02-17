@@ -46,7 +46,6 @@ abstract class PrPipeline extends ScmPipeline {
     //other config
     public stagesForTargetBranchChangedMode = [CHECKOUT, PRE_MERGE]
 
-
     PrPipeline(Object script) {
         super(script)
     }
@@ -55,7 +54,7 @@ abstract class PrPipeline extends ScmPipeline {
 
     def static initBody(PrPipeline ctx) {
         initBodyWithOutAbortDuplicateBuilds(ctx)
-        abortDuplicateBuildsWithDescription(ctx)
+        RepositoryUtil.notifyGitlabAboutStagePending(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.sourceBranch)
     }
 
     def static initBodyWithOutAbortDuplicateBuilds(PrPipeline ctx) {
@@ -147,6 +146,7 @@ abstract class PrPipeline extends ScmPipeline {
         prepareMessageForPipeline(ctx, { message ->
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
         })
+        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult)
     }
 
     def static debugFinalizeStageBody(PrPipeline ctx) {
@@ -158,6 +158,7 @@ abstract class PrPipeline extends ScmPipeline {
 
     def static preExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
         RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, stage.name)
+        RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE)
     }
 
     def static postExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {

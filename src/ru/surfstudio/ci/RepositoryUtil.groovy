@@ -27,6 +27,7 @@ class RepositoryUtil {
     def static SKIP_CI_LABEL2 = "[ci skip]"
     def static VERSION_LABEL1 = "[version]"
     def static DEFAULT_GITLAB_CONNECTION = "Gitlab Surf"
+    def static SYNTHETIC_PIPELINE_STAGE = "Pipeline"
 
     def static notifyGitlabAboutStageStart(Object script, String repoUrl, String stageName){
         def gitlabStatus = "running"
@@ -63,6 +64,13 @@ class RepositoryUtil {
         }
         script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $result"
         script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "$commit"]])
+    }
+
+    def static notifyGitlabAboutStagePending(Object script, String repoUrl, String stageName, String sourceBranch){
+        def gitlabStatus = "pending"
+        def slug = getCurrentGitlabRepoSlug(script, repoUrl)
+        script.echo "Notify GitLab - synthetic stage: $stageName, repoSlug: $slug, branch: $sourceBranch, status: $gitlabStatus"
+        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "$sourceBranch"]])
     }
 
     def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName){
