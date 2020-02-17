@@ -123,7 +123,7 @@ class PrPipelineAndroid extends PrPipeline {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
                 }
         ]
-        finalizeBody = { finalizeStageBody(this) }
+        finalizeBody = { finalizeStageBody(this, repoUrl) }
     }
 
     /**

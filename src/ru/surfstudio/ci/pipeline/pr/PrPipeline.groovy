@@ -158,10 +158,20 @@ abstract class PrPipeline extends ScmPipeline {
         }
     }
 
-    def static finalizeStageBody(PrPipeline ctx){
+    def static finalizeStageBody(PrPipeline ctx, String repoUrl){
         prepareMessageForPipeline(ctx, { message ->
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
         })
+        notifyGitlabAboutStageFinishFinalize(ctx, repoUrl)
+    }
+
+    def static notifyGitlabAboutStageFinishFinalize(PrPipeline ctx, String repoUrl) {
+        ctx.forStages { stage ->
+            if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.NOT_BUILT) {
+                ctx.script.echo "notify stage"
+                postExecuteStageBodyPr(ctx.script, stage.name, repoUrl)
+            }
+        }
     }
 
     def static debugFinalizeStageBody(PrPipeline ctx) {
