@@ -56,7 +56,7 @@ abstract class PrPipeline extends ScmPipeline {
     def static initBody(PrPipeline ctx) {
         initBodyWithOutAbortDuplicateBuilds(ctx)
         //abortDuplicateBuildsWithDescription(ctx)
-        notifyGitlabAboutStagesPending(ctx)
+       // notifyGitlabAboutStagesPending(ctx)
     }
 
     def static notifyGitlabAboutStagesPending(PrPipeline ctx) {
