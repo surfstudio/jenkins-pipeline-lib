@@ -174,7 +174,7 @@ abstract class PrPipeline extends ScmPipeline {
         def repoSlug = RepositoryUtil.getCurrentGitlabRepoSlug(script, repoUrl)
 
         RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, stage.name)
-        script.updateGitlabCommitStatus(name: "Pipeline", state: "running", builds: [[projectId: repoSlug, revisionHash: PrPipeline.sourceBranch]])
+        script.updateGitlabCommitStatus(name: "Pipeline", state: "running", builds: [[projectId: repoSlug, revisionHash: this.sourceBranch]])
     }
 
     def static postExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
