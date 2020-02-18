@@ -34,6 +34,8 @@ class AndroidPipelineHelper {
     private static String INSTRUMENTAL_TEST_REPORT_NAME = "Instrumental tests"
 
     private static String DEFAULT_HTML_RESULT_FILENAME = "index.html"
+    private static String JIRA_ISSUE_KEY_PATTERN = ~/((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)/
+    // https://confluence.atlassian.com/stashkb/integrating-with-custom-jira-issue-key-313460921.html?_ga=2.153274111.652352963.1580752546-1778113334.1579628389
 
     def static buildStageBodyAndroid(Object script, String buildGradleTask) {
         AndroidUtil.withGradleBuildCacheCredentials(script) {
@@ -175,7 +177,16 @@ class AndroidPipelineHelper {
     ) {
         boolean hasChanges = RepositoryUtil.checkHasChanges(script)
         if (hasChanges) {
-            script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1\""
+
+            String jiraIssueKey
+            try {
+                jiraIssueKey = "\nApplyed for jira issue: ${(RepositoryUtil.getCurrentCommitMessage(script) =~ JIRA_ISSUE_KEY_PATTERN)[0][0]}."
+            } catch(Exception ignored) {
+                jiraIssueKey = ""
+            }
+            String commitHash = RepositoryUtil.getCurrentCommitHash(script).toString().take(8)
+
+            script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1." + jiraIssueKey  + "\nLast formatted commit is $commitHash \""
             RepositoryUtil.push(script, repoUrl, repoCredentialsId)
         } else {
             script.echo "No modification after code formatting. "
