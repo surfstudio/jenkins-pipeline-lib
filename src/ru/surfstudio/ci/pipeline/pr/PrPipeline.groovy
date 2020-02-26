@@ -21,6 +21,7 @@ import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.ScmPipeline
+import ru.surfstudio.ci.pipeline.base.LogRotatorUtil
 import ru.surfstudio.ci.stage.SimpleStage
 import ru.surfstudio.ci.stage.StageStrategy
 
@@ -47,6 +48,23 @@ abstract class PrPipeline extends ScmPipeline {
     //other config
     public stagesForTargetBranchChangedMode = [CHECKOUT, PRE_MERGE]
 
+    //region customization of stored artifacts
+
+    // artifacts are only kept up to this days
+    public int artifactDaysToKeep = 3
+    // only this number of builds have their artifacts kept
+    public int artifactNumToKeep = 10
+    // history is only kept up to this days
+    public int daysToKeep = 30
+    // only this number of build logs are kept
+    public int numToKeep = 100
+
+    private static int ARTIFACTS_DAYS_TO_KEEP_MAX_VALUE = 5
+    private static int ARTIFACTS_NUM_TO_KEEP_MAX_VALUE = 20
+    private static int DAYS_TO_KEEP_MAX_VALUE = 30
+    private static int NUM_TO_KEEP_MAX_VALUE = 100
+
+    //endregion
 
     PrPipeline(Object script) {
         super(script)
@@ -78,18 +96,18 @@ abstract class PrPipeline extends ScmPipeline {
             value -> ctx.targetBranchChanged = Boolean.valueOf(value)
         }
 
-        if(ctx.targetBranchChanged) {
+        if (ctx.targetBranchChanged) {
             script.echo "Build triggered by target branch changes, run only ${ctx.stagesForTargetBranchChangedMode} stages"
             ctx.forStages { stage ->
-                if(!(stage instanceof SimpleStage)){
+                if (!(stage instanceof SimpleStage)) {
                     return
                 }
 
                 def executeStage = false
-                for(stageNameForTargetBranchChangedMode in ctx.stagesForTargetBranchChangedMode){
+                for (stageNameForTargetBranchChangedMode in ctx.stagesForTargetBranchChangedMode) {
                     executeStage = executeStage || (stageNameForTargetBranchChangedMode == stage.getName())
                 }
-                if(!executeStage) {
+                if (!executeStage) {
                     stage.strategy = StageStrategy.SKIP_STAGE
                 }
             }
@@ -144,7 +162,7 @@ abstract class PrPipeline extends ScmPipeline {
         }
     }
 
-    def static finalizeStageBody(PrPipeline ctx){
+    def static finalizeStageBody(PrPipeline ctx) {
         prepareMessageForPipeline(ctx, { message ->
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "bitbucket")
         })
@@ -182,22 +200,47 @@ abstract class PrPipeline extends ScmPipeline {
     public static final String AUTHOR_USERNAME_PARAMETER = 'authorUsername'
     public static final String TARGET_BRANCH_CHANGED_PARAMETER = 'targetBranchChanged'
 
-    static List<Object> properties(ScmPipeline ctx) {
+    static List<Object> properties(PrPipeline ctx) {
         def script = ctx.script
         return [
-                buildDiscarder(script),
+                buildDiscarder(ctx, script),
                 parameters(script),
                 triggers(script, ctx.repoUrl)
         ]
     }
 
-    def static buildDiscarder(script) {
+    def static buildDiscarder(PrPipeline ctx, script) {
         return script.buildDiscarder(
                 script.logRotator(
-                        artifactDaysToKeepStr: '3',
-                        artifactNumToKeepStr: '10',
-                        daysToKeepStr: '30',
-                        numToKeepStr: '100')
+                        artifactDaysToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.ARTIFACTS_DAYS_TO_KEEP_NAME,
+                                ctx.artifactDaysToKeep,
+                                ARTIFACTS_DAYS_TO_KEEP_MAX_VALUE
+
+                        ),
+                        artifactNumToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.ARTIFACTS_NUM_TO_KEEP_NAME,
+                                ctx.artifactNumToKeep,
+                                ARTIFACTS_NUM_TO_KEEP_MAX_VALUE
+
+                        ),
+                        daysToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.DAYS_TO_KEEP_NAME,
+                                ctx.daysToKeep,
+                                DAYS_TO_KEEP_MAX_VALUE
+
+                        ),
+                        numToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.NUM_TO_KEEP_NAME,
+                                ctx.numToKeep,
+                                NUM_TO_KEEP_MAX_VALUE
+
+                        )
+                )
         )
     }
 
@@ -243,7 +286,7 @@ abstract class PrPipeline extends ScmPipeline {
                         printContributedVariables: true,
                         printPostContent: true,
                         causeString: 'Triggered by Bitbucket',
-                        regexpFilterExpression: '^'+"$repoUrl"+'$',
+                        regexpFilterExpression: '^' + "$repoUrl" + '$',
                         regexpFilterText: '$repoUrl'
                 ),
                 script.pollSCM('')
