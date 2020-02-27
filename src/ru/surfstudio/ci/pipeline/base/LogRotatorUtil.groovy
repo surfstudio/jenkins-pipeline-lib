@@ -32,8 +32,7 @@ class LogRotatorUtil {
      */
     static String getActualParameterValue(script, String paramName, int currentValue, int maxValue) {
         if (currentValue > maxValue) {
-            script.echo "WARNING: $currentValue for $paramName is ignored, using maxValue=$maxValue"
-            return maxValue.toString()
+            script.error "$currentValue for $paramName cannot be more than maxValue=$maxValue"
         }
         return currentValue.toString()
     }
