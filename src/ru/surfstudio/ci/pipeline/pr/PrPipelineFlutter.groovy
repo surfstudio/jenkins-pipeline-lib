@@ -115,10 +115,12 @@ class PrPipelineFlutter extends PrPipeline {
         ]
 
         stages = [
-                parallel(STAGE_PARALLEL, [
-                        group(STAGE_ANDROID, androidStages),
-                        node(STAGE_IOS, NodeProvider.iOSFlutterNode, false, iosStages)
-                ]),
+                parallel(STAGE_PARALLEL,
+                        [
+                                group(STAGE_ANDROID, androidStages),
+                                node(STAGE_IOS, NodeProvider.iOSFlutterNode, false, iosStages)
+                        ]
+                ),
         ]
 
         finalizeBody = { finalizeStageBody(this) }
