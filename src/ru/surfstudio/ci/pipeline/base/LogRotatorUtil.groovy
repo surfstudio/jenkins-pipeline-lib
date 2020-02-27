@@ -35,6 +35,7 @@ class LogRotatorUtil {
             script.echo "WARNING: $currentValue for $paramName is ignored, using maxValue=$maxValue"
             return maxValue.toString()
         }
+        script.echo "using $currentValue for $paramName"
         return currentValue.toString()
     }
 }
