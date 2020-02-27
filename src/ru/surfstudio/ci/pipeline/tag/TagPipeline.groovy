@@ -22,6 +22,7 @@ import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
 
 import ru.surfstudio.ci.pipeline.ScmPipeline
+import ru.surfstudio.ci.pipeline.base.LogRotatorUtil
 import ru.surfstudio.ci.stage.SimpleStage
 
 import java.util.regex.Pattern
@@ -43,19 +44,37 @@ abstract class TagPipeline extends ScmPipeline {
     //scm
     public tagRegexp = /(.*)?\d{1,4}\.\d{1,4}\.\d{1,4}(.*)?/
     public repoTag = ""
-    public branchesPatternsForAutoChangeVersion = [/^origin\/dev\/.*/, /^origin\/feature\/.*/] //будет выбрана первая подходящая ветка
+    //будет выбрана первая подходящая ветка
+    public branchesPatternsForAutoChangeVersion = [/^origin\/dev\/.*/, /^origin\/feature\/.*/]
 
     //logic for customize
     public Closure applyStrategiesFromParams = { ctx -> //todo нужна ли вообще эта логика?
         def params = script.params
         CommonUtil.applyStrategiesFromParams(ctx, [
-                (UNIT_TEST): params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
+                (UNIT_TEST)           : params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
                 (INSTRUMENTATION_TEST): params[INSTRUMENTATION_TEST_STAGE_STRATEGY_PARAMETER],
                 (STATIC_CODE_ANALYSIS): params[STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER],
-                (BETA_UPLOAD): params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
+                (BETA_UPLOAD)         : params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
         ])
     }
 
+    //region customization of stored artifacts
+
+    // artifacts are only kept up to this days
+    public int artifactDaysToKeep = 30
+    // only this number of builds have their artifacts kept
+    public int artifactNumToKeep = -1
+    // history is only kept up to this days
+    public int daysToKeep = -1
+    // only this number of build logs are kept
+    public int numToKeep = -1
+
+    private static int ARTIFACTS_DAYS_TO_KEEP_MAX_VALUE = 30
+    private static int ARTIFACTS_NUM_TO_KEEP_MAX_VALUE = 5
+    private static int DAYS_TO_KEEP_MAX_VALUE = 10
+    private static int NUM_TO_KEEP_MAX_VALUE = 10
+
+    //endregion
 
     TagPipeline(Object script) {
         super(script)
@@ -81,7 +100,7 @@ abstract class TagPipeline extends ScmPipeline {
         CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.ANOTHER, buildDescription)
     }
 
-    def static checkoutStageBody(Object script,  String url, String repoTag, String credentialsId) {
+    def static checkoutStageBody(Object script, String url, String repoTag, String credentialsId) {
         script.git(
                 url: url,
                 credentialsId: credentialsId,
@@ -114,8 +133,8 @@ abstract class TagPipeline extends ScmPipeline {
         def branchForChangeVersion = null
         for (branchRegexp in branchesPatternsForAutoChangeVersion) {
             Pattern pattern = Pattern.compile(branchRegexp)
-            for(branch in branches){
-                if (pattern.matcher(branch).matches()){
+            for (branch in branches) {
+                if (pattern.matcher(branch).matches()) {
                     branchForChangeVersion = branch
                     break
                 }
@@ -125,7 +144,7 @@ abstract class TagPipeline extends ScmPipeline {
             }
         }
 
-        if(!branchForChangeVersion){
+        if (!branchForChangeVersion) {
             script.error "WARN: Do not find suitable branch for setting version. Branches searched for patterns: $branchesPatternsForAutoChangeVersion"
         }
 
@@ -147,7 +166,7 @@ abstract class TagPipeline extends ScmPipeline {
         RepositoryUtil.pushForceTag(script, repoUrl, repoCredentialsId)
     }
 
-    def static finalizeStageBody(TagPipeline ctx){
+    def static finalizeStageBody(TagPipeline ctx) {
         if (ctx.getStage(ctx.CHECKOUT).result != Result.ABORTED) { //do not handle builds skipped via [skip ci] label
             JarvisUtil.createVersionAndNotify(ctx)
         }
@@ -183,34 +202,55 @@ abstract class TagPipeline extends ScmPipeline {
 
     public static final String STAGE_STRATEGY_PARAM_DESCRIPTION = 'stage strategy types, see repo <a href="https://bitbucket.org/surfstudio/jenkins-pipeline-lib">jenkins-pipeline-lib</a> , class StageStrategy. If empty, job will use initial strategy for this stage'
 
-    def static List<Object> properties(TagPipeline ctx) {
+    static List<Object> properties(TagPipeline ctx) {
         def script = ctx.script
         return [
-                buildDiscarder(script),
+                buildDiscarder(ctx, script),
                 parameters(script),
                 triggers(script, ctx.repoUrl, ctx.tagRegexp)
         ]
     }
 
-    def static buildDiscarder(script) {
+    def static buildDiscarder(TagPipeline ctx, script) {
         return script.buildDiscarder(
                 script.logRotator(
-                        artifactDaysToKeepStr: '30',
-                        artifactNumToKeepStr: '',
-                        daysToKeepStr: '',
-                        numToKeepStr: '')
+                        artifactDaysToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.ARTIFACTS_DAYS_TO_KEEP_NAME,
+                                ctx.artifactDaysToKeep,
+                                ARTIFACTS_DAYS_TO_KEEP_MAX_VALUE
+                        ),
+                        artifactNumToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.ARTIFACTS_NUM_TO_KEEP_NAME,
+                                ctx.artifactNumToKeep,
+                                ARTIFACTS_NUM_TO_KEEP_MAX_VALUE
+                        ),
+                        daysToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.DAYS_TO_KEEP_NAME,
+                                ctx.daysToKeep,
+                                DAYS_TO_KEEP_MAX_VALUE
+                        ),
+                        numToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.NUM_TO_KEEP_NAME,
+                                ctx.numToKeep,
+                                NUM_TO_KEEP_MAX_VALUE
+                        )
+                )
         )
     }
 
     def static parameters(script) {
         return script.parameters([
                 [
-                        $class     : 'GitParameterDefinition',
-                        name       : REPO_TAG_PARAMETER,
-                        type       : 'PT_TAG',
-                        description: 'Тег для сборки',
+                        $class       : 'GitParameterDefinition',
+                        name         : REPO_TAG_PARAMETER,
+                        type         : 'PT_TAG',
+                        description  : 'Тег для сборки',
                         selectedValue: 'NONE',
-                        sortMode: 'DESCENDING_SMART'
+                        sortMode     : 'DESCENDING_SMART'
                 ],
                 script.string(
                         name: UNIT_TEST_STAGE_STRATEGY_PARAMETER,
