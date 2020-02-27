@@ -21,6 +21,7 @@ import ru.surfstudio.ci.Constants
 import ru.surfstudio.ci.JarvisUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.ScmPipeline
+import ru.surfstudio.ci.pipeline.base.LogRotatorUtil
 import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
@@ -65,16 +66,16 @@ abstract class UiTestPipeline extends ScmPipeline {
     public UNDEFINED_BRANCH = "<undefined>"
     public defaultSourceBranch = UNDEFINED_BRANCH
     public sourceBranch = ""
-    
+
     public UNDEFINED_CREDENTIALS = "<undefined_cred>"
-    public sourceRepoCredentialsId = UNDEFINED_CREDENTIALS 
-    public testRepoCredentialsId = UNDEFINED_CREDENTIALS 
+    public sourceRepoCredentialsId = UNDEFINED_CREDENTIALS
+    public testRepoCredentialsId = UNDEFINED_CREDENTIALS
 
     //jira
     public taskKey = ""
     public taskName = ""
     public userEmail = ""
-    
+
     //cron
     public cronTimeTrigger = '00 09 * * *'
 
@@ -85,6 +86,24 @@ abstract class UiTestPipeline extends ScmPipeline {
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
     public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
 
+    //region customization of stored artifacts
+
+    // artifacts are only kept up to this days
+    public int artifactDaysToKeep = 3
+    // only this number of builds have their artifacts kept
+    public int artifactNumToKeep = 10
+    // history is only kept up to this days
+    public int daysToKeep = 60
+    // only this number of build logs are kept
+    public int numToKeep = 200
+
+    private static int ARTIFACTS_DAYS_TO_KEEP_MAX_VALUE = 5
+    private static int ARTIFACTS_NUM_TO_KEEP_MAX_VALUE = 20
+    private static int DAYS_TO_KEEP_MAX_VALUE = 60
+    private static int NUM_TO_KEEP_MAX_VALUE = 200
+
+    //endregion
+
     UiTestPipeline(Object script) {
         super(script)
     }
@@ -93,7 +112,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     def static initBody(UiTestPipeline ctx) {
         def script = ctx.script
-        
+
         CommonUtil.checkPipelineParameterDefined(script, ctx.sourceRepoUrl, "sourceRepoUrl")
         CommonUtil.checkPipelineParameterDefined(script, ctx.jiraProjectKey, "jiraProjectKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.platform, "platform")
@@ -127,15 +146,15 @@ abstract class UiTestPipeline extends ScmPipeline {
             value -> ctx.userEmail = value
         }
 
-        if(ctx.notificationEnabled) {
+        if (ctx.notificationEnabled) {
             sendStartNotification(ctx)
         }
-        
+
         //устанавливаем credentialsId по умолчанию, если они не были установлены ранее
-        if(ctx.sourceRepoCredentialsId == ctx.UNDEFINED_CREDENTIALS){
+        if (ctx.sourceRepoCredentialsId == ctx.UNDEFINED_CREDENTIALS) {
             ctx.sourceRepoCredentialsId = ctx.repoCredentialsId
         }
-        if(ctx.testRepoCredentialsId == ctx.UNDEFINED_CREDENTIALS){
+        if (ctx.testRepoCredentialsId == ctx.UNDEFINED_CREDENTIALS) {
             ctx.testRepoCredentialsId = ctx.repoCredentialsId
         }
 
@@ -214,9 +233,9 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.sh "cd .. && ls"
                 script.sh "cd .. && curl -H \"Content-Type: multipart/form-data\" -u ${script.env.USERNAME}:${script.env.PASSWORD} -F \"file=@arhive.zip\" ${Constants.JIRA_URL}rest/raven/1.0/import/execution/bundle"
             }
-            script.step([$class: 'ArtifactArchiver', artifacts: outputrerunTxtFile, allowEmptyArchive: true]) 
-        
-            CommonUtil.safe(script){
+            script.step([$class: 'ArtifactArchiver', artifacts: outputrerunTxtFile, allowEmptyArchive: true])
+
+            CommonUtil.safe(script) {
 
                 script.sh "rm arhive.zip"
             }
@@ -234,7 +253,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     }
 
     def static finalizeStageBody(UiTestPipeline ctx) {
-        if(!isBulkJob(ctx)) {
+        if (!isBulkJob(ctx)) {
             def script = ctx.script
             if (ctx.notificationEnabled) {
                 sendFinishNotification(ctx)
@@ -252,8 +271,8 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     def static sendStartNotification(UiTestPipeline ctx) {
         def jenkinsLink = CommonUtil.getBuildUrlSlackLink(ctx.script)
-        if(isBulkJob(ctx)){
-            sendMessage(ctx,"Запущено параллельное выполнение тестов прогонов ${ctx.taskKey}. ${jenkinsLink}", true)
+        if (isBulkJob(ctx)) {
+            sendMessage(ctx, "Запущено параллельное выполнение тестов прогонов ${ctx.taskKey}. ${jenkinsLink}", true)
         } else {
             def testExecutionLink = CommonUtil.getJiraTaskMarkdownLink(ctx.taskKey)
             def testExecutionName = ctx.taskName ? "\"${ctx.taskName}\"" : ""
@@ -292,8 +311,8 @@ abstract class UiTestPipeline extends ScmPipeline {
                     CommonUtil.startCurrentBuildCloneWithParams(
                             script,
                             [
-                                script.string(name: TASK_KEY_PARAMETER, value: task.trim())
-                            ],  
+                                    script.string(name: TASK_KEY_PARAMETER, value: task.trim())
+                            ],
                             true
                     )
                 }
@@ -308,7 +327,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         }
     }
 
-    def static isBulkJob(UiTestPipeline ctx){
+    def static isBulkJob(UiTestPipeline ctx) {
         return ctx.taskKey.contains(",")
     }
     // =============================================== 	↑↑↑  END EXECUTION UTILS ↑↑↑ =================================================
@@ -326,20 +345,41 @@ abstract class UiTestPipeline extends ScmPipeline {
     def static List<Object> properties(UiTestPipeline ctx) {
         def script = ctx.script
         return [
-                buildDiscarder(script),
+                buildDiscarder(ctx, script),
                 environments(script, ctx.testBranch),
                 parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.node),
                 triggers(script, ctx.jiraProjectKey, ctx.platform, ctx.cronTimeTrigger)
         ]
     }
 
-    def static buildDiscarder(script) {
+    def static buildDiscarder(UiTestPipeline ctx, script) {
         return script.buildDiscarder(
                 script.logRotator(
-                        artifactDaysToKeepStr: '3',
-                        artifactNumToKeepStr: '10',
-                        daysToKeepStr: '60',
-                        numToKeepStr: '200')
+                        artifactDaysToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.ARTIFACTS_DAYS_TO_KEEP_NAME,
+                                ctx.artifactDaysToKeep,
+                                ARTIFACTS_DAYS_TO_KEEP_MAX_VALUE
+                        ),
+                        artifactNumToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.ARTIFACTS_NUM_TO_KEEP_NAME,
+                                ctx.artifactNumToKeep,
+                                ARTIFACTS_NUM_TO_KEEP_MAX_VALUE
+                        ),
+                        daysToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.DAYS_TO_KEEP_NAME,
+                                ctx.daysToKeep,
+                                DAYS_TO_KEEP_MAX_VALUE
+                        ),
+                        numToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.NUM_TO_KEEP_NAME,
+                                ctx.numToKeep,
+                                NUM_TO_KEEP_MAX_VALUE
+                        )
+                )
         )
     }
 
@@ -347,15 +387,15 @@ abstract class UiTestPipeline extends ScmPipeline {
      * @param testBranch - ветка в которой находятся тесты
      */
     def static environments(script, String testBranch) {
-        return  [
-                $class: 'EnvInjectJobProperty',
-                info: [
+        return [
+                $class                    : 'EnvInjectJobProperty',
+                info                      : [
                         loadFilesFromMaster: false,
-                        propertiesContent: "testBranch=$testBranch",  //используется в том числе для получения jenkinsFile из репозитория с тестами
-                        secureGroovyScript: [classpath: [], sandbox: false, script: '']],
-                keepBuildVariables: true,
+                        propertiesContent  : "testBranch=$testBranch",  //используется в том числе для получения jenkinsFile из репозитория с тестами
+                        secureGroovyScript : [classpath: [], sandbox: false, script: '']],
+                keepBuildVariables        : true,
                 keepJenkinsSystemVariables: true,
-                on: true
+                on                        : true
         ]
 
     }
@@ -377,7 +417,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.string(
                         name: USER_EMAIL_PARAMETER,
                         defaultValue: "qa@surfstudio.ru",
-                        description: 'почта пользователя, которому будут отсылаться уведомления о результатах тестирования. Если не указано. то сообщения будут отсылаться в группу проекта'),      
+                        description: 'почта пользователя, которому будут отсылаться уведомления о результатах тестирования. Если не указано. то сообщения будут отсылаться в группу проекта'),
                 script.string(
                         name: NODE_PARAMETER,
                         defaultValue: node,
