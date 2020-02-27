@@ -217,28 +217,24 @@ abstract class PrPipeline extends ScmPipeline {
                                 LogRotatorUtil.ARTIFACTS_DAYS_TO_KEEP_NAME,
                                 ctx.artifactDaysToKeep,
                                 ARTIFACTS_DAYS_TO_KEEP_MAX_VALUE
-
                         ),
                         artifactNumToKeepStr: LogRotatorUtil.getActualParameterValue(
                                 script,
                                 LogRotatorUtil.ARTIFACTS_NUM_TO_KEEP_NAME,
                                 ctx.artifactNumToKeep,
                                 ARTIFACTS_NUM_TO_KEEP_MAX_VALUE
-
                         ),
                         daysToKeepStr: LogRotatorUtil.getActualParameterValue(
                                 script,
                                 LogRotatorUtil.DAYS_TO_KEEP_NAME,
                                 ctx.daysToKeep,
                                 DAYS_TO_KEEP_MAX_VALUE
-
                         ),
                         numToKeepStr: LogRotatorUtil.getActualParameterValue(
                                 script,
                                 LogRotatorUtil.NUM_TO_KEEP_NAME,
                                 ctx.numToKeep,
                                 NUM_TO_KEEP_MAX_VALUE
-
                         )
                 )
         )
