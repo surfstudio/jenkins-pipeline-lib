@@ -221,6 +221,9 @@ class AndroidTestUtil {
                                 break
                             }
 
+                            def screenshotFile = "${formatArgsForShellCommand(spoonOutputDir)}/${currentApkName}.png"
+                            script.sh "${AdbUtil.getAdbCommand(script, config.emulatorName)} exec-out screencap -p > \"${formatArgsForShellCommand(screenshotFile)}\""
+
                             countOfLaunch++
                             deleteApk(script, testBuildTypeApkName, config.emulatorName)
                         }
