@@ -44,7 +44,6 @@ abstract class PrPipeline extends ScmPipeline {
     public destinationBranch = ""
     public authorUsername = ""
     public boolean targetBranchChanged = false
-
     //other config
     public stagesForTargetBranchChangedMode = [CHECKOUT, PRE_MERGE]
 
@@ -164,23 +163,23 @@ abstract class PrPipeline extends ScmPipeline {
 
     def static finalizeStageBody(PrPipeline ctx) {
         prepareMessageForPipeline(ctx, { message ->
-            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "bitbucket")
+            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
         })
     }
 
     def static debugFinalizeStageBody(PrPipeline ctx) {
         prepareMessageForPipeline(ctx, { message ->
-            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "bitbucket")
+            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
             JarvisUtil.sendMessageToGroup(ctx.script, message, "9d0c617e-d14a-490e-9914-83820b135cfc", "stride", false)
         })
     }
 
     def static preExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
-        RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
+        RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, stage.name)
     }
 
     def static postExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
-        RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
+        RepositoryUtil.notifyGitlabAboutStageFinish(script, repoUrl, stage.name, stage.result)
     }
 
     String buildDescription() {
@@ -205,7 +204,8 @@ abstract class PrPipeline extends ScmPipeline {
         return [
                 buildDiscarder(ctx, script),
                 parameters(script),
-                triggers(script, ctx.repoUrl)
+                triggers(script, ctx.repoUrl),
+                script.gitLabConnection(ctx.gitlabConnection)
         ]
     }
 
@@ -250,7 +250,7 @@ abstract class PrPipeline extends ScmPipeline {
                         description: 'Ветка, в которую будет мержиться пр, обязательный параметр'),
                 script.string(
                         name: AUTHOR_USERNAME_PARAMETER,
-                        description: 'username в bitbucket создателя пр, нужно для отправки собщений, обязательный параметр')
+                        description: 'username в gitlab создателя пр, нужно для отправки собщений, обязательный параметр')
         ])
     }
 
@@ -260,19 +260,19 @@ abstract class PrPipeline extends ScmPipeline {
                         genericVariables: [
                                 [
                                         key  : SOURCE_BRANCH_PARAMETER,
-                                        value: '$.pullrequest.source.branch.name'
+                                        value: '$.object_attributes.source_branch'
                                 ],
                                 [
                                         key  : DESTINATION_BRANCH_PARAMETER,
-                                        value: '$.pullrequest.destination.branch.name'
+                                        value: '$.object_attributes.target_branch'
                                 ],
                                 [
                                         key  : AUTHOR_USERNAME_PARAMETER,
-                                        value: '$.pullrequest.author.account_id'
+                                        value: '$.object_attributes.last_commit.author.email'
                                 ],
                                 [
                                         key  : 'repoUrl',
-                                        value: '$.repository.links.html.href'
+                                        value: '$.project.web_url'
                                 ],
                                 [
                                         key  : TARGET_BRANCH_CHANGED_PARAMETER,
@@ -281,8 +281,8 @@ abstract class PrPipeline extends ScmPipeline {
                         ],
                         printContributedVariables: true,
                         printPostContent: true,
-                        causeString: 'Triggered by Bitbucket',
-                        regexpFilterExpression: '^' + "$repoUrl" + '$',
+                        causeString: 'Triggered by GitLab',
+                        regexpFilterExpression: "$repoUrl",
                         regexpFilterText: '$repoUrl'
                 ),
                 script.pollSCM('')

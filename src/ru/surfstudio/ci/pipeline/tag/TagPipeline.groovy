@@ -182,11 +182,11 @@ abstract class TagPipeline extends ScmPipeline {
     }
 
     def static preExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
-        RepositoryUtil.notifyBitbucketAboutStageStart(script, repoUrl, stage.name)
+        RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, stage.name)
     }
 
     def static postExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
-        RepositoryUtil.notifyBitbucketAboutStageFinish(script, repoUrl, stage.name, stage.result)
+        RepositoryUtil.notifyGitlabAboutStageFinish(script, repoUrl, stage.name, stage.result)
     }
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
 
@@ -207,7 +207,8 @@ abstract class TagPipeline extends ScmPipeline {
         return [
                 buildDiscarder(ctx, script),
                 parameters(script),
-                triggers(script, ctx.repoUrl, ctx.tagRegexp)
+                triggers(script, ctx.repoUrl, ctx.tagRegexp),
+                script.gitLabConnection(ctx.gitlabConnection)
         ]
     }
 
@@ -273,17 +274,18 @@ abstract class TagPipeline extends ScmPipeline {
                 script.GenericTrigger(
                         genericVariables: [
                                 [
-                                        key  : 'repoTag', //параметер tag будет доступен по ключу repoTag_0 - особенности GenericWebhookTrigger Plugin
-                                        value: '$.push.changes[?(@.new.type == "tag")].new.name'
+                                        key  : 'repoTag_0', //параметер tag будет доступен по ключу repoTag_0 - особенности GenericWebhookTrigger Plugin
+                                        value: '$.ref',
+                                        regexpFilter: 'refs/tags/'
                                 ],
                                 [
                                         key  : 'repoUrl',
-                                        value: '$.repository.links.html.href'
+                                        value: '$.project.web_url'
                                 ]
                         ],
                         printContributedVariables: true,
                         printPostContent: true,
-                        causeString: 'Triggered by Bitbucket',
+                        causeString: 'Triggered by Gitlab',
                         regexpFilterExpression: /$repoUrl $tagRegexp/,
                         regexpFilterText: '$repoUrl $repoTag_0'
                 ),
