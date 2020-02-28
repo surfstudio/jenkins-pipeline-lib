@@ -43,6 +43,7 @@ abstract class TagPipeline extends ScmPipeline {
 
     //scm
     public tagRegexp = /(.*)?\d{1,4}\.\d{1,4}\.\d{1,4}(.*)?/
+    public tagHash = ""
     public repoTag = ""
     //будет выбрана первая подходящая ветка
     public branchesPatternsForAutoChangeVersion = [/^origin\/dev\/.*/, /^origin\/feature\/.*/]
@@ -94,10 +95,14 @@ abstract class TagPipeline extends ScmPipeline {
         extractValueFromEnvOrParamsAndRun(script, REPO_TAG_PARAMETER) {
             value -> ctx.repoTag = value
         }
+        extractValueFromEnvOrParamsAndRun(script, TAG_HASH_PARAMETER) {
+            value -> ctx.tagHash = value
+        }
 
         def buildDescription = ctx.repoTag
         CommonUtil.setBuildDescription(script, buildDescription)
         CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.ANOTHER, buildDescription)
+        RepositoryUtil.notifyGitlabAboutStagePending(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.tagHash)
     }
 
     def static checkoutStageBody(Object script, String url, String repoTag, String credentialsId) {
@@ -170,6 +175,7 @@ abstract class TagPipeline extends ScmPipeline {
         if (ctx.getStage(ctx.CHECKOUT).result != Result.ABORTED) { //do not handle builds skipped via [skip ci] label
             JarvisUtil.createVersionAndNotify(ctx)
         }
+        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult)
     }
 
     def static debugFinalizeStageBody(TagPipeline ctx) {
@@ -183,6 +189,7 @@ abstract class TagPipeline extends ScmPipeline {
 
     def static preExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
         RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, stage.name)
+        RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE)
     }
 
     def static postExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
@@ -199,7 +206,7 @@ abstract class TagPipeline extends ScmPipeline {
     public static final String STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER = 'staticCodeAnalysisStageStrategy'
     public static final String BETA_UPLOAD_STAGE_STRATEGY_PARAMETER = 'betaUploadStageStrategy'
     public static final String REPO_TAG_PARAMETER = 'repoTag_0'
-
+    public static final String TAG_HASH_PARAMETER = 'tagHash'
     public static final String STAGE_STRATEGY_PARAM_DESCRIPTION = 'stage strategy types, see repo <a href="https://bitbucket.org/surfstudio/jenkins-pipeline-lib">jenkins-pipeline-lib</a> , class StageStrategy. If empty, job will use initial strategy for this stage'
 
     static List<Object> properties(TagPipeline ctx) {
@@ -281,6 +288,10 @@ abstract class TagPipeline extends ScmPipeline {
                                 [
                                         key  : 'repoUrl',
                                         value: '$.project.web_url'
+                                ],
+                                [
+                                        key :  TAG_HASH_PARAMETER,
+                                        value: '$.checkout_sha'
                                 ]
                         ],
                         printContributedVariables: true,
