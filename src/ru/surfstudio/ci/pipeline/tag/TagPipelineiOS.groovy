@@ -100,7 +100,7 @@ class TagPipelineiOS extends TagPipeline {
                                       String certfileCredentialId,
                                       String googleServiceAccountCredsId,
                                       String betaUploadConfigArgument,
-                                      String betaUploadConfigValue,
+                                      String betaUploadConfigValue
     ) {
         script.withCredentials([
                 script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
