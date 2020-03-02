@@ -251,12 +251,12 @@ class RepositoryUtil {
         return !script.sh(returnStdout: true, script: "git status --porcelain --untracked-files=no").isEmpty()
     }
 
-    static Collection<String> filesDiffPr(
+    static String[] ktFilesDiffPr(
             Object script,
             String sourceBranch,
             String destinationBranch
     ) {
-        return script.sh(returnStdout: true, script: "git log --no-merges --first-parent --oneline --name-only origin/${destinationBranch}..${sourceBranch} | grep \".kt\"")
+        return script.sh(returnStdout: true, script: "git log --no-merges --first-parent --oneline --name-only origin/${destinationBranch}..${sourceBranch} | grep '.kt' || true")
                 .split("\n")
     }
 
