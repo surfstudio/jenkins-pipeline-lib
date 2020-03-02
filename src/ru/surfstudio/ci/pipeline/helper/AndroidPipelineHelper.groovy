@@ -15,6 +15,7 @@
  */
 package ru.surfstudio.ci.pipeline.helper
 
+import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.pr.PrPipeline
@@ -160,7 +161,11 @@ class AndroidPipelineHelper {
             String sourceBranch,
             String destinationBranch
     ) {
-        def files = RepositoryUtil.filesDiffPr(script, sourceBranch, destinationBranch)
+        def files = RepositoryUtil.ktFilesDiffPr(script, sourceBranch, destinationBranch)
+        if (CommonUtil.isEmptyStringArray(files)) {
+            script.echo "No *.kt files for formatting."
+            return
+        }
         try {
             AndroidUtil.withGradleBuildCacheCredentials(script) {
                 script.sh "./gradlew ktlintFilesFormat -PlintFiles=\"${files.join("\",\"")}\""
@@ -189,7 +194,7 @@ class AndroidPipelineHelper {
             script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1." + jiraIssueKey  + "\nLast formatted commit is $commitHash \""
             RepositoryUtil.push(script, repoUrl, repoCredentialsId)
         } else {
-            script.echo "No modification after code formatting. "
+            script.echo "No modification after code formatting."
         }
         return hasChanges
     }

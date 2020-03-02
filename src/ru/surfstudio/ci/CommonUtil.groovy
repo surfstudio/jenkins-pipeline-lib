@@ -233,6 +233,10 @@ class CommonUtil {
         }
     }
 
+    def static isEmptyStringArray(String[] array) {
+        array.size() == 0 || array.every {it -> it.isEmpty()}
+    }
+
     def static printInitialVar(Object script, String varName, varValue) {
         script.echo "initial value of {$varName} is {$varValue}"
     }
