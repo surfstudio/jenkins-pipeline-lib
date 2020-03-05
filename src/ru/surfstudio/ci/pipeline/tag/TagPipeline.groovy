@@ -185,6 +185,7 @@ abstract class TagPipeline extends ScmPipeline {
         prepareMessageForPipeline(ctx, { message ->
             JarvisUtil.sendMessageToGroup(ctx.script, message, "9d0c617e-d14a-490e-9914-83820b135cfc", "stride", false)
         })
+        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult)
     }
 
     def static preExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
