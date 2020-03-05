@@ -173,6 +173,7 @@ abstract class PrPipeline extends ScmPipeline {
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
             JarvisUtil.sendMessageToGroup(ctx.script, message, "9d0c617e-d14a-490e-9914-83820b135cfc", "stride", false)
         })
+        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult)
     }
 
     def static preExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
