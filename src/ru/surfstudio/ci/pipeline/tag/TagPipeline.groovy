@@ -172,20 +172,20 @@ abstract class TagPipeline extends ScmPipeline {
     }
 
     def static finalizeStageBody(TagPipeline ctx) {
+        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult)
         if (ctx.getStage(ctx.CHECKOUT).result != Result.ABORTED) { //do not handle builds skipped via [skip ci] label
             JarvisUtil.createVersionAndNotify(ctx)
         }
-        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult)
     }
 
     def static debugFinalizeStageBody(TagPipeline ctx) {
+        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult)
         if (ctx.getStage(ctx.CHECKOUT).result != Result.ABORTED) { //do not handle builds skipped via [skip ci] label
             JarvisUtil.createVersionAndNotify(ctx)
         }
         prepareMessageForPipeline(ctx, { message ->
             JarvisUtil.sendMessageToGroup(ctx.script, message, "9d0c617e-d14a-490e-9914-83820b135cfc", "stride", false)
         })
-        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult)
     }
 
     def static preExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
