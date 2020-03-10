@@ -16,12 +16,11 @@
 package ru.surfstudio.ci
 
 import ru.surfstudio.ci.pipeline.tag.TagPipeline
-import ru.surfstudio.ci.stage.SimpleStage
 import ru.surfstudio.ci.stage.StageWithResult
 
 class JarvisUtil {
 
-    def static withJarvisToken(Object script, Closure closure){
+    def static withJarvisToken(Object script, Closure closure) {
         script.withCredentials([[$class: 'StringBinding', credentialsId: "jarvisApiToken", variable: "jarvisToken"]], closure)
     }
 
@@ -30,7 +29,7 @@ class JarvisUtil {
      * @param script
      * @return http параметр с нужным токеном
      */
-    def static getHttpParamToken(Object script){
+    def static getHttpParamToken(Object script) {
         return "authToken=${script.env.jarvisToken}"
     }
 
@@ -59,6 +58,25 @@ class JarvisUtil {
     }
 
     def static sendMessageToGroup(Object script, String message, String projectId, String idType, boolean success) {
+        sendMessageToGroupUtil(script, message, projectId, idType, success ? "green" : "red")
+    }
+
+    def static sendMessageToGroup(Object script, String message, String projectId, String idType, String jobResult) {
+        def color
+        switch (jobResult) {
+            case Result.SUCCESS:
+                color = "green"
+                break
+            case Result.UNSTABLE:
+                color = "yellow"
+                break
+            default:
+                color = "red"
+        }
+        sendMessageToGroupUtil(script, message, projectId, idType, color)
+    }
+
+    private def static sendMessageToGroupUtil(Object script, String message, String projectId, String idType, String color) {
         withJarvisToken(script) {
             script.echo "Sending message to project: ${message}"
             def body = [
@@ -68,7 +86,7 @@ class JarvisUtil {
                     as_task       : true,
                     id_type       : idType,
                     notify        : true,
-                    color         : success ? "green" : "red",
+                    color         : color,
                     sender        : "Jarvis"
             ]
             def jsonBody = groovy.json.JsonOutput.toJson(body)
@@ -83,7 +101,7 @@ class JarvisUtil {
         }
     }
 
-    def static getMainBranch(Object script, String repoUrl){
+    def static getMainBranch(Object script, String repoUrl) {
         withJarvisToken(script) {
             def rawResponse = script.httpRequest consoleLogResponseBody: true,
                     httpMode: 'GET',
@@ -110,7 +128,7 @@ class JarvisUtil {
         withJarvisToken(script) {
             def stageResultsBody = []
             ctx.forStages { stage ->
-                if(stage instanceof StageWithResult && stage.result) {
+                if (stage instanceof StageWithResult && stage.result) {
                     stageResultsBody.add([name: stage.name, status: stage.result])
                 }
             }
