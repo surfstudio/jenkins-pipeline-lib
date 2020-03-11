@@ -42,11 +42,10 @@ class RepositoryUtil {
 
     def static notifyGitlabAboutStageFinish(Object script, String repoUrl, String stageName, String result){
         def commit = getSavedGitCommitHash(script)
-        def slug = getCurrentGitlabRepoSlug(script, repoUrl)
         if (!commit) {
             script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
         }
-        notifyGitlabAboutStage(script, repoUrl, stageName, result, commit)
+        notifyGitlabAboutStageFinish(script, repoUrl, stageName, result, commit)
     }
 
     def static notifyGitlabAboutStageAborted(Object script, String repoUrl, String stageName, String sourceBranch){
@@ -63,7 +62,7 @@ class RepositoryUtil {
         script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "$sourceBranch"]])
     }
 
-    def static notifyGitlabAboutStage(Object script, String repoUrl, String stageName, String result, String revision){
+    def static notifyGitlabAboutStageFinish(Object script, String repoUrl, String stageName, String result, String revision){
         def gitlabStatus = ""
 
         switch (result) {
