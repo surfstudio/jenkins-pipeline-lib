@@ -41,29 +41,12 @@ class RepositoryUtil {
     }
 
     def static notifyGitlabAboutStageFinish(Object script, String repoUrl, String stageName, String result){
-        def gitlabStatus = ""
-
-        switch (result) {
-            case Result.SUCCESS:
-                gitlabStatus = "success"
-                break
-            case Result.ABORTED:
-                gitlabStatus = "canceled"
-                break
-            case Result.FAILURE:
-            case Result.UNSTABLE:
-                gitlabStatus = "failed"
-                break
-            default:
-                script.error "Unsupported Result: ${result}"
-        }
         def commit = getSavedGitCommitHash(script)
         def slug = getCurrentGitlabRepoSlug(script, repoUrl)
         if (!commit) {
             script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
         }
-        script.echo "Notify GitLab - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $result"
-        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "$commit"]])
+        notifyGitlabAboutStage(script, repoUrl, stageName, result, commit)
     }
 
     def static notifyGitlabAboutStageAborted(Object script, String repoUrl, String stageName, String sourceBranch){
@@ -78,6 +61,29 @@ class RepositoryUtil {
         def slug = getCurrentGitlabRepoSlug(script, repoUrl)
         script.echo "Notify GitLab - synthetic stage: $stageName, repoSlug: $slug, branch: $sourceBranch, status: $gitlabStatus"
         script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "$sourceBranch"]])
+    }
+
+    def static notifyGitlabAboutStage(Object script, String repoUrl, String stageName, String result, String revision){
+        def gitlabStatus = ""
+
+        switch (result) {
+            case Result.SUCCESS:
+                gitlabStatus = "success"
+                break
+            case Result.NOT_BUILT:
+            case Result.ABORTED:
+                gitlabStatus = "canceled"
+                break
+            case Result.FAILURE:
+            case Result.UNSTABLE:
+                gitlabStatus = "failed"
+                break
+            default:
+                script.error "Unsupported Result: ${result}"
+        }
+        def slug = getCurrentGitlabRepoSlug(script, repoUrl)
+        script.echo "Notify GitLab - synthetic stage: $stageName, repoSlug: $slug, commitId: $revision, status: $gitlabStatus"
+        script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "$revision"]])
     }
 
     def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName){
