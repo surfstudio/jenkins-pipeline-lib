@@ -58,6 +58,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public outputHtmlFile = "report.html"
     public outputrerunTxtFile = "rerun.txt"
     public outputsIdsDiff = "miss_id.txt"
+    public failedSteps = "failed_steps.txt"
 
     //credentials
     public jiraAuthenticationName = 'Jarvis_Jira'
@@ -215,9 +216,10 @@ abstract class UiTestPipeline extends ScmPipeline {
                                        String outputsDir,
                                        String outputJsonFile,
                                        String outputHtmlFile,
-                                       String outputrerunTxtFile,
+                                       String outputrerunTxtFile, 
                                        String jiraAuthenticationName,
-                                       String htmlReportName) {
+                                       String htmlReportName,
+                                       String failedSteps) {
         script.dir(outputsDir) {
             //def testResult = script.readFile file: outputJsonFile
             //script.echo "Test result json: $testResult"
@@ -233,8 +235,11 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.sh "cd .. && ls"
                 script.sh "cd .. && curl -H \"Content-Type: multipart/form-data\" -u ${script.env.USERNAME}:${script.env.PASSWORD} -F \"file=@arhive.zip\" ${Constants.JIRA_URL}rest/raven/1.0/import/execution/bundle"
             }
+            
+            CommonUtil.shWithRuby(script, "set -x; ruby -r './Scripts/group_sters.rb' e \'GroupScenarios.new.group_failed_scenarios(${outputJsonFile}, ${failedSteps}\')"
+            
             script.step([$class: 'ArtifactArchiver', artifacts: outputrerunTxtFile, allowEmptyArchive: true])
-
+            
             CommonUtil.safe(script) {
 
                 script.sh "rm arhive.zip"
