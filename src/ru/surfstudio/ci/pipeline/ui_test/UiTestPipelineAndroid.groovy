@@ -67,6 +67,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                             featuresDir,
                             artifactForTest,
                             featureForTest,
+                            outputJsonFile,
                             outputHtmlFile,
                             outputrerunTxtFile,
                             outputsIdsDiff)
@@ -115,6 +116,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                                     String artifactForTest,
                                     String featureFile,
                                     String outputHtmlFile,
+                                    String outputJsonFile,
                                     String outputrerunTxtFile,
                                     String outputsIdsDiff
                                     ) {
@@ -155,8 +157,9 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                     script.sh "mkdir arhive"
                 }
                 
+                script.sh "find ${outputsDir} -iname '*.json'; cp *.json ..; mv *.json ${outputJsonFile}"
+                script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir};  mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
                 
-                script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; cp *.json ..; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
             }
         }
     }
