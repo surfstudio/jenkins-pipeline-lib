@@ -172,14 +172,14 @@ abstract class TagPipeline extends ScmPipeline {
     }
 
     def static finalizeStageBody(TagPipeline ctx) {
-        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult)
+        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.tagHash)
         if (ctx.getStage(ctx.CHECKOUT).result != Result.ABORTED) { //do not handle builds skipped via [skip ci] label
             JarvisUtil.createVersionAndNotify(ctx)
         }
     }
 
     def static debugFinalizeStageBody(TagPipeline ctx) {
-        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult)
+        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.tagHash)
         if (ctx.getStage(ctx.CHECKOUT).result != Result.ABORTED) { //do not handle builds skipped via [skip ci] label
             JarvisUtil.createVersionAndNotify(ctx)
         }
