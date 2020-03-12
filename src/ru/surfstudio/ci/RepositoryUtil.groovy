@@ -81,7 +81,7 @@ class RepositoryUtil {
                 script.error "Unsupported Result: ${result}"
         }
         def slug = getCurrentGitlabRepoSlug(script, repoUrl)
-        script.echo "Notify GitLab - synthetic stage: $stageName, repoSlug: $slug, commitId: $revision, status: $gitlabStatus"
+        script.echo "Notify GitLab - synthetic stage: $stageName, repoSlug: $slug, revision: $revision, status: $gitlabStatus"
         script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "$revision"]])
     }
 
