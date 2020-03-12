@@ -92,7 +92,11 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
     def static buildStageBodyAndroid(Object script, String sourcesDir, String buildGradleTask) {
         script.dir(sourcesDir) {
-            script.sh "./gradlew ${buildGradleTask}"
+
+            //script.sh "./gradlew ${buildGradleTask}"
+            def built = build('Labirint_Android_TAG');  // https://plugins.jenkins.io/pipeline-build-step
+           //TODO copyArtifacts(projectName: 'Labirint_Android_TAG', selector: specific("${built.lastSuccessful}"), selector:specific("${built = qa}");
+            copyArtifacts(projectName: 'Labirint_Android_TAG', selector: specific("${built.lastSuccessful}"));
         }
     }
 
