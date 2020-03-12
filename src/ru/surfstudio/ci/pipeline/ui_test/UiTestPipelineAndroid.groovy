@@ -109,7 +109,6 @@ class UiTestPipelineAndroid extends UiTestPipeline {
             }
         }
     }
-...
 }
             
             
