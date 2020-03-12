@@ -154,7 +154,9 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 CommonUtil.safe(script) {
                     script.sh "mkdir arhive"
                 }
-                script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
+                
+                
+                script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; cp *.json ..; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
             }
         }
     }
