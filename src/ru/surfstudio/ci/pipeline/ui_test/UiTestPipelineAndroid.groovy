@@ -94,9 +94,25 @@ class UiTestPipelineAndroid extends UiTestPipeline {
         script.dir(sourcesDir) {
 
             //script.sh "./gradlew ${buildGradleTask}"
-            def built = build('Labirint_Android_TAG');  // https://plugins.jenkins.io/pipeline-build-step
+            //def built = build('Labirint_Android_TAG');  // https://plugins.jenkins.io/pipeline-build-step
            //TODO copyArtifacts(projectName: 'Labirint_Android_TAG', selector: specific("${built.lastSuccessful}"), selector:specific("${built = qa}");
-            copyArtifacts(projectName: 'Labirint_Android_TAG', selector: specific("${built.lastSuccessful}"));
+            //copyArtifacts(projectName: 'Labirint_Android_TAG', selector: specific("${built.lastSuccessful}"));
+            
+            stages {
+           stage('Copy Archive') {
+         steps {
+             script {
+                step ([$class: 'CopyArtifact',
+                    projectName: 'Labirint_Android_TAG',
+                    filter: "*qa.apk",
+                    target: '.']);
+            }
+        }
+    }
+...
+}
+            
+            
         }
     }
 
