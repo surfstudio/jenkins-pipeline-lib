@@ -236,7 +236,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.sh "cd .. && curl -H \"Content-Type: multipart/form-data\" -u ${script.env.USERNAME}:${script.env.PASSWORD} -F \"file=@arhive.zip\" ${Constants.JIRA_URL}rest/raven/1.0/import/execution/bundle"
             }
             
-            CommonUtil.shWithRuby(script, "set -x; ruby -r './Scripts/group_steps.rb' -e 'GroupScenarios.new.group_failed_scenarios(${outputJsonFile}, ${failedStepsFile})'")
+            CommonUtil.shWithRuby(script, "set -x; ruby -r './Scripts/group_steps.rb' -e \"GroupScenarios.new.group_failed_scenarios(${outputJsonFile}, ${failedStepsFile})'\"")
             
             script.step([$class: 'ArtifactArchiver', artifacts: outputrerunTxtFile, allowEmptyArchive: true])
             
