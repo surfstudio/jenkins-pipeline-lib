@@ -54,7 +54,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     //files
     public featureForTest = "for_test.feature"
-    public outputJsonFile = "report.json"
+    public outputJsonFile = "output.json"
     public outputHtmlFile = "report.html"
     public outputrerunTxtFile = "rerun.txt"
     public outputsIdsDiff = "miss_id.txt"
