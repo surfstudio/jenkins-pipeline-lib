@@ -104,7 +104,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                  
                 script.step ([$class: 'CopyArtifact',
                     projectName: 'Labirint_Android_TAG',
-                    filter: "app/build/outputs/apk/qa/LabirintAndroid-1.7.0-rc09-(3009)-qa.apk",
+                    filter: "app/build/outputs/apk/qa/LabirintAndroid-1.7.0-rc09*",
                     target: "${sourcesDir}"]);
             }
         }
