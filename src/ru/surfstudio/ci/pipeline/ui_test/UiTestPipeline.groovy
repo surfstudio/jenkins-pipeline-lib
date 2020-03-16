@@ -118,6 +118,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         CommonUtil.checkPipelineParameterDefined(script, ctx.sourceRepoUrl, "sourceRepoUrl")
         CommonUtil.checkPipelineParameterDefined(script, ctx.jiraProjectKey, "jiraProjectKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.platform, "platform")
+        CommonUtil.checkPipelineParameterDefined(script, ctx.platform, "projectForBuild")
         CommonUtil.checkPipelineParameterDefined(script, ctx.testBranch, "testBranch")
         CommonUtil.checkPipelineParameterDefined(script, ctx.defaultTaskKey, "defaultTaskKey")
 
@@ -412,7 +413,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     }
 
-    private static void parameters(script, String defaultTaskKey, String testBranch, String defaultSourceBranch, String node) {
+    private static void parameters(script, String defaultTaskKey, String testBranch, String defaultSourceBranch, String projectForBuild, String node) {
         return script.parameters([
                 script.string(
                         name: TASK_KEY_PARAMETER,
