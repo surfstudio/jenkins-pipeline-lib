@@ -430,7 +430,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                         name: PROJECT_FOR_BUILD,
                         defaultValue: projectForBuild,
                         description: 'Проект, из которого нужно взять сборку Android'
-                )        
+                ),        
                 script.string(
                         name: USER_EMAIL_PARAMETER,
                         defaultValue: "qa@surfstudio.ru",
