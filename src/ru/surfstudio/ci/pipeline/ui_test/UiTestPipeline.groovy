@@ -427,12 +427,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.string(
                         name: SOURCE_BRANCH_PARAMETER,
                         defaultValue: defaultSourceBranch,
-                        description: 'Ветка, с исходным кодом приложения, из которой нужно собрать сборку. Необязательный параметр, если не указана, будет использоваться MainBranch repo '),
-                script.string(
-                        name: PROJECT_FOR_BUILD,
-                        defaultValue: projectForBuild,
-                        description: 'Проект, из которого нужно взять сборку Android'
-                ),        
+                        description: 'Ветка, с исходным кодом приложения, из которой нужно собрать сборку. Необязательный параметр, если не указана, будет использоваться MainBranch repo '),       
                 script.string(
                         name: USER_EMAIL_PARAMETER,
                         defaultValue: "qa@surfstudio.ru",
