@@ -246,6 +246,7 @@ abstract class UiTestPipeline extends ScmPipeline {
             
             
             script.step([$class: 'ArtifactArchiver', artifacts: outputrerunTxtFile, allowEmptyArchive: true])
+            script.step([$class: 'ArtifactArchiver', artifacts: failedStepsFile, allowEmptyArchive: true])
             
             CommonUtil.safe(script) {
 
