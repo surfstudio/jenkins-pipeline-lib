@@ -44,7 +44,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public jiraProjectKey
     public platform  // "android" or "ios"
     public testBranch // branch with tests
-    //public projectForBuild = "" 
+    public projectForBuild = "" 
     public defaultTaskKey  //task for run periodically
 
     //dirs
@@ -118,7 +118,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         CommonUtil.checkPipelineParameterDefined(script, ctx.sourceRepoUrl, "sourceRepoUrl")
         CommonUtil.checkPipelineParameterDefined(script, ctx.jiraProjectKey, "jiraProjectKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.platform, "platform")
-        //CommonUtil.checkPipelineParameterDefined(script, ctx.projectForBuild, "projectForBuild")
+        CommonUtil.checkPipelineParameterDefined(script, ctx.projectForBuild, "projectForBuild")
         CommonUtil.checkPipelineParameterDefined(script, ctx.testBranch, "testBranch")
         CommonUtil.checkPipelineParameterDefined(script, ctx.defaultTaskKey, "defaultTaskKey")
 
@@ -138,9 +138,9 @@ abstract class UiTestPipeline extends ScmPipeline {
             value -> ctx.testBranch = value
         }
 
-        //extractValueFromEnvOrParamsAndRun(script, PROJECT_FOR_BUILD) {
-          //  value -> ctx.projectForBuild = value
-        //}
+        extractValueFromEnvOrParamsAndRun(script, PROJECT_FOR_BUILD) {
+            value -> ctx.projectForBuild = value
+        }
 
         //jira
         extractValueFromEnvOrParamsAndRun(script, TASK_KEY_PARAMETER) {
@@ -361,7 +361,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         return [
                 buildDiscarder(ctx, script),
                 environments(script, ctx.testBranch),
-                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.node),
+                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.projectForBuild, ctx.node),
                 triggers(script, ctx.jiraProjectKey, ctx.platform, ctx.cronTimeTrigger)
         ]
     }
