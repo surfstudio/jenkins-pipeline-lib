@@ -44,7 +44,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public jiraProjectKey
     public platform  // "android" or "ios"
     public testBranch // branch with tests
-    public projectForBuild 
+    public projectForBuild = "" 
     public defaultTaskKey  //task for run periodically
 
     //dirs
@@ -138,7 +138,7 @@ abstract class UiTestPipeline extends ScmPipeline {
             value -> ctx.testBranch = value
         }
 
-        extractValueFromParamsAndRun(script, PROJECT_FOR_BUILD) {
+        extractValueFromEnvOrParamsAndRun(script, PROJECT_FOR_BUILD) {
             value -> ctx.projectForBuild = value
         }
 
