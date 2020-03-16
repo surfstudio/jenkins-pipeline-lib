@@ -67,7 +67,6 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                             featuresDir,
                             artifactForTest,
                             featureForTest,
-                            outputJsonFile,
                             outputHtmlFile,
                             outputrerunTxtFile,
                             outputsIdsDiff)
@@ -131,7 +130,6 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                                     String artifactForTest,
                                     String featureFile,
                                     String outputHtmlFile,
-                                    String outputJsonFile,
                                     String outputrerunTxtFile,
                                     String outputsIdsDiff
                                     ) {
@@ -162,7 +160,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
        
             try {
-                CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  \" ${featuresDir}/${featureFile} --concurrent")
+                CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  -p json_report\" ${featuresDir}/${featureFile} --concurrent")
             }
             finally {
       
