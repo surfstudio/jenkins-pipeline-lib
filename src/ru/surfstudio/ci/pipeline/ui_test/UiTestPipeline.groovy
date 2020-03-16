@@ -44,6 +44,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public jiraProjectKey
     public platform  // "android" or "ios"
     public testBranch // branch with tests
+    public projectForBuild
     public defaultTaskKey  //task for run periodically
 
     //dirs
@@ -136,6 +137,10 @@ abstract class UiTestPipeline extends ScmPipeline {
             value -> ctx.testBranch = value
         }
 
+        extractValueFromParamsAndRun(script, PROJECT_FOR_BUILD) {
+            value -> ctx.projectForBuild = value
+        }
+
         //jira
         extractValueFromEnvOrParamsAndRun(script, TASK_KEY_PARAMETER) {
             value -> ctx.taskKey = value
@@ -146,6 +151,8 @@ abstract class UiTestPipeline extends ScmPipeline {
         extractValueFromEnvOrParamsAndRun(script, USER_EMAIL_PARAMETER) {
             value -> ctx.userEmail = value
         }
+
+    
 
         if (ctx.notificationEnabled) {
             sendStartNotification(ctx)
@@ -221,8 +228,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                                        String htmlReportName,
                                        String failedStepsFile) {
         script.dir(outputsDir) {
-            //def testResult = script.readFile file: outputJsonFile
-            //script.echo "Test result json: $testResult"
+
             script.withCredentials([script.usernamePassword(
                     credentialsId: jiraAuthenticationName,
                     usernameVariable: 'USERNAME',
@@ -344,6 +350,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public static final String TASK_KEY_PARAMETER = 'taskKey'
     public static final String TEST_BRANCH_PARAMETER = 'testBranch'
     public static final String SOURCE_BRANCH_PARAMETER = 'sourceBranch'
+    public static final String PROJECT_FOR_BUILD = 'projectForBuild'
     public static final String USER_EMAIL_PARAMETER = 'userEmail'
     public static final String NODE_PARAMETER = 'node'
 
@@ -419,6 +426,11 @@ abstract class UiTestPipeline extends ScmPipeline {
                         name: SOURCE_BRANCH_PARAMETER,
                         defaultValue: defaultSourceBranch,
                         description: 'Ветка, с исходным кодом приложения, из которой нужно собрать сборку. Необязательный параметр, если не указана, будет использоваться MainBranch repo '),
+                script.string(
+                        name: PROJECT_FOR_BUILD,
+                        defaultValue: projectForBuild,
+                        description: 'Проект, из которого нужно взять сборку Android'
+                )        
                 script.string(
                         name: USER_EMAIL_PARAMETER,
                         defaultValue: "qa@surfstudio.ru",
