@@ -224,7 +224,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                                        String outputsDir,
                                        String outputJsonFile,
                                        String outputHtmlFile,
-                                       String outputrerunTxtFile, 
+                                       String outputrerunTxtFile,
                                        String jiraAuthenticationName,
                                        String htmlReportName,
                                        String failedStepsFile) {
@@ -244,9 +244,8 @@ abstract class UiTestPipeline extends ScmPipeline {
             }
             
             
-            
             script.step([$class: 'ArtifactArchiver', artifacts: outputrerunTxtFile, allowEmptyArchive: true])
-            script.step([$class: 'ArtifactArchiver', artifacts: failedStepsFile, allowEmptyArchive: true])
+            
 
             CommonUtil.safe(script) {
 
