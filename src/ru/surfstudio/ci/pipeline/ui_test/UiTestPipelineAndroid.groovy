@@ -173,7 +173,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 }
                 
                 
-                script.sh "find ${outputsDir} -iname '*.json'; cp *.json ..; mv *.json ${outputJsonFile}"
+                //script.sh "find ${outputsDir} -iname '*.json'; cp *.json ..; mv *.json ${outputJsonFile}"
                 script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir};  mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
                 
             }
