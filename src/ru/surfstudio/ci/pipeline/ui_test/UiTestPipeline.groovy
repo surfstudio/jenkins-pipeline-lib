@@ -44,7 +44,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public jiraProjectKey
     public platform  // "android" or "ios"
     public testBranch // branch with tests
-    public projectForBuild
+    public projectForBuild 
     public defaultTaskKey  //task for run periodically
 
     //dirs
@@ -118,7 +118,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         CommonUtil.checkPipelineParameterDefined(script, ctx.sourceRepoUrl, "sourceRepoUrl")
         CommonUtil.checkPipelineParameterDefined(script, ctx.jiraProjectKey, "jiraProjectKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.platform, "platform")
-        CommonUtil.checkPipelineParameterDefined(script, ctx.platform, "projectForBuild")
+        CommonUtil.checkPipelineParameterDefined(script, ctx.projectForBuild, "projectForBuild")
         CommonUtil.checkPipelineParameterDefined(script, ctx.testBranch, "testBranch")
         CommonUtil.checkPipelineParameterDefined(script, ctx.defaultTaskKey, "defaultTaskKey")
 
