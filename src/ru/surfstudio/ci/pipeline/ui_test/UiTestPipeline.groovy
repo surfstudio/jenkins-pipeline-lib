@@ -59,7 +59,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public outputHtmlFile = "report.html"
     public outputrerunTxtFile = "rerun.txt"
     public outputsIdsDiff = "miss_id.txt"
-    public failedStepsFile = "failed_steps.txt"
+    public failedStepsFile = "failed_steps"
 
     //credentials
     public jiraAuthenticationName = 'Jarvis_Jira'
