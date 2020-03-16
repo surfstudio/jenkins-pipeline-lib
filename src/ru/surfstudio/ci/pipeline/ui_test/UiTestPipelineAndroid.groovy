@@ -131,7 +131,8 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                                     String featureFile,
                                     String outputHtmlFile,
                                     String outputrerunTxtFile,
-                                    String outputsIdsDiff
+                                    String outputsIdsDiff,
+                                    String failedStepsFile
                                     ) {
 
         script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
@@ -163,14 +164,16 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  -p json_report\" ${featuresDir}/${featureFile} --concurrent")
             }
             finally {
-      
+                
                 CommonUtil.shWithRuby(script, "ruby -r \'./find_id.rb\' -e \"Find.new.get_miss_id(\'./${sourcesDir}\', \'./features/android/pages\')\"")
                 script.step([$class: 'ArtifactArchiver', artifacts: outputsIdsDiff, allowEmptyArchive: true])
+                
+                
                 CommonUtil.safe(script) {
                     script.sh "mkdir arhive"
                 }
                 
-                
+                CommonUtil.shWithRuby(script, "ruby -r \'./group_steps.rb\' -e \"GroupScenarios.new.group_failed_scenarios(\'${outputsDir}/*.json\', \'${failedStepsFile}\')\"")
                 //script.sh "find ${outputsDir} -iname '*.json'; cp *.json ..; mv *.json ${outputJsonFile}"
                 script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir};  mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
                 
