@@ -91,9 +91,6 @@ class UiTestPipelineAndroid extends UiTestPipeline {
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
     def static buildStageBodyAndroid(Object script, String sourcesDir, String buildGradleTask) {
-     
-            
-            
             
             //script.sh "./gradlew ${buildGradleTask}"
             //def built = build('Labirint_Android_TAG');  // https://plugins.jenkins.io/pipeline-build-step
