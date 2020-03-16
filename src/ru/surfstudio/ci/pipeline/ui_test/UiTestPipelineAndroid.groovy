@@ -174,7 +174,10 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                     script.sh "mkdir arhive"
                 }
                 
-                CommonUtil.shWithRuby(script, "ruby -r \'./group_steps.rb\' -e \"GroupScenarios.new.group_failed_scenarios(\'${outputsDir}/*.json\', \'${failedStepsFile}\')\"")
+                script.echo "find ${outputsDir} -iname '*.json'"
+                //def jsons = script.sh "find ${outputsDir} -iname '*.json'"
+                //script.echo jsons 
+                CommonUtil.shWithRuby(script, "ruby -r \'./group_steps.rb\' -e \"GroupScenarios.new.group_failed_scenarios(\'${outputsDir}/ANE_LX1.json\', \'${failedStepsFile}\')\"")
                 //script.sh "find ${outputsDir} -iname '*.json'; cp *.json ..; mv *.json ${outputJsonFile}"
                 script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir};  mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
                 
