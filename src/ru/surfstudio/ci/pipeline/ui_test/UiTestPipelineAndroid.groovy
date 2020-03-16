@@ -69,7 +69,8 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                             featureForTest,
                             outputHtmlFile,
                             outputrerunTxtFile,
-                            outputsIdsDiff)
+                            outputsIdsDiff,
+                            failedStepsFile)
                 },
                 stage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     publishResultsStageBody(script,
