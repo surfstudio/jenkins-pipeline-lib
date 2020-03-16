@@ -118,7 +118,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         CommonUtil.checkPipelineParameterDefined(script, ctx.sourceRepoUrl, "sourceRepoUrl")
         CommonUtil.checkPipelineParameterDefined(script, ctx.jiraProjectKey, "jiraProjectKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.platform, "platform")
-        CommonUtil.checkPipelineParameterDefined(script, ctx.projectForBuild, "projectForBuild")
+        //CommonUtil.checkPipelineParameterDefined(script, ctx.projectForBuild, "projectForBuild")
         CommonUtil.checkPipelineParameterDefined(script, ctx.testBranch, "testBranch")
         CommonUtil.checkPipelineParameterDefined(script, ctx.defaultTaskKey, "defaultTaskKey")
 
@@ -134,9 +134,9 @@ abstract class UiTestPipeline extends ScmPipeline {
         extractValueFromParamsAndRun(script, SOURCE_BRANCH_PARAMETER) {
             value -> ctx.sourceBranch = value
         }
-        extractValueFromParamsAndRun(script, TEST_BRANCH_PARAMETER) {
-            value -> ctx.testBranch = value
-        }
+        //extractValueFromParamsAndRun(script, TEST_BRANCH_PARAMETER) {
+          //  value -> ctx.testBranch = value
+        //}
 
         extractValueFromEnvOrParamsAndRun(script, PROJECT_FOR_BUILD) {
             value -> ctx.projectForBuild = value
@@ -352,7 +352,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public static final String TASK_KEY_PARAMETER = 'taskKey'
     public static final String TEST_BRANCH_PARAMETER = 'testBranch'
     public static final String SOURCE_BRANCH_PARAMETER = 'sourceBranch'
-    public static final String PROJECT_FOR_BUILD = 'projectForBuild'
+    //public static final String PROJECT_FOR_BUILD = 'projectForBuild'
     public static final String USER_EMAIL_PARAMETER = 'userEmail'
     public static final String NODE_PARAMETER = 'node'
 
@@ -361,7 +361,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         return [
                 buildDiscarder(ctx, script),
                 environments(script, ctx.testBranch),
-                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.projectForBuild, ctx.node),
+                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.node),
                 triggers(script, ctx.jiraProjectKey, ctx.platform, ctx.cronTimeTrigger)
         ]
     }
