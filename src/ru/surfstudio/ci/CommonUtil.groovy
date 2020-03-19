@@ -65,28 +65,32 @@ class CommonUtil {
         return script.env.ANDROID_HOME
     }
 
+    static String getAndroidSdkHome(Object script) {
+        return script.env.ANDROID_SDK_ROOT
+    }
+
     static String getAdbHome(Object script) {
-        return "${getAndroidHome(script)}/platform-tools/adb"
+        return "adb"
     }
 
     static String getEmulatorHome(Object script) {
-        return "${getAndroidHome(script)}/emulator/emulator"
+        return "${getAndroidSdkHome(script)}/emulator/emulator"
     }
 
     private static String getAndroidToolsHome(Object script) {
-        return "${getAndroidHome(script)}/tools/bin"
+        return "${getAndroidSdkHome(script)}/tools/bin"
     }
 
     static String getAaptHome(Object script, String buildToolsVersion) {
-        return "${getAndroidHome(script)}/build-tools/$buildToolsVersion/aapt"
+        return "aapt"
     }
 
     static String getAvdManagerHome(Object script) {
-        return "${getAndroidToolsHome(script)}/avdmanager"
+        return "avdmanager"
     }
 
     static String getSdkManagerHome(Object script) {
-        return "${getAndroidToolsHome(script)}/sdkmanager"
+        return "sdkmanager"
     }
     //endregion
 
