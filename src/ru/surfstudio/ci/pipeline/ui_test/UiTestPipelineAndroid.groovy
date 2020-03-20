@@ -92,11 +92,10 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
     def static buildStageBodyAndroid(Object script, String sourcesDir, String buildGradleTask) {
             
-            //script.sh "./gradlew ${buildGradleTask}"
             //def built = build('Labirint_Android_TAG');  // https://plugins.jenkins.io/pipeline-build-step
            //TODO copyArtifacts(projectName: 'Labirint_Android_TAG', selector: specific("${built.lastSuccessful}"), selector:specific("${built = qa}"); androidTestBuildType = "qa"
             //copyArtifacts(projectName: 'Labirint_Android_TAG', selector: specific("${built.lastSuccessful}")); 
-        if (projectForBuild != '')
+        if (projectForBuild == '')
             {
              def job_name = System.getenv('JOB_NAME')
              script.dir(sourcesDir) {
@@ -105,8 +104,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                     //projectName: 'Labirint_Android_TAG',
                     projectName: "${job_name}_Android_TAG",
                     target: "${sourcesDir}"])
-            }
-            else { 
+            } else { 
             script.sh "./gradlew ${buildGradleTask}"
             }
             }
