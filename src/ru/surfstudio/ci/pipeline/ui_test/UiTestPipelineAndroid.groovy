@@ -99,12 +99,14 @@ class UiTestPipelineAndroid extends UiTestPipeline {
             {
              def job_name = System.getenv('JOB_NAME')
              script.dir(sourcesDir) {
-                 
+                script.echo "$job_name"
                 script.step ([$class: 'CopyArtifact',
                     projectName: "${job_name}_Android_TAG",
                     target: "${sourcesDir}"])
             }}  else if (script.env.projectForBuild == '') {
-                script.sh "./gradlew ${buildGradleTask}"
+                 script.dir(sourcesDir) { 
+                     script.sh "./gradlew ${buildGradleTask}"
+                 }
             } else 
             { 
                 script.dir(sourcesDir) {
