@@ -64,6 +64,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
                             sourcesDir, 
                             derivedDataPath,
                             testiOSSDK,
+                            projectForBuild,
                             iOSKeychainCredenialId, 
                             iOSCertfileCredentialId)
                 },
@@ -107,8 +108,13 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
-    def static buildStageBodyiOS(Object script, String sourcesDir, String derivedDataPath, String sdk, String keychainCredenialId, String certfileCredentialId) {
+    def static buildStageBodyiOS(Object script, String sourcesDir, String derivedDataPath, String sdk, String projectForBuild, String keychainCredenialId, String certfileCredentialId) {
         
+         if (script.env.projectForBuild == '') {
+                 script.dir(sourcesDir) { 
+                     script.echo "works"
+                 }}
+
         public artifactForTest = "*-cal.app"
         public builtAppPattern = "${sourcesDir}/**/**-cal.app"
 
