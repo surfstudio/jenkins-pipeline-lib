@@ -137,7 +137,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         extractValueFromParamsAndRun(script, TEST_BRANCH_PARAMETER) {
             value -> ctx.testBranch = value
         }
-        extractValueFromEnvOrParamsAndRun(script, PROJECT_FOR_BUILD) {
+        extractValueFromEnvOrParamsAndRun(script, PROJECT_FOR_BUILD_PARAMETER) {
             value -> ctx.projectForBuild = value
         }
     
