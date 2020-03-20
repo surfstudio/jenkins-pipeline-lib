@@ -96,12 +96,19 @@ class UiTestPipelineAndroid extends UiTestPipeline {
             //def built = build('Labirint_Android_TAG');  // https://plugins.jenkins.io/pipeline-build-step
            //TODO copyArtifacts(projectName: 'Labirint_Android_TAG', selector: specific("${built.lastSuccessful}"), selector:specific("${built = qa}"); androidTestBuildType = "qa"
             //copyArtifacts(projectName: 'Labirint_Android_TAG', selector: specific("${built.lastSuccessful}")); 
-
+        if (projectForBuild != '')
+            {
+             def job_name = System.getenv('JOB_NAME')
              script.dir(sourcesDir) {
                  
                 script.step ([$class: 'CopyArtifact',
-                    projectName: 'Labirint_Android_TAG',
-                    target: "${sourcesDir}"]);
+                    //projectName: 'Labirint_Android_TAG',
+                    projectName: "${job_name}_Android_TAG",
+                    target: "${sourcesDir}"])
+            }
+            else { 
+            script.sh "./gradlew ${buildGradleTask}"
+            }
             }
         }
     
@@ -171,9 +178,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                     script.sh "mkdir arhive"
                 }
                 
-                //script.echo "find ${outputsDir} -iname '*.json'"
-                //def jsons = script.sh "find ${outputsDir} -iname '*.json'"
-                //script.echo jsons 
+
                 CommonUtil.shWithRuby(script, "ruby -r \'./group_steps.rb\' -e \"GroupScenarios.new.group_failed_scenarios(\'${outputsDir}/ANE_LX1.json\', \'${failedStepsFile}\')\"")
                 script.step([$class: 'ArtifactArchiver', artifacts: failedStepsFile, allowEmptyArchive: true])
                 script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir};  mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
