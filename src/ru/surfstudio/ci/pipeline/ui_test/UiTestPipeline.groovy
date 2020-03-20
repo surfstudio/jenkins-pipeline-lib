@@ -412,7 +412,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     }
 
-    private static void parameters(script, String defaultTaskKey, String testBranch, String defaultSourceBranch, String node) {
+    private static void parameters(script, String defaultTaskKey, String testBranch, String defaultSourceBranch, String node, String projectForBuild) {
         return script.parameters([
                 script.string(
                         name: TASK_KEY_PARAMETER,
