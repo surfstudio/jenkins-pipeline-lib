@@ -103,7 +103,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                  
                 script.step ([$class: 'CopyArtifact',
                     //projectName: 'Labirint_Android_TAG',
-                    projectName: "${job_name}_Android_TAG"
+                    projectName: "${job_name}_Android_TAG",
                     target: "${sourcesDir}"]);
             }
             else script.sh "./gradlew ${buildGradleTask}";
