@@ -165,7 +165,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
           
             script.sh "mv src/Build/Products/Debug-iphonesimulator/Labirint-cal.app Labirint-cal.app" 
             //script.dir(sourcesDir){ 
-                script.step([$class: 'ArtifactArchiver', artifacts: "Labirint-cal.app"])
+                script.sh "zip -r Labirint-cal.app.zip Labirint-cal.app"
+                script.step([$class: 'ArtifactArchiver', artifacts: "Labirint-cal.app.zip"])
             //}
             
             
