@@ -104,10 +104,10 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                     //projectName: 'Labirint_Android_TAG',
                     projectName: "${job_name}_Android_TAG",
                     target: "${sourcesDir}"])
-            } else { 
+            }} else { 
             script.sh "./gradlew ${buildGradleTask}"
             }
-            }
+            
         }
     
 
