@@ -100,7 +100,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
              
              script.dir(sourcesDir) {
 
-                def job_name =   "${script.env.JOB_ENV}"               
+                def job_name =   "${script.env.JOB_NAME}"               
                 script.echo "${job_name}"
                 script.step ([$class: 'CopyArtifact',
                     projectName: "${job_name}_Android_TAG",
