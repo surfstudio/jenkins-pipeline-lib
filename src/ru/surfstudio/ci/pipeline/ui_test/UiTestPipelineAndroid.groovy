@@ -92,36 +92,25 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
     def static buildStageBodyAndroid(Object script, String sourcesDir, String projectForBuild, String buildGradleTask) {
             
-            //def built = build('Labirint_Android_TAG');  // https://plugins.jenkins.io/pipeline-build-step
-           //TODO copyArtifacts(projectName: 'Labirint_Android_TAG', selector: specific("${built.lastSuccessful}"), selector:specific("${built = qa}"); androidTestBuildType = "qa"
-            //copyArtifacts(projectName: 'Labirint_Android_TAG', selector: specific("${built.lastSuccessful}")); 
-        if (script.env.projectForBuild == 'default')
-            {
-             
-             script.dir(sourcesDir) {
-
-                def job_name =   "${script.env.JOB_BASE_NAME}"               
-                script.echo "${job_name}"
-                script.step ([$class: 'CopyArtifact',
-                    projectName: "${job_name}_Android_TAG",
-                    target: "${sourcesDir}"])
-            }}  else if (script.env.projectForBuild == '') {
+ 
+            if (script.env.projectForBuild == '') {
                  script.dir(sourcesDir) { 
                      script.sh "./gradlew ${buildGradleTask}"
-                 }
-            } else 
+                 }}
+             else 
             { 
-                script.dir(sourcesDir) {
-                 
+             
+             script.dir(sourcesDir) {
+     
+                script.echo "${projectForBuild}"
                 script.step ([$class: 'CopyArtifact',
-                    projectName: "${script.env.projectForBuild}",
+                    projectName: "${projectForBuild}",
                     target: "${sourcesDir}"])
             }
-            }
             
-        }
+            }
     
-
+        }
  
 
     def static prepareApkStageBodyAndroid(Object script, String builtApkPattern, String newApkForTest) {
