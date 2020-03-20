@@ -118,9 +118,9 @@ abstract class UiTestPipeline extends ScmPipeline {
         CommonUtil.checkPipelineParameterDefined(script, ctx.sourceRepoUrl, "sourceRepoUrl")
         CommonUtil.checkPipelineParameterDefined(script, ctx.jiraProjectKey, "jiraProjectKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.platform, "platform")
-        CommonUtil.checkPipelineParameterDefined(script, ctx.projectForBuild, "projectForBuild")
         CommonUtil.checkPipelineParameterDefined(script, ctx.testBranch, "testBranch")
         CommonUtil.checkPipelineParameterDefined(script, ctx.defaultTaskKey, "defaultTaskKey")
+        CommonUtil.checkPipelineParameterDefined(script, ctx.projectForBuild, "projectForBuild")
 
         CommonUtil.printInitialStageStrategies(ctx)
 
