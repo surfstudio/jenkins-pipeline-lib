@@ -33,6 +33,9 @@ class UiTestPipelineiOS extends UiTestPipeline {
     public testOSVersion = "com.apple.CoreSimulator.SimRuntime.iOS-12-3"
     public testiOSSDK = "iphonesimulator12.3"
 
+    public artifactForTest = "*.app"
+    public builtAppPattern = "${sourcesDir}/**/**.app"
+
 
     UiTestPipelineiOS(Object script) {
         super(script)
@@ -105,6 +108,19 @@ class UiTestPipelineiOS extends UiTestPipeline {
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
     def static buildStageBodyiOS(Object script, String sourcesDir, String derivedDataPath, String sdk, String keychainCredenialId, String certfileCredentialId) {
+        
+        public artifactForTest = "*-cal.app"
+        public builtAppPattern = "${sourcesDir}/**/**-cal.app"
+
+         //script.dir(sourcesDir) {
+     
+    
+           //     script.step ([$class: 'CopyArtifact',
+             //       projectName: "Labirint_IOS_UI_TEST",
+               //     target: "${sourcesDir}"])
+            //}
+        
+        
         script.withCredentials([
                 script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
                 script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
@@ -140,7 +156,15 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
             script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
             //script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -derivedDataPath ${derivedDataPath}"
- 
+            script.step([$class: 'ArtifactArchiver', artifacts: "${derivedDataPath}/Build/Products/Debug-iphonesimulator/*.app"])
+
+        //def files = script.findFiles(glob: builtApkPattern)
+        //String foundedApks = files.join("\n")
+        //script.echo "founded apks: $foundedApks"
+        //def apkPath = files[0].path
+        //script.echo "use first: $apkPath"
+
+        //script.sh "mv \"${apkPath}\" ${newApkForTest}"
             
         }
     }
