@@ -44,7 +44,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public jiraProjectKey
     public platform  // "android" or "ios"
     public testBranch // branch with tests
-    public projectForBuild = "" 
+    public projectForBuild = "default" 
     public defaultTaskKey  //task for run periodically
 
     //dirs
@@ -118,7 +118,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         CommonUtil.checkPipelineParameterDefined(script, ctx.sourceRepoUrl, "sourceRepoUrl")
         CommonUtil.checkPipelineParameterDefined(script, ctx.jiraProjectKey, "jiraProjectKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.platform, "platform")
-        //CommonUtil.checkPipelineParameterDefined(script, ctx.projectForBuild, "projectForBuild")
+        CommonUtil.checkPipelineParameterDefined(script, ctx.projectForBuild, "projectForBuild")
         CommonUtil.checkPipelineParameterDefined(script, ctx.testBranch, "testBranch")
         CommonUtil.checkPipelineParameterDefined(script, ctx.defaultTaskKey, "defaultTaskKey")
 
@@ -138,9 +138,9 @@ abstract class UiTestPipeline extends ScmPipeline {
             value -> ctx.testBranch = value
         }
 
-        //extractValueFromEnvOrParamsAndRun(script, PROJECT_FOR_BUILD) {
-          //  value -> ctx.projectForBuild = value
-        //}
+        extractValueFromParamsAndRun(script, PROJECT_FOR_BUILD_PARAMETER) {
+            value -> ctx.projectForBuild = value
+        }
     
         //jira
         extractValueFromEnvOrParamsAndRun(script, TASK_KEY_PARAMETER) {
@@ -351,7 +351,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public static final String TASK_KEY_PARAMETER = 'taskKey'
     public static final String TEST_BRANCH_PARAMETER = 'testBranch'
     public static final String SOURCE_BRANCH_PARAMETER = 'sourceBranch'
-    //public static final String PROJECT_FOR_BUILD = 'projectForBuild'
+    public static final String PROJECT_FOR_BUILD_PARAMETER = 'projectForBuild'
     public static final String USER_EMAIL_PARAMETER = 'userEmail'
     public static final String NODE_PARAMETER = 'node'
 
@@ -360,7 +360,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         return [
                 buildDiscarder(ctx, script),
                 environments(script, ctx.testBranch),
-                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.node),
+                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.projectForBuild, ctx.node),
                 triggers(script, ctx.jiraProjectKey, ctx.platform, ctx.cronTimeTrigger)
         ]
     }
@@ -431,6 +431,12 @@ abstract class UiTestPipeline extends ScmPipeline {
                         name: USER_EMAIL_PARAMETER,
                         defaultValue: "qa@surfstudio.ru",
                         description: 'почта пользователя, которому будут отсылаться уведомления о результатах тестирования. Если не указано. то сообщения будут отсылаться в группу проекта'),
+                script.string(
+                        name: PROJECT_FOR_BUILD_PARAMETER,
+                        defaultValue: projectForBuild,
+                        description: 'Название Job, откуда брать сборку')
+
+                ),
                 script.string(
                         name: NODE_PARAMETER,
                         defaultValue: node,

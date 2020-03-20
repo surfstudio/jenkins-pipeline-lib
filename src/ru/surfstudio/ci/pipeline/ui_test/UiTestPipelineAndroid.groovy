@@ -45,7 +45,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                     checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, sourceRepoCredentialsId)
                 },
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    buildStageBodyAndroid(script, sourcesDir, buildGradleTask)
+                    buildStageBodyAndroid(script, sourcesDir, projectForBuild, buildGradleTask)
                 },
                 stage(PREPARE_ARTIFACT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     prepareApkStageBodyAndroid(script,
@@ -90,22 +90,29 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
-    def static buildStageBodyAndroid(Object script, String sourcesDir, String buildGradleTask) {
+    def static buildStageBodyAndroid(Object script, String sourcesDir, String projectForBuild, String buildGradleTask) {
             
             //def built = build('Labirint_Android_TAG');  // https://plugins.jenkins.io/pipeline-build-step
            //TODO copyArtifacts(projectName: 'Labirint_Android_TAG', selector: specific("${built.lastSuccessful}"), selector:specific("${built = qa}"); androidTestBuildType = "qa"
             //copyArtifacts(projectName: 'Labirint_Android_TAG', selector: specific("${built.lastSuccessful}")); 
-        if (projectForBuild == '')
+        if (script.env.projectForBuild == 'default')
             {
              def job_name = System.getenv('JOB_NAME')
              script.dir(sourcesDir) {
                  
                 script.step ([$class: 'CopyArtifact',
-                    //projectName: 'Labirint_Android_TAG',
                     projectName: "${job_name}_Android_TAG",
                     target: "${sourcesDir}"])
-            }} else { 
-            script.sh "./gradlew ${buildGradleTask}"
+            }}  else if (script.env.projectForBuild == '') {
+                script.sh "./gradlew ${buildGradleTask}"
+            } else 
+            { 
+                script.dir(sourcesDir) {
+                 
+                script.step ([$class: 'CopyArtifact',
+                    projectName: "${script.env.projectForBuild}",
+                    target: "${sourcesDir}"])
+            }
             }
             
         }
