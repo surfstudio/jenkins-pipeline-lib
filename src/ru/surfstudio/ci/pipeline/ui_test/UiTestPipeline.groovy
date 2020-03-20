@@ -434,6 +434,10 @@ abstract class UiTestPipeline extends ScmPipeline {
                         name: NODE_PARAMETER,
                         defaultValue: node,
                         description: 'Node на котором будет выполняться job')
+                script.string(
+                        name: PROJECT_FOR_BUILD_PARAMETER,
+                        defaultValue: projectForBuild,
+                        description: 'Последняя, успешно собранная TAG сборка')        
         ])
     }
 
