@@ -163,7 +163,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
             script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
             //script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -derivedDataPath ${derivedDataPath}"
           
-            script.sh "mv src/Build/Products/Debug-iphonesimulator/Labirint-cal.app ." 
+            script.sh "mv -f src/Build/Products/Debug-iphonesimulator/Labirint-cal.app ." 
             //script.dir(sourcesDir){ 
                 script.sh "zip -r Labirint-cal.app.zip Labirint-cal.app"
                 script.step([$class: 'ArtifactArchiver', artifacts: "Labirint-cal.app.zip"])
