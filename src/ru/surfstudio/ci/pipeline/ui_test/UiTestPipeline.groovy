@@ -137,7 +137,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         extractValueFromParamsAndRun(script, TEST_BRANCH_PARAMETER) {
             value -> ctx.testBranch = value
         }
-        extractValueFromEnvOrParamsAndRun(script, PROJECT_FOR_BUILD_PARAMETER) {
+        extractValueFromParamsAndRun(script, PROJECT_FOR_BUILD_PARAMETER) {
             value -> ctx.projectForBuild = value
         }
     
@@ -359,7 +359,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         return [
                 buildDiscarder(ctx, script),
                 environments(script, ctx.testBranch),
-                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.node),
+                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.node, ctx.projectForBuild),
                 triggers(script, ctx.jiraProjectKey, ctx.platform, ctx.cronTimeTrigger)
         ]
     }
