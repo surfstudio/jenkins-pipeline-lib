@@ -97,9 +97,11 @@ class UiTestPipelineAndroid extends UiTestPipeline {
             //copyArtifacts(projectName: 'Labirint_Android_TAG', selector: specific("${built.lastSuccessful}")); 
         if (script.env.projectForBuild == 'default')
             {
-             def job_name = System.getenv('JOB_NAME')
+             
              script.dir(sourcesDir) {
-                script.echo "$job_name"
+
+                def job_name =   "${script.env.JOB_ENV}"               
+                script.echo "${job_name}"
                 script.step ([$class: 'CopyArtifact',
                     projectName: "${job_name}_Android_TAG",
                     target: "${sourcesDir}"])
