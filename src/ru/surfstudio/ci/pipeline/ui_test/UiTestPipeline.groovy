@@ -434,9 +434,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.string(
                         name: PROJECT_FOR_BUILD_PARAMETER,
                         defaultValue: projectForBuild,
-                        description: 'Название Job, откуда брать сборку')
-
-                ),
+                        description: 'Название Job, откуда брать сборку'),
                 script.string(
                         name: NODE_PARAMETER,
                         defaultValue: node,
