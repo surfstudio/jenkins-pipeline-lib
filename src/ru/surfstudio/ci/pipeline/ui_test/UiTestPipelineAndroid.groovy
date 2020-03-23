@@ -96,6 +96,11 @@ class UiTestPipelineAndroid extends UiTestPipeline {
             if (script.env.projectForBuild == '') {
                  script.dir(sourcesDir) { 
                      script.sh "./gradlew ${buildGradleTask}"
+
+                    script.step ([$class: 'CopyArtifact',
+                    projectName: "Labirint_Android_UI_TEST",
+                    filter: "miss_id.txt",
+                    target: "${sourcesDir}"])
                  }}
              else 
             { 
