@@ -154,29 +154,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
             CommonUtil.shWithRuby(script, "set -x; expect -f calabash-expect.sh; set +x;")
             
-            //CommonUtil.safe(script) {
-//
-    //            CommonUtil.shWithRuby(script, "ruby ${sourcesDir}/scripts/flatter.rb ${sourcesDir}/*.xcodeproj")
-  //          }
-            
-
             script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
-            //script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -derivedDataPath ${derivedDataPath}"
-          
-            //script.sh "mv src/Build/Products/Debug-iphonesimulator/Labirint-cal.app ." 
-
-            script.step([$class: 'ArtifactArchiver', artifacts: "features/scenarios/"])
-       
-            
-            
-
-        //def files = script.findFiles(glob: builtApkPattern)
-        //String foundedApks = files.join("\n")
-        //script.echo "founded apks: $foundedApks"
-        //def apkPath = files[0].path
-        //script.echo "use first: $apkPath"
-
-        //script.sh "mv \"${apkPath}\" ${newApkForTest}"
             
         }
     }
