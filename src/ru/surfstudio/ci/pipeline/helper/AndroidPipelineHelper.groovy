@@ -15,6 +15,7 @@
  */
 package ru.surfstudio.ci.pipeline.helper
 
+import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.pr.PrPipeline
@@ -34,6 +35,8 @@ class AndroidPipelineHelper {
     private static String INSTRUMENTAL_TEST_REPORT_NAME = "Instrumental tests"
 
     private static String DEFAULT_HTML_RESULT_FILENAME = "index.html"
+    private static String JIRA_ISSUE_KEY_PATTERN = ~/((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)/
+    // https://confluence.atlassian.com/stashkb/integrating-with-custom-jira-issue-key-313460921.html?_ga=2.153274111.652352963.1580752546-1778113334.1579628389
 
     def static buildStageBodyAndroid(Object script, String buildGradleTask) {
         AndroidUtil.withGradleBuildCacheCredentials(script) {
@@ -158,7 +161,11 @@ class AndroidPipelineHelper {
             String sourceBranch,
             String destinationBranch
     ) {
-        def files = RepositoryUtil.filesDiffPr(script, sourceBranch, destinationBranch)
+        def files = RepositoryUtil.ktFilesDiffPr(script, sourceBranch, destinationBranch)
+        if (CommonUtil.isEmptyStringArray(files)) {
+            script.echo "No *.kt files for formatting."
+            return
+        }
         try {
             AndroidUtil.withGradleBuildCacheCredentials(script) {
                 script.sh "./gradlew ktlintFilesFormat -PlintFiles=\"${files.join("\",\"")}\""
@@ -171,14 +178,26 @@ class AndroidPipelineHelper {
     static boolean checkChangesAndUpdate(
             Object script,
             String repoUrl,
-            String repoCredentialsId
+            String repoCredentialsId,
+            String sourceBranch
     ) {
         boolean hasChanges = RepositoryUtil.checkHasChanges(script)
         if (hasChanges) {
+            RepositoryUtil.notifyGitlabAboutStageAborted(script, repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, sourceBranch)
             script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1\""
+
+            String jiraIssueKey
+            try {
+                jiraIssueKey = "\nApplyed for jira issue: ${(RepositoryUtil.getCurrentCommitMessage(script) =~ JIRA_ISSUE_KEY_PATTERN)[0][0]}."
+            } catch(Exception ignored) {
+                jiraIssueKey = ""
+            }
+            String commitHash = RepositoryUtil.getCurrentCommitHash(script).toString().take(8)
+
+            script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1." + jiraIssueKey  + "\nLast formatted commit is $commitHash \""
             RepositoryUtil.push(script, repoUrl, repoCredentialsId)
         } else {
-            script.echo "No modification after code formatting. "
+            script.echo "No modification after code formatting."
         }
         return hasChanges
     }

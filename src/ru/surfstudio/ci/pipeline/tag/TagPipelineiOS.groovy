@@ -22,6 +22,8 @@ import ru.surfstudio.ci.pipeline.helper.iOSPipelineHelper
 
 class TagPipelineiOS extends TagPipeline {
 
+    public googleServiceAccountCredsId = "surf-jarvis-firebase-token"
+
     public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
     public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
     public betaUploadConfigArgument = "config"
@@ -40,7 +42,7 @@ class TagPipelineiOS extends TagPipeline {
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
 
-        initializeBody = {  initBody(this) }
+        initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }
 
         stages = [
@@ -52,8 +54,8 @@ class TagPipelineiOS extends TagPipeline {
                 },
                 stage(BUILD) {
                     iOSPipelineHelper.buildStageBodyiOS(script,
-                        iOSKeychainCredenialId,
-                        iOSCertfileCredentialId
+                            iOSKeychainCredenialId,
+                            iOSCertfileCredentialId
                     )
                 },
                 stage(UNIT_TEST) {
@@ -67,10 +69,11 @@ class TagPipelineiOS extends TagPipeline {
                 },
                 stage(BETA_UPLOAD) {
                     betaUploadStageBodyiOS(script,
-                        iOSKeychainCredenialId,
-                        iOSCertfileCredentialId,
-                        betaUploadConfigArgument,
-                        getBuildConfigValue()
+                            iOSKeychainCredenialId,
+                            iOSCertfileCredentialId,
+                            googleServiceAccountCredsId,
+                            betaUploadConfigArgument,
+                            getBuildConfigValue()
                     )
                 },
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
@@ -86,18 +89,25 @@ class TagPipelineiOS extends TagPipeline {
     String getBuildConfigValue() {
         def resultConfigValue = betaUploadConfigValue
         if (!resultConfigValue?.trim()) {
-            def matchValue = this.repoTag=~/.*-([^0-9]+)[0-9]/
+            def matchValue = this.repoTag =~ /.*-([^0-9]+)[0-9]/
             matchValue.each { resultConfigValue = it[1] }
         }
         return resultConfigValue
     }
 
-    def static betaUploadStageBodyiOS(Object script, String keychainCredenialId, String certfileCredentialId, String betaUploadConfigArgument, String betaUploadConfigValue) {
+    def static betaUploadStageBodyiOS(Object script,
+                                      String keychainCredenialId,
+                                      String certfileCredentialId,
+                                      String googleServiceAccountCredsId,
+                                      String betaUploadConfigArgument,
+                                      String betaUploadConfigValue
+    ) {
         script.withCredentials([
                 script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
-                script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
+                script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY'),
+                script.string(credentialsId: googleServiceAccountCredsId, variable: 'FIREBASE_TOKEN')
         ]) {
-        
+
             script.echo "Importing iOS certificate: ${certfileCredentialId}"
 
             CommonUtil.shWithRuby(script, 'security -v unlock-keychain -p $KEYCHAIN_PASS')
@@ -114,7 +124,6 @@ class TagPipelineiOS extends TagPipeline {
     }
 
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
-
 
 
 }
