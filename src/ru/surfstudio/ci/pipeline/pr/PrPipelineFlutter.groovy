@@ -47,7 +47,7 @@ class PrPipelineFlutter extends PrPipeline {
     public testCommand = "flutter test"
 
     //docker
-    public dockerImageName = "cirrusci/flutter:latest"
+    public dockerImageName = "cirrusci/flutter:stable"
     public dockerArguments = "-it -v \${PWD}:/build --workdir /build"
 
     PrPipelineFlutter(Object script) {
