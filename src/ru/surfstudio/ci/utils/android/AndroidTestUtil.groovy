@@ -141,6 +141,7 @@ class AndroidTestUtil {
 
         ApkUtil.getApkList(script, "$androidTestBuildType-$ANDROID_TEST_APK_SUFFIX*").each {
             def currentApkName = "$it"
+            script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! currentApkName $currentApkName"
             def apkMainFolder = ApkUtil.getApkFolderName(script, currentApkName).trim()
 
             if (apkMainFolder == "template") return
@@ -156,18 +157,25 @@ class AndroidTestUtil {
                 testReportFileNameSuffix += "/$apkModuleName"
                 testModuleName += "/$apkModuleName"
             }
+            script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! testModuleName $testModuleName"
 
             // Находим APK для androidTestBuildType, заданного в конфиге
             def testBuildTypeApkList = ApkUtil.getApkList(
                     script,
                     "$androidTestBuildType*",
                     ANDROID_TEST_APK_SUFFIX,
-                    apkMainFolder
+                    testModuleName
             )
 
             // Проверка, существует ли APK с заданным androidTestBuildType
             if (testBuildTypeApkList.size() > 0) {
+                script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! testBuildTypeApkList size ${testBuildTypeApkList.size()}"
+                testBuildTypeApkList.each {
+                    script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! current testBuildTypeApkName $it"
+                }
+                //todo find appropriate apk for current sample
                 def testBuildTypeApkName = testBuildTypeApkList[0]
+                script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! testBuildTypeApkName $testBuildTypeApkName"
                 if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) {
                     def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, apkModuleName).trim()
 
