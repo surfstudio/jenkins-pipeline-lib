@@ -118,13 +118,13 @@ class UiTestPipelineiOS extends UiTestPipeline {
         public artifactForTest = "*-cal.app"
         public builtAppPattern = "${sourcesDir}/**/*-cal.app"
 
-         script.dir(sourcesDir) {
+        // script.dir(sourcesDir) {
     
-                script.step ([$class: 'CopyArtifact',
-                    projectName: "Labirint_IOS_UI_TEST",
-                    filter: "**/*-cal.app",
-                   target: "${sourcesDir}"])
-            }
+          //      script.step ([$class: 'CopyArtifact',
+            //        projectName: "Labirint_IOS_UI_TEST",
+              //      filter: "**/*-cal.app",
+                //   target: "${sourcesDir}"])
+            //}
         
         
         script.withCredentials([
@@ -155,7 +155,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
             CommonUtil.shWithRuby(script, "set -x; expect -f calabash-expect.sh; set +x;")
             
             script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
-            
+            script.step([$class: 'ArtifactArchiver', artifacts: "**/*-cal.app"])
         }
     }
 
