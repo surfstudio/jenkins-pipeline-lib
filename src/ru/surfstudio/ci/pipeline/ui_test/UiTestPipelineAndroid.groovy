@@ -111,6 +111,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 script.echo "${projectForBuild}"
                 script.step ([$class: 'CopyArtifact',
                     projectName: "${projectForBuild}",
+                    filter: "/**/*-qa.apk",
                     target: "${sourcesDir}"])
             }
             
