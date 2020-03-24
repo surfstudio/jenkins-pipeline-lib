@@ -116,15 +116,15 @@ class UiTestPipelineiOS extends UiTestPipeline {
                  }}
 
         public artifactForTest = "*-cal.app"
-        public builtAppPattern = "${sourcesDir}/**/**-cal.app"
+        public builtAppPattern = "${sourcesDir}/**/*-cal.app"
 
-         //script.dir(sourcesDir) {
-     
+         script.dir(sourcesDir) {
     
-           //     script.step ([$class: 'CopyArtifact',
-             //       projectName: "Labirint_IOS_UI_TEST",
-               //     target: "${sourcesDir}"])
-            //}
+                script.step ([$class: 'CopyArtifact',
+                    projectName: "Labirint_IOS_UI_TEST",
+                    filter: "**/*-cal.app",
+                   target: "${sourcesDir}"])
+            }
         
         
         script.withCredentials([
