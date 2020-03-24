@@ -100,7 +100,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                     script.step ([$class: 'CopyArtifact',
                     projectName: "Labirint_Android_UI_TEST",
                     filter: "miss_id.txt",
-                    selector: specific("lastCompleted"),
+                    selector: lastCompleted(),
                     target: "${sourcesDir}"])
                  }}
              else 
