@@ -26,6 +26,9 @@ class PrPipelineFlutter extends PrPipeline {
     public static final String STAGE_ANDROID = 'Android'
     public static final String STAGE_IOS = 'IOS'
 
+    public static PRE_MERGE_IOS = "PreMerge IOS"
+    public static CHECKOUT_IOS = "Checkout IOS"
+
     public static final String CHECKOUT_FLUTTER_VERSION_ANDROID = 'Checkout Flutter Project Version (Android)'
     public static final String CHECKOUT_FLUTTER_VERSION_IOS = 'Checkout Flutter Project Version (iOS)'
 
@@ -46,24 +49,7 @@ class PrPipelineFlutter extends PrPipeline {
     public buildIOsCommand = "./script/ios/build.sh -qa"
     public testCommand = "flutter test"
 
-    public iosStages = [
-            stage(STAGE_IOS, false) {
-                // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
-            },
-            stage(PRE_MERGE, false) {
-                preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
-            },
-            stage(CHECKOUT_FLUTTER_VERSION_IOS) {
-                script.sh checkoutFlutterVersionCommand
-            },
-            stage(BUILD_IOS) {
-                FlutterPipelineHelper.buildStageBodyIOS(script,
-                        buildIOsCommand,
-                        iOSKeychainCredenialId,
-                        iOSCertfileCredentialId)
-            },
-    ]
-
+    public iosStagesForSkipping = [STAGE_IOS, PRE_MERGE_IOS, CHECKOUT_FLUTTER_VERSION_IOS, BUILD_IOS]
 
     PrPipelineFlutter(Object script) {
         super(script)
@@ -78,8 +64,18 @@ class PrPipelineFlutter extends PrPipeline {
         initializeBody = {
             if (this.targetBranchChanged) {
                 script.echo "Build triggered by target branch changes, skip IOS branch"
-                forStages (iosStages) { stage ->
-                    stage.strategy = StageStrategy.SKIP_STAGE
+                forStages{ stage ->
+                    if (!(stage instanceof SimpleStage)) {
+                        return
+                    }
+
+                    def executeStage = false
+                    for (stageNameForTargetBranchChangedMode in iosStagesForSkipping) {
+                        executeStage = executeStage || (stageNameForTargetBranchChangedMode == stage.getName())
+                    }
+                    if (!executeStage) {
+                        stage.strategy = StageStrategy.SKIP_STAGE
+                    }
                 }
             }
             initBody(this)
@@ -113,6 +109,24 @@ class PrPipelineFlutter extends PrPipeline {
                             buildAndroidCommand,
                             androidKeystoreCredentials,
                             androidKeystorePropertiesCredentials)
+                },
+        ]
+
+        def iosStages = [
+                stage(STAGE_IOS, false) {
+                    // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
+                },
+                stage(PRE_MERGE_IOS, false) {
+                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+                },
+                stage(CHECKOUT_FLUTTER_VERSION_IOS) {
+                    script.sh checkoutFlutterVersionCommand
+                },
+                stage(BUILD_IOS) {
+                    FlutterPipelineHelper.buildStageBodyIOS(script,
+                            buildIOsCommand,
+                            iOSKeychainCredenialId,
+                            iOSCertfileCredentialId)
                 },
         ]
 
