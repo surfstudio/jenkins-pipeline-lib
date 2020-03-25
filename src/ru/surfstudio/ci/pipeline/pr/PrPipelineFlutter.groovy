@@ -69,11 +69,11 @@ class PrPipelineFlutter extends PrPipeline {
                         return
                     }
 
-                    def executeStage = false
+                    def skipStage = false
                     for (stageNameForTargetBranchChangedMode in iosStagesForSkipping) {
-                        executeStage = executeStage || (stageNameForTargetBranchChangedMode == stage.getName())
+                        skipStage = skipStage || (stageNameForTargetBranchChangedMode == stage.getName())
                     }
-                    if (!executeStage) {
+                    if (skipStage) {
                         stage.strategy = StageStrategy.SKIP_STAGE
                     }
                 }
