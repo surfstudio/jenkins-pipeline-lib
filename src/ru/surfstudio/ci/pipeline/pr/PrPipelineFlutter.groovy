@@ -17,6 +17,7 @@ package ru.surfstudio.ci.pipeline.pr
 
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
+import ru.surfstudio.ci.stage.SimpleStage
 import ru.surfstudio.ci.stage.StageStrategy
 
 class PrPipelineFlutter extends PrPipeline {
@@ -45,6 +46,24 @@ class PrPipelineFlutter extends PrPipeline {
     public buildIOsCommand = "./script/ios/build.sh -qa"
     public testCommand = "flutter test"
 
+    public iosStages = [
+            stage(STAGE_IOS, false) {
+                // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
+            },
+            stage(PRE_MERGE, false) {
+                preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
+            },
+            stage(CHECKOUT_FLUTTER_VERSION_IOS) {
+                script.sh checkoutFlutterVersionCommand
+            },
+            stage(BUILD_IOS) {
+                FlutterPipelineHelper.buildStageBodyIOS(script,
+                        buildIOsCommand,
+                        iOSKeychainCredenialId,
+                        iOSCertfileCredentialId)
+            },
+    ]
+
 
     PrPipelineFlutter(Object script) {
         super(script)
@@ -56,7 +75,15 @@ class PrPipelineFlutter extends PrPipeline {
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
-        initializeBody = { initBody(this) }
+        initializeBody = {
+            if (this.targetBranchChanged) {
+                script.echo "Build triggered by target branch changes, skip IOS branch"
+                forStages (iosStages) { stage ->
+                    stage.strategy = StageStrategy.SKIP_STAGE
+                }
+            }
+            initBody(this)
+        }
         propertiesProvider = { properties(this) }
 
 
@@ -86,24 +113,6 @@ class PrPipelineFlutter extends PrPipeline {
                             buildAndroidCommand,
                             androidKeystoreCredentials,
                             androidKeystorePropertiesCredentials)
-                },
-        ]
-
-        def iosStages = [
-                stage(STAGE_IOS, false) {
-                    // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
-                },
-                stage(PRE_MERGE, false) {
-                    preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
-                },
-                stage(CHECKOUT_FLUTTER_VERSION_IOS) {
-                    script.sh checkoutFlutterVersionCommand
-                },
-                stage(BUILD_IOS) {
-                    FlutterPipelineHelper.buildStageBodyIOS(script,
-                            buildIOsCommand,
-                            iOSKeychainCredenialId,
-                            iOSCertfileCredentialId)
                 },
         ]
 
