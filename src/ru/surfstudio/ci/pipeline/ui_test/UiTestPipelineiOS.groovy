@@ -157,7 +157,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
             script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
             //script.step([$class: 'ArtifactArchiver', artifacts: "**/Debug-iphonesimulator/*-cal.app"])
             script.sh "ls -la"
-            archiveArtifacts artifacts: '**/Debug-iphonesimulator/*-cal.app', allowEmptyArchive: true
+            script.archiveArtifacts artifacts('**/Debug-iphonesimulator/*-cal.app', allowEmptyArchive: true)
         }
     }
 
