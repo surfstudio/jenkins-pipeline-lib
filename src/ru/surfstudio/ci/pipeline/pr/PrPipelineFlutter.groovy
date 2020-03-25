@@ -27,7 +27,6 @@ class PrPipelineFlutter extends PrPipeline {
     public static final String STAGE_IOS = 'IOS'
 
     public static PRE_MERGE_IOS = "PreMerge IOS"
-    public static CHECKOUT_IOS = "Checkout IOS"
 
     public static final String CHECKOUT_FLUTTER_VERSION_ANDROID = 'Checkout Flutter Project Version (Android)'
     public static final String CHECKOUT_FLUTTER_VERSION_IOS = 'Checkout Flutter Project Version (iOS)'
