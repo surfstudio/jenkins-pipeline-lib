@@ -104,11 +104,10 @@ class UiTestPipelineiOS extends UiTestPipeline {
  
                script.step ([$class: 'CopyArtifact',
                    projectName: "${projectForBuild}",
-                    filter: "*-cal.app.zip",
+                    filter: "Build-cal.app.zip",
                    target: "."])
     
-            script.sh "unzip -a *.app.zip"
-            script.archiveArtifacts(artifacts: "**/*-cal.app.zip/")
+            script.sh "unzip Build-cal.app.zip"
         
     }
 
