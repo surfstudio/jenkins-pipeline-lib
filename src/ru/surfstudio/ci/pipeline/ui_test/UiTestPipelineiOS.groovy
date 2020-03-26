@@ -58,6 +58,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
                      CommonUtil.safe(script) {
                             script.sh "rm -rf ./*"
                     checkoutTestsStageBody(script, repoUrl, testBranch, testRepoCredentialsId)
+                    }
                 },
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     buildStageBodyiOS(script,
