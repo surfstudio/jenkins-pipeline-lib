@@ -93,10 +93,11 @@ class UiTestPipelineiOSTag extends UiTestPipeline {
             CommonUtil.shWithRuby(script, "set -x; expect -f calabash-expect.sh; set +x;")
             
             script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
-            script.sh "zip -r Build-cal.app.zip ${sourcesDir}/Build/Products/Debug-iphonesimulator/*-cal.app/"
+            script.sh "mv ${sourcesDir}/Build/Products/Debug-iphonesimulator/*-cal.app/ Build-cal.app/"
+            script.sh "zip -r Build-cal.app.zip Build-cal.app/"
             script.archiveArtifacts(artifacts: "Build-cal.app.zip")
 
-            
+
         }
     }
 
