@@ -58,12 +58,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
                 },
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     buildStageBodyiOS(script,
-                            sourcesDir, 
-                            derivedDataPath,
-                            testiOSSDK,
-                            projectForBuild,
-                            iOSKeychainCredenialId, 
-                            iOSCertfileCredentialId)
+                            projectForBuild)
                 },
                 stage(PREPARE_ARTIFACT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     script.echo "empty stage"
