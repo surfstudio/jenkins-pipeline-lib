@@ -148,32 +148,31 @@ class AndroidTestUtil {
 
             // Проверка, содержит ли проект модули
             def apkModuleName = ApkUtil.getApkModuleName(currentApkName, androidTestBuildType, ANDROID_TEST_APK_SUFFIX).trim()
+            def apkDirName = ApkUtil.getApkDirName(currentApkName)
             def testReportFileNameSuffix = apkMainFolder
 
             // Фактическое имя модуля, в котором запущены тесты (отличается от apkMainFolder, если проект содержит вложенные модули)
             def testModuleName = apkMainFolder
 
-            if (apkMainFolder != apkModuleName) {
-                testReportFileNameSuffix += "/$apkModuleName"
-                testModuleName += "/$apkModuleName"
+            if (apkMainFolder != apkDirName) {
+                testReportFileNameSuffix = apkDirName
+                testModuleName = apkDirName
             }
             script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! testModuleName $testModuleName"
+            script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! testReportFileNameSuffix $testReportFileNameSuffix"
 
-            // Находим APK для androidTestBuildType, заданного в конфиге
+            // Находим APK для androidTestBuildType, заданного в конфиге.
+            // Поиск идет в той же директории, где находится текущий APK для инструментальных тестов
             def testBuildTypeApkList = ApkUtil.getApkList(
                     script,
                     "$androidTestBuildType*",
                     ANDROID_TEST_APK_SUFFIX,
-                    testModuleName
+                    apkDirName
             )
 
             // Проверка, существует ли APK с заданным androidTestBuildType
             if (testBuildTypeApkList.size() > 0) {
-                script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! testBuildTypeApkList size ${testBuildTypeApkList.size()}"
-                testBuildTypeApkList.each {
-                    script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! current testBuildTypeApkName $it"
-                }
-                //todo find appropriate apk for current sample
+                // так как поиск идет в той же директории, APK с заданным androidTestBuildType будет всегда один
                 def testBuildTypeApkName = testBuildTypeApkList[0]
                 script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! testBuildTypeApkName $testBuildTypeApkName"
                 if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) {
