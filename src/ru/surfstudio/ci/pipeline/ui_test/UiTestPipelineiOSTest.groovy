@@ -19,7 +19,7 @@ import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
 
-class UiTestPipelineiOS extends UiTestPipeline {
+class UiTestPipelineiOSTest extends UiTestPipeline {
 
 
     //dirs
@@ -37,7 +37,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
     public builtAppPattern = "${sourcesDir}/**/**.app"
 
 
-    UiTestPipelineiOS(Object script) {
+    UiTestPipelineiOSTest(Object script) {
         super(script)
     }
 
