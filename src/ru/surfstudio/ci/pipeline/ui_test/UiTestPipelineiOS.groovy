@@ -33,7 +33,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
     public testOSVersion = "com.apple.CoreSimulator.SimRuntime.iOS-12-3"
     public testiOSSDK = "iphonesimulator12.3"
 
-    public app = "Build-cal.app.zip"
+    public appZip = "Build-cal.app.zip"
+    public app = "Build-cal.app"
 
 
 
@@ -63,7 +64,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     buildStageBodyiOS(script,
                             projectForBuild, 
-                            app)
+                            appZip)
                 },
                 stage(PREPARE_ARTIFACT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     script.echo "empty stage"
@@ -106,14 +107,14 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
-    def static buildStageBodyiOS(Object script, String projectForBuild, String app) {
+    def static buildStageBodyiOS(Object script, String projectForBuild, String appZip) {
  
                script.step ([$class: 'CopyArtifact',
                    projectName: "${projectForBuild}",
                     filter: "*-cal.app.zip",
                    target: "."])
     
-            script.sh "unzip ${app}"
+            script.sh "unzip ${appZip}"
         
     }
 
