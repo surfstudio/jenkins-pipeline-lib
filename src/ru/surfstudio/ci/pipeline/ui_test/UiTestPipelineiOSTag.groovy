@@ -19,7 +19,7 @@ import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
 
-class UiTestPipelineiOS extends UiTestPipeline {
+class UiTestPipelineiOSTag extends UiTestPipeline {
 
 
     //dirs
@@ -58,7 +58,6 @@ class UiTestPipelineiOS extends UiTestPipeline {
                             sourcesDir, 
                             derivedDataPath,
                             testiOSSDK,
-                            projectForBuild,
                             iOSKeychainCredenialId, 
                             iOSCertfileCredentialId)
                 }
@@ -68,18 +67,9 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
-    def static buildStageBodyiOS(Object script, String sourcesDir, String derivedDataPath, String sdk, String projectForBuild, String keychainCredenialId, String certfileCredentialId) {
+    def static buildStageBodyiOS(Object script, String sourcesDir, String derivedDataPath, String sdk, String keychainCredenialId, String certfileCredentialId) {
         
-         if (script.env.projectForBuild == '') {
-                 script.dir(sourcesDir) { 
-                     script.echo "works"
-                 }}
-
-        public artifactForTest = "*-cal.app"
-        public builtAppPattern = "${sourcesDir}/**/*-cal.app"
-
-
-    
+        
         
         script.withCredentials([
                 script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
