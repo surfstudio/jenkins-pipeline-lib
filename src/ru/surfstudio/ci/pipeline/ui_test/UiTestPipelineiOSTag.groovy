@@ -34,7 +34,7 @@ class UiTestPipelineiOSTag extends UiTestPipeline {
     public builtAppPattern = "${sourcesDir}/**/**.app"
 
 
-    UiTestPipelineiOS(Object script) {
+    UiTestPipelineiOSTag(Object script) {
         super(script)
     }
 
