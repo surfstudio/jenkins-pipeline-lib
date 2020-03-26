@@ -33,8 +33,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
     public testOSVersion = "com.apple.CoreSimulator.SimRuntime.iOS-12-3"
     public testiOSSDK = "iphonesimulator12.3"
 
-    public artifactForTest = "*.app"
-    public builtAppPattern = "${sourcesDir}/**/**.app"
+    public app = "Build-cal.app.zip"
+
 
 
     UiTestPipelineiOS(Object script) {
@@ -111,7 +111,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
                     filter: "*-cal.app.zip",
                    target: "."])
     
-            script.sh "unzip Build-cal.app.zip"
+            script.sh "unzip ${app}"
         
     }
 
@@ -140,7 +140,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
 
             script.sh "xcrun simctl boot \$(cat ${simulatorIdentifierFile})"
-            script.sh "xcrun simctl install booted ${derivedDataPath}/Build/Products/Debug-iphonesimulator/*.app"
+            script.sh "xcrun simctl install booted ${app}"
 
             CommonUtil.shWithRuby(script, "run-loop simctl manage-processes") 
             script.echo "Tests started"
@@ -151,7 +151,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
 
             try {
-                CommonUtil.shWithRuby(script, "APP_BUNDLE_PATH=Build-cal.app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty")
+                CommonUtil.shWithRuby(script, "bundle install")
+                CommonUtil.shWithRuby(script, "APP_BUNDLE_PATH=${app} DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty")
             } finally {
                 script.sh "xcrun simctl shutdown \$(cat ${simulatorIdentifierFile})"
                 script.sh "xcrun simctl shutdown all"
