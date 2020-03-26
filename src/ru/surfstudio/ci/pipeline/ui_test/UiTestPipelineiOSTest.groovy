@@ -111,7 +111,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
                    projectName: "${projectForBuild}",
                     filter: "*-cal.app.zip",
                    target: "."])
-            unzip -a foo.zip
+    
             script.sh "unzip -a *.app.zip"
             script.archiveArtifacts(artifacts: "**/*-cal.app.zip/")
         }
