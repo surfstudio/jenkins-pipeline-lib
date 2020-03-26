@@ -114,7 +114,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
     
             script.sh "unzip -a *.app.zip"
             script.archiveArtifacts(artifacts: "**/*-cal.app.zip/")
-        }
+        
     }
 
     def static testStageBodyiOS(Object script,
