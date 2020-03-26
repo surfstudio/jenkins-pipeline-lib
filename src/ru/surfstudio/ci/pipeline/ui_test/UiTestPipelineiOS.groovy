@@ -53,9 +53,6 @@ class UiTestPipelineiOS extends UiTestPipeline {
                 stage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     initBody(this)
                 },
-                stage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, sourceRepoCredentialsId)
-                },
                 stage(CHECKOUT_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     checkoutTestsStageBody(script, repoUrl, testBranch, testRepoCredentialsId)
                 },
@@ -108,56 +105,16 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
-    def static buildStageBodyiOS(Object script, String sourcesDir, String derivedDataPath, String sdk, String projectForBuild, String keychainCredenialId, String certfileCredentialId) {
-        
-         if (script.env.projectForBuild == '') {
-                 script.dir(sourcesDir) { 
-                     script.echo "works"
-                 }}
-
-        public artifactForTest = "*-cal.app"
-        public builtAppPattern = "${sourcesDir}/**/*-cal.app"
-
-        // script.dir(sourcesDir) {
+    def static buildStageBodyiOS(Object script, String projectForBuild) {
+ 
+               script.step ([$class: 'CopyArtifact',
+                   projectName: "${projectForBuild}",
+                    filter: "*-cal.app.zip",
+                   target: "."])
     
-          //      script.step ([$class: 'CopyArtifact',
-            //        projectName: "Labirint_IOS_UI_TEST",
-              //      filter: "**/*-cal.app",
-                //   target: "${sourcesDir}"])
-            //}
-        
-        
-        script.withCredentials([
-                script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
-                script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
-        ]) {
-            script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
-            script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
-
-            CommonUtil.shWithRuby(script, "gem install bundler -v 1.17.3")
-
-            script.dir(sourcesDir) {
-                CommonUtil.shWithRuby(script, "make init")
-            }
-
-            CommonUtil.shWithRuby(script, "bundle install")
-            
-           // раскомментировать этот и следующий кусок при переезде Зенита на эту версию снэпшота
-            //script.dir(sourcesDir) { 
-            //
-              //   CommonUtil.safe(script) 
-                //{
-
-                  //  CommonUtil.shWithRuby(script, "make set_token_for_snack")
-                //}
-            //}
-
-            CommonUtil.shWithRuby(script, "set -x; expect -f calabash-expect.sh; set +x;")
-            
-            script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
-            script.sh "zip -r *.app.zip ${sourcesDir}/Build/Products/Debug-iphonesimulator/*-cal.app/"
+            script.sh "unzip -a *.app.zip"
             script.archiveArtifacts(artifacts: "**/*-cal.app.zip/")
-        }
+        
     }
 
     def static testStageBodyiOS(Object script,
