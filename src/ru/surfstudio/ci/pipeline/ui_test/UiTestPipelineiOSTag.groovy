@@ -53,6 +53,9 @@ class UiTestPipelineiOSTag extends UiTestPipeline {
                 stage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, sourceRepoCredentialsId)
                 },
+                stage(CHECKOUT_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                    checkoutTestsStageBody(script, repoUrl, testBranch, testRepoCredentialsId)
+                },
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     buildStageBodyiOS(script,
                             sourcesDir, 
