@@ -34,9 +34,11 @@ class AndroidTestUtil {
 
     private static String TEST_COUNT_STRING = "testCount="
     private static String FAILURE_STRING = "failure"
+    private static String ERROR_MESSAGE_STRING = "errorMessage="
 
     private static String ZERO_STRING = "0"
-    private static String DIVIDER = "="
+    private static String STANDARD_DIVIDER = " "
+    private static String EOL_DIVIDER = "\n"
 
     private static Integer SUCCESS_CODE = 0
     private static Integer ERROR_CODE = 1
@@ -186,6 +188,7 @@ class AndroidTestUtil {
 
                         script.echo "currentInstrumentationRunnerName $currentInstrumentationRunnerName"
 
+                        //todo sh refactoring
                         String projectRootDir = "${script.sh(returnStdout: true, script: "pwd")}/"
                         String spoonOutputDir = "${formatArgsForShellCommand(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
                         script.sh "mkdir -p $spoonOutputDir"
@@ -210,18 +213,31 @@ class AndroidTestUtil {
                                     -serial \"${formatArgsForShellCommand(config.emulatorName)}\""
                             )
                             script.echo testResultLogs
-                            testResultLogs = testResultLogs.split()
 
-                            def testCountString = testResultLogs.find { it.contains(TEST_COUNT_STRING) }
-                            def testCount = testCountString.split().find { it.contains(TEST_COUNT_STRING) }.split(DIVIDER).last()
+                            def testCountString = findInLogs(testResultLogs, TEST_COUNT_STRING, STANDARD_DIVIDER)
+                            def testCount = searchInLogs(testCountString, TEST_COUNT_STRING, STANDARD_DIVIDER)
+                            def errorMessage = searchInLogs(testResultLogs, ERROR_MESSAGE_STRING, EOL_DIVIDER)
 
                             if (testCount == ZERO_STRING) {
-                                printMessage(script, "$NO_INSTRUMENTAL_TESTS_MESSAGE $testModuleName")
+                                /**
+                                 * Существует кейс, когда testCount=0 не потому, что модуль не содержит тестов,
+                                 * а потому, что приложение падает при запуске.
+                                 * В этих случаях печатаем в лог причину ошибки и сохраняем код ошибки,
+                                 * такие тесты перезапускать не нужно
+                                 */
+                                def message
+                                if (CommonUtil.isNullOrEmpty(errorMessage)) {
+                                    message = "$NO_INSTRUMENTAL_TESTS_MESSAGE $testModuleName"
+                                } else {
+                                    message = "$errorMessage $testModuleName"
+                                    testResultCode = ERROR_CODE
+                                }
+                                printMessage(script, message)
                                 break
                             }
 
-                            def testFailureString = testResultLogs.find { it.contains(FAILURE_STRING) }
-                            testResultCode = testFailureString == null && testCountString != null ? SUCCESS_CODE : ERROR_CODE
+                            def testFailureString = findInLogs(testResultLogs, FAILURE_STRING, STANDARD_DIVIDER)
+                            testResultCode = testFailureString == null && testCount != null ? SUCCESS_CODE : ERROR_CODE
                             printMessage(script, "$TEST_RESULT_CODE_MESSAGE $testResultCode")
 
                             if (testResultCode == SUCCESS_CODE) {
@@ -246,6 +262,36 @@ class AndroidTestUtil {
         }
     }
     //endregion
+
+    /**
+     * Функция для поиска строки среди логов и получения подстроки в завимости от разделителя
+     */
+    private static String searchInLogs(
+            Object logs,
+            String search,
+            String logsDivider
+    ) {
+        def searchResult = findInLogs(logs, search, logsDivider)
+        if (searchResult != null) {
+            //noinspection GroovyAssignabilityCheck
+            return searchResult.split(search)
+                    .last()
+                    .toString()
+        }
+        return null
+    }
+
+    /**
+     * Функция для простого поиска строки среди логов
+     */
+    private static Object findInLogs(
+            Object logs,
+            String search,
+            String logsDivider
+    ) {
+        //noinspection GroovyAssignabilityCheck
+        return logs.split(logsDivider).find { it.contains(search) }
+    }
 
     /**
      * Функция, форматирующая аргументы и конкатенирующая их.
