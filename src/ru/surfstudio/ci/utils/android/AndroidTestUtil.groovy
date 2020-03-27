@@ -188,8 +188,7 @@ class AndroidTestUtil {
 
                         script.echo "currentInstrumentationRunnerName $currentInstrumentationRunnerName"
 
-                        //todo sh refactoring
-                        String projectRootDir = "${script.sh(returnStdout: true, script: "pwd")}/"
+                        String projectRootDir = "${getShCommandOutput(script, "pwd")}/"
                         String spoonOutputDir = "${formatArgsForShellCommand(projectRootDir, testReportFileNameSuffix)}/build/outputs/spoon-output"
                         script.sh "mkdir -p $spoonOutputDir"
 
@@ -202,9 +201,9 @@ class AndroidTestUtil {
                                 printMessage(script, "$REPEAT_TESTS_MESSAGE $testModuleName")
                             }
 
-                            def testResultLogs = script.sh(
-                                    returnStdout: true,
-                                    script: "java -jar $SPOON_JAR_NAME \
+                            def testResultLogs = getShCommandOutput(
+                                    script,
+                                    "java -jar $SPOON_JAR_NAME \
                                     --apk \"${formatArgsForShellCommand(projectRootDir, testBuildTypeApkName)}\" \
                                     --test-apk \"${formatArgsForShellCommand(projectRootDir, currentApkName)}\" \
                                     --output \"${formatArgsForShellCommand(spoonOutputDir)}\" \
@@ -246,9 +245,11 @@ class AndroidTestUtil {
 
                             countOfLaunch++
                             deleteApk(script, testBuildTypeApkName, config.emulatorName)
-                        }
+                        } // while (countOfLaunch <= instrumentationTestRetryCount)
 
                         allTestsPassed = allTestsPassed && (testResultCode == SUCCESS_CODE)
+
+                        script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! allTestsPassed $allTestsPassed testResultCode $testResultCode"
 
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkModuleName}.xml"
                         script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkModuleName}"
@@ -322,6 +323,10 @@ class AndroidTestUtil {
 
     private static void printMessage(Object script, String message) {
         script.echo "---------------------------------- $message ----------------------------------"
+    }
+
+    private def static getShCommandOutput(Object script, String command) {
+        return script.sh(returnStdout: true, script: command)
     }
 
     /**
