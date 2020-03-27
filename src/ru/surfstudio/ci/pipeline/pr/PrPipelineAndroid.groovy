@@ -71,7 +71,7 @@ class PrPipelineAndroid extends PrPipeline {
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
-        initializeBody = { initBodyWithOutAbortDuplicateBuilds(this) }
+        initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }
 
         stages = [
@@ -82,7 +82,7 @@ class PrPipelineAndroid extends PrPipeline {
                 },
                 stage(CODE_STYLE_FORMATTING, StageStrategy.SKIP_STAGE) {
                     AndroidPipelineHelper.ktlintFormatStageAndroid(script, sourceBranch, destinationBranch)
-                    hasChanges = AndroidPipelineHelper.checkChangesAndUpdate(script, repoUrl, repoCredentialsId)
+                    hasChanges = AndroidPipelineHelper.checkChangesAndUpdate(script, repoUrl, repoCredentialsId, sourceBranch)
                 },
                 stage(UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT, StageStrategy.SKIP_STAGE, false) {
                     if (hasChanges) {

@@ -124,7 +124,7 @@ class TagPipelineFlutter extends TagPipeline {
         initializeBody = { initBodyFlutter(this) }
         propertiesProvider = {
             [
-                    buildDiscarder(script),
+                    buildDiscarder(this, script),
                     parametersFlutter(script),
                     triggers(script, this.repoUrl, this.tagRegexp)
             ]

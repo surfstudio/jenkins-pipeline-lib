@@ -43,8 +43,7 @@ class TagPipelineAndroid extends TagPipeline {
     public firebaseAppDistributionTask = "appDistributionUploadQa"
     public googleServiceAccountCredsId = "surf-jarvis-firebase-token"
 
-    // todo при увеличении версии библиотеки заменить значение на true
-    public useFirebaseDistribution = false
+    public useFirebaseDistribution = true
 
     public unitTestGradleTask = "testQaUnitTest -PtestType=unit"
     public unitTestResultPathXml = "**/test-results/testQaUnitTest/*.xml"

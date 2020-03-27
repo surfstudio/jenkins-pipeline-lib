@@ -33,6 +33,10 @@ class UiTestPipelineiOS extends UiTestPipeline {
     public testOSVersion = "com.apple.CoreSimulator.SimRuntime.iOS-12-3"
     public testiOSSDK = "iphonesimulator12.3"
 
+    public appZip = "Build-cal.app.zip"
+    public app = "Build-cal.app"
+
+
 
     UiTestPipelineiOS(Object script) {
         super(script)
@@ -50,19 +54,17 @@ class UiTestPipelineiOS extends UiTestPipeline {
                 stage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     initBody(this)
                 },
-                stage(CHECKOUT_SOURCES, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, sourceRepoCredentialsId)
-                },
                 stage(CHECKOUT_TESTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                 
+                     CommonUtil.safe(script) {
+                            script.sh "rm -rf ./*"
                     checkoutTestsStageBody(script, repoUrl, testBranch, testRepoCredentialsId)
+                    }
                 },
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     buildStageBodyiOS(script,
-                            sourcesDir, 
-                            derivedDataPath,
-                            testiOSSDK,
-                            iOSKeychainCredenialId, 
-                            iOSCertfileCredentialId)
+                            projectForBuild, 
+                            appZip)
                 },
                 stage(PREPARE_ARTIFACT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     script.echo "empty stage"
@@ -79,6 +81,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
                             taskKey,
                             sourcesDir,
                             derivedDataPath,
+                            app,
                             testDeviceName,
                             testOSVersion,
                             outputsDir,
@@ -86,7 +89,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
                             featureForTest,
                             outputHtmlFile,
                             outputJsonFile,
-                            outputrerunTxtFile)
+                            outputrerunTxtFile,
+                            failedStepsFile)
                 },
                 stage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     publishResultsStageBody(script,
@@ -103,51 +107,22 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
-    def static buildStageBodyiOS(Object script, String sourcesDir, String derivedDataPath, String sdk, String keychainCredenialId, String certfileCredentialId) {
-        script.withCredentials([
-                script.string(credentialsId: keychainCredenialId, variable: 'KEYCHAIN_PASS'),
-                script.file(credentialsId: certfileCredentialId, variable: 'DEVELOPER_P12_KEY')
-        ]) {
-            script.sh 'security -v unlock-keychain -p $KEYCHAIN_PASS'
-            script.sh 'security import "$DEVELOPER_P12_KEY" -P ""'
-
-            CommonUtil.shWithRuby(script, "gem install bundler -v 1.17.3")
-
-            script.dir(sourcesDir) {
-                CommonUtil.shWithRuby(script, "make init")
-            }
-
-            CommonUtil.shWithRuby(script, "bundle install")
-            
-           // раскомментировать этот и следующий кусок при переезде Зенита на эту версию снэпшота
-            //script.dir(sourcesDir) { 
-            //
-              //   CommonUtil.safe(script) 
-                //{
-
-                  //  CommonUtil.shWithRuby(script, "make set_token_for_snack")
-                //}
-            //}
-
-            CommonUtil.shWithRuby(script, "set -x; expect -f calabash-expect.sh; set +x;")
-            
-            //CommonUtil.safe(script) {
-//
-    //            CommonUtil.shWithRuby(script, "ruby ${sourcesDir}/scripts/flatter.rb ${sourcesDir}/*.xcodeproj")
-  //          }
-            
-
-            script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
-            //script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -derivedDataPath ${derivedDataPath}"
+    def static buildStageBodyiOS(Object script, String projectForBuild, String appZip) {
  
-            
-        }
+               script.step ([$class: 'CopyArtifact',
+                   projectName: "${projectForBuild}",
+                    filter: "*-cal.app.zip",
+                   target: "."])
+    
+            script.sh "unzip ${appZip}"
+        
     }
 
     def static testStageBodyiOS(Object script,
                                 String taskKey,
                                 String sourcesDir,
                                 String derivedDataPath,
+                                String app,
                                 String device,
                                 String iosVersion,
                                 String outputsDir,
@@ -155,7 +130,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
                                 String featureFile,
                                 String outputHtmlFile,
                                 String outputJsonFile,
-                                outputrerunTxtFile) {
+                                String outputrerunTxtFile,
+                                String failedStepsFile) {
 
         script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
             def simulatorIdentifierFile = "currentsim"
@@ -169,7 +145,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
 
             script.sh "xcrun simctl boot \$(cat ${simulatorIdentifierFile})"
-            script.sh "xcrun simctl install booted ${derivedDataPath}/Build/Products/Debug-iphonesimulator/*.app"
+            script.sh "xcrun simctl install booted ${app}"
 
             CommonUtil.shWithRuby(script, "run-loop simctl manage-processes") 
             script.echo "Tests started"
@@ -180,7 +156,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
 
             try {
-                CommonUtil.shWithRuby(script, "APP_BUNDLE_PATH=${derivedDataPath}/Build/Products/Debug-iphonesimulator/\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//').app DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty")
+                CommonUtil.shWithRuby(script, "bundle install")
+                CommonUtil.shWithRuby(script, "APP_BUNDLE_PATH=${app} DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty")
             } finally {
                 script.sh "xcrun simctl shutdown \$(cat ${simulatorIdentifierFile})"
                 script.sh "xcrun simctl shutdown all"
@@ -192,6 +169,10 @@ class UiTestPipelineiOS extends UiTestPipeline {
                  CommonUtil.safe(script) {
                     script.sh "mkdir arhive"
                 }
+
+                CommonUtil.shWithRuby(script, "ruby -r \'./group_steps.rb\' -e \"GroupScenarios.new.group_failed_scenarios(\'${outputsDir}/ANE_LX1.json\', \'${failedStepsFile}\')\"")
+                script.step([$class: 'ArtifactArchiver', artifacts: failedStepsFile, allowEmptyArchive: true])
+               
                 script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
             }
         }

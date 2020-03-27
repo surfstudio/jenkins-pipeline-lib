@@ -17,6 +17,7 @@ package ru.surfstudio.ci.pipeline.api_test
 
 import ru.surfstudio.ci.*
 import ru.surfstudio.ci.pipeline.ScmPipeline
+import ru.surfstudio.ci.pipeline.base.LogRotatorUtil
 import ru.surfstudio.ci.stage.StageStrategy
 
 import ru.surfstudio.ci.utils.android.AndroidUtil
@@ -41,14 +42,34 @@ class ApiTestPipelineAndroid extends ScmPipeline {
 
 
     //tasks
-    public checkApiTestGradleTask = "clean testQaUnitTest -PtestType=api" //тесты на работающие методы на сервере
-    public waitApiTestGradleTask = "clean testQaUnitTest -PtestType=waitApi" //тесты на апи, которые еще не работают на сервере, эти тесты должны падать при успешном прохождении теста
+    //тесты на работающие методы на сервере
+    public checkApiTestGradleTask = "clean testQaUnitTest -PtestType=api"
+    //тесты на апи, которые еще не работают на сервере, эти тесты должны падать при успешном прохождении теста
+    public waitApiTestGradleTask = "clean testQaUnitTest -PtestType=waitApi"
 
     public testResultPathXml = "**/test-results/testQaUnitTest/*.xml"
     public testResultPathDirHtml = "app-injector/build/reports/tests/testQaUnitTest/"
 
     //cron
     public cronTimeTrigger = '00 05 * * *'
+
+    //region customization of stored artifacts
+
+    // artifacts are only kept up to this days
+    public int artifactDaysToKeep = 3
+    // only this number of builds have their artifacts kept
+    public int artifactNumToKeep = 10
+    // history is only kept up to this days
+    public int daysToKeep = 90
+    // only this number of build logs are kept
+    public int numToKeep = -1
+
+    private static int ARTIFACTS_DAYS_TO_KEEP_MAX_VALUE = 5
+    private static int ARTIFACTS_NUM_TO_KEEP_MAX_VALUE = 20
+    private static int DAYS_TO_KEEP_MAX_VALUE = 100
+    private static int NUM_TO_KEEP_MAX_VALUE = 10
+
+    //endregion
 
     ApiTestPipelineAndroid(Object script) {
         super(script)
@@ -84,8 +105,8 @@ class ApiTestPipelineAndroid extends ScmPipeline {
         CommonUtil.printInitialStageStrategies(ctx)
 
         //Достаем main branch для sourceRepo, если не указали в параметрах
-        extractValueFromParamsAndRun(script, SOURCE_BRANCH_PARAMETER) { value -> 
-            if(value != ctx.UNDEFINED_BRANCH) {
+        extractValueFromParamsAndRun(script, SOURCE_BRANCH_PARAMETER) { value ->
+            if (value != ctx.UNDEFINED_BRANCH) {
                 ctx.sourceBranch = value
             }
         }
@@ -98,7 +119,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
         CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.ANOTHER, buildDescription)
     }
 
-    def static checkoutStageBody(Object script,  String url, String branch, String credentialsId) {
+    def static checkoutStageBody(Object script, String url, String branch, String credentialsId) {
         script.git(
                 url: url,
                 credentialsId: credentialsId,
@@ -133,19 +154,20 @@ class ApiTestPipelineAndroid extends ScmPipeline {
         }
     }
 
-    def static finalizeStageBody(ApiTestPipelineAndroid ctx) { //todo выводить количество пройденных и непройденных тестов
+    def static finalizeStageBody(ApiTestPipelineAndroid ctx) {
+        //todo выводить количество пройденных и непройденных тестов
         def link = "${CommonUtil.getBuildUrlSlackLink(ctx.script)}"
         def message
         if (ctx.jobResult == Result.FAILURE) {
             def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
             message = "Ошибка прогона апи тестов из-за этапов: ${unsuccessReasons}; $link"
 
-        } else if(ctx.jobResult == Result.UNSTABLE) {
-            if(ctx.getStage(CHECK_API_TEST).result == Result.FAILURE) {
+        } else if (ctx.jobResult == Result.UNSTABLE) {
+            if (ctx.getStage(CHECK_API_TEST).result == Result.FAILURE) {
                 message = "Обнаружены нерабочие методы API; $link"
             }
-            if(ctx.getStage(WAIT_API_TEST).result == Result.FAILURE) {
-                if(message) message+= "\n"
+            if (ctx.getStage(WAIT_API_TEST).result == Result.FAILURE) {
+                if (message) message += "\n"
                 else message = ""
                 message += "Обнаружены новые работающие методы API; $link"
             }
@@ -165,23 +187,43 @@ class ApiTestPipelineAndroid extends ScmPipeline {
     //parameters
     public static final String SOURCE_BRANCH_PARAMETER = 'sourceBranch'
 
-
-    def static List<Object> properties(ApiTestPipelineAndroid ctx) {
+    static List<Object> properties(ApiTestPipelineAndroid ctx) {
         def script = ctx.script
         return [
-                buildDiscarder(script),
+                buildDiscarder(ctx, script),
                 parameters(script, ctx.defaultSourceBranch),
                 triggers(script, ctx.cronTimeTrigger)
         ]
     }
 
-    def static buildDiscarder(script) {
+    def static buildDiscarder(ApiTestPipelineAndroid ctx, script) {
         return script.buildDiscarder(
                 script.logRotator(
-                        artifactDaysToKeepStr: '3',
-                        artifactNumToKeepStr: '10',
-                        daysToKeepStr: '90',
-                        numToKeepStr: '')
+                        artifactDaysToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.ARTIFACTS_DAYS_TO_KEEP_NAME,
+                                ctx.artifactDaysToKeep,
+                                ARTIFACTS_DAYS_TO_KEEP_MAX_VALUE
+                        ),
+                        artifactNumToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.ARTIFACTS_NUM_TO_KEEP_NAME,
+                                ctx.artifactNumToKeep,
+                                ARTIFACTS_NUM_TO_KEEP_MAX_VALUE
+                        ),
+                        daysToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.DAYS_TO_KEEP_NAME,
+                                ctx.daysToKeep,
+                                DAYS_TO_KEEP_MAX_VALUE
+                        ),
+                        numToKeepStr: LogRotatorUtil.getActualParameterValue(
+                                script,
+                                LogRotatorUtil.NUM_TO_KEEP_NAME,
+                                ctx.numToKeep,
+                                NUM_TO_KEEP_MAX_VALUE
+                        )
+                )
         )
     }
 
