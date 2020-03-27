@@ -111,6 +111,13 @@ class ApkUtil {
     }
 
     /**
+     * Функция, возвращающая имя директории, в котором содержится APK-файл, по названию APK-файла
+     */
+    static String getApkDirName(String apkFullName) {
+        return apkFullName.split("/build")[0]
+    }
+
+    /**
      * Функция для удаления APK из переиспользуемого эмулятора
      */
     static void uninstallApk(Object script, String emulatorName, String packageName) {
