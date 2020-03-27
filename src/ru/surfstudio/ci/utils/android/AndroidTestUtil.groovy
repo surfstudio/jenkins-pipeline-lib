@@ -143,7 +143,6 @@ class AndroidTestUtil {
 
         ApkUtil.getApkList(script, "$androidTestBuildType-$ANDROID_TEST_APK_SUFFIX*").each {
             def currentApkName = "$it"
-            script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! currentApkName $currentApkName"
             def apkMainFolder = ApkUtil.getApkFolderName(script, currentApkName).trim()
 
             if (apkMainFolder == "template") return
@@ -160,8 +159,6 @@ class AndroidTestUtil {
                 testReportFileNameSuffix = apkDirName
                 testModuleName = apkDirName
             }
-            script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! testModuleName $testModuleName"
-            script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! testReportFileNameSuffix $testReportFileNameSuffix"
 
             // Находим APK для androidTestBuildType, заданного в конфиге.
             // Поиск идет в той же директории, где находится текущий APK для инструментальных тестов
@@ -176,7 +173,6 @@ class AndroidTestUtil {
             if (testBuildTypeApkList.size() > 0) {
                 // так как поиск идет в той же директории, APK с заданным androidTestBuildType будет всегда один
                 def testBuildTypeApkName = testBuildTypeApkList[0]
-                script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! testBuildTypeApkName $testBuildTypeApkName"
                 if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) {
                     def currentInstrumentationRunnerName = getTestInstrumentationRunnerName(script, apkModuleName).trim()
 
@@ -248,8 +244,6 @@ class AndroidTestUtil {
                         } // while (countOfLaunch <= instrumentationTestRetryCount)
 
                         allTestsPassed = allTestsPassed && (testResultCode == SUCCESS_CODE)
-
-                        script.echo "!!!!!!!!!!!!!!!!!!!!!!!!!! allTestsPassed $allTestsPassed testResultCode $testResultCode"
 
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkModuleName}.xml"
                         script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkModuleName}"
