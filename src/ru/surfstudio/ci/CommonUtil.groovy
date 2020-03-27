@@ -82,7 +82,7 @@ class CommonUtil {
     }
 
     static String getAaptHome(Object script, String buildToolsVersion) {
-        return "aapt"
+        return "${getAndroidHome(script)}/build-tools/$buildToolsVersion/aapt"
     }
 
     static String getAvdManagerHome(Object script) {
