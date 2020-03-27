@@ -89,7 +89,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
                             featureForTest,
                             outputHtmlFile,
                             outputJsonFile,
-                            outputrerunTxtFile)
+                            outputrerunTxtFile,
+                            failedStepsFile)
                 },
                 stage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     publishResultsStageBody(script,
@@ -98,8 +99,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
                             outputHtmlFile,
                             outputrerunTxtFile,
                             jiraAuthenticationName,
-                            "UI Tests ${taskKey} ${taskName}",
-                            failedStepsFile)
+                            "UI Tests ${taskKey} ${taskName}")
                 }
         ]
         finalizeBody = { finalizeStageBody(this) }
@@ -130,7 +130,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
                                 String featureFile,
                                 String outputHtmlFile,
                                 String outputJsonFile,
-                                outputrerunTxtFile) {
+                                String outputrerunTxtFile,
+                                String failedStepsFile) {
 
         script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
             def simulatorIdentifierFile = "currentsim"
