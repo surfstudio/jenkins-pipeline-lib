@@ -169,6 +169,10 @@ class UiTestPipelineiOS extends UiTestPipeline {
                  CommonUtil.safe(script) {
                     script.sh "mkdir arhive"
                 }
+
+                CommonUtil.shWithRuby(script, "ruby -r \'./group_steps.rb\' -e \"GroupScenarios.new.group_failed_scenarios(\'${outputsDir}/ANE_LX1.json\', \'${failedStepsFile}\')\"")
+                script.step([$class: 'ArtifactArchiver', artifacts: failedStepsFile, allowEmptyArchive: true])
+               
                 script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
             }
         }
