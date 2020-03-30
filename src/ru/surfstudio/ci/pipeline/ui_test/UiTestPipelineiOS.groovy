@@ -64,7 +64,8 @@ class UiTestPipelineiOS extends UiTestPipeline {
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     buildStageBodyiOS(script,
                             projectForBuild, 
-                            appZip)
+                            appZip, 
+                            app)
                 },
                 stage(PREPARE_ARTIFACT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     script.echo "empty stage"
@@ -107,7 +108,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
-    def static buildStageBodyiOS(Object script, String projectForBuild, String appZip) {
+    def static buildStageBodyiOS(Object script, String projectForBuild, String appZip, String app) {
             script.sh "rm -rf ${app}"
                script.step ([$class: 'CopyArtifact',
                    projectName: "${projectForBuild}",
