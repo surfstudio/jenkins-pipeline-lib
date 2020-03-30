@@ -30,7 +30,7 @@ class UiTestPipelineiOSTag extends UiTestPipeline {
     public testOSVersion = "com.apple.CoreSimulator.SimRuntime.iOS-12-3"
     public testiOSSDK = "iphonesimulator12.3"
 
-    public artifactForTest = "*.app"
+   public app = "Build-cal.app"
     public builtAppPattern = "${sourcesDir}/**/**.app"
 
 
@@ -61,6 +61,7 @@ class UiTestPipelineiOSTag extends UiTestPipeline {
                             sourcesDir, 
                             derivedDataPath,
                             testiOSSDK,
+                            app,
                             iOSKeychainCredenialId, 
                             iOSCertfileCredentialId)
                 }
@@ -70,7 +71,7 @@ class UiTestPipelineiOSTag extends UiTestPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
-    def static buildStageBodyiOS(Object script, String sourcesDir, String derivedDataPath, String sdk, String keychainCredenialId, String certfileCredentialId) {
+    def static buildStageBodyiOS(Object script, String sourcesDir, String derivedDataPath, String sdk, String app, String keychainCredenialId, String certfileCredentialId) {
         
         
         
@@ -92,6 +93,7 @@ class UiTestPipelineiOSTag extends UiTestPipeline {
 
             CommonUtil.shWithRuby(script, "set -x; expect -f calabash-expect.sh; set +x;")
             
+            script.sh "script.sh rm -rf ${app}"
             script.sh "xcodebuild -workspace ${sourcesDir}/*.xcworkspace -scheme \"\$(xcodebuild -workspace ${sourcesDir}/*.xcworkspace -list | grep '\\-cal' | sed 's/ *//')\" -allowProvisioningUpdates -sdk ${sdk} -derivedDataPath ${derivedDataPath}"
             script.sh "mv ${sourcesDir}/Build/Products/Debug-iphonesimulator/*-cal.app/ Build-cal.app/"
             script.sh "zip -r Build-cal.app.zip Build-cal.app/"
