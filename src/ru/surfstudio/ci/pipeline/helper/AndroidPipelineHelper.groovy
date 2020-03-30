@@ -107,6 +107,8 @@ class AndroidPipelineHelper {
             AndroidUtil.withGradleBuildCacheCredentials(script) {
                 script.sh "./gradlew ${androidTestConfig.instrumentalTestAssembleGradleTask}"
             }
+            script.sh "rm -rf ${androidTestConfig.instrumentalTestResultPathDirXml}; \
+                rm -rf ${androidTestConfig.instrumentalTestResultPathDirHtml}"
             script.sh "mkdir -p ${androidTestConfig.instrumentalTestResultPathDirXml}; \
                 mkdir -p ${androidTestConfig.instrumentalTestResultPathDirHtml}"
 
