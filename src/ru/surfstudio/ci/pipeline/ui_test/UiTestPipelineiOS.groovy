@@ -108,7 +108,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
     def static buildStageBodyiOS(Object script, String projectForBuild, String appZip) {
- 
+            script.sh "rm -rf ${app}"
                script.step ([$class: 'CopyArtifact',
                    projectName: "${projectForBuild}",
                     filter: "*-cal.app.zip",
@@ -116,13 +116,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
     
             script.sh "unzip ${appZip}"
 
-                     script.build job: 'Labirint_iOS_TAG_Calabash', parameters: [
-                    script.string(name: 'taskKey', value: 'LABIOS-2903'),
-                    script.string(name: 'testBranch', value: '1.8_Новая_товарка'),
-                    script.string(name: 'sourceBranch', value: '<undefined>'),
-                    script.string(name: 'userEmail', value: 'tolubaev@surfstudio.ru'),
-                    script.string(name: 'projectForBuild', value: 'test'),
-                    script.string(name: 'node', value: 'ios-ui-test')]
+                     
              
         
     }
@@ -183,6 +177,14 @@ class UiTestPipelineiOS extends UiTestPipeline {
                 script.step([$class: 'ArtifactArchiver', artifacts: failedStepsFile, allowEmptyArchive: true])
                
                 script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
+                
+                /* script.build job: 'Labirint_iOS_TAG_Calabash', parameters: [
+                    script.string(name: 'taskKey', value: 'LABIOS-2903'),
+                    script.string(name: 'testBranch', value: '1.8_Новая_товарка'),
+                    script.string(name: 'sourceBranch', value: '<undefined>'),
+                    script.string(name: 'userEmail', value: 'tolubaev@surfstudio.ru'),
+                    script.string(name: 'projectForBuild', value: 'test'),
+                    script.string(name: 'node', value: 'ios-ui-test')] */
             }
         }
     }
