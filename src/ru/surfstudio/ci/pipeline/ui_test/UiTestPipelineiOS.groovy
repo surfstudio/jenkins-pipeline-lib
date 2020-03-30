@@ -123,7 +123,7 @@ class UiTestPipelineiOS extends UiTestPipeline {
                     script.string(name: 'userEmail', value: 'tolubaev@surfstudio.ru'),
                     script.string(name: 'projectForBuild', value: 'test'),
                     script.string(name: 'node', value: 'ios-ui-test')]
-            ]  
+             
         
     }
 
