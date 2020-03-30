@@ -79,8 +79,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                             outputHtmlFile,
                             outputrerunTxtFile,
                             jiraAuthenticationName,
-                            "UI Tests ${taskKey} ${taskName}",
-                            failedStepsFile)
+                            "UI Tests ${taskKey} ${taskName}")
 
                 }
 
@@ -146,6 +145,8 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                                     String failedStepsFile
                                     ) {
 
+                              
+                                            
         script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
             script.echo "Tests started"
             script.echo "start tests for $artifactForTest $taskKey"

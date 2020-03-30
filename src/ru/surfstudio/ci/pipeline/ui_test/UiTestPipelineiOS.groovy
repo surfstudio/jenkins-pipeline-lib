@@ -115,6 +115,15 @@ class UiTestPipelineiOS extends UiTestPipeline {
                    target: "."])
     
             script.sh "unzip ${appZip}"
+
+                     script.build job: 'Labirint_iOS_TAG_Calabash', parameters: [
+                    script.string(name: 'taskKey', value: 'LABIOS-2903'),
+                    script.string(name: 'testBranch', value: '1.8_Новая_товарка'),
+                    script.string(name: 'sourceBranch', value: '<undefined>'),
+                    script.string(name: 'userEmail', value: 'tolubaev@surfstudio.ru'),
+                    script.string(name: 'projectForBuild', value: 'test'),
+                    script.string(name: 'node', value: 'ios-ui-test'))
+            ]  
         
     }
 
