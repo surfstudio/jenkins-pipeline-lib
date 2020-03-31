@@ -162,9 +162,10 @@ class UiTestPipelineiOS extends UiTestPipeline {
             try {
                 CommonUtil.shWithRuby(script, "bundle install")
                 CommonUtil.shWithRuby(script, "APP_BUNDLE_PATH=${app} DEVICE_TARGET=\$(cat ${simulatorIdentifierFile}) bundle exec cucumber -p ios ${featuresDir}/${featureFile} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f html -o ${outputsDir}/${outputHtmlFile} -f json -o ${outputsDir}/${outputJsonFile} -f pretty")
-            } finally {
                 script.sh "xcrun simctl shutdown \$(cat ${simulatorIdentifierFile})"
                 script.sh "xcrun simctl shutdown all"
+            } finally {
+                
                 script.sh "xcrun simctl list"
                 script.sh "xcrun simctl delete \$(cat ${simulatorIdentifierFile})"
                 script.echo "Removing simulator ..."
