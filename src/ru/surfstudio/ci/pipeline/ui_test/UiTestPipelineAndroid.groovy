@@ -19,6 +19,7 @@ import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.android.config.AvdConfig
+import ru.surfstudio.ci.utils.android.config.EmulatorUtil
 
 class UiTestPipelineAndroid extends UiTestPipeline {
 
@@ -166,7 +167,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
             EmulatorUtil.createAndLaunchNewEmulator(script, config)
             checkEmulatorStatus(script, config)
             script.echo "Emulator started"
-            
+
             script.echo "start tests for $artifactForTest $taskKey"
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
