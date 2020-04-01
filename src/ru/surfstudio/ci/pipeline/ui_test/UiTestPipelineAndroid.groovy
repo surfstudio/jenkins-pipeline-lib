@@ -31,6 +31,11 @@ class UiTestPipelineAndroid extends UiTestPipeline {
         super(script)
     }
 
+    private static void launchEmulator(Object script, AvdConfig config) {
+        script.sh "yes | ${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
+        EmulatorUtil.createAndLaunchNewEmulator(script, config)
+    }
+
     private static void checkEmulatorStatus(Object script, AvdConfig config) {
         if (EmulatorUtil.isEmulatorOffline(script, config.emulatorName) || !CommonUtil.isNotNullOrEmpty(config.emulatorName)) {
             EmulatorUtil.closeAndCreateEmulator(script, config, "emulator is offline")
@@ -164,7 +169,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
         script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
             script.echo "Tests started"
 
-            EmulatorUtil.createAndLaunchNewEmulator(script, config)
+            launchEmulator(script, config)
             checkEmulatorStatus(script, config)
             script.echo "Emulator started"
 
