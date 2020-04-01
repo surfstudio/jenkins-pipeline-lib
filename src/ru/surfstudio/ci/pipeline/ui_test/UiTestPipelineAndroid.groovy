@@ -18,6 +18,7 @@ package ru.surfstudio.ci.pipeline.ui_test
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
+import ru.surfstudio.ci.utils.android.config.AvdConfig
 
 class UiTestPipelineAndroid extends UiTestPipeline {
 
@@ -27,6 +28,14 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
     UiTestPipelineAndroid(Object script) {
         super(script)
+    }
+
+    private static void checkEmulatorStatus(Object script, AvdConfig config) {
+        if (EmulatorUtil.isEmulatorOffline(script, config.emulatorName) || !CommonUtil.isNotNullOrEmpty(config.emulatorName)) {
+            EmulatorUtil.closeAndCreateEmulator(script, config, "emulator is offline")
+        } else {
+            script.echo "emulator is online"
+        }
     }
 
     @Override
@@ -71,7 +80,8 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                             outputJsonFile,
                             outputrerunTxtFile,
                             outputsIdsDiff,
-                            failedStepsFile)
+                            failedStepsFile,
+                            config)
                 },
                 stage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     publishResultsStageBody(script,
@@ -144,11 +154,14 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                                     String outputJsonFile,
                                     String outputrerunTxtFile,
                                     String outputsIdsDiff,
-                                    String failedStepsFile
+                                    String failedStepsFile,
+                                    AvdConfig config
                                     ) {
 
-                              
-                                            
+
+        EmulatorUtil.createAndLaunchNewEmulator(script, config)
+        checkEmulatorStatus(script, config)
+
         script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
             script.echo "Tests started"
             script.echo "start tests for $artifactForTest $taskKey"
