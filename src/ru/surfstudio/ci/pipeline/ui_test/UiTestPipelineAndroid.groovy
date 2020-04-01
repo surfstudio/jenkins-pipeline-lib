@@ -159,11 +159,14 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                                     ) {
 
 
-        EmulatorUtil.createAndLaunchNewEmulator(script, config)
-        checkEmulatorStatus(script, config)
 
         script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
             script.echo "Tests started"
+
+            EmulatorUtil.createAndLaunchNewEmulator(script, config)
+            checkEmulatorStatus(script, config)
+            script.echo "Emulator started"
+            
             script.echo "start tests for $artifactForTest $taskKey"
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
