@@ -155,7 +155,7 @@ abstract class UiTestPipeline extends ScmPipeline {
             value -> ctx.userEmail = value
         }
 
-        extractValueFromParamsAndRun(script, ENVIRONMENT_PARAMETER) {
+        extractValueFromBoolParamsAndRun(script, ENVIRONMENT_PARAMETER) {
             value -> ctx.environment = value
         }
 

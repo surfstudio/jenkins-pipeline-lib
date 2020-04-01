@@ -217,6 +217,10 @@ class CommonUtil {
         runWithNotEmptyValue(script, key, null, script.params[key], actionWithValue)
     }
 
+     def static extractValueFromBoolParamsAndRun(Object script, Boolean key, Closure actionWithValue) {
+        runWithNotEmptyValue(script, key, null, script.params[key], actionWithValue)
+    }
+
     def static runWithNotEmptyValue(script, String key, envValue, paramsValue, Closure actionWithValue) {
         if (notEmpty(envValue)) {
             script.echo "Value {$envValue} extracted by {$key} from env"
