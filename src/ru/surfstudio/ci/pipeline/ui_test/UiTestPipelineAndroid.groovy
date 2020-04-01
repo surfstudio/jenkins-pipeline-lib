@@ -19,7 +19,7 @@ import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.android.config.AvdConfig
-import ru.surfstudio.ci.utils.android.config.EmulatorUtil
+import ru.surfstudio.ci.utils.android.EmulatorUtil
 
 class UiTestPipelineAndroid extends UiTestPipeline {
 
