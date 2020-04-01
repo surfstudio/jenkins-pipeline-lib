@@ -68,6 +68,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                             artifactForTest,
                             featureForTest,
                             outputHtmlFile,
+                            outputJsonFile,
                             outputrerunTxtFile,
                             outputsIdsDiff,
                             failedStepsFile)
@@ -140,6 +141,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                                     String artifactForTest,
                                     String featureFile,
                                     String outputHtmlFile,
+                                    String outputJsonFile,
                                     String outputrerunTxtFile,
                                     String outputsIdsDiff,
                                     String failedStepsFile
@@ -173,7 +175,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
        
             try {
-                CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  -p json_report\" ${featuresDir}/${featureFile} --concurrent")
+                CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  -f json -o ${outputsDir}/${outputJsonFile} -p json_report\" ${featuresDir}/${featureFile} --concurrent")
             }
             finally {
                 
@@ -187,7 +189,12 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 
 
                 CommonUtil.shWithRuby(script, "ruby -r \'./group_steps.rb\' -e \"GroupScenarios.new.group_failed_scenarios(\'${outputsDir}/ANE_LX1.json\', \'${failedStepsFile}\')\"")
+                
+                CommonUtil.safe(script) {
+                    script.sh "rm ${outputsDir/}${outputJsonFile}"
+                }
                 script.step([$class: 'ArtifactArchiver', artifacts: failedStepsFile, allowEmptyArchive: true])
+            
                 script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir};  mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
                 
             }
