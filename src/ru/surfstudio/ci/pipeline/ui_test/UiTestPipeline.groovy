@@ -45,7 +45,8 @@ abstract class UiTestPipeline extends ScmPipeline {
     public platform  // "android" or "ios"
     public testBranch // branch with tests
     public projectForBuild = "test" 
-    public defaultTaskKey  //task for run periodically
+    public defaultTaskKey
+    public environment = false  //task for run periodically
 
     //dirs
     public sourcesDir = "src"
@@ -77,7 +78,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public taskKey = ""
     public taskName = ""
     public userEmail = ""
-    public environment = ""
+    
 
     //cron
     public cronTimeTrigger = '00 09 * * *'
