@@ -188,7 +188,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 }
                 
 
-                CommonUtil.shWithRuby(script, "ruby -r \'./group_steps.rb\' -e \"GroupScenarios.new.group_failed_scenarios(\'${outputsDir}/ANE_LX1.json\', \'${failedStepsFile}\')\"")
+                CommonUtil.shWithRuby(script, "ruby -r \'./group_steps.rb\' -e \"GroupScenarios.new.group_failed_scenarios(\'${outputsDir}/${outputJsonFile}\', \'${failedStepsFile}\')\"")
                 
                 CommonUtil.safe(script) {
                     script.sh "rm ${outputsDir/}${outputJsonFile}"
