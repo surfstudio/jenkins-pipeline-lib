@@ -357,7 +357,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public static final String SOURCE_BRANCH_PARAMETER = 'sourceBranch'
     public static final String PROJECT_FOR_BUILD_PARAMETER = 'projectForBuild'
     public static final String USER_EMAIL_PARAMETER = 'userEmail'
-    public static final String ENVIRONMENT_PARAMETER = 'emulator'
+    public static final Boolean ENVIRONMENT_PARAMETER = false
     public static final String NODE_PARAMETER = 'node'
 
 
@@ -443,7 +443,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                         description: 'Название Job, откуда брать сборку'),
                 script.string(
                         name: ENVIRONMENT_PARAMETER,
-                        defaultValue: 'emulator',
+                        defaultValue: false,
                         description: 'Устройство или эмулятор для прогона'
                 ),
                 script.string(
