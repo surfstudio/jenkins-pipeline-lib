@@ -78,7 +78,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 },
                 stage(TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     testStageBodyAndroid(script,
-                            environmnent,
+                            environment,
                             taskKey,
                             sourcesDir,
                             outputsDir,
