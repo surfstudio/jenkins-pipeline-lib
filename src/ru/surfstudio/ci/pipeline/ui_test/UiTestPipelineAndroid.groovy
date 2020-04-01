@@ -78,6 +78,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 },
                 stage(TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     testStageBodyAndroid(script,
+                            environmnent,
                             taskKey,
                             sourcesDir,
                             outputsDir,
@@ -152,6 +153,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
     }
 
     def static testStageBodyAndroid(Object script,
+                                    Choice environmnent,
                                     String taskKey,
                                     String sourcesDir,
                                     String outputsDir,

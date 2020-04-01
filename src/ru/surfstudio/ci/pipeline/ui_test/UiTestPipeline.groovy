@@ -121,6 +121,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         CommonUtil.checkPipelineParameterDefined(script, ctx.testBranch, "testBranch")
         CommonUtil.checkPipelineParameterDefined(script, ctx.defaultTaskKey, "defaultTaskKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.projectForBuild, "projectForBuild")
+        CommonUtil.checkPipelineParameterDefined(script, ctx.environment, "environment")
 
         CommonUtil.printInitialStageStrategies(ctx)
 
@@ -151,6 +152,10 @@ abstract class UiTestPipeline extends ScmPipeline {
         }
         extractValueFromEnvOrParamsAndRun(script, USER_EMAIL_PARAMETER) {
             value -> ctx.userEmail = value
+        }
+
+        extractValueFromParamsAndRun(script, ENVIRONMENT_PARAMETER) {
+            value -> ctx.environment = value
         }
 
     
@@ -352,14 +357,16 @@ abstract class UiTestPipeline extends ScmPipeline {
     public static final String SOURCE_BRANCH_PARAMETER = 'sourceBranch'
     public static final String PROJECT_FOR_BUILD_PARAMETER = 'projectForBuild'
     public static final String USER_EMAIL_PARAMETER = 'userEmail'
+    public static final String ENVIRONMENT_PARAMETER = 'emulator'
     public static final String NODE_PARAMETER = 'node'
+
 
     def static List<Object> properties(UiTestPipeline ctx) {
         def script = ctx.script
         return [
                 buildDiscarder(ctx, script),
                 environments(script, ctx.testBranch),
-                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.projectForBuild, ctx.node),
+                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.projectForBuild, ctx.environment, ctx.node),
                 triggers(script, ctx.jiraProjectKey, ctx.platform, ctx.cronTimeTrigger)
         ]
     }
@@ -412,7 +419,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     }
 
-    private static void parameters(script, String defaultTaskKey, String testBranch, String defaultSourceBranch, String projectForBuild, String node) {
+    private static void parameters(script, String defaultTaskKey, String testBranch, String defaultSourceBranch, String projectForBuild, Choice environment, String node) {
         return script.parameters([
                 script.string(
                         name: TASK_KEY_PARAMETER,
@@ -434,6 +441,11 @@ abstract class UiTestPipeline extends ScmPipeline {
                         name: PROJECT_FOR_BUILD_PARAMETER,
                         defaultValue: projectForBuild,
                         description: 'Название Job, откуда брать сборку'),
+                script.string(
+                        name: ENVIRONMENT_PARAMETER,
+                        defaultValue: 'emulator',
+                        description: 'Устройство или эмулятор для прогона'
+                ),
                 script.string(
                         name: NODE_PARAMETER,
                         defaultValue: node,
