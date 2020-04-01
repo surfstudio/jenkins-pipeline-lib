@@ -153,7 +153,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
     }
 
     def static testStageBodyAndroid(Object script,
-                                    Boolean environmnent,
+                                    Boolean environment,
                                     String taskKey,
                                     String sourcesDir,
                                     String outputsDir,
