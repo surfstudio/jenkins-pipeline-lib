@@ -46,7 +46,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public testBranch // branch with tests
     public projectForBuild = "test" 
     public defaultTaskKey
-    public environment = false  //task for run periodically
+    public environment = true  //task for run periodically
 
     //dirs
     public sourcesDir = "src"
