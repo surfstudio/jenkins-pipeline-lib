@@ -77,6 +77,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public taskKey = ""
     public taskName = ""
     public userEmail = ""
+    public environment = ""
 
     //cron
     public cronTimeTrigger = '00 09 * * *'
