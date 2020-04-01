@@ -27,6 +27,8 @@ class UiTestPipelineAndroid extends UiTestPipeline {
     public buildGradleTask = "clean assembleDebug"
     public builtApkPattern = "${sourcesDir}/**/**.apk"
 
+    public AvdConfig avdConfig = new AvdConfig()
+
     UiTestPipelineAndroid(Object script) {
         super(script)
     }
@@ -87,7 +89,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                             outputrerunTxtFile,
                             outputsIdsDiff,
                             failedStepsFile,
-                            config)
+                            avdConfig)
                 },
                 stage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     publishResultsStageBody(script,
@@ -161,7 +163,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                                     String outputrerunTxtFile,
                                     String outputsIdsDiff,
                                     String failedStepsFile,
-                                    AvdConfig config
+                                    AvdConfig avdConfig
                                     ) {
 
 
@@ -169,8 +171,8 @@ class UiTestPipelineAndroid extends UiTestPipeline {
         script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
             script.echo "Tests started"
 
-            launchEmulator(script, config)
-            checkEmulatorStatus(script, config)
+            launchEmulator(script, avdConfig)
+            checkEmulatorStatus(script, avdConfig)
             script.echo "Emulator started"
 
             script.echo "start tests for $artifactForTest $taskKey"
