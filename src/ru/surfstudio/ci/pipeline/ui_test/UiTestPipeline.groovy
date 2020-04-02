@@ -48,7 +48,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public testBranch // branch with tests
     public projectForBuild = "test" 
     public defaultTaskKey //task for run periodically
-    public boolean environment = false
+    public environment = false
     //dirs
     public sourcesDir = "src"
     public featuresDir = "features"
@@ -437,7 +437,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                         name: PROJECT_FOR_BUILD_PARAMETER,
                         defaultValue: projectForBuild,
                         description: 'Название Job, откуда брать сборку'),
-                script.string(
+                script.boolean(
                         name: ENVIRONMENT_PARAMETER,
                         defaultValue: environment,
                         description: 'Устройство или эмулятор для прогона'
