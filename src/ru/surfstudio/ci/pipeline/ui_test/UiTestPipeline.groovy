@@ -118,7 +118,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     def static initBody(UiTestPipeline ctx) {
         def script = ctx.script
-
+        script.echo "Test log"
         CommonUtil.checkPipelineParameterDefined(script, ctx.sourceRepoUrl, "sourceRepoUrl")
         CommonUtil.checkPipelineParameterDefined(script, ctx.jiraProjectKey, "jiraProjectKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.platform, "platform")
