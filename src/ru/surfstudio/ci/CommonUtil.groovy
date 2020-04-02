@@ -21,6 +21,7 @@ import ru.surfstudio.ci.stage.StageWithResult
 import ru.surfstudio.ci.stage.StageWithStrategy
 import ru.surfstudio.ci.utils.StageTreeUtil
 
+
 class CommonUtil {
 
     static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50

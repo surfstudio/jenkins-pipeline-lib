@@ -26,6 +26,9 @@ import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
 import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
+import static ru.surfstudio.ci.CommonUtil.extractValueFromBoolParamsAndRun
+
+
 
 abstract class UiTestPipeline extends ScmPipeline {
 
