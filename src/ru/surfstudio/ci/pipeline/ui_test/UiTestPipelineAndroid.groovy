@@ -34,23 +34,6 @@ class UiTestPipelineAndroid extends UiTestPipeline {
         super(script)
     }
 
-    private static void launchEmulator(Object script, AvdConfig config) {
-        script.sh "source ~/.bashrc; yes | ${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
-        EmulatorUtil.createAndLaunchNewEmulator(script, config)
-    }
-
-    private static void checkEmulatorStatus(Object script, AvdConfig config) {
-        if (EmulatorUtil.isEmulatorOffline(script, config.emulatorName) || !CommonUtil.isNotNullOrEmpty(config.emulatorName)) {
-            EmulatorUtil.closeAndCreateEmulator(script, config, "emulator is offline")
-        } else {
-            script.echo "emulator is online"
-        }
-    }
-
-        static void cleanup(Object script, AvdConfig config) {
-        EmulatorUtil.closeRunningEmulator(script, config)
-    }
-
     @Override
     def init() {
         platform = "android"
@@ -179,8 +162,8 @@ class UiTestPipelineAndroid extends UiTestPipeline {
             script.echo "Tests started"
 
             if (emulator) {
-                launchEmulator(script, avdConfig)
-                checkEmulatorStatus(script, avdConfig)
+                AndroidTestUtil.launchEmulator(script, avdConfig)
+                AndroidTestUtil.checkEmulatorStatus(script, avdConfig)
                 script.echo "Emulator started"
             }
             
@@ -213,7 +196,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
             }
             finally {
                 
-                cleanup(script, config)
+                AndroidTestUtil.cleanup(script, config)
 
                 CommonUtil.shWithRuby(script, "ruby -r \'./find_id.rb\' -e \"Find.new.get_miss_id(\'./${sourcesDir}\', \'./features/android/pages\')\"")
                 script.step([$class: 'ArtifactArchiver', artifacts: outputsIdsDiff, allowEmptyArchive: true])
