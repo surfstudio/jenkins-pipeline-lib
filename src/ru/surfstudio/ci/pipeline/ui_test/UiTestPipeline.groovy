@@ -353,7 +353,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public static final String SOURCE_BRANCH_PARAMETER = 'sourceBranch'
     public static final String PROJECT_FOR_BUILD_PARAMETER = 'projectForBuild'
     public static final String USER_EMAIL_PARAMETER = 'userEmail'
-    public static final Boolean ENVIRONMENT_PARAMETER = false
+    public static final boolean ENVIRONMENT_PARAMETER = false
     public static final String NODE_PARAMETER = 'node'
 
 
@@ -415,7 +415,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     }
 
-    private static void parameters(script, String defaultTaskKey, String testBranch, String defaultSourceBranch, String projectForBuild, Boolean environment, String node) {
+    private static void parameters(script, String defaultTaskKey, String testBranch, String defaultSourceBranch, String projectForBuild, boolean environment, String node) {
         return script.parameters([
                 script.string(
                         name: TASK_KEY_PARAMETER,
