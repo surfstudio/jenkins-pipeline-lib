@@ -125,7 +125,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         CommonUtil.checkPipelineParameterDefined(script, ctx.testBranch, "testBranch")
         CommonUtil.checkPipelineParameterDefined(script, ctx.defaultTaskKey, "defaultTaskKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.projectForBuild, "projectForBuild")
-        CommonUtil.checkPipelineParameterDefined(script, ctx.environment, "environment")
+       // CommonUtil.checkPipelineParameterDefined(script, ctx.environment, "environment")
         script.echo "Test log222 environment = $ctx.environment"
         CommonUtil.printInitialStageStrategies(ctx)
 
