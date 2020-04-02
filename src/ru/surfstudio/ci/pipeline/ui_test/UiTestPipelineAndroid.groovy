@@ -20,6 +20,7 @@ import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.android.config.AvdConfig
 import ru.surfstudio.ci.utils.android.EmulatorUtil
+import ru.surfstudio.ci.utils.AndroidTestUtil
 
 class UiTestPipelineAndroid extends UiTestPipeline {
 
@@ -33,18 +34,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
         super(script)
     }
 
-    private static void launchEmulator(Object script, AvdConfig config) {
-        script.sh "yes | ${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
-        EmulatorUtil.createAndLaunchNewEmulator(script, config)
-    }
 
-    private static void checkEmulatorStatus(Object script, AvdConfig config) {
-        if (EmulatorUtil.isEmulatorOffline(script, config.emulatorName) || !CommonUtil.isNotNullOrEmpty(config.emulatorName)) {
-            EmulatorUtil.closeAndCreateEmulator(script, config, "emulator is offline")
-        } else {
-            script.echo "emulator is online"
-        }
-    }
 
     @Override
     def init() {
