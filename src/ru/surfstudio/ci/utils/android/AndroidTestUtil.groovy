@@ -107,12 +107,12 @@ class AndroidTestUtil {
     }
 
     //region Stages of instrumental tests running
-    public static void launchEmulator(Object script, AvdConfig config) {
+    private static void launchEmulator(Object script, AvdConfig config) {
         script.sh "yes | ${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
         EmulatorUtil.createAndLaunchNewEmulator(script, config)
     }
 
-    public static void checkEmulatorStatus(Object script, AvdConfig config) {
+    private static void checkEmulatorStatus(Object script, AvdConfig config) {
         if (EmulatorUtil.isEmulatorOffline(script, config.emulatorName) || !CommonUtil.isNotNullOrEmpty(config.emulatorName)) {
             EmulatorUtil.closeAndCreateEmulator(script, config, "emulator is offline")
         } else {
