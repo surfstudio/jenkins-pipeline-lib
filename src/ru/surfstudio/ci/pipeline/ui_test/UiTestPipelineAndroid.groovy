@@ -197,7 +197,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
             }
             finally {
                 
-                AndroidTestUtil.cleanup(script, config)
+                AndroidTestUtil.cleanup(script, avdConfig)
 
                 CommonUtil.shWithRuby(script, "ruby -r \'./find_id.rb\' -e \"Find.new.get_miss_id(\'./${sourcesDir}\', \'./features/android/pages\')\"")
                 script.step([$class: 'ArtifactArchiver', artifacts: outputsIdsDiff, allowEmptyArchive: true])
