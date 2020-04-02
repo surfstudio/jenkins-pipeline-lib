@@ -26,7 +26,6 @@ import ru.surfstudio.ci.stage.StageStrategy
 
 import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
 import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
-import static ru.surfstudio.ci.CommonUtil.extractValueFromBoolParamsAndRun
 
 
 
@@ -124,7 +123,6 @@ abstract class UiTestPipeline extends ScmPipeline {
         CommonUtil.checkPipelineParameterDefined(script, ctx.testBranch, "testBranch")
         CommonUtil.checkPipelineParameterDefined(script, ctx.defaultTaskKey, "defaultTaskKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.projectForBuild, "projectForBuild")
-       // CommonUtil.checkPipelineParameterDefined(script, ctx.environment, "environment")
         CommonUtil.printInitialStageStrategies(ctx)
 
         //если триггером был webhook параметры устанавливаются как env, если запустили вручную, то устанавливается как params
@@ -155,9 +153,6 @@ abstract class UiTestPipeline extends ScmPipeline {
         extractValueFromEnvOrParamsAndRun(script, USER_EMAIL_PARAMETER) {
             value -> ctx.userEmail = value
         }
-      /*  extractValueFromBoolParamsAndRun(script, ENVIRONMENT_PARAMETER) {
-            value -> ctx.environment = value
-        }*/
 
     
 
@@ -444,7 +439,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                         description: 'Название Job, откуда брать сборку'),
                 script.string(
                         name: ENVIRONMENT_PARAMETER,
-                        defaultValue: environment,
+                        defaultValue: false,
                         description: 'Устройство или эмулятор для прогона'
                 ),
                 script.string(
