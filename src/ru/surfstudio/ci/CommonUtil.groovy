@@ -62,8 +62,12 @@ class CommonUtil {
     }
 
     //region Environment variables
-    static String getAndroidHome(Object script) {
+    static String getAndroidHomeMac(Object script) {
         return script.env.ANDROID_HOME
+    }
+
+    static String getnAndroidHome(Object script) {
+        return "\${ANDROID_HOME}"
     }
 
     static String getAndroidSdkHome(Object script) {
@@ -75,6 +79,10 @@ class CommonUtil {
     }
 
     static String getEmulatorHome(Object script) {
+        return "${getAndroidSdkHome(script)}/emulator/emulator"
+    }
+
+    static String getEmulatorHomeWithEnv(Object script) {
         return "${getAndroidSdkHome(script)}/emulator/emulator"
     }
 
@@ -93,6 +101,7 @@ class CommonUtil {
     static String getSdkManagerHome(Object script) {
         return "sdkmanager"
     }
+
     //endregion
 
     def static shWithRuby(Object script, String command, String version = "2.5.5") {
