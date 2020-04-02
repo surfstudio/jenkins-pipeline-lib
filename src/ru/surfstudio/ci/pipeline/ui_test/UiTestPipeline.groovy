@@ -437,15 +437,14 @@ abstract class UiTestPipeline extends ScmPipeline {
                         name: PROJECT_FOR_BUILD_PARAMETER,
                         defaultValue: projectForBuild,
                         description: 'Название Job, откуда брать сборку'),
-                script.booleanParam(
-                        name: EMULATOR_PARAMETER,
-                        defaultValue: false,
-                        description: 'Устройство или эмулятор для прогона'
-                ),
                 script.string(
                         name: NODE_PARAMETER,
                         defaultValue: node,
-                        description: 'Node на котором будет выполняться job')
+                        description: 'Node на котором будет выполняться job'),
+                script.booleanParam(
+                        name: EMULATOR_PARAMETER,
+                        defaultValue: false,
+                        description: 'Чек-бокс включен для запуска эмулятора ')
         ])
     }
 
