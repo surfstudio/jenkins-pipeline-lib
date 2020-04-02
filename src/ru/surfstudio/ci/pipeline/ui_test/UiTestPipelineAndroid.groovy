@@ -47,6 +47,10 @@ class UiTestPipelineAndroid extends UiTestPipeline {
         }
     }
 
+        static void cleanup(Object script, AvdConfig config) {
+        EmulatorUtil.closeRunningEmulator(script, config)
+    }
+
     @Override
     def init() {
         platform = "android"
@@ -209,6 +213,8 @@ class UiTestPipelineAndroid extends UiTestPipeline {
             }
             finally {
                 
+                cleanup(script, config)
+
                 CommonUtil.shWithRuby(script, "ruby -r \'./find_id.rb\' -e \"Find.new.get_miss_id(\'./${sourcesDir}\', \'./features/android/pages\')\"")
                 script.step([$class: 'ArtifactArchiver', artifacts: outputsIdsDiff, allowEmptyArchive: true])
                 

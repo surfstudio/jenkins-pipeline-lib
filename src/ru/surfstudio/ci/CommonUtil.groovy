@@ -62,12 +62,8 @@ class CommonUtil {
     }
 
     //region Environment variables
-    static String getAndroidHomeMac(Object script) {
+    static String getAndroidHome(Object script) {
         return script.env.ANDROID_HOME
-    }
-
-    static String getnAndroidHome(Object script) {
-        return "\${ANDROID_HOME}"
     }
 
     static String getAndroidSdkHome(Object script) {
