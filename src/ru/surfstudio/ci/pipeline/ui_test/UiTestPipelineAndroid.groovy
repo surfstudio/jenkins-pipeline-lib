@@ -35,7 +35,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
     }
 
     private static void launchEmulator(Object script, AvdConfig config) {
-        script.sh "source ~/.bashrc; yes | \${ANDROID_HOME}/tools/bin/${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
+        script.sh "source ~/.bashrc; yes | ${CommonUtil.getSdkManagerHome(script)} \"${config.sdkId}\""
         EmulatorUtil.createAndLaunchNewEmulator(script, config)
     }
 
