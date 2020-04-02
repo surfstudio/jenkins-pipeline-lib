@@ -118,7 +118,6 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     def static initBody(UiTestPipeline ctx) {
         def script = ctx.script
-        script.echo "Test log environment = $ctx.environment"
         CommonUtil.checkPipelineParameterDefined(script, ctx.sourceRepoUrl, "sourceRepoUrl")
         CommonUtil.checkPipelineParameterDefined(script, ctx.jiraProjectKey, "jiraProjectKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.platform, "platform")
@@ -126,7 +125,6 @@ abstract class UiTestPipeline extends ScmPipeline {
         CommonUtil.checkPipelineParameterDefined(script, ctx.defaultTaskKey, "defaultTaskKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.projectForBuild, "projectForBuild")
        // CommonUtil.checkPipelineParameterDefined(script, ctx.environment, "environment")
-        script.echo "Test log222 environment = $ctx.environment"
         CommonUtil.printInitialStageStrategies(ctx)
 
         //если триггером был webhook параметры устанавливаются как env, если запустили вручную, то устанавливается как params

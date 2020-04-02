@@ -219,7 +219,7 @@ class CommonUtil {
     }
 
      def static extractValueFromBoolParamsAndRun(Object script, Boolean key, Closure actionWithValue) {
-        runWithNotEmptyValue(script, key, script.env[key], script.params[key], actionWithValue)
+        runWithNotEmptyValue(script, key, null, script.params[key], actionWithValue)
     }
 
     def static runWithNotEmptyValue(script, String key, envValue, paramsValue, Closure actionWithValue) {
