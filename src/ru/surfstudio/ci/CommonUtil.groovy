@@ -78,10 +78,6 @@ class CommonUtil {
         return "${getAndroidSdkHome(script)}/emulator/emulator"
     }
 
-    static String getEmulatorHomeWithEnv(Object script) {
-        return "${getAndroidSdkHome(script)}/emulator/emulator"
-    }
-
     private static String getAndroidToolsHome(Object script) {
         return "${getAndroidSdkHome(script)}/tools/bin"
     }
