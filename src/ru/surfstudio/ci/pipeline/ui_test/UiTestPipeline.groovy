@@ -48,7 +48,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public testBranch // branch with tests
     public projectForBuild = "test" 
     public defaultTaskKey //task for run periodically
-    public environment = false
+    public emulator = true
     //dirs
     public sourcesDir = "src"
     public featuresDir = "features"
@@ -353,7 +353,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public static final String SOURCE_BRANCH_PARAMETER = 'sourceBranch'
     public static final String PROJECT_FOR_BUILD_PARAMETER = 'projectForBuild'
     public static final String USER_EMAIL_PARAMETER = 'userEmail'
-    public static final String ENVIRONMENT_PARAMETER = 'environment'
+    public static final String EMULATOR_PARAMETER = 'emulator'
     public static final String NODE_PARAMETER = 'node'
 
 
@@ -362,7 +362,7 @@ abstract class UiTestPipeline extends ScmPipeline {
         return [
                 buildDiscarder(ctx, script),
                 environments(script, ctx.testBranch),
-                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.projectForBuild, ctx.environment, ctx.node),
+                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.projectForBuild, ctx.emulator, ctx.node),
                 triggers(script, ctx.jiraProjectKey, ctx.platform, ctx.cronTimeTrigger)
         ]
     }
@@ -415,7 +415,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     }
 
-    private static void parameters(script, String defaultTaskKey, String testBranch, String defaultSourceBranch, String projectForBuild, boolean environment, String node) {
+    private static void parameters(script, String defaultTaskKey, String testBranch, String defaultSourceBranch, String projectForBuild, boolean emulator, String node) {
         return script.parameters([
                 script.string(
                         name: TASK_KEY_PARAMETER,
@@ -438,7 +438,7 @@ abstract class UiTestPipeline extends ScmPipeline {
                         defaultValue: projectForBuild,
                         description: 'Название Job, откуда брать сборку'),
                 script.booleanParam(
-                        name: ENVIRONMENT_PARAMETER,
+                        name: EMULATOR_PARAMETER,
                         defaultValue: false,
                         description: 'Устройство или эмулятор для прогона'
                 ),

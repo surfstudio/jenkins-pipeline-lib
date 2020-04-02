@@ -78,7 +78,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 },
                 stage(TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     testStageBodyAndroid(script,
-                            environment,
+                            emulator,
                             taskKey,
                             sourcesDir,
                             outputsDir,
@@ -153,7 +153,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
     }
 
     def static testStageBodyAndroid(Object script,
-                                    Boolean environment,
+                                    Boolean emulator,
                                     String taskKey,
                                     String sourcesDir,
                                     String outputsDir,
@@ -173,9 +173,12 @@ class UiTestPipelineAndroid extends UiTestPipeline {
         script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
             script.echo "Tests started"
 
-            launchEmulator(script, avdConfig)
-            checkEmulatorStatus(script, avdConfig)
-            script.echo "Emulator started"
+            if (emulator) {
+                launchEmulator(script, avdConfig)
+                checkEmulatorStatus(script, avdConfig)
+                script.echo "Emulator started"
+            }
+            
 
             script.echo "start tests for $artifactForTest $taskKey"
             CommonUtil.safe(script) {
