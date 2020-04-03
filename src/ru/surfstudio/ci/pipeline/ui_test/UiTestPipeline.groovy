@@ -27,6 +27,8 @@ import ru.surfstudio.ci.stage.StageStrategy
 import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
 import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 
+
+
 abstract class UiTestPipeline extends ScmPipeline {
 
     //stage names
@@ -45,8 +47,8 @@ abstract class UiTestPipeline extends ScmPipeline {
     public platform  // "android" or "ios"
     public testBranch // branch with tests
     public projectForBuild = "test" 
-    public defaultTaskKey  //task for run periodically
-
+    public defaultTaskKey //task for run periodically
+    public emulator = true
     //dirs
     public sourcesDir = "src"
     public featuresDir = "features"
@@ -77,6 +79,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public taskKey = ""
     public taskName = ""
     public userEmail = ""
+    
 
     //cron
     public cronTimeTrigger = '00 09 * * *'
@@ -114,14 +117,12 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     def static initBody(UiTestPipeline ctx) {
         def script = ctx.script
-
         CommonUtil.checkPipelineParameterDefined(script, ctx.sourceRepoUrl, "sourceRepoUrl")
         CommonUtil.checkPipelineParameterDefined(script, ctx.jiraProjectKey, "jiraProjectKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.platform, "platform")
         CommonUtil.checkPipelineParameterDefined(script, ctx.testBranch, "testBranch")
         CommonUtil.checkPipelineParameterDefined(script, ctx.defaultTaskKey, "defaultTaskKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.projectForBuild, "projectForBuild")
-
         CommonUtil.printInitialStageStrategies(ctx)
 
         //если триггером был webhook параметры устанавливаются как env, если запустили вручную, то устанавливается как params
@@ -352,14 +353,16 @@ abstract class UiTestPipeline extends ScmPipeline {
     public static final String SOURCE_BRANCH_PARAMETER = 'sourceBranch'
     public static final String PROJECT_FOR_BUILD_PARAMETER = 'projectForBuild'
     public static final String USER_EMAIL_PARAMETER = 'userEmail'
+    public static final String EMULATOR_PARAMETER = 'emulator'
     public static final String NODE_PARAMETER = 'node'
+
 
     def static List<Object> properties(UiTestPipeline ctx) {
         def script = ctx.script
         return [
                 buildDiscarder(ctx, script),
                 environments(script, ctx.testBranch),
-                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.projectForBuild, ctx.node),
+                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.projectForBuild, ctx.emulator, ctx.node),
                 triggers(script, ctx.jiraProjectKey, ctx.platform, ctx.cronTimeTrigger)
         ]
     }
@@ -412,7 +415,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     }
 
-    private static void parameters(script, String defaultTaskKey, String testBranch, String defaultSourceBranch, String projectForBuild, String node) {
+    private static void parameters(script, String defaultTaskKey, String testBranch, String defaultSourceBranch, String projectForBuild, boolean emulator, String node) {
         return script.parameters([
                 script.string(
                         name: TASK_KEY_PARAMETER,
@@ -437,7 +440,11 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.string(
                         name: NODE_PARAMETER,
                         defaultValue: node,
-                        description: 'Node на котором будет выполняться job')
+                        description: 'Node на котором будет выполняться job'),
+                script.booleanParam(
+                        name: EMULATOR_PARAMETER,
+                        defaultValue: false,
+                        description: 'Чек-бокс включен для запуска эмулятора ')
         ])
     }
 

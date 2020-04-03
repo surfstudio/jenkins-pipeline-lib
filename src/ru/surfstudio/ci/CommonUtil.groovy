@@ -21,6 +21,7 @@ import ru.surfstudio.ci.stage.StageWithResult
 import ru.surfstudio.ci.stage.StageWithStrategy
 import ru.surfstudio.ci.utils.StageTreeUtil
 
+
 class CommonUtil {
 
     static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50
@@ -92,6 +93,7 @@ class CommonUtil {
     static String getSdkManagerHome(Object script) {
         return "sdkmanager"
     }
+
     //endregion
 
     def static shWithRuby(Object script, String command, String version = "2.5.5") {
@@ -214,6 +216,10 @@ class CommonUtil {
      * @param actionWithValue{value -> }
      */
     def static extractValueFromParamsAndRun(Object script, String key, Closure actionWithValue) {
+        runWithNotEmptyValue(script, key, null, script.params[key], actionWithValue)
+    }
+
+     def static extractValueFromBoolParamsAndRun(Object script, Boolean key, Closure actionWithValue) {
         runWithNotEmptyValue(script, key, null, script.params[key], actionWithValue)
     }
 

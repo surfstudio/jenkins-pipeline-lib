@@ -18,12 +18,17 @@ package ru.surfstudio.ci.pipeline.ui_test
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
+import ru.surfstudio.ci.utils.android.config.AvdConfig
+import ru.surfstudio.ci.utils.android.EmulatorUtil
+import ru.surfstudio.ci.utils.android.AndroidTestUtil
 
 class UiTestPipelineAndroid extends UiTestPipeline {
 
     public artifactForTest = "for_test.apk"
     public buildGradleTask = "clean assembleDebug"
     public builtApkPattern = "${sourcesDir}/**/**.apk"
+
+    public AvdConfig avdConfig = new AvdConfig()
 
     UiTestPipelineAndroid(Object script) {
         super(script)
@@ -61,6 +66,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 },
                 stage(TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     testStageBodyAndroid(script,
+                            emulator,
                             taskKey,
                             sourcesDir,
                             outputsDir,
@@ -71,7 +77,8 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                             outputJsonFile,
                             outputrerunTxtFile,
                             outputsIdsDiff,
-                            failedStepsFile)
+                            failedStepsFile,
+                            avdConfig)
                 },
                 stage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     publishResultsStageBody(script,
@@ -134,6 +141,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
     }
 
     def static testStageBodyAndroid(Object script,
+                                    Boolean emulator,
                                     String taskKey,
                                     String sourcesDir,
                                     String outputsDir,
@@ -144,13 +152,23 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                                     String outputJsonFile,
                                     String outputrerunTxtFile,
                                     String outputsIdsDiff,
-                                    String failedStepsFile
+                                    String failedStepsFile,
+                                    AvdConfig avdConfig
                                     ) {
 
-                              
-                                            
+
+
         script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
             script.echo "Tests started"
+
+            if (emulator) {
+                AndroidTestUtil.cleanup(script, avdConfig)
+                AndroidTestUtil.launchEmulator(script, avdConfig)
+                AndroidTestUtil.checkEmulatorStatus(script, avdConfig)
+                script.echo "Emulator started"
+            }
+            
+
             script.echo "start tests for $artifactForTest $taskKey"
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
@@ -179,6 +197,8 @@ class UiTestPipelineAndroid extends UiTestPipeline {
             }
             finally {
                 
+                AndroidTestUtil.cleanup(script, avdConfig)
+
                 CommonUtil.shWithRuby(script, "ruby -r \'./find_id.rb\' -e \"Find.new.get_miss_id(\'./${sourcesDir}\', \'./features/android/pages\')\"")
                 script.step([$class: 'ArtifactArchiver', artifacts: outputsIdsDiff, allowEmptyArchive: true])
                 
