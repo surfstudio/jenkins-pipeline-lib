@@ -91,7 +91,7 @@ class CommonUtil {
     }
 
     static String getSdkManagerHome(Object script) {
-        return "source ~/.bash_profile; sdkmanager"
+        return "source ~/.bashrc; sdkmanager"
     }
 
     //endregion
