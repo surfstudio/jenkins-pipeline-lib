@@ -36,6 +36,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
 
         static void launchEmulatorUITest(Object script, AvdConfig config) {
+        static Integer EMULATOR_TIMEOUT = 60
         script.sh "${CommonUtil.getEmulatorHome(script)} \
                 -avd \"${config.avdName}\" \
                 -no-boot-anim -netfast -noaudio -accel on -no-window -gpu swiftshader_indirect -no-snapshot-save &"
