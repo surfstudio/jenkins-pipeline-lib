@@ -34,6 +34,27 @@ class UiTestPipelineAndroid extends UiTestPipeline {
         super(script)
     }
 
+
+        static void launchEmulatorUITest(Object script, AvdConfig config) {
+        script.sh "${CommonUtil.getEmulatorHome(script)} \
+                -avd \"${config.avdName}\" \
+                -no-boot-anim -netfast -noaudio -accel on -no-window -gpu swiftshader_indirect -no-snapshot-save &"
+        script.echo "waiting $EMULATOR_TIMEOUT seconds for emulator..."
+        script.sh "sleep $EMULATOR_TIMEOUT"
+
+        // запоминаем новое имя эмулятора
+        for (def emulatorName : getAllEmulatorNames(script)) {
+            def emulatorPort = emulatorName.substring(emulatorName.indexOf('-') + 1, emulatorName.length())
+            
+        }
+        echo "I am using this func"
+        if (CommonUtil.isNullOrEmpty(config.emulatorName)) {
+            throw new Exception("Emulator for AVD ${config.avdName} not found")
+        }
+    }
+
+
+
     @Override
     def init() {
         platform = "android"
@@ -163,7 +184,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
             if (emulator) {
                 AndroidTestUtil.cleanup(script, avdConfig)
-                AndroidTestUtil.launchEmulator(script, avdConfig)
+                AndroidTestUtil.launchEmulatorUITest(script, avdConfig)
                 AndroidTestUtil.checkEmulatorStatus(script, avdConfig)
                 script.echo "Emulator started"
             }
