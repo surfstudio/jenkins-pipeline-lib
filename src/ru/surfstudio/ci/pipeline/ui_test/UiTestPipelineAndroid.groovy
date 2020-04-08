@@ -167,7 +167,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                // AndroidTestUtil.launchEmulatorUITest(script, avdConfig)
                 //AndroidTestUtil.checkEmulatorStatus(script, avdConfig)
                 //script.echo "Emulator started"
-            /}
+            //}
 
             script.sh "open -a /Applications/Genymotion.app/Contents/MacOS/player.app --args --vm-name '0bc8a7ab-9591-4b79-a3e2-3a3b4dbdf131'"
             script.sh "sleep 25"
