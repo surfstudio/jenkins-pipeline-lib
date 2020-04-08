@@ -184,7 +184,9 @@ class UiTestPipelineAndroid extends UiTestPipeline {
             script.echo "Tests started"
 
             if (emulator) {
-                AndroidTestUtil.cleanup(script, avdConfig)
+                 CommonUtil.safe(script) {
+                    AndroidTestUtil.cleanup(script, avdConfig)
+                 }
                 AndroidTestUtil.launchEmulatorUITest(script, avdConfig)
                 AndroidTestUtil.checkEmulatorStatus(script, avdConfig)
                 script.echo "Emulator started"
