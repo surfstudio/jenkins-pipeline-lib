@@ -164,7 +164,7 @@ class EmulatorUtil {
     private static String getAvdNameForEmulatorPort(Object script, String emulatorPort) {
         def netcatOutput = getShCommandOutput(
                 script,
-                "echo avd name | nc localhost $emulatorPort -q $NETCAT_TIMEOUT"
+                "echo avd name | nc localhost $emulatorPort"
         ).split()
         return netcatOutput[netcatOutput.length - 2]
     }
