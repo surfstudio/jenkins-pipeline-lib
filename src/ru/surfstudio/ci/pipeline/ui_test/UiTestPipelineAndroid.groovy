@@ -162,12 +162,12 @@ class UiTestPipelineAndroid extends UiTestPipeline {
         script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
             script.echo "Tests started"
 
-           // if (emulator) {
+            if (emulator) {
              //   AndroidTestUtil.cleanup(script, avdConfig)
-               // AndroidTestUtil.launchEmulatorUITest(script, avdConfig)
-                //AndroidTestUtil.checkEmulatorStatus(script, avdConfig)
-                //script.echo "Emulator started"
-            //}
+                AndroidTestUtil.launchEmulatorUITest(script, avdConfig)
+                AndroidTestUtil.checkEmulatorStatus(script, avdConfig)
+                script.echo "Emulator started"
+            }
 
             script.sh "open -a /Applications/Genymotion.app/Contents/MacOS/player.app --args --vm-name '0bc8a7ab-9591-4b79-a3e2-3a3b4dbdf131'"
             script.sh "sleep 25"
@@ -199,7 +199,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
             }
             finally {
                 
-                //AndroidTestUtil.cleanup(script, avdConfig)
+                AndroidTestUtil.cleanup(script, avdConfig)
 
                 CommonUtil.shWithRuby(script, "ruby -r \'./find_id.rb\' -e \"Find.new.get_miss_id(\'./${sourcesDir}\', \'./features/android/pages\')\"")
                 script.step([$class: 'ArtifactArchiver', artifacts: outputsIdsDiff, allowEmptyArchive: true])
