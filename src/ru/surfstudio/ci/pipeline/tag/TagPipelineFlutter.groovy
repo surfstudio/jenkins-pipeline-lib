@@ -30,6 +30,8 @@ import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 class TagPipelineFlutter extends TagPipeline {
     public static final String STAGE_PARALLEL = 'Parallel Pipeline'
 
+    public static final String STAGE_DOCKER = "Docker Flutter"
+
     public static final String STAGE_ANDROID = 'Android'
     public static final String STAGE_IOS = 'IOS'
 
@@ -99,6 +101,10 @@ class TagPipelineFlutter extends TagPipeline {
     public List<Stage> androidStages
     public List<Stage> iosStages
 
+    //docker
+    public dockerImageName = "cirrusci/flutter:stable"
+    public dockerArguments = "-it -v \${PWD}:/build --workdir /build"
+
     TagPipelineFlutter(Object script) {
         super(script)
     }
@@ -131,59 +137,62 @@ class TagPipelineFlutter extends TagPipeline {
         }
 
         androidStages = [
-                stage(STAGE_ANDROID, false) {
-                    // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
-                },
-                stage(CHECKOUT, false) {
-                    checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
-                },
-                stage(CALCULATE_VERSION_CODES_ANDROID) {
-                    calculateVersionCodesStageBody(this,
-                            configFile,
-                            compositeVersionNameVar,
-                            minVersionCode)
-                },
-                stage(CLEAN_PREV_BUILD_ANDROID) {
-                    script.sh cleanFlutterCommand
-                },
-                stage(CHECKOUT_FLUTTER_VERSION_ANDROID) {
-                    script.sh checkoutFlutterVersionCommand
-                },
-                stage(VERSION_UPDATE_FOR_ARM64) {
-                    versionUpdateStageBody(script,
-                            repoTag,
-                            arm64VersionCode,
-                            configFile,
-                            compositeVersionNameVar)
-                },
-                stage(BUILD_ANDROID_ARM64) {
-                    FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
-                            buildAndroidCommandArm64,
-                            androidKeystoreCredentials,
-                            androidKeystorePropertiesCredentials)
-                },
-                stage(VERSION_UPDATE) {
-                    versionUpdateStageBody(script,
-                            repoTag,
-                            mainVersionCode,
-                            configFile,
-                            compositeVersionNameVar)
-                },
-                stage(BUILD_ANDROID) {
-                    FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
-                            buildAndroidCommand,
-                            androidKeystoreCredentials,
-                            androidKeystorePropertiesCredentials)
-                },
-                stage(UNIT_TEST) {
-                    FlutterPipelineHelper.testStageBody(script, testCommand)
-                },
-                stage(STATIC_CODE_ANALYSIS) {
-                    FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
-                },
-                stage(BETA_UPLOAD_ANDROID) {
-                    uploadStageBody(script, shBetaUploadCommandAndroid)
-                },
+                docker(STAGE_DOCKER, dockerImageName, dockerArguments, [
+                        stage(STAGE_ANDROID, false) {
+                            // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
+                        },
+                        stage(CHECKOUT, false) {
+                            checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
+                        },
+                        stage(CALCULATE_VERSION_CODES_ANDROID) {
+                            calculateVersionCodesStageBody(this,
+                                    configFile,
+                                    compositeVersionNameVar,
+                                    minVersionCode)
+                        },
+                        stage(CLEAN_PREV_BUILD_ANDROID) {
+                            script.sh cleanFlutterCommand
+                        },
+                        stage(CHECKOUT_FLUTTER_VERSION_ANDROID) {
+                            script.sh checkoutFlutterVersionCommand
+                        },
+                        stage(VERSION_UPDATE_FOR_ARM64) {
+                            versionUpdateStageBody(script,
+                                    repoTag,
+                                    arm64VersionCode,
+                                    configFile,
+                                    compositeVersionNameVar)
+                        },
+                        stage(BUILD_ANDROID_ARM64) {
+                            FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
+                                    buildAndroidCommandArm64,
+                                    androidKeystoreCredentials,
+                                    androidKeystorePropertiesCredentials)
+                        },
+                        stage(VERSION_UPDATE) {
+                            versionUpdateStageBody(script,
+                                    repoTag,
+                                    mainVersionCode,
+                                    configFile,
+                                    compositeVersionNameVar)
+                        },
+                        stage(BUILD_ANDROID) {
+                            FlutterPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
+                                    buildAndroidCommand,
+                                    androidKeystoreCredentials,
+                                    androidKeystorePropertiesCredentials)
+                        },
+                        stage(UNIT_TEST) {
+                            FlutterPipelineHelper.testStageBody(script, testCommand)
+                        },
+                        stage(STATIC_CODE_ANALYSIS) {
+                            FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
+                        },
+                        stage(BETA_UPLOAD_ANDROID) {
+                            uploadStageBody(script, shBetaUploadCommandAndroid)
+                        },
+                    ],
+                ),
         ]
 
         iosStages = [
