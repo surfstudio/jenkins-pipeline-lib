@@ -108,6 +108,8 @@ class PrPipelineFlutter extends PrPipeline {
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
         initializeBody = {
+            initBody(this)
+
             if (this.targetBranchChanged) {
                 script.echo "Build triggered by target branch changes, skip IOS branch"
 //                forStages{ stage ->
@@ -126,12 +128,8 @@ class PrPipelineFlutter extends PrPipeline {
 
                 stages = androidStages
             }
-            initBody(this)
         }
         propertiesProvider = { properties(this) }
-
-
-
 
         stages = [
                 parallel(STAGE_PARALLEL, [
