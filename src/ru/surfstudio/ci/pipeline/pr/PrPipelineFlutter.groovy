@@ -55,33 +55,6 @@ class PrPipelineFlutter extends PrPipeline {
     }
 
     def init() {
-        node = NodeProvider.androidFlutterNode
-
-        preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
-        postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
-
-        initializeBody = {
-            if (this.targetBranchChanged) {
-                script.echo "Build triggered by target branch changes, skip IOS branch"
-                forStages{ stage ->
-                    if (!(stage instanceof SimpleStage)) {
-                        return
-                    }
-
-                    def skipStage = false
-                    for (stageNameForTargetBranchChangedMode in iosStagesForSkipping) {
-                        skipStage = skipStage || (stageNameForTargetBranchChangedMode == stage.getName())
-                    }
-                    if (skipStage) {
-                        stage.strategy = StageStrategy.SKIP_STAGE
-                    }
-                }
-            }
-            initBody(this)
-        }
-        propertiesProvider = { properties(this) }
-
-
         def androidStages = [
                 stage(STAGE_ANDROID, false) {
                     // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
@@ -128,6 +101,37 @@ class PrPipelineFlutter extends PrPipeline {
                             iOSCertfileCredentialId)
                 },
         ]
+
+        node = NodeProvider.androidFlutterNode
+
+        preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
+        postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
+
+        initializeBody = {
+            if (this.targetBranchChanged) {
+                script.echo "Build triggered by target branch changes, skip IOS branch"
+//                forStages{ stage ->
+//                    if (!(stage instanceof SimpleStage)) {
+//                        return
+//                    }
+//
+//                    def skipStage = false
+//                    for (stageNameForTargetBranchChangedMode in iosStagesForSkipping) {
+//                        skipStage = skipStage || (stageNameForTargetBranchChangedMode == stage.getName())
+//                    }
+//                    if (skipStage) {
+//                        stage.strategy = StageStrategy.SKIP_STAGE
+//                    }
+//                }
+
+                stages = androidStages
+            }
+            initBody(this)
+        }
+        propertiesProvider = { properties(this) }
+
+
+
 
         stages = [
                 parallel(STAGE_PARALLEL, [
