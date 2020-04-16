@@ -16,7 +16,9 @@
 package ru.surfstudio.ci.pipeline.pr
 
 import ru.surfstudio.ci.NodeProvider
+import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
+import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
 
 class PrPipelineFlutter extends PrPipeline {
@@ -51,8 +53,6 @@ class PrPipelineFlutter extends PrPipeline {
     }
 
     def init() {
-        node = NodeProvider.androidFlutterNode
-
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
@@ -109,11 +109,42 @@ class PrPipelineFlutter extends PrPipeline {
 
         stages = [
                 parallel(STAGE_PARALLEL, [
-                        group(STAGE_ANDROID, androidStages),
+                        node(STAGE_ANDROID, NodeProvider.androidFlutterNode, false, androidStages),
                         node(STAGE_IOS, NodeProvider.iOSFlutterNode, false, iosStages)
                 ]),
         ]
 
         finalizeBody = { finalizeStageBody(this) }
+    }
+
+    def run() {
+        CommonUtil.fixVisualizingStagesInParallelBlock(script)
+        try {
+            def initStage = stage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, false, createInitStageBody())
+            initStage.execute(script, this)
+            if (CommonUtil.notEmpty(node)) {
+                script.echo "run on master node"
+            }
+            for (Stage stage : stages) {
+                stage.execute(script, this)
+            }
+        } finally {
+            jobResult = calculateJobResult(stages)
+            if (jobResult == Result.ABORTED || jobResult == Result.FAILURE) {
+                script.echo "Job stopped, see reason above ^^^^"
+            }
+            script.echo "Finalize build:"
+            printStageResults()
+            script.echo "Current job result: ${script.currentBuild.result}"
+            script.echo "Try apply job result: ${jobResult}"
+            script.currentBuild.result = jobResult
+            //нельзя повышать статус, то есть если раньше был установлен failed или unstable, нельзя заменить на success
+            script.echo "Updated job result: ${script.currentBuild.result}"
+            if (finalizeBody) {
+                script.echo "Start finalize body"
+                finalizeBody()
+                script.echo "End finalize body"
+            }
+        }
     }
 }
