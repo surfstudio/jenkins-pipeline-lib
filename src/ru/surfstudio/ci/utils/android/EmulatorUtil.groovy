@@ -162,9 +162,17 @@ class EmulatorUtil {
      * Функция, возвращающая имя AVD для эмулятора с заданным портом
      */
     private static String getAvdNameForEmulatorPort(Object script, String emulatorPort) {
+        def netcatOption
+        if (getShCommandOutput(script, "uname").startsWith("Darwin")) {
+            // this option is unstable for linux machine
+            netcatOption = "-w"
+        } else {
+            // this option can't be used on macos, parameter -q is unknown
+            netcatOption = "-q"
+        }
         def netcatOutput = getShCommandOutput(
                 script,
-                "echo avd name | nc localhost $emulatorPort -w $NETCAT_TIMEOUT"
+                "echo avd name | nc localhost $emulatorPort $netcatOption $NETCAT_TIMEOUT"
         ).split()
         return netcatOutput[netcatOutput.length - 2]
     }
