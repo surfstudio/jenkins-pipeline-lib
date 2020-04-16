@@ -115,20 +115,6 @@ class PrPipelineFlutter extends PrPipeline {
 
             if (this.targetBranchChanged) {
                 script.echo "Build triggered by target branch changes, skip IOS branch"
-//                forStages{ stage ->
-//                    if (!(stage instanceof SimpleStage)) {
-//                        return
-//                    }
-//
-//                    def skipStage = false
-//                    for (stageNameForTargetBranchChangedMode in iosStagesForSkipping) {
-//                        skipStage = skipStage || (stageNameForTargetBranchChangedMode == stage.getName())
-//                    }
-//                    if (skipStage) {
-//                        stage.strategy = StageStrategy.SKIP_STAGE
-//                    }
-//                }
-
                 stages = androidStages
             }
         }
