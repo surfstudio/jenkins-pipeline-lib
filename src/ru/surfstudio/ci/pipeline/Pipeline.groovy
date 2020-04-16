@@ -71,16 +71,9 @@ abstract class Pipeline implements Serializable {
     public preExecuteStageBody = {}  // { stage -> ... } runs for all stages in 'stages' list
     public postExecuteStageBody = {} // { stage -> ... } runs for all stages in 'stages' list
 
-    public runBody = {
-        script.node(node) {
-            if (CommonUtil.notEmpty(node)) {
-                script.echo "Switch to node ${node}: ${script.env.NODE_NAME}"
-            }
-            for (Stage stage : stages) {
-                stage.execute(script, this)
-            }
-        }
-    } // run body
+//    public runBody = {
+//
+//    } // run body
 
     Pipeline(script) {
         this.script = script
@@ -98,7 +91,14 @@ abstract class Pipeline implements Serializable {
         try {
             def initStage = stage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, false, createInitStageBody())
             initStage.execute(script, this)
-            runBody()
+            script.node(node) {
+                if (CommonUtil.notEmpty(node)) {
+                    script.echo "Switch to node ${node}: ${script.env.NODE_NAME}"
+                }
+                for (Stage stage : stages) {
+                    stage.execute(script, this)
+                }
+            }
         } finally {
             jobResult = calculateJobResult(stages)
             if (jobResult == Result.ABORTED || jobResult == Result.FAILURE) {
