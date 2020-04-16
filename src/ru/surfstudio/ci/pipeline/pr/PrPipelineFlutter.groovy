@@ -51,7 +51,10 @@ class PrPipelineFlutter extends PrPipeline {
     public buildIOsCommand = "./script/ios/build.sh -qa"
     public testCommand = "flutter test"
 
-    public iosStagesForSkipping = [STAGE_IOS, PRE_MERGE_IOS, CHECKOUT_FLUTTER_VERSION_IOS, BUILD_IOS]
+
+    //nodes
+    public nodeIos
+    public nodeAndroid
 
     PrPipelineFlutter(Object script) {
         super(script)
@@ -105,7 +108,8 @@ class PrPipelineFlutter extends PrPipeline {
                 },
         ]
 
-        node = NodeProvider.androidFlutterNode
+        node = node ?: NodeProvider.androidFlutterNode
+        nodeIos = nodeIos ?: NodeProvider.iOSFlutterNode
 
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
@@ -122,42 +126,17 @@ class PrPipelineFlutter extends PrPipeline {
 
         stages = [
                 parallel(STAGE_PARALLEL, [
-                        node(STAGE_ANDROID, NodeProvider.androidFlutterNode, false, androidStages),
-                        node(STAGE_IOS, NodeProvider.iOSFlutterNode, false, iosStages)
+                        node(STAGE_ANDROID, node, false, androidStages),
+                        node(STAGE_IOS, nodeIos , false, iosStages)
                 ]),
         ]
 
-        finalizeBody = { finalizeStageBody(this) }
-    }
-
-    def run() {
-        CommonUtil.fixVisualizingStagesInParallelBlock(script)
-        try {
-            def initStage = stage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, false, createInitStageBody())
-            initStage.execute(script, this)
-            if (CommonUtil.notEmpty(node)) {
-                script.echo "run on master node"
-            }
+        runBody = {
+            script.echo "run on master node"
             for (Stage stage : stages) {
                 stage.execute(script, this)
             }
-        } finally {
-            jobResult = calculateJobResult(stages)
-            if (jobResult == Result.ABORTED || jobResult == Result.FAILURE) {
-                script.echo "Job stopped, see reason above ^^^^"
-            }
-            script.echo "Finalize build:"
-            printStageResults()
-            script.echo "Current job result: ${script.currentBuild.result}"
-            script.echo "Try apply job result: ${jobResult}"
-            script.currentBuild.result = jobResult
-            //нельзя повышать статус, то есть если раньше был установлен failed или unstable, нельзя заменить на success
-            script.echo "Updated job result: ${script.currentBuild.result}"
-            if (finalizeBody) {
-                script.echo "Start finalize body"
-                finalizeBody()
-                script.echo "End finalize body"
-            }
         }
+        finalizeBody = { finalizeStageBody(this) }
     }
 }
