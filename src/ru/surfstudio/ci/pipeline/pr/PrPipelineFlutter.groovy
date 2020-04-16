@@ -17,6 +17,7 @@ package ru.surfstudio.ci.pipeline.pr
 
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
+import ru.surfstudio.ci.stage.SimpleStage
 import ru.surfstudio.ci.stage.StageStrategy
 
 class PrPipelineFlutter extends PrPipeline {
@@ -24,6 +25,8 @@ class PrPipelineFlutter extends PrPipeline {
 
     public static final String STAGE_ANDROID = 'Android'
     public static final String STAGE_IOS = 'IOS'
+
+    public static PRE_MERGE_IOS = "PreMerge IOS"
 
     public static final String CHECKOUT_FLUTTER_VERSION_ANDROID = 'Checkout Flutter Project Version (Android)'
     public static final String CHECKOUT_FLUTTER_VERSION_IOS = 'Checkout Flutter Project Version (iOS)'
@@ -45,21 +48,13 @@ class PrPipelineFlutter extends PrPipeline {
     public buildIOsCommand = "./script/ios/build.sh -qa"
     public testCommand = "flutter test"
 
+    public iosStagesForSkipping = [STAGE_IOS, PRE_MERGE_IOS, CHECKOUT_FLUTTER_VERSION_IOS, BUILD_IOS]
 
     PrPipelineFlutter(Object script) {
         super(script)
     }
 
     def init() {
-        node = NodeProvider.androidFlutterNode
-
-        preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
-        postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
-
-        initializeBody = { initBody(this) }
-        propertiesProvider = { properties(this) }
-
-
         def androidStages = [
                 stage(STAGE_ANDROID, false) {
                     // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
@@ -93,7 +88,7 @@ class PrPipelineFlutter extends PrPipeline {
                 stage(STAGE_IOS, false) {
                     // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                 },
-                stage(PRE_MERGE, false) {
+                stage(PRE_MERGE_IOS, false) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
                 stage(CHECKOUT_FLUTTER_VERSION_IOS) {
@@ -106,6 +101,35 @@ class PrPipelineFlutter extends PrPipeline {
                             iOSCertfileCredentialId)
                 },
         ]
+
+        node = NodeProvider.androidFlutterNode
+
+        preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
+        postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
+
+        initializeBody = {
+            initBody(this)
+
+            if (this.targetBranchChanged) {
+                script.echo "Build triggered by target branch changes, skip IOS branch"
+//                forStages{ stage ->
+//                    if (!(stage instanceof SimpleStage)) {
+//                        return
+//                    }
+//
+//                    def skipStage = false
+//                    for (stageNameForTargetBranchChangedMode in iosStagesForSkipping) {
+//                        skipStage = skipStage || (stageNameForTargetBranchChangedMode == stage.getName())
+//                    }
+//                    if (skipStage) {
+//                        stage.strategy = StageStrategy.SKIP_STAGE
+//                    }
+//                }
+
+                stages = androidStages
+            }
+        }
+        propertiesProvider = { properties(this) }
 
         stages = [
                 parallel(STAGE_PARALLEL, [
