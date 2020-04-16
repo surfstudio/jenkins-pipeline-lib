@@ -21,6 +21,7 @@ import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.SimpleStage
 import ru.surfstudio.ci.stage.StageStrategy
+import ru.surfstudio.ci.CommonUtil
 
 class PrPipelineFlutter extends PrPipeline {
     public static final String STAGE_PARALLEL = 'Parallel Pipeline'
