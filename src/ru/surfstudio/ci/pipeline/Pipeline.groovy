@@ -71,10 +71,6 @@ abstract class Pipeline implements Serializable {
     public preExecuteStageBody = {}  // { stage -> ... } runs for all stages in 'stages' list
     public postExecuteStageBody = {} // { stage -> ... } runs for all stages in 'stages' list
 
-//    public runBody = {
-//
-//    } // run body
-
     Pipeline(script) {
         this.script = script
     }
