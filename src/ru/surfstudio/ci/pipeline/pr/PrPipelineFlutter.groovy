@@ -108,7 +108,8 @@ class PrPipelineFlutter extends PrPipeline {
                 },
         ]
 
-        node = node ?: NodeProvider.androidFlutterNode
+        node = "master"
+        nodeAndroid = nodeAndroid ?: NodeProvider.androidFlutterNode
         nodeIos = nodeIos ?: NodeProvider.iOSFlutterNode
 
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
@@ -126,17 +127,17 @@ class PrPipelineFlutter extends PrPipeline {
 
         stages = [
                 parallel(STAGE_PARALLEL, [
-                        node(STAGE_ANDROID, node, false, androidStages),
+                        node(STAGE_ANDROID, nodeAndroid, false, androidStages),
                         node(STAGE_IOS, nodeIos , false, iosStages)
                 ]),
         ]
 
-        runBody = {
-            script.echo "run on master node"
-            for (Stage stage : stages) {
-                stage.execute(script, this)
-            }
-        }
+//        runBody = {
+//            script.echo "run on master node"
+//            for (Stage stage : stages) {
+//                stage.execute(script, this)
+//            }
+//        }
         finalizeBody = { finalizeStageBody(this) }
     }
 }
