@@ -51,7 +51,6 @@ class PrPipelineFlutter extends PrPipeline {
     public buildIOsCommand = "./script/ios/build.sh -qa"
     public testCommand = "flutter test"
 
-
     //nodes
     public nodeIos
     public nodeAndroid
@@ -132,12 +131,6 @@ class PrPipelineFlutter extends PrPipeline {
                 ]),
         ]
 
-//        runBody = {
-//            script.echo "run on master node"
-//            for (Stage stage : stages) {
-//                stage.execute(script, this)
-//            }
-//        }
         finalizeBody = { finalizeStageBody(this) }
     }
 }
