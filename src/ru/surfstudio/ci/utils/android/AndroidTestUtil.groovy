@@ -116,7 +116,7 @@ class AndroidTestUtil {
         foldersInRoot.findAll { it != "app/" && it != "keystore/" && it != "scripts/" }.each { folderName ->
             def htmlResultFolderInModule = "${folderName}build/reports/tests/testQaUnitTest/"
             //если папка с тестами существует в модуле, переносим её
-            script.sh "[ -d \"$htmlResultFolderInModule\" ] && mv $htmlResultFolderInModule $testResultPathDirHtml$folderName || x=3"
+            script.sh "[ -d \"$htmlResultFolderInModule\" ] && mv $htmlResultFolderInModule $testResultPathDirHtml$folderName || true"
         }
     }
 
