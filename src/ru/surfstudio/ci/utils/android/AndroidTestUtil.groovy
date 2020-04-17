@@ -118,8 +118,6 @@ class AndroidTestUtil {
             //если папка с тестами существует в модуле, переносим её
             script.sh "[ -d \"$htmlResultFolderInModule\" ] && mv $htmlResultFolderInModule $testResultPathDirHtml$folderName || x=3"
         }
-
-        script.sh "ls $testResultPathDirHtml"
     }
 
     /**
