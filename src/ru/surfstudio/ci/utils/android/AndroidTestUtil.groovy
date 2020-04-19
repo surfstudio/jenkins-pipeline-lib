@@ -113,7 +113,6 @@ class AndroidTestUtil {
         //перенос результата тестов каждого модуля в testResultPathDirHtml
         String[] foldersInRoot = getShCommandOutput(script, "ls -d */").split('\n')
         String testResultHtmlModule = testResultPathDirHtml.substring(0, testResultPathDirHtml.indexOf('/') + 1)
-        script.echo "qw $testResultHtmlModule"
         foldersInRoot.findAll { it != testResultHtmlModule }.each { folderName ->
             def htmlResultFolderInModule = "${folderName}build/reports/tests/testQaUnitTest/"
             //если папка с тестами существует в модуле, переносим её
