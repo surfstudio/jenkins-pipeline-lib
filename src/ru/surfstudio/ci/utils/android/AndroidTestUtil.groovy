@@ -99,27 +99,6 @@ class AndroidTestUtil {
         }
     }
 
-    static void startUnitTests(
-            Object script,
-            String unitTestGradleTask,
-            String testResultPathXml,
-            String testResultPathDirHtml
-    ) {
-        AndroidUtil.withGradleBuildCacheCredentials(script) {
-            script.sh "./gradlew $unitTestGradleTask"
-        }
-
-        getShCommandOutput(script, "mkdir -p $testResultPathDirHtml")
-
-        //перенос результата тестов каждого модуля в testResultPathDirHtml
-        String[] foldersInRoot = getShCommandOutput(script, "ls -d */").split('\n')
-        foldersInRoot.findAll { it != "app/" && it != "keystore/" && it != "scripts/" }.each { folderName ->
-            def htmlResultFolderInModule = "${folderName}build/reports/tests/testQaUnitTest/"
-            //если папка с тестами существует в модуле, переносим её
-            script.sh "[ -d \"$htmlResultFolderInModule\" ] && mv $htmlResultFolderInModule $testResultPathDirHtml$folderName || x=3"
-        }
-    }
-
     /**
      * Функция, которая должна быть вызвана по завершении инструментальных тестов
      */

@@ -23,7 +23,6 @@ import ru.surfstudio.ci.stage.SimpleStage
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.utils.android.AndroidTestUtil
 import ru.surfstudio.ci.utils.android.AndroidUtil
-import ru.surfstudio.ci.utils.android.ApkUtil
 import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
 import ru.surfstudio.ci.utils.android.config.AvdConfig
 
@@ -65,12 +64,9 @@ class AndroidPipelineHelper {
             String testResultPathDirHtml
     ) {
         try {
-            AndroidTestUtil.startUnitTests(
-                    script,
-                    unitTestGradleTask,
-                    testResultPathXml,
-                    testResultPathDirHtml
-            )
+            AndroidUtil.withGradleBuildCacheCredentials(script) {
+                script.sh "./gradlew $unitTestGradleTask"
+            }
         } finally {
             publishTestResults(script, testResultPathXml, testResultPathDirHtml, UNIT_TEST_REPORT_NAME)
         }
