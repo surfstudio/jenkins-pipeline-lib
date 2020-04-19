@@ -68,7 +68,6 @@ class AndroidPipelineHelper {
             AndroidTestUtil.startUnitTests(
                     script,
                     unitTestGradleTask,
-                    testResultPathXml,
                     testResultPathDirHtml
             )
         } finally {
