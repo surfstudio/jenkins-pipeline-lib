@@ -88,14 +88,14 @@ abstract class Pipeline implements Serializable {
             def initStage = stage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, false, createInitStageBody())
             initStage.execute(script, this)
             script.node(node) {
-                if(CommonUtil.notEmpty(node)) {
+                if (CommonUtil.notEmpty(node)) {
                     script.echo "Switch to node ${node}: ${script.env.NODE_NAME}"
                 }
                 for (Stage stage : stages) {
                     stage.execute(script, this)
                 }
             }
-        }  finally {
+        } finally {
             jobResult = calculateJobResult(stages)
             if (jobResult == Result.ABORTED || jobResult == Result.FAILURE) {
                 script.echo "Job stopped, see reason above ^^^^"
@@ -104,7 +104,8 @@ abstract class Pipeline implements Serializable {
             printStageResults()
             script.echo "Current job result: ${script.currentBuild.result}"
             script.echo "Try apply job result: ${jobResult}"
-            script.currentBuild.result = jobResult  //нельзя повышать статус, то есть если раньше был установлен failed или unstable, нельзя заменить на success
+            script.currentBuild.result = jobResult
+            //нельзя повышать статус, то есть если раньше был установлен failed или unstable, нельзя заменить на success
             script.echo "Updated job result: ${script.currentBuild.result}"
             if (finalizeBody) {
                 script.echo "Start finalize body"
@@ -144,7 +145,7 @@ abstract class Pipeline implements Serializable {
 
     /**
      * execute lambda with all stages in stage tree
-     * @param lambda: { stage ->  ... }
+     * @param lambda : { stage ->  ... }
      */
     def forStages(List<Stage> stages = this.stages, Closure lambda) {
         return StageTreeUtil.forStages(stages, lambda)
@@ -157,14 +158,14 @@ abstract class Pipeline implements Serializable {
     /**
      * create simple stage
      */
-    def static stage(String name, String strategy, boolean runPreAndPostExecuteStageBodies, Closure body){
+    def static stage(String name, String strategy, boolean runPreAndPostExecuteStageBodies, Closure body) {
         return new SimpleStage(name, strategy, runPreAndPostExecuteStageBodies, body)
     }
 
     /**
      * create simple stage
      */
-    def static stage(String name, String strategy, Closure body){
+    def static stage(String name, String strategy, Closure body) {
         return new SimpleStage(name, strategy, body)
     }
 
@@ -300,8 +301,8 @@ abstract class Pipeline implements Serializable {
     // ==================================== UTIL =========================================
 
     def printStageResults() {
-        forStages {stage ->
-            if(stage instanceof SimpleStage) {
+        forStages { stage ->
+            if (stage instanceof SimpleStage) {
                 script.echo(String.format("%-30s", "\"${stage.name}\" stage result: ") + stage.result)
             }
         }
@@ -325,13 +326,13 @@ abstract class Pipeline implements Serializable {
         def currentJobResult = Result.NOT_BUILT
         for (Stage abstractStage : stages) {
             def newJobResult
-            if(abstractStage instanceof StageGroup) {
+            if (abstractStage instanceof StageGroup) {
                 newJobResult = this.calculateJobResult((abstractStage as StageGroup).stages)
-            } else if(abstractStage instanceof SimpleStage) {
+            } else if (abstractStage instanceof SimpleStage) {
                 def stage = abstractStage as SimpleStage
                 if (stage.result == null) {
                     newJobResult = Result.NOT_BUILT
-                } else  if (stage.result == Result.SUCCESS) {
+                } else if (stage.result == Result.SUCCESS) {
                     newJobResult = Result.SUCCESS
                 } else if (stage.result == Result.ABORTED) {
                     newJobResult = Result.ABORTED
@@ -359,7 +360,7 @@ abstract class Pipeline implements Serializable {
     // ================================== Deprecate ======================================
 
     @Deprecated
-    def static createStage(String name, String strategy, Closure body){
+    def static createStage(String name, String strategy, Closure body) {
         return new SimpleStage(name, strategy, body)
     }
 
