@@ -19,7 +19,7 @@ import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.utils.android.config.AvdConfig
 
 /**
- * Утилиты для инструментальных тестов Android
+ * Утилиты для Android тестов
  */
 class AndroidTestUtil {
 
@@ -99,7 +99,13 @@ class AndroidTestUtil {
         }
     }
 
-    static void startUnitTests(
+    /**
+     * Функция, запускающая выполнение unit тестов
+     * @param script контекст вызова
+     * @param unitTestGradleTask gradle таск выполняющий запуск тестов
+     * @param testResultPathDirHtml путь для сохранения html-отчетов о результатах тестов
+     */
+    static void runUnitTests(
             Object script,
             String unitTestGradleTask,
             String testResultPathDirHtml
