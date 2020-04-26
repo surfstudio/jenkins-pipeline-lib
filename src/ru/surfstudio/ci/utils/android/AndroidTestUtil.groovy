@@ -126,8 +126,7 @@ class AndroidTestUtil {
             String htmlTestDataFolder = "classes"
             //если в модуле содержатся не пустые результаты тестов то переносим их в testResultPathDirHtml
             script.sh "[ -d $htmlReportDir/$htmlTestDataFolder ] " +
-                    "&& (mkdir -p $testResultPathDirHtml${moduleName} " +
-                    "&& mv $htmlReportDir/* $testResultPathDirHtml${moduleName}) " +
+                    "&& (mkdir -p $testResultPathDirHtml${moduleName} && mv $htmlReportDir/* $testResultPathDirHtml${moduleName}) " +
                     "|| true"
         }
     }
