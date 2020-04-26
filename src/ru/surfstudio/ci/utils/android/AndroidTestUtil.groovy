@@ -302,7 +302,7 @@ class AndroidTestUtil {
     /**
      * Функция, переносит результаты html тестов из всех модулей в указанную папку
      * @param script контекст вызова
-     * @param folderNameInBuildModuleDir , имя корневой папки результатов тестов в модуле (<moduleName>/build/<folderNameInBuildModuleDir>)
+     * @param folderNameInBuildModuleDir имя корневой папки результатов тестов в модуле (<moduleName>/build/<folderNameInBuildModuleDir>)
      * @param testResultPathDirHtml путь для сохранения html-отчетов о результатах тестов
      */
     private static void moveHtmlReportsToResultDir(
