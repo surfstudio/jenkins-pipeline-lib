@@ -51,6 +51,11 @@ class AndroidTestUtil {
     private static String TEST_RESULT_CODE_MESSAGE = "TEST RESULT CODE:"
     //endregion
 
+    //region test reports
+    private static String UNIT_TEST_REPORTS_FOLDER_NAME = "reports"
+    private static String API_TEST_REPORTS_FOLDER_NAME = "reports"
+    //endregion
+
     /**
      * Версия build tools для получения корректного пути к актуальной утилите aapt.
      *
@@ -114,21 +119,25 @@ class AndroidTestUtil {
             script.sh "./gradlew $unitTestGradleTask"
         }
 
-        //перенос результата тестов каждого модуля в testResultPathDirHtml
-        String[] reportDirs = getShCommandOutput(script, "find -name reports").split('\n')
-        script.sh "mkdir -p $testResultPathDirHtml"
-        reportDirs.each { reportDir ->
-            String modulePath = reportDir.replace("/build/reports", "")
-            String moduleName = modulePath.substring(modulePath.lastIndexOf('/') + 1)
+        moveHtmlReportsToResultDir(script, UNIT_TEST_REPORTS_FOLDER_NAME, testResultPathDirHtml)
+    }
 
-            String htmlReportDir = reportDir.replace("./", "") + "/tests/**"
-
-            String htmlTestDataFolder = "classes"
-            //если в модуле содержатся не пустые результаты тестов то переносим их в testResultPathDirHtml
-            script.sh "[ -d $htmlReportDir/$htmlTestDataFolder ] " +
-                    "&& (mkdir -p $testResultPathDirHtml${moduleName} && mv $htmlReportDir/* $testResultPathDirHtml${moduleName}) " +
-                    "|| true"
+    /**
+     * Функция, запускающая выполнение api тестов
+     * @param script контекст вызова
+     * @param unitTestGradleTask gradle таск выполняющий запуск тестов
+     * @param testResultPathDirHtml путь для сохранения html-отчетов о результатах тестов
+     */
+    static void runApiTests(
+            Object script,
+            String unitTestGradleTask,
+            String testResultPathDirHtml
+    ) {
+        AndroidUtil.withGradleBuildCacheCredentials(script) {
+            script.sh "./gradlew $unitTestGradleTask"
         }
+
+        moveHtmlReportsToResultDir(script, API_TEST_REPORTS_FOLDER_NAME, testResultPathDirHtml)
     }
 
     /**
@@ -289,6 +298,31 @@ class AndroidTestUtil {
         }
     }
     //endregion
+
+    /**
+     * Функция, переносит результаты html тестов из всех модулей в указанную папку
+     * @param script контекст вызова
+     * @param folderNameInBuildModuleDir , имя корневой папки результатов тестов в модуле (<moduleName>/build/<folderNameInBuildModuleDir>)
+     * @param testResultPathDirHtml путь для сохранения html-отчетов о результатах тестов
+     */
+    private static void moveHtmlReportsToResultDir(
+            Object script,
+            String folderNameInBuildModuleDir,
+            String testResultPathDirHtml
+    ) {
+        String[] reportDirs = getShCommandOutput(script, "find -name $folderNameInBuildModuleDir").split('\n')
+        //если папка с результатами тестов существует удаляем все её содержимое, иначе создаем её
+        script.sh "'[' -d $testResultPathDirHtml ']' && rm -r $testResultPathDirHtml/* ||  mkdir -p $testResultPathDirHtml"
+
+        reportDirs.each { reportDir ->
+            String modulePath = reportDir.replace("/build/$folderNameInBuildModuleDir", "")
+            String moduleName = modulePath.substring(modulePath.lastIndexOf('/') + 1)
+            String htmlReportDir = reportDir + "/tests/**"
+            String htmlTestDataFolder = "classes"
+            //если в модуле содержатся не пустые тесты то переносим их в testResultPathDirHtml
+            script.sh "[ -d $htmlReportDir/$htmlTestDataFolder ] && (mkdir -p $testResultPathDirHtml${moduleName} && mv $htmlReportDir/* $testResultPathDirHtml${moduleName}) || true"
+        }
+    }
 
     /**
      * Функция для поиска строки среди логов и получения подстроки в завимости от разделителя
