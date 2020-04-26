@@ -114,15 +114,16 @@ class AndroidTestUtil {
             script.sh "./gradlew $unitTestGradleTask"
         }
 
-        script.sh "mkdir -p $testResultPathDirHtml"
-
         //перенос результата тестов каждого модуля в testResultPathDirHtml
-        String[] foldersInRoot = getShCommandOutput(script, "ls -d */").split('\n')
-        String testResultHtmlModule = testResultPathDirHtml.substring(0, testResultPathDirHtml.indexOf('/') + 1)
-        foldersInRoot.findAll { it != testResultHtmlModule }.each { folderName ->
-            def htmlResultFolderInModule = "${folderName}build/reports/tests/testQaUnitTest/"
-            //если папка с тестами существует в модуле, переносим её
-            script.sh "[ -d \"$htmlResultFolderInModule\" ] && mv $htmlResultFolderInModule $testResultPathDirHtml$folderName || true"
+        String[] reportDirs = getShCommandOutput(script, "find -name reports").split('\n')
+        script.sh "mkdir -p $testResultPathDirHtml"
+        reportDirs.each { reportDir ->
+            String modulePath = reportDir.replace("/build/reports", "")
+            String moduleName = modulePath.substring(modulePath.lastIndexOf('/') + 1)
+
+            String htmlReportDir = reportDir.replace("./", "") + "/tests/**"
+            //если папка с результатами тестов существует переносим её в testResultPathDirHtml
+            script.sh "[ -d $htmlReportDir ] && (mkdir -p $testResultPathDirHtml${moduleName} && mv $htmlReportDir/* $testResultPathDirHtml${moduleName}) || true"
         }
     }
 

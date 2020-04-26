@@ -32,7 +32,7 @@ class PrPipelineAndroid extends PrPipeline {
 
     public unitTestGradleTask = "testQaUnitTest -PtestType=unit"
     public unitTestResultPathXml = "**/test-results/testQaUnitTest/*.xml"
-    public unitTestResultPathDirHtml = "app/build/reports/tests/testQaUnitTest/"
+    public unitTestResultPathDirHtml = "build/reports/tests/testQaUnitTest/"
 
     // buildType, для которого будут выполняться инструментальные тесты
     public androidTestBuildType = "qa"
