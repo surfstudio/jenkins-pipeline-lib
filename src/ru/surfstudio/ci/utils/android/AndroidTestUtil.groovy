@@ -122,8 +122,13 @@ class AndroidTestUtil {
             String moduleName = modulePath.substring(modulePath.lastIndexOf('/') + 1)
 
             String htmlReportDir = reportDir.replace("./", "") + "/tests/**"
-            //если папка с результатами тестов существует переносим её в testResultPathDirHtml
-            script.sh "[ -d $htmlReportDir ] && (mkdir -p $testResultPathDirHtml${moduleName} && mv $htmlReportDir/* $testResultPathDirHtml${moduleName}) || true"
+
+            String htmlTestDataFolder = "classes"
+            //если в модуле содержатся не пустые результаты тестов то переносим их в testResultPathDirHtml
+            script.sh "[ -d $htmlReportDir/$htmlTestDataFolder ] " +
+                    "&& (mkdir -p $testResultPathDirHtml${moduleName} " +
+                    "&& mv $htmlReportDir/* $testResultPathDirHtml${moduleName}) " +
+                    "|| true"
         }
     }
 
