@@ -51,11 +51,6 @@ class AndroidTestUtil {
     private static String TEST_RESULT_CODE_MESSAGE = "TEST RESULT CODE:"
     //endregion
 
-    //region test reports
-    private static String UNIT_TEST_REPORTS_FOLDER_NAME = "reports"
-    private static String API_TEST_REPORTS_FOLDER_NAME = "reports"
-    //endregion
-
     /**
      * Версия build tools для получения корректного пути к актуальной утилите aapt.
      *
@@ -119,7 +114,7 @@ class AndroidTestUtil {
             script.sh "./gradlew $unitTestGradleTask"
         }
 
-        moveHtmlReportsToResultDir(script, UNIT_TEST_REPORTS_FOLDER_NAME, testResultPathDirHtml)
+        moveHtmlReportsToResultDir(script, testResultPathDirHtml)
     }
 
     /**
@@ -137,7 +132,7 @@ class AndroidTestUtil {
             script.sh "./gradlew $unitTestGradleTask"
         }
 
-        moveHtmlReportsToResultDir(script, API_TEST_REPORTS_FOLDER_NAME, testResultPathDirHtml)
+        moveHtmlReportsToResultDir(script, testResultPathDirHtml)
     }
 
     /**
@@ -307,20 +302,19 @@ class AndroidTestUtil {
      */
     private static void moveHtmlReportsToResultDir(
             Object script,
-            String folderNameInBuildModuleDir,
             String testResultPathDirHtml
     ) {
-        String[] reportDirs = getShCommandOutput(script, "find -name $folderNameInBuildModuleDir").split('\n')
-        //если папка с результатами тестов существует удаляем все её содержимое, иначе создаем её
-        script.sh "'[' -d $testResultPathDirHtml ']' && rm -r $testResultPathDirHtml/* ||  mkdir -p $testResultPathDirHtml"
+        script.sh "'[' -d $testResultPathDirHtml ']' && rm -r $testResultPathDirHtml || true"
 
-        reportDirs.each { reportDir ->
-            String modulePath = reportDir.replace("/build/$folderNameInBuildModuleDir", "")
-            String moduleName = modulePath.substring(modulePath.lastIndexOf('/') + 1)
-            String htmlReportDir = reportDir + "/tests/**"
-            String htmlTestDataFolder = "classes"
-            //если в модуле содержатся не пустые тесты то переносим их в testResultPathDirHtml
-            script.sh "[ -d $htmlReportDir/$htmlTestDataFolder ] && (mkdir -p $testResultPathDirHtml${moduleName} && mv $htmlReportDir/* $testResultPathDirHtml${moduleName}) || true"
+        String[] reportsDirs = (script.findFiles(glob: '**/build/reports/tests/**/classes/*.html') as String[])
+                .collect { it.substring(0, it.indexOf("/classes/")) }
+                .unique()
+
+        reportsDirs.each { reportDir ->
+            String[] dirs = reportDir.split('/')
+            String moduleName = dirs[dirs.findIndexOf { it == "build" } - 1]
+
+            script.sh "mkdir -p $testResultPathDirHtml${moduleName} && mv $reportDir/* $testResultPathDirHtml${moduleName}"
         }
     }
 
