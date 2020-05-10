@@ -119,8 +119,8 @@ class AndroidTestUtil {
                 .unique()
 
         reportsDirs.each { reportDir ->
-            String[] dirs = reportDir.split('/')
-            String moduleName = dirs[dirs.findIndexOf { it == "build" } - 1]
+            String[] folders = reportDir.split('/')
+            String moduleName = folders[folders.findIndexOf { it == "build" } - 1]
 
             script.sh "mkdir -p $testResultPathDirHtml${moduleName} && mv $reportDir/* $testResultPathDirHtml${moduleName}"
         }
