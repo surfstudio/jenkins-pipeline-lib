@@ -49,7 +49,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
     public waitApiTestGradleTask = "clean testQaUnitTest -PtestType=waitApi"
 
     public testResultPathXml = "**/test-results/testQaUnitTest/*.xml"
-    public testResultPathDirHtml = "app-injector/build/reports/tests/testQaUnitTest/"
+    public testResultPathDirHtml = "build/reports/tests/testQaUnitTest/"
 
     //cron
     public cronTimeTrigger = '00 05 * * *'
@@ -139,21 +139,12 @@ class ApiTestPipelineAndroid extends ScmPipeline {
             String reportName
     ) {
         try {
-            AndroidTestUtil.runApiTests(
-                    script,
-                    testGradleTask,
-                    testResultPathDirHtml
-            )
+            AndroidUtil.withGradleBuildCacheCredentials(script) {
+                script.sh "./gradlew $testGradleTask"
+            }
         } finally {
             script.junit allowEmptyResults: true, testResults: testResultPathXml
-            script.publishHTML(target: [
-                    allowMissing         : true,
-                    alwaysLinkToLastBuild: false,
-                    keepAll              : true,
-                    reportDir            : testResultPathDirHtml,
-                    reportFiles          : "*/index.html",
-                    reportName           : reportName
-            ])
+            AndroidTestUtil.archiveUnitTestHtmlResults(script, testResultPathDirHtml, reportName)
         }
     }
 

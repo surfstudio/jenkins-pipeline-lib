@@ -25,6 +25,8 @@ class AndroidTestUtil {
 
     static String ANDROID_TEST_APK_SUFFIX = "androidTest"
 
+    private static String DEFAULT_HTML_RESULT_FILENAME = "index.html"
+
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
     private static Integer TIMEOUT_PER_TEST = 60 * 5 // seconds
 
@@ -100,39 +102,37 @@ class AndroidTestUtil {
     }
 
     /**
-     * Функция, запускающая выполнение unit тестов
+     * Функция архивирует результаты html тестов
      * @param script контекст вызова
-     * @param unitTestGradleTask gradle таск выполняющий запуск тестов
      * @param testResultPathDirHtml путь для сохранения html-отчетов о результатах тестов
+     * @param reportsName название отчетов
      */
-    static void runUnitTests(
+    static void archiveUnitTestHtmlResults(
             Object script,
-            String unitTestGradleTask,
-            String testResultPathDirHtml
+            String testResultPathDirHtml,
+            String reportsName
     ) {
-        AndroidUtil.withGradleBuildCacheCredentials(script) {
-            script.sh "./gradlew $unitTestGradleTask"
+        script.sh "'[' -d $testResultPathDirHtml ']' && rm -r $testResultPathDirHtml || true"
+
+        String[] reportsDirs = (script.findFiles(glob: '**/build/reports/tests/*/classes/*.html') as String[])
+                .collect { it.substring(0, it.indexOf("/classes/")) }
+                .unique()
+
+        reportsDirs.each { reportDir ->
+            String[] dirs = reportDir.split('/')
+            String moduleName = dirs[dirs.findIndexOf { it == "build" } - 1]
+
+            script.sh "mkdir -p $testResultPathDirHtml${moduleName} && mv $reportDir/* $testResultPathDirHtml${moduleName}"
         }
 
-        moveHtmlReportsToResultDir(script, testResultPathDirHtml)
-    }
-
-    /**
-     * Функция, запускающая выполнение api тестов
-     * @param script контекст вызова
-     * @param unitTestGradleTask gradle таск выполняющий запуск тестов
-     * @param testResultPathDirHtml путь для сохранения html-отчетов о результатах тестов
-     */
-    static void runApiTests(
-            Object script,
-            String unitTestGradleTask,
-            String testResultPathDirHtml
-    ) {
-        AndroidUtil.withGradleBuildCacheCredentials(script) {
-            script.sh "./gradlew $unitTestGradleTask"
-        }
-
-        moveHtmlReportsToResultDir(script, testResultPathDirHtml)
+        script.publishHTML(target: [
+                allowMissing         : true,
+                alwaysLinkToLastBuild: false,
+                keepAll              : true,
+                reportDir            : testResultPathDirHtml,
+                reportFiles          : "*/$DEFAULT_HTML_RESULT_FILENAME",
+                reportName           : reportsName
+        ])
     }
 
     /**
@@ -293,30 +293,6 @@ class AndroidTestUtil {
         }
     }
     //endregion
-
-    /**
-     * Функция, переносит результаты html тестов из всех модулей в указанную папку
-     * @param script контекст вызова
-     * @param folderNameInBuildModuleDir имя корневой папки результатов тестов в модуле (<moduleName>/build/<folderNameInBuildModuleDir>)
-     * @param testResultPathDirHtml путь для сохранения html-отчетов о результатах тестов
-     */
-    private static void moveHtmlReportsToResultDir(
-            Object script,
-            String testResultPathDirHtml
-    ) {
-        script.sh "'[' -d $testResultPathDirHtml ']' && rm -r $testResultPathDirHtml || true"
-
-        String[] reportsDirs = (script.findFiles(glob: '**/build/reports/tests/**/classes/*.html') as String[])
-                .collect { it.substring(0, it.indexOf("/classes/")) }
-                .unique()
-
-        reportsDirs.each { reportDir ->
-            String[] dirs = reportDir.split('/')
-            String moduleName = dirs[dirs.findIndexOf { it == "build" } - 1]
-
-            script.sh "mkdir -p $testResultPathDirHtml${moduleName} && mv $reportDir/* $testResultPathDirHtml${moduleName}"
-        }
-    }
 
     /**
      * Функция для поиска строки среди логов и получения подстроки в завимости от разделителя
