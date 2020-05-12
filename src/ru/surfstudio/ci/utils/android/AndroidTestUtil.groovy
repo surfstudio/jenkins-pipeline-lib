@@ -102,7 +102,7 @@ class AndroidTestUtil {
     }
 
     /**
-     * Функция архивирует результаты html тестов
+     * Функция архивирует html-результаты unit-тестов
      * @param script контекст вызова
      * @param testResultPathDirHtml путь для сохранения html-отчетов о результатах тестов
      * @param reportsName название отчетов
@@ -112,14 +112,16 @@ class AndroidTestUtil {
             String testResultPathDirHtml,
             String reportsName
     ) {
-        script.sh "'[' -d $testResultPathDirHtml ']' && rm -r $testResultPathDirHtml || true"
+        script.sh "rm -rf $testResultPathDirHtml"
 
+        //находим не пустые html отчеты (в непустых есть папка classes)
         String[] reportsDirs = (script.findFiles(glob: '**/build/reports/tests/*/classes/*.html') as String[])
                 .collect { it.substring(0, it.indexOf("/classes/")) }
                 .unique()
-
+        //переносим html отчеты из модулей в testResultPathDirHtml, так как publishHTML может архивировать только из одной папки
         reportsDirs.each { reportDir ->
             String[] folders = reportDir.split('/')
+            //папка модуля находится переде папкой build
             String moduleName = folders[folders.findIndexOf { it == "build" } - 1]
 
             script.sh "mkdir -p $testResultPathDirHtml${moduleName} && mv $reportDir/* $testResultPathDirHtml${moduleName}"
