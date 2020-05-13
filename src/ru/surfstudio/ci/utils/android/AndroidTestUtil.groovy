@@ -285,6 +285,7 @@ class AndroidTestUtil {
 
                         script.sh "cp $spoonOutputDir/junit-reports/*.xml $androidTestResultPathXml/report-${apkModuleName}.xml"
                         script.sh "cp -r $spoonOutputDir $androidTestResultPathDirHtml/${apkModuleName}"
+                        script.echo "конец"
                     }
                 } // if (CommonUtil.isNotNullOrEmpty(testBuildTypeApkName)) ...
             } // if (testBuildTypeApkList.size() > 0)...
