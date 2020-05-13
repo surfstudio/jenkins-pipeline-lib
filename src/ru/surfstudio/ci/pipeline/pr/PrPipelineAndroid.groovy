@@ -92,18 +92,6 @@ class PrPipelineAndroid extends PrPipeline {
                 stage(PRE_MERGE) {
                     mergeLocal(script, destinationBranch)
                 },
-                stage(BUILD) {
-                    AndroidPipelineHelper.buildWithCredentialsStageBodyAndroid(script,
-                            buildGradleTask,
-                            keystoreCredentials,
-                            keystorePropertiesCredentials)
-                },
-                stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    AndroidPipelineHelper.unitTestStageBodyAndroid(script,
-                            unitTestGradleTask,
-                            unitTestResultPathXml,
-                            unitTestResultPathDirHtml)
-                },
                 stage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.instrumentationTestStageBodyAndroid(
                             script,
