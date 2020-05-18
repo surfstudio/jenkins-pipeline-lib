@@ -53,6 +53,8 @@ class TagPipelineFlutter extends TagPipeline {
     public static final String BETA_UPLOAD_IOS = 'Beta Upload iOS'
     public static final String TESTFLIGHT_UPLOAD_IOS = 'TestFlight Upload iOS'
 
+    public static final String COPY_ARTIFACTS_FROM_DOCKER = 'Copy artifacts from docker container'
+
     //required initial configuration
     public androidKeystoreCredentials = "no_credentials"
     public androidKeystorePropertiesCredentials = "no_credentials"
@@ -85,6 +87,8 @@ class TagPipelineFlutter extends TagPipeline {
     public shBetaUploadCommandAndroid = "make -C android/ init && make -C android/ beta"
     public shBetaUploadCommandIos = "make -C ios/ beta"
     public shTestFlightUploadCommandIos = "make -C ios/ release"
+
+    public copyArtifactsFromDockerCommand = "docker cp CONTAINER:\${PWD}/build/app/outputs/apk build/app/outputs/apk"
 
     //versions
     public minVersionCode = 10000
@@ -188,6 +192,9 @@ class TagPipelineFlutter extends TagPipeline {
                         stage(STATIC_CODE_ANALYSIS) {
                             FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                         },
+                        stage(COPY_ARTIFACTS_FROM_DOCKER) {
+                            script.sh copyArtifactsFromDockerCommand
+                        }
                         stage(BETA_UPLOAD_ANDROID) {
                             uploadStageBody(script, shBetaUploadCommandAndroid)
                         },
