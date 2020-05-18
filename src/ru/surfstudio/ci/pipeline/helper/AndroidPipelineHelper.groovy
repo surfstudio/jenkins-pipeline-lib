@@ -186,7 +186,6 @@ class AndroidPipelineHelper {
         boolean hasChanges = RepositoryUtil.checkHasChanges(script)
         if (hasChanges) {
             RepositoryUtil.notifyGitlabAboutStageAborted(script, repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, sourceBranch)
-            script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1\""
 
             String jiraIssueKey
             try {
