@@ -88,8 +88,6 @@ class TagPipelineFlutter extends TagPipeline {
     public shBetaUploadCommandIos = "make -C ios/ beta"
     public shTestFlightUploadCommandIos = "make -C ios/ release"
 
-    public copyArtifactsFromDockerCommand = "docker cp CONTAINER:\${pwd}/build/app/outputs/apk \${PWD}/build/app/outputs/apk"
-
     //versions
     public minVersionCode = 10000
     public mainVersionCode = "<undefined>"
@@ -108,6 +106,8 @@ class TagPipelineFlutter extends TagPipeline {
     //docker
     public dockerImageName = "cirrusci/flutter:stable"
     public dockerArguments = "-it -v \${PWD}:/build --workdir /build"
+
+    public copyArtifactsFromDockerCommand = "docker cp ${dockerImageName}:\${pwd}/build/app/outputs/apk/. \${PWD}/build/app/outputs/apk"
 
     TagPipelineFlutter(Object script) {
         super(script)
