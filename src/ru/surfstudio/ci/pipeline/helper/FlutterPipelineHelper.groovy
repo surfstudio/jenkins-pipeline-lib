@@ -60,10 +60,10 @@ class FlutterPipelineHelper {
 
             script.echo "Importing iOS certificate: ${certfileCredentialId}"
 
+            CommonUtil.shWithRuby2(script, 'security default-keychain -s /Users/jenkins/Library/Keychains/login.keychain-db')
             CommonUtil.shWithRuby2(script, 'security -v unlock-keychain -p $KEYCHAIN_PASS')
             CommonUtil.shWithRuby2(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
             CommonUtil.shWithRuby2(script, 'security set-key-partition-list -S apple-tool:,apple: -s -k $KEYCHAIN_PASS ~/Library/Keychains/login.keychain-db')
-            CommonUtil.shWithRuby2(script, 'security import "$DEVELOPER_P12_KEY" -P "" -A')
             CommonUtil.shWithRuby2(script, 'ls ios/; open ../../scripts/xcode.app ./ios/$(ls ./ios/ | grep xcworkspace)')
 
             CommonUtil.shWithRuby2(script, "make -C ios/ init")

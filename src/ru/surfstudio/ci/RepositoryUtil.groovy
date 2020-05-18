@@ -49,7 +49,7 @@ class RepositoryUtil {
     }
 
     def static notifyGitlabAboutStageAborted(Object script, String repoUrl, String stageName, String sourceBranch){
-        def gitlabStatus = "aborted"
+        def gitlabStatus = "canceled"
         def slug = getCurrentGitlabRepoSlug(script, repoUrl)
         script.echo "Notify GitLab - synthetic stage: $stageName, repoSlug: $slug, branch: $sourceBranch, status: $gitlabStatus"
         script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "$sourceBranch"]])
