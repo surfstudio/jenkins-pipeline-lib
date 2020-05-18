@@ -32,6 +32,8 @@ class PrPipelineFlutter extends PrPipeline {
     public static final String BUILD_ANDROID = 'Build Android'
     public static final String BUILD_IOS = 'Build iOS'
 
+    public static final String COPY_ARTIFACTS_FROM_DOCKER = 'Copy artifacts from docker container'
+
     //required initial configuration
     public androidKeystoreCredentials = "no_credentials"
     public androidKeystorePropertiesCredentials = "no_credentials"
@@ -49,6 +51,8 @@ class PrPipelineFlutter extends PrPipeline {
     //docker
     public dockerImageName = "cirrusci/flutter:stable"
     public dockerArguments = "-it -v \${PWD}:/build --workdir /build"
+
+    public copyArtifactsFromDockerCommand = "docker cp CONTAINER:\${PWD}/build/app/outputs/apk build/app/outputs/apk"
 
     PrPipelineFlutter(Object script) {
         super(script)
@@ -92,6 +96,9 @@ class PrPipelineFlutter extends PrPipeline {
                                     androidKeystoreCredentials,
                                     androidKeystorePropertiesCredentials)
                         },
+                        stage(COPY_ARTIFACTS_FROM_DOCKER) {
+                            script.sh copyArtifactsFromDockerCommand
+                        }
                 ]
                 )
         ]
