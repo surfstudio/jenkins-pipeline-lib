@@ -8,7 +8,7 @@ import ru.surfstudio.ci.stage.StageStrategy
 
 class PrBackend extends PrPipeline {
     private boolean hasChanges = false
-    public buildGradleTask = "clean assembly"
+    public buildGradleTask = "clean assemble"
     public unitTestGradleTask = "test"
 
     public unitTestResultPathXml = "build/test-results/test/*.xml"
