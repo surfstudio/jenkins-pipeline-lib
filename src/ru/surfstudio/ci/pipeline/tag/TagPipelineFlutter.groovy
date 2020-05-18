@@ -194,7 +194,7 @@ class TagPipelineFlutter extends TagPipeline {
                         },
                         stage(COPY_ARTIFACTS_FROM_DOCKER) {
                             script.sh copyArtifactsFromDockerCommand
-                        }
+                        },
                         stage(BETA_UPLOAD_ANDROID) {
                             uploadStageBody(script, shBetaUploadCommandAndroid)
                         },
