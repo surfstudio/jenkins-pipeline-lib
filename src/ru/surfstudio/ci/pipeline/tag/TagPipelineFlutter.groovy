@@ -196,17 +196,15 @@ class TagPipelineFlutter extends TagPipeline {
                         stage(STATIC_CODE_ANALYSIS) {
                             FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                         },
-                        stage('ls check') {
-                            script.sh 'ls'
+                        stage(COPY_ARTIFACTS_FROM_DOCKER) {
+                            script.sh copyArtifactsFromDockerCommand
+                        },
+                        stage(BETA_UPLOAD_ANDROID) {
+                            uploadStageBody(script, shBetaUploadCommandAndroid)
                         },
                     ],
                 ),
-                stage(COPY_ARTIFACTS_FROM_DOCKER) {
-                    script.sh copyArtifactsFromDockerCommand
-                },
-                stage(BETA_UPLOAD_ANDROID) {
-                    uploadStageBody(script, shBetaUploadCommandAndroid)
-                },
+
         ]
 
         iosStages = [
