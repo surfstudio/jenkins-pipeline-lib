@@ -106,9 +106,12 @@ class TagPipelineFlutter extends TagPipeline {
     //docker
     public dockerImageName = "cirrusci/flutter:stable"
     public dockerContainerName = 'randomname'
-    public dockerArguments = "-it --name ${dockerContainerName} -v \${PWD}:/build --workdir /build"
+    public dockerArguments = "-it --name ${dockerContainerName} " +
+                                "-v \${PWD}:/build " +
+                                "--workdir /build"
+                                // "-v /var/run/docker.sock:/var/run/docker.sock " +
 
-    public copyArtifactsFromDockerCommand = "docker cp ${dockerContainerName}:\${pwd}/build/app/outputs/apk/. \${PWD}/build/app/outputs/apk"
+    public copyArtifactsFromDockerCommand = "docker cp ${dockerContainerName}:build/app/outputs/apk/. \${PWD}/build/app/outputs/apk"
 
     TagPipelineFlutter(Object script) {
         super(script)
