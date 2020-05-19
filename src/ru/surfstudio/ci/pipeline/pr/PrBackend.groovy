@@ -12,7 +12,7 @@ class PrBackend extends PrPipeline {
     public unitTestGradleTask = "test"
 
     public unitTestResultPathXml = "build/test-results/test/*.xml"
-    public unitTestResultDirHtml = "build/reports/tests/test/"
+    public unitTestResultDirHtml = "build/reports/tests/test"
 
 
     PrBackend(Object script) {
