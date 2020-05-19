@@ -108,8 +108,8 @@ class TagPipelineFlutter extends TagPipeline {
     public dockerContainerName = 'randomname'
     public dockerArguments = "-it --name ${dockerContainerName} " +
                                 "-v \${PWD}:/build " +
+                                "-v /var/run/docker.sock:/var/run/docker.sock " +
                                 "--workdir /build"
-                                // "-v /var/run/docker.sock:/var/run/docker.sock " +
 
     public copyArtifactsFromDockerCommand = "docker cp ${dockerContainerName}:build/app/outputs/apk/. \${PWD}/build/app/outputs/apk"
 
