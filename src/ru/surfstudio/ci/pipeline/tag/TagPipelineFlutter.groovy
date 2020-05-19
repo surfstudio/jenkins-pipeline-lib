@@ -193,6 +193,9 @@ class TagPipelineFlutter extends TagPipeline {
                         stage(STATIC_CODE_ANALYSIS) {
                             FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                         },
+                        stage('ls check') {
+                            script.sh 'ls'
+                        },
                     ],
                 ),
                 stage(COPY_ARTIFACTS_FROM_DOCKER) {
