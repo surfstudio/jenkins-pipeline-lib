@@ -35,16 +35,17 @@ class PrBackend extends PrPipeline {
                     saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
                     abortDuplicateBuildsWithDescription(this)
                 },
-                stage(CODE_STYLE_FORMATTING, StageStrategy.SKIP_STAGE) {
+                stage(CODE_STYLE_FORMATTING) {
                     AndroidPipelineHelper.ktlintFormatStageAndroid(script, sourceBranch, destinationBranch)
                     hasChanges = AndroidPipelineHelper.checkChangesAndUpdate(script, repoUrl, repoCredentialsId, sourceBranch)
                 },
-                stage(UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT, StageStrategy.SKIP_STAGE, false) {
+                stage(UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT, false) {
                     if (hasChanges) {
                         RepositoryUtil.saveCurrentGitCommitHash(script)
                     }
                 },
                 stage(PRE_MERGE) {
+                    script.echo "script class name: ${script.class.name}"
                     mergeLocal(script, destinationBranch)
                 },
                 stage(BUILD) {
