@@ -102,6 +102,15 @@ class TagPipelineFlutter extends TagPipeline {
     public List<Stage> iosStages
 
     //docker
+    //
+    // Чтобы изменить канал Flutter для сборки проекта
+    // необходимо в конфиге нужного job'a (лежит в мастер ветке проекта)
+    // переопределить это поле и изменить тег образа на название
+    // нужного канала (stable, beta или dev). Например:
+    //
+    // def pipeline = new PrPipelineFlutter(this)
+    // pipeline.dockerImageName = "cirrusci/flutter:dev"
+    //
     public dockerImageName = "cirrusci/flutter:stable"
     public dockerArguments = "-it -v \${PWD}:/build --workdir /build"
 
@@ -152,9 +161,6 @@ class TagPipelineFlutter extends TagPipeline {
                         },
                         stage(CLEAN_PREV_BUILD_ANDROID) {
                             script.sh cleanFlutterCommand
-                        },
-                        stage(CHECKOUT_FLUTTER_VERSION_ANDROID) {
-                            script.sh checkoutFlutterVersionCommand
                         },
                         stage(VERSION_UPDATE_FOR_ARM64) {
                             versionUpdateStageBody(script,

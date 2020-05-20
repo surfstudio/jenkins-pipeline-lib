@@ -40,13 +40,22 @@ class PrPipelineFlutter extends PrPipeline {
     public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
 
     //sh commands
-    public checkoutFlutterVersionCommand = "echo \"Deprecated\""
+    public checkoutFlutterVersionCommand = "./script/version.sh" // ios only
 
     public buildAndroidCommand = "./script/android/build.sh -qa && ./script/android/build.sh -qa -x64"
     public buildIOsCommand = "./script/ios/build.sh -qa"
     public testCommand = "flutter test"
 
     //docker
+    //
+    // Чтобы изменить канал Flutter для сборки проекта
+    // необходимо в конфиге нужного job'a (лежит в мастер ветке проекта)
+    // переопределить это поле и изменить тег образа на название
+    // нужного канала (stable, beta или dev). Например:
+    //
+    // def pipeline = new PrPipelineFlutter(this)
+    // pipeline.dockerImageName = "cirrusci/flutter:dev"
+    //
     public dockerImageName = "cirrusci/flutter:stable"
     public dockerArguments = "-it -v \${PWD}:/build --workdir /build"
 
@@ -76,9 +85,6 @@ class PrPipelineFlutter extends PrPipeline {
                         },
                         stage(PRE_MERGE, false) {
                             preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
-                        },
-                        stage(CHECKOUT_FLUTTER_VERSION_ANDROID) {
-                            script.sh checkoutFlutterVersionCommand
                         },
                         stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                             FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
