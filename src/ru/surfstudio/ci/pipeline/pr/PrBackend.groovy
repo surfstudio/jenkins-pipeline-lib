@@ -45,7 +45,6 @@ class PrBackend extends PrPipeline {
                     }
                 },
                 stage(PRE_MERGE) {
-                    script.echo "script class name: ${script.class.name}"
                     mergeLocal(script, destinationBranch)
                 },
                 stage(BUILD) {
