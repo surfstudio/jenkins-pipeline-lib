@@ -68,10 +68,7 @@ class AndroidPipelineHelper {
                 script.sh "./gradlew $unitTestGradleTask"
             }
         } finally {
-            def results = publishTestResults(script, testResultPathXml, testResultPathDirHtml, UNIT_TEST_REPORT_NAME)
-            script.echo "publishHtml $script.publishHTML"
-            results
-
+            publishTestResults(script, testResultPathXml, testResultPathDirHtml, UNIT_TEST_REPORT_NAME)
         }
     }
 
