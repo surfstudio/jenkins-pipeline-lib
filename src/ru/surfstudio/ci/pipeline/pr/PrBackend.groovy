@@ -74,7 +74,7 @@ class PrBackend extends PrPipeline {
                     script.echo "Switch to node ${node}: ${script.env.NODE_NAME}"
                 }
 
-                script.docker.image('gradle:6.0.1-jdk11').internal {
+                script.docker.image('gradle:6.0.1-jdk11').inside {
                     for (Stage stage : stages) {
                         stage.execute(script, this)
                     }
