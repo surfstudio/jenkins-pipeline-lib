@@ -49,11 +49,23 @@ class PrBackend extends PrPipeline {
                     mergeLocal(script, destinationBranch)
                 },
                 stage(BUILD) {
+                    agent {
+                        docker {
+                            image 'gradle:6.0.1-jdk11'
+                            label 'android'
+                        }
+                    }
                     BackendPipelineHelper.buildStageBodyBackend(
                             script, buildGradleTask
                     )
                 },
                 stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                    agent {
+                        docker {
+                            image 'gradle:6.0.1-jdk11'
+                            label 'android'
+                        }
+                    }
                     AndroidPipelineHelper.unitTestStageBodyAndroid(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
                 }
         ]
