@@ -113,6 +113,7 @@ class TagPipelineAndroid extends TagPipeline {
                 },
                 stage(INSTRUMENTATION_TEST) {
                     AndroidPipelineHelper.instrumentationTestStageBodyAndroid(
+                            "q instrumental tests",
                             script,
                             avdConfig,
                             androidTestBuildType,

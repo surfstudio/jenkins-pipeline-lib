@@ -70,6 +70,7 @@ class AndroidPipelineHelper {
 
     @Deprecated
     def static instrumentationTestStageBodyAndroid(
+            String reportName,
             Object script,
             String testGradleTask,
             String testResultPathXml,
@@ -85,7 +86,7 @@ class AndroidPipelineHelper {
                                             keepAll              : true,
                                             reportDir            : testResultPathDirHtml,
                                             reportFiles          : 'index.html',
-                                            reportName           : "Instrumental Tests"
+                                            reportName           : reportName
 
                 ])
             }
@@ -93,6 +94,7 @@ class AndroidPipelineHelper {
     }
 
     def static instrumentationTestStageBodyAndroid(
+            String reportName,
             Object script,
             AvdConfig config,
             String androidTestBuildType,
@@ -127,7 +129,7 @@ class AndroidPipelineHelper {
                     keepAll              : true,
                     reportDir            : androidTestConfig.instrumentalTestResultPathDirHtml,
                     reportFiles          : "*/index.html",
-                    reportName           : INSTRUMENTAL_TEST_REPORT_NAME
+                    reportName           : reportName
             ])
         }
     }
