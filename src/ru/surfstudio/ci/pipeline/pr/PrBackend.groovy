@@ -56,7 +56,9 @@ class PrBackend extends PrPipeline {
                     }
                 },
                 stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    AndroidPipelineHelper.unitTestStageBodyAndroid(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
+                    script.docker.image('gradle:6.0.1-jdk11').inside {
+                        AndroidPipelineHelper.unitTestStageBodyAndroid(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
+                    }
                 }
         ]
         finalizeBody = { finalizeStageBody(this) }
