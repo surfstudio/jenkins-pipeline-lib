@@ -26,6 +26,7 @@ final class BackendPipelineHelper {
     def static buildStageBodyBackend(Object script, String buildGradleTask) {
         AndroidUtil.withGradleBuildCacheCredentials(script) {
             script.sh "./gradlew ${buildGradleTask}"
+            script.sh "script class name: ${script.class.name}"
         }
     }
 
