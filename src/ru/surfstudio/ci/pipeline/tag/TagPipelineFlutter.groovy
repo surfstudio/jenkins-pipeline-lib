@@ -112,7 +112,7 @@ class TagPipelineFlutter extends TagPipeline {
                                 "-v /usr/bin/docker:/usr/bin/docker " +
                                 "--workdir /build"
 
-    public copyArtifactsFromDockerCommand = "docker cp ${dockerContainerName}:build/build/app/outputs/apk/. \${PWD}/build/app/outputs/apk"
+    public copyArtifactsFromDockerCommand = "sudo docker cp ${dockerContainerName}:build/build/app/outputs/apk/. \${PWD}/build/app/outputs/apk"
 
     TagPipelineFlutter(Object script) {
         super(script)
