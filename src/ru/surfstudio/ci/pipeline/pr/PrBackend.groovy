@@ -22,7 +22,8 @@ class PrBackend extends PrPipeline {
     @Override
     def init() {
         node = NodeProvider.backendNode
-        script.docker.withDockerContainer('gradle:6.0.1-jdk11')
+        script.docker.image('gradle:6.0.1-jdk11')
+
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
