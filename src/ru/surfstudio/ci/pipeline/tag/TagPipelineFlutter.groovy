@@ -53,8 +53,6 @@ class TagPipelineFlutter extends TagPipeline {
     public static final String BETA_UPLOAD_IOS = 'Beta Upload iOS'
     public static final String TESTFLIGHT_UPLOAD_IOS = 'TestFlight Upload iOS'
 
-    public static final String COPY_ARTIFACTS_FROM_DOCKER = 'Copy artifacts from docker container'
-
     //required initial configuration
     public androidKeystoreCredentials = "no_credentials"
     public androidKeystorePropertiesCredentials = "no_credentials"
@@ -105,14 +103,7 @@ class TagPipelineFlutter extends TagPipeline {
 
     //docker
     public dockerImageName = "cirrusci/flutter:stable"
-    public dockerContainerName = 'randomname'
-    public dockerArguments = "-it --name ${dockerContainerName} " +
-                                "-v \${PWD}:/build " +
-                                "--workdir /build"
-                                // "-v /var/run/docker.sock:/var/run/docker.sock " +
-                                // "-v /usr/bin/docker:/usr/bin/docker " +
-
-    public copyArtifactsFromDockerCommand = "sudo docker cp ${dockerContainerName}:build/build/app/outputs/apk/. \${PWD}/build/app/outputs/apk"
+    public dockerArguments = "-it -v \${PWD}:/build --workdir /build"
 
     TagPipelineFlutter(Object script) {
         super(script)
@@ -197,9 +188,6 @@ class TagPipelineFlutter extends TagPipeline {
                         stage(STATIC_CODE_ANALYSIS) {
                             FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                         },
-                        // stage(COPY_ARTIFACTS_FROM_DOCKER) {
-                        //     script.sh copyArtifactsFromDockerCommand
-                        // },
                     ],
                 ),
                 stage(BETA_UPLOAD_ANDROID) {
