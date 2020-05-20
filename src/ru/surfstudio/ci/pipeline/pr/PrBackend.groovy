@@ -22,7 +22,7 @@ class PrBackend extends PrPipeline {
     @Override
     def init() {
         node = NodeProvider.backendNode
-        script.docker.image('gradle:6.0.1-jdk11')
+
 
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
@@ -49,23 +49,13 @@ class PrBackend extends PrPipeline {
                     mergeLocal(script, destinationBranch)
                 },
                 stage(BUILD) {
-                    agent {
-                        docker {
-                            image 'gradle:6.0.1-jdk11'
-                            label 'android'
-                        }
+                    script.docker.image('gradle:6.0.1-jdk11'){
+                        BackendPipelineHelper.buildStageBodyBackend(
+                                script, buildGradleTask
+                        )
                     }
-                    BackendPipelineHelper.buildStageBodyBackend(
-                            script, buildGradleTask
-                    )
                 },
                 stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    agent {
-                        docker {
-                            image 'gradle:6.0.1-jdk11'
-                            label 'android'
-                        }
-                    }
                     AndroidPipelineHelper.unitTestStageBodyAndroid(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
                 }
         ]
