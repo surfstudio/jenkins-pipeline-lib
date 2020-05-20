@@ -22,12 +22,12 @@ class PrBackend extends PrPipeline {
     @Override
     def init() {
         node = NodeProvider.backendNode
-        script.agent({
+        script.agent{
             docker {
                 image 'gradle:6.0.1-jdk11'
                 label 'android'
             }
-        })
+        }
         preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
 
