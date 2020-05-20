@@ -45,6 +45,7 @@ class PrBackend extends PrPipeline {
                     }
                 },
                 stage(PRE_MERGE) {
+                    script.sh "agent is $script.agent"
                     mergeLocal(script, destinationBranch)
                 },
                 stage(BUILD) {
