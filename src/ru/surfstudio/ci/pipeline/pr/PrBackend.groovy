@@ -49,7 +49,7 @@ class PrBackend extends PrPipeline {
                     mergeLocal(script, destinationBranch)
                 },
                 stage(BUILD) {
-                    script.docker.image('gradle:6.0.1-jdk11'){
+                    script.docker.image('gradle:6.0.1-jdk11').inside {
                         BackendPipelineHelper.buildStageBodyBackend(
                                 script, buildGradleTask
                         )
