@@ -108,9 +108,9 @@ class TagPipelineFlutter extends TagPipeline {
     public dockerContainerName = 'randomname'
     public dockerArguments = "-it --name ${dockerContainerName} " +
                                 "-v \${PWD}:/build " +
-                                "-v /var/run/docker.sock:/var/run/docker.sock " +
-                                "-v /usr/bin/docker:/usr/bin/docker " +
                                 "--workdir /build"
+                                // "-v /var/run/docker.sock:/var/run/docker.sock " +
+                                // "-v /usr/bin/docker:/usr/bin/docker " +
 
     public copyArtifactsFromDockerCommand = "sudo docker cp ${dockerContainerName}:build/build/app/outputs/apk/. \${PWD}/build/app/outputs/apk"
 
@@ -197,13 +197,13 @@ class TagPipelineFlutter extends TagPipeline {
                         stage(STATIC_CODE_ANALYSIS) {
                             FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                         },
-                        stage(COPY_ARTIFACTS_FROM_DOCKER) {
-                            script.sh copyArtifactsFromDockerCommand
-                        },
-                        stage(BETA_UPLOAD_ANDROID) {
-                            uploadStageBody(script, shBetaUploadCommandAndroid)
-                        },
+                        // stage(COPY_ARTIFACTS_FROM_DOCKER) {
+                        //     script.sh copyArtifactsFromDockerCommand
+                        // },
                     ],
+                    stage(BETA_UPLOAD_ANDROID) {
+                        uploadStageBody(script, shBetaUploadCommandAndroid)
+                    },
                 ),
 
         ]
