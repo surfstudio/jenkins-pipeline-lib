@@ -22,7 +22,7 @@ class PrBackend extends PrPipeline {
     @Override
     def init() {
         node = NodeProvider.backendNode
-        script.docker {
+        script.docker.withDockerContainer {
                 image 'gradle:6.0.1-jdk11'
                 label 'android'
             }
