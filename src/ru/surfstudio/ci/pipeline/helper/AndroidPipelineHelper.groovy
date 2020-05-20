@@ -27,7 +27,7 @@ import ru.surfstudio.ci.utils.android.config.AvdConfig
  */
 class AndroidPipelineHelper {
 
-    private static String INSTRUMENTAL_TEST_REPORT_NAME = "Instrumental tests"
+    private static String DEFAULT_INSTRUMENTAL_TEST_REPORT_NAME = "Instrumental tests"
     private static String UNIT_TEST_REPORT_NAME = "Unit Tests"
 
     private static String JIRA_ISSUE_KEY_PATTERN = ~/((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)/
@@ -70,11 +70,11 @@ class AndroidPipelineHelper {
 
     @Deprecated
     def static instrumentationTestStageBodyAndroid(
-            String reportName,
             Object script,
             String testGradleTask,
             String testResultPathXml,
-            String testResultPathDirHtml
+            String testResultPathDirHtml,
+            String reportName = DEFAULT_INSTRUMENTAL_TEST_REPORT_NAME
     ) {
         ru.surfstudio.ci.AndroidUtil.onEmulator(script, "avd-main") {
             try {
@@ -94,12 +94,12 @@ class AndroidPipelineHelper {
     }
 
     def static instrumentationTestStageBodyAndroid(
-            String reportName,
             Object script,
             AvdConfig config,
             String androidTestBuildType,
             Closure getTestInstrumentationRunnerName,
-            AndroidTestConfig androidTestConfig
+            AndroidTestConfig androidTestConfig,
+            String reportName = DEFAULT_INSTRUMENTAL_TEST_REPORT_NAME
     ) {
         try {
             AndroidUtil.withGradleBuildCacheCredentials(script) {

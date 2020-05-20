@@ -94,7 +94,6 @@ class PrPipelineAndroid extends PrPipeline {
                 },
                 stage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     AndroidPipelineHelper.instrumentationTestStageBodyAndroid(
-                            "qqq instrumental tests",
                             script,
                             avdConfig,
                             androidTestBuildType,
