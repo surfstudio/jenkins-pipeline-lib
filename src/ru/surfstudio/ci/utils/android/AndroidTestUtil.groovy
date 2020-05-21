@@ -124,7 +124,7 @@ class AndroidTestUtil {
             //папка модуля находится переде папкой build
             String moduleName = folders[folders.findIndexOf { it == "build" } - 1]
 
-            script.sh "mkdir -p $testResultPathDirHtml${moduleName} && mv $reportDir/* $testResultPathDirHtml${moduleName}"
+            script.sh "mkdir -p $testResultPathDirHtml${moduleName} && cp -rf $reportDir/* $testResultPathDirHtml${moduleName}"
         }
 
         script.publishHTML(target: [
