@@ -91,11 +91,20 @@ class PrPipelineAndroid extends PrPipeline {
                 stage(PRE_MERGE) {
                     mergeLocal(script, destinationBranch)
                 },
-                stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    AndroidPipelineHelper.unitTestStageBodyAndroid(script,
-                            unitTestGradleTask,
-                            unitTestResultPathXml,
-                            unitTestResultPathDirHtml)
+                stage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                    AndroidPipelineHelper.instrumentationTestStageBodyAndroid(
+                            script,
+                            avdConfig,
+                            androidTestBuildType,
+                            getTestInstrumentationRunnerName,
+                            new AndroidTestConfig(
+                                    instrumentalTestAssembleGradleTask,
+                                    instrumentalTestResultPathDirXml,
+                                    instrumentalTestResultPathDirHtml,
+                                    generateUniqueAvdNameForJob,
+                                    instrumentationTestRetryCount
+                            )
+                    )
                 }
         ]
         finalizeBody = { finalizeStageBody(this) }
