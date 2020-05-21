@@ -55,8 +55,7 @@ class PrPipelineAndroid extends PrPipeline {
      * Если для всех модулей проекта используется одинаковый instrumentation runner,
      * то функцию можно переопределить следующим образом:
      *
-     * pipeline.getTestInstrumentationRunnerName = { script, prefix -> return "androidx.test.runner.AndroidJUnitRunner" }
-     */
+     * pipeline.getTestInstrumentationRunnerName = { script, prefix -> return "androidx.test.runner.AndroidJUnitRunner" }*/
     public getTestInstrumentationRunnerName = { script, prefix -> return getDefaultTestInstrumentationRunnerName(script, prefix) }
 
     public AvdConfig avdConfig = new AvdConfig()
@@ -92,23 +91,11 @@ class PrPipelineAndroid extends PrPipeline {
                 stage(PRE_MERGE) {
                     mergeLocal(script, destinationBranch)
                 },
-                stage(INSTRUMENTATION_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    AndroidPipelineHelper.instrumentationTestStageBodyAndroid(
-                            script,
-                            avdConfig,
-                            androidTestBuildType,
-                            getTestInstrumentationRunnerName,
-                            new AndroidTestConfig(
-                                    instrumentalTestAssembleGradleTask,
-                                    instrumentalTestResultPathDirXml,
-                                    instrumentalTestResultPathDirHtml,
-                                    generateUniqueAvdNameForJob,
-                                    instrumentationTestRetryCount
-                            )
-                    )
-                },
-                stage(STATIC_CODE_ANALYSIS, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
+                stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                    AndroidPipelineHelper.unitTestStageBodyAndroid(script,
+                            unitTestGradleTask,
+                            unitTestResultPathXml,
+                            unitTestResultPathDirHtml)
                 }
         ]
         finalizeBody = { finalizeStageBody(this) }
@@ -119,12 +106,8 @@ class PrPipelineAndroid extends PrPipeline {
      *
      * Пример такого gradle-таска:
      *
-     * task printTestInstrumentationRunnerName {
-     *     doLast {
-     *         println "$android.defaultConfig.testInstrumentationRunner"
-     *     }
-     * }
-     */
+     * task printTestInstrumentationRunnerName {*     doLast {*         println "$android.defaultConfig.testInstrumentationRunner"
+     *}*}*/
     private getDefaultTestInstrumentationRunnerName = { script, prefix ->
         def defaultInstrumentationRunnerGradleTaskName = "printTestInstrumentationRunnerName"
         return script.sh(
