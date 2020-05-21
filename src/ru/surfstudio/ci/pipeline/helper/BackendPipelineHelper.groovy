@@ -33,6 +33,8 @@ final class BackendPipelineHelper {
     def static runUnitTests(Object script, String testGradleTask, testResultPathXml, testResultPathDirHtml){
         try {
             AndroidUtil.withGradleBuildCacheCredentials(script) {
+                script.sh "ls build"
+                script.sh "ls build/libs"
                 script.sh "./gradlew $testGradleTask"
             }
         } finally {
