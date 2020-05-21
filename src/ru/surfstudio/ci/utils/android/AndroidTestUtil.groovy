@@ -112,7 +112,7 @@ class AndroidTestUtil {
             String testResultPathDirHtml,
             String reportsName
     ) {
-        script.sh "rm -rf $testResultPathDirHtml"
+        script.sh "rm -rf $testResultPathDirHtml/*"
 
         //находим не пустые html отчеты (в непустых есть папка classes)
         String[] reportsDirs = (script.findFiles(glob: '**/build/reports/tests/*/classes/*.html') as String[])
