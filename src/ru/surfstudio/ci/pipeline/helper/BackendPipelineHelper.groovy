@@ -40,7 +40,8 @@ final class BackendPipelineHelper {
             publishTestResults(script, testResultPathXml, testResultPathDirHtml, UNIT_TEST_REPORT_NAME)
         }
     }
-    def static void publishTestResults(
+
+   def static publishTestResults(
             Object script,
             String testResultPathXml,
             String testResultPathDirHtml,
@@ -52,7 +53,7 @@ final class BackendPipelineHelper {
                 alwaysLinkToLastBuild: false,
                 keepAll              : true,
                 reportDir            : testResultPathDirHtml,
-                reportFiles          : DEFAULT_HTML_RESULT_FILENAME,
+                reportFiles          : "index.html",
                 reportName           : reportName
         ])
     }
