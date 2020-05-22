@@ -15,6 +15,7 @@ class PrBackend extends PrPipeline {
     public unitTestResultPathXml = "build/test-results/test/*.xml"
     public unitTestResultDirHtml = "build/reports/tests/test"
 
+    public dockerImage = "gradle:6.0.1-jdk11"
 
     PrBackend(Object script) {
         super(script)
@@ -50,18 +51,22 @@ class PrBackend extends PrPipeline {
                     mergeLocal(script, destinationBranch)
                 },
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    script.docker.image('gradle:6.0.1-jdk11').inside() {
-                        BackendPipelineHelper.buildStageBodyBackend(
-                                script, buildGradleTask
-                        )
+                    runInsideDocker {
+                        BackendPipelineHelper.buildStageBodyBackend(script, buildGradleTask)
                     }
                 },
                 stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    script.docker.image('gradle:6.0.1-jdk11').inside() {
+                    runInsideDocker {
                         BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
                     }
-                }
-        ]
+                }]
         finalizeBody = { finalizeStageBody(this) }
+    }
+
+    def runInsideDocker(Closure closure) {
+        if(dockerImage != null || !dockerImage.isEmpty())
+            script.ocker.image(dockerImage).inside(closure)
+        else
+            closure
     }
 }
