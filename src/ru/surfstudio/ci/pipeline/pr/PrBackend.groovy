@@ -65,7 +65,7 @@ class PrBackend extends PrPipeline {
 
     def runInsideDocker(Closure closure) {
         if(dockerImage != null || !dockerImage.isEmpty())
-            script.ocker.image(dockerImage).inside(closure)
+            script.docker.image(dockerImage).inside(closure)
         else
             closure
     }
