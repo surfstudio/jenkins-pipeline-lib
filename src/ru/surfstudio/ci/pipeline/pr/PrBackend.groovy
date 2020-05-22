@@ -9,8 +9,7 @@ import ru.surfstudio.ci.stage.StageStrategy
 
 class PrBackend extends PrPipeline {
     private boolean hasChanges = false
-    public buildGradleTask = "assemble"
-    public cleanGradleTask = "clean"
+    public buildGradleTask = "clean assemble"
     public unitTestGradleTask = "test"
 
     public unitTestResultPathXml = "build/test-results/test/*.xml"
@@ -51,22 +50,16 @@ class PrBackend extends PrPipeline {
                     mergeLocal(script, destinationBranch)
                 },
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-//                    script.docker.image('gradle:6.0.1-jdk11').inside {
-                    script.sh "java -version"
-                    BackendPipelineHelper.buildStageBodyBackend(
-                            script, cleanGradleTask
-                    )
-                    script.sh "ls"
+                    script.docker.image('gradle:6.0.1-jdk11').inside {
                         BackendPipelineHelper.buildStageBodyBackend(
                                 script, buildGradleTask
                         )
-                    script.sh "ls"
-//                    }
+                    }
                 },
                 stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-//                    script.docker.image('gradle:6.0.1-jdk11').inside {
+                    script.docker.image('gradle:6.0.1-jdk11').inside {
                         BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
-//                    }
+                    }
                 }
         ]
         finalizeBody = { finalizeStageBody(this) }
