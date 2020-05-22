@@ -50,7 +50,7 @@ class PrBackend extends PrPipeline {
                     mergeLocal(script, destinationBranch)
                 },
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    script.docker.image('gradle:6.0.1-jdk11').internal/*.withRun('-v ~/.m2:/home/gradle/.m2 -v ~/.gradle:/home/gradle/.gradle')*/ {
+                    script.docker.image('gradle:6.0.1-jdk11').internal {
                         BackendPipelineHelper.buildStageBodyBackend(
                                 script, buildGradleTask
                         )
