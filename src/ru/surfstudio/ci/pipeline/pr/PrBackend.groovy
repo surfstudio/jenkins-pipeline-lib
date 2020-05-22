@@ -51,6 +51,7 @@ class PrBackend extends PrPipeline {
                 },
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
 //                    script.docker.image('gradle:6.0.1-jdk11').inside {
+                    script.sh "java -version"
                         BackendPipelineHelper.buildStageBodyBackend(
                                 script, buildGradleTask
                         )
