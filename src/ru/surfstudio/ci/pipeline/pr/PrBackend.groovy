@@ -9,7 +9,8 @@ import ru.surfstudio.ci.stage.StageStrategy
 
 class PrBackend extends PrPipeline {
     private boolean hasChanges = false
-    public buildGradleTask = "clean assemble"
+    public buildGradleTask = "assemble"
+    public cleanGradleTask = "clean"
     public unitTestGradleTask = "test"
 
     public unitTestResultPathXml = "build/test-results/test/*.xml"
@@ -52,6 +53,10 @@ class PrBackend extends PrPipeline {
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
 //                    script.docker.image('gradle:6.0.1-jdk11').inside {
                     script.sh "java -version"
+                    BackendPipelineHelper.buildStageBodyBackend(
+                            script, cleanGradleTask
+                    )
+                    script.sh "ls build"
                         BackendPipelineHelper.buildStageBodyBackend(
                                 script, buildGradleTask
                         )
