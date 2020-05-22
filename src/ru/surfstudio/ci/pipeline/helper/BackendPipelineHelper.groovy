@@ -22,6 +22,7 @@ final class BackendPipelineHelper {
     }
 
     private static String UNIT_TEST_REPORT_NAME = "Unit Tests"
+    private static String DEFAULT_HTML_RESULT_FILENAME = "index.html"
 
     def static buildStageBodyBackend(Object script, String buildGradleTask) {
         AndroidUtil.withGradleBuildCacheCredentials(script) {
@@ -32,11 +33,6 @@ final class BackendPipelineHelper {
 
     def static runUnitTests(Object script, String testGradleTask, testResultPathXml, testResultPathDirHtml){
         try {
-            script.sh "ls build"
-            script.sh "ls build/libs"
-            script.sh "echo \$gradle_build_cache"
-            script.sh "echo \$GRADLE_BUILD_CACHE_USER"
-            script.sh "echo \$GRADLE_BUILD_CACHE_PASS"
             AndroidUtil.withGradleBuildCacheCredentials(script) {
                 script.sh "./gradlew $testGradleTask"
             }
@@ -44,6 +40,21 @@ final class BackendPipelineHelper {
             publishTestResults(script, testResultPathXml, testResultPathDirHtml, UNIT_TEST_REPORT_NAME)
         }
     }
-
+    def static void publishTestResults(
+            Object script,
+            String testResultPathXml,
+            String testResultPathDirHtml,
+            String reportName
+    ) {
+        script.junit allowEmptyResults: true, testResults: testResultPathXml
+        script.publishHTML(target: [
+                allowMissing         : true,
+                alwaysLinkToLastBuild: false,
+                keepAll              : true,
+                reportDir            : testResultPathDirHtml,
+                reportFiles          : "*/$DEFAULT_HTML_RESULT_FILENAME",
+                reportName           : reportName
+        ])
+    }
 }
 
