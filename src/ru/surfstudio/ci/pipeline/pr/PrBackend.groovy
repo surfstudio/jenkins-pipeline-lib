@@ -1,12 +1,10 @@
 package ru.surfstudio.ci.pipeline.pr
 
-import ru.surfstudio.ci.CommonUtil
+
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
-import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.pipeline.helper.BackendPipelineHelper
-import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
 
 class PrBackend extends PrPipeline {
@@ -51,7 +49,7 @@ class PrBackend extends PrPipeline {
                 stage(PRE_MERGE) {
                     mergeLocal(script, destinationBranch)
                 },
-                stage(BUILD) {
+                stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     script.docker.image('gradle:6.0.1-jdk11').inside {
                         BackendPipelineHelper.buildStageBodyBackend(
                                 script, buildGradleTask
