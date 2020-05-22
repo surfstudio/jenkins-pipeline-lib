@@ -61,6 +61,14 @@ class PrBackend extends PrPipeline {
                 stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     script.docker.image('gradle:6.0.1-jdk11').inside {
                         AndroidPipelineHelper.unitTestStageBodyAndroid(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
+                        script.publishHTML(target: [
+                                allowMissing         : true,
+                                alwaysLinkToLastBuild: true,
+                                keepAll              : true,
+                                reportDir            : unitTestResultDirHtml,
+                                reportFiles          : "index.html",
+                                reportName           : "Template's unit tests"
+                        ])
                     }
                 }
         ]
