@@ -60,6 +60,7 @@ class PrBackend extends PrPipeline {
                         BackendPipelineHelper.buildStageBodyBackend(
                                 script, buildGradleTask
                         )
+                    script.sh "ls"
 //                    }
                 },
                 stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
