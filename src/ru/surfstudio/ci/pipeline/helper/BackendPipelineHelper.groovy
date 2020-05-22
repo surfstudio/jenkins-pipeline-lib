@@ -53,7 +53,7 @@ final class BackendPipelineHelper {
                 alwaysLinkToLastBuild: false,
                 keepAll              : true,
                 reportDir            : testResultPathDirHtml,
-                reportFiles          : "index.html",
+                reportFiles          : DEFAULT_HTML_RESULT_FILENAME,
                 reportName           : reportName
         ])
     }
