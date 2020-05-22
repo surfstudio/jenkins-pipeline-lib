@@ -56,7 +56,7 @@ class PrBackend extends PrPipeline {
                     BackendPipelineHelper.buildStageBodyBackend(
                             script, cleanGradleTask
                     )
-                    script.sh "ls build"
+                    script.sh "ls"
                         BackendPipelineHelper.buildStageBodyBackend(
                                 script, buildGradleTask
                         )
