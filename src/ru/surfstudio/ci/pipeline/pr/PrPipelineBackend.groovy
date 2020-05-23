@@ -13,7 +13,7 @@ import ru.surfstudio.ci.stage.StageStrategy
  * that steps will run inside docker. <p>
  *     For Instance: <p>
  * <pre>
- * def pipeline = new PrBackend(this)
+ * def pipeline = new PrPipelineBackend(this)
  * pipeline.init()
  * pipeline.dockerImage = "gradle:6.0.1-jdk11"
  * pipeline.run()
