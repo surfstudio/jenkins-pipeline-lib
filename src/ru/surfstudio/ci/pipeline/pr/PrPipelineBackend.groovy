@@ -8,8 +8,8 @@ import ru.surfstudio.ci.stage.StageStrategy
 
 /**
  * In a case when you need running some steps into specific environment (for instance build and run tests using jvm 11)
- * you can use {@link PrBackend#runInsideDocker} method, previously you have to set image name {@link PrBackend#dockerImage}.<p>
- * Build and Unit_test steps are wrapped by {@link PrBackend#runInsideDocker} method, therefore if you'll set {@link PrBackend#dockerImage} field
+ * you can use {@link PrPipelineBackend#runInsideDocker} method, previously you have to set image name {@link PrPipelineBackend#dockerImage}.<p>
+ * Build and Unit_test steps are wrapped by {@link PrPipelineBackend#runInsideDocker} method, therefore if you'll set {@link PrPipelineBackend#dockerImage} field
  * that steps will run inside docker. <p>
  *     For Instance: <p>
  * <pre>
@@ -19,7 +19,7 @@ import ru.surfstudio.ci.stage.StageStrategy
  * pipeline.run()
  * </pre>
  */
-class PrBackend extends PrPipeline {
+class PrPipelineBackend extends PrPipeline {
     private boolean hasChanges = false
     public buildGradleTask = "clean assemble"
     public unitTestGradleTask = "test"
@@ -29,7 +29,7 @@ class PrBackend extends PrPipeline {
 
     public String dockerImage = null
 
-    PrBackend(Object script) {
+    PrPipelineBackend(Object script) {
         super(script)
     }
 
