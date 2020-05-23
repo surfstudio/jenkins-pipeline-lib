@@ -11,7 +11,7 @@ final class DockerRegistryHelper {
 
     def static buildDockerImage(Object script, String projectId, String registryUrl, String imageTag) {
         withRegistryCredentials(script, registryUrl){
-            scrip.sh "pwd"
+            script.sh "pwd"
             script.sh "ls build"
             def image = script.docker.build("$projectId:$imageTag","./")
             image.push()
