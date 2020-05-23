@@ -4,6 +4,7 @@ import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.pipeline.helper.BackendPipelineHelper
+import ru.surfstudio.ci.pipeline.helper.DockerRegistryHelper
 import ru.surfstudio.ci.stage.StageStrategy
 
 /**
@@ -23,6 +24,7 @@ class PrPipelineBackend extends PrPipeline {
     private boolean hasChanges = false
     public buildGradleTask = "clean assemble"
     public unitTestGradleTask = "test"
+    public DOCKER_BUILD_PUBLISH_IMAGE = "Build and publish docker image"
 
     public unitTestResultPathXml = "build/test-results/test/*.xml"
     public unitTestResultDirHtml = "build/reports/tests/test"
@@ -69,7 +71,11 @@ class PrPipelineBackend extends PrPipeline {
                     runInsideDocker {
                         BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
                     }
-                }]
+                },
+                stage(DOCKER_BUILD_PUBLISH_IMAGE) {
+                    DockerRegistryHelper.buildDockerImage(script, "template", "eu.gcr.io/surf-infrastructure/template","test")
+                }
+        ]
         finalizeBody = { finalizeStageBody(this) }
     }
 
