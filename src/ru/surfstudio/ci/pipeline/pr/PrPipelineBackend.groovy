@@ -44,7 +44,6 @@ class PrPipelineBackend extends PrPipeline {
 
         stages = [
                 stage(CHECKOUT, false) {
-                    script.sh "echo \$TARGET_TAG_SUFFIX"
                     checkout(script, repoUrl, sourceBranch, repoCredentialsId)
                     saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
                     abortDuplicateBuildsWithDescription(this)
