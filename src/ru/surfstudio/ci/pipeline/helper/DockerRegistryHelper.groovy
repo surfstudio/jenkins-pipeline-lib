@@ -4,8 +4,7 @@ final class DockerRegistryHelper {
     private DockerRegistryHelper() {
     }
     def static withRegistryCredentials(Object script, String registryUrl, Closure body) {
-        script.echo(script.credentials("google-container-registry-service-account"))
-        script.docker.withRegistry(registryUrl, 'google-container-registry-service-account') {
+        script.docker.withRegistry(registryUrl, 'gcr:google-container-registry-service-account') {
             body()
         }
     }
