@@ -4,9 +4,9 @@ final class DockerRegistryHelper {
     private DockerRegistryHelper() {
     }
     def static withRegistryCredentials(Object script, String registryUrl, Closure body) {
-        script.docker.withRegistry(registryUrl, 'gcr:[google-container-registry-service-account]') {
-            body()
-        }
+            script.withCredentials([script.file(credentialsId: "google-container-registry-service-account", variable: 'GCRKEY')]) {
+                body()
+            }
     }
 
     def static buildDockerImage(Object script, String projectId, String registryUrl, String imageTag) {
