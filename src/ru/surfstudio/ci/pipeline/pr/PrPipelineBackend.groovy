@@ -75,7 +75,7 @@ class PrPipelineBackend extends PrPipeline {
                         BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
                     }
                 },
-                stage(DOCKER_BUILD_PUBLISH_IMAGE, StageStrategy.SKIP_STAGE) {
+                stage(DOCKER_BUILD_PUBLISH_IMAGE, registryPathAndProjectId != null && registryPathAndProjectId.isEmpty()? StageStrategy.SKIP_STAGE : StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                        DockerRegistryHelper.buildDockerImageAndPush(script, registryPathAndProjectId, registryUrl,pathToDockerfile,"test")
                 }]
         finalizeBody = { finalizeStageBody(this) }
