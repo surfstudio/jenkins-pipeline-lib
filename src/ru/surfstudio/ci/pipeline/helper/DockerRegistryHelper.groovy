@@ -10,7 +10,7 @@ final class DockerRegistryHelper {
             }
     }
 
-    def static buildDockerImageAndPush(Object script, String projectId, String registryUrl, String pathToFile, String ... imageTags) {
+    def static buildDockerImageAndPush(Object script, String projectId, String registryUrl, String pathToFile, List<String> imageTags) {
         withRegistryCredentials(script, registryUrl){
             def image = script.docker.build("$registryUrl/$projectId", pathToFile)
             for (String imageTag : imageTags) {

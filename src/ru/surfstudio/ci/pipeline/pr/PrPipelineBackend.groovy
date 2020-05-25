@@ -81,7 +81,7 @@ class PrPipelineBackend extends PrPipeline {
                     if(fullCommitHash != null && !fullCommitHash.isEmpty())
                         tags.add("dev-${fullCommitHash.reverse().take(8)}")
                     tags.add("dev")
-                    DockerRegistryHelper.buildDockerImageAndPush(script, registryPathAndProjectId, registryUrl, pathToDockerfile,*tags)
+                    DockerRegistryHelper.buildDockerImageAndPush(script, registryPathAndProjectId, registryUrl, pathToDockerfile,tags)
                 }]
         finalizeBody = { finalizeStageBody(this) }
     }
