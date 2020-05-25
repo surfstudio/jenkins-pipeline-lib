@@ -77,7 +77,7 @@ class PrPipelineBackend extends PrPipeline {
                 },
                 stage(DOCKER_BUILD_PUBLISH_IMAGE) {
                     if(registryPathAndProjectId != null && !registryPathAndProjectId.isEmpty())
-                        DockerRegistryHelper.buildDockerImage(script, registryPathAndProjectId, registryUrl,pathToDockerfile,"test")
+                        DockerRegistryHelper.buildDockerImageAndPush(script, registryPathAndProjectId, registryUrl,pathToDockerfile,"test")
                 }
         ]
         finalizeBody = { finalizeStageBody(this) }
