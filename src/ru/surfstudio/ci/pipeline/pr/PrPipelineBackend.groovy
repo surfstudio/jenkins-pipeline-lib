@@ -65,10 +65,14 @@ class PrPipelineBackend extends PrPipeline {
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     runInsideDocker {
                         BackendPipelineHelper.buildStageBodyBackend(script, buildGradleTask)
+                        script.sh "ls"
+                        script.sh "ls build"
                     }
                 },
                 stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     runInsideDocker {
+                        script.sh "ls"
+                        script.sh "ls build"
                         BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
                     }
                 },
