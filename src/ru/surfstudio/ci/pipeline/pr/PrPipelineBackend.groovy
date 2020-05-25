@@ -28,6 +28,9 @@ class PrPipelineBackend extends PrPipeline {
 
     public unitTestResultPathXml = "build/test-results/test/*.xml"
     public unitTestResultDirHtml = "build/reports/tests/test"
+    public pathToDockerfile = "./"
+    public registryUrl = "eu.gcr.io"
+    public registryPathAndProjectId = ""
 
     public String dockerImage = null
 
@@ -65,21 +68,16 @@ class PrPipelineBackend extends PrPipeline {
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     runInsideDocker {
                         BackendPipelineHelper.buildStageBodyBackend(script, buildGradleTask)
-                        script.sh "ls"
-                        script.sh "ls build"
                     }
                 },
                 stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     runInsideDocker {
-                        script.sh "ls"
-                        script.sh "ls build"
                         BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
                     }
                 },
                 stage(DOCKER_BUILD_PUBLISH_IMAGE) {
-                    script.sh "ls"
-                    script.sh "ls build"
-                    DockerRegistryHelper.buildDockerImage(script, "surf-infrastructure/template/template", "eu.gcr.io","test")
+                    if(registryPathAndProjectId != null && !registryPathAndProjectId.isEmpty())
+                        DockerRegistryHelper.buildDockerImage(script, registryPathAndProjectId, registryUrl,pathToDockerfile,"test")
                 }
         ]
         finalizeBody = { finalizeStageBody(this) }
