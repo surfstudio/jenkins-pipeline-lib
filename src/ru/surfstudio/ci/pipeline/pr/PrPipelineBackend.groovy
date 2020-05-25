@@ -73,7 +73,7 @@ class PrPipelineBackend extends PrPipeline {
                     }
                 },
                 stage(DOCKER_BUILD_PUBLISH_IMAGE) {
-                    DockerRegistryHelper.buildDockerImage(script, "template", "eu.gcr.io/surf-infrastructure/template","test")
+                    DockerRegistryHelper.buildDockerImage(script, "surf-infrastructure/template/template", "eu.gcr.io","test")
                 }
         ]
         finalizeBody = { finalizeStageBody(this) }
