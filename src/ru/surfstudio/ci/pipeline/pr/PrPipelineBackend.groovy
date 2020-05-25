@@ -90,6 +90,6 @@ class PrPipelineBackend extends PrPipeline {
         if(dockerImage != null && !dockerImage.isEmpty())
             script.docker.image(dockerImage).inside(closure)
         else
-            closure
+            closure.call()
     }
 }
