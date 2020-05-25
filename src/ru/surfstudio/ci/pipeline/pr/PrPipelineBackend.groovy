@@ -76,7 +76,12 @@ class PrPipelineBackend extends PrPipeline {
                     }
                 },
                 stage(DOCKER_BUILD_PUBLISH_IMAGE, registryPathAndProjectId != null && registryPathAndProjectId.isEmpty()? StageStrategy.SKIP_STAGE : StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                       DockerRegistryHelper.buildDockerImageAndPush(script, registryPathAndProjectId, registryUrl,pathToDockerfile,"test")
+                    List<String> tags = new ArrayList<String>()
+                    String fullCommitHash = RepositoryUtil.getCurrentCommitHash(script)
+                    if(fullCommitHash != null && !fullCommitHash.isEmpty())
+                        tags.add("dev-${fullCommitHash.reverse().take(8)}")
+                    tags.add("dev")
+                    DockerRegistryHelper.buildDockerImageAndPush(script, registryPathAndProjectId, registryUrl, pathToDockerfile,*tags)
                 }]
         finalizeBody = { finalizeStageBody(this) }
     }
