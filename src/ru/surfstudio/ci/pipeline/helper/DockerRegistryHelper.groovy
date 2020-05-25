@@ -5,6 +5,7 @@ final class DockerRegistryHelper {
     }
     def static withRegistryCredentials(Object script, String registryUrl, Closure body) {
             script.withCredentials([script.file(credentialsId: "google-container-registry-service-account", variable: 'GCRKEY')]) {
+                script.sh "docker docker login -u _json_key -p \"`cat \$GCRKEY`\" $registryUrl"
                 body()
             }
     }
