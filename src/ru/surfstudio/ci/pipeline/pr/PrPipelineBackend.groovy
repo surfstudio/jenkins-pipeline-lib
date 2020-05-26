@@ -4,13 +4,12 @@ import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.pipeline.helper.BackendPipelineHelper
-import ru.surfstudio.ci.pipeline.helper.DockerRegistryHelper
 import ru.surfstudio.ci.stage.StageStrategy
 
 /**
  * In a case when you need running some steps into specific environment (for instance build and run tests using jvm 11)
- * you can use {@link PrPipelineBackend#runInsideDocker} method, previously you have to set image name {@link PrPipelineBackend#dockerImage}.<p>
- * Build and Unit_test steps are wrapped by {@link PrPipelineBackend#runInsideDocker} method, therefore if you'll set {@link PrPipelineBackend#dockerImage} field
+ * you can use {@link ru.surfstudio.ci.pipeline.pr.PrPipelineBackend#buildInsideDocker(Closure)} method, previously you have to set image name {@link PrPipelineBackend#dockerImageForBuild}.<p>
+ * Build and Unit_test steps are wrapped by {@link ru.surfstudio.ci.pipeline.pr.PrPipelineBackend#buildInsideDocker(Closure)} method, therefore if you'll set {@link PrPipelineBackend#dockerImageForBuild} field
  * that steps will run inside docker. <p>
  *     For Instance: <p>
  * <pre>
@@ -24,15 +23,11 @@ class PrPipelineBackend extends PrPipeline {
     private boolean hasChanges = false
     public buildGradleTask = "clean assemble"
     public unitTestGradleTask = "test"
-    public DOCKER_BUILD_PUBLISH_IMAGE = "Build and publish docker image"
 
     public unitTestResultPathXml = "build/test-results/test/*.xml"
     public unitTestResultDirHtml = "build/reports/tests/test"
-    public pathToDockerfile = "./"
-    public registryUrl = "eu.gcr.io"
-    public registryPathAndProjectId = ""
 
-    public String dockerImage = null
+    public String dockerImageForBuild = null
 
     PrPipelineBackend(Object script) {
         super(script)
@@ -66,29 +61,21 @@ class PrPipelineBackend extends PrPipeline {
                     mergeLocal(script, destinationBranch)
                 },
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    runInsideDocker {
+                    buildInsideDocker{
                         BackendPipelineHelper.buildStageBodyBackend(script, buildGradleTask)
                     }
                 },
                 stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    runInsideDocker {
+                    buildInsideDocker{
                         BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
                     }
-                },
-                stage(DOCKER_BUILD_PUBLISH_IMAGE, registryPathAndProjectId != null && registryPathAndProjectId.isEmpty()? StageStrategy.SKIP_STAGE : StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    List<String> tags = new ArrayList<String>()
-                    String fullCommitHash = RepositoryUtil.getCurrentCommitHash(script)
-                    if(fullCommitHash != null && !fullCommitHash.isEmpty())
-                        tags.add("dev-${fullCommitHash.reverse().take(8)}")
-                    tags.add("dev")
-                    DockerRegistryHelper.buildDockerImageAndPush(script, registryPathAndProjectId, registryUrl, pathToDockerfile,tags)
                 }]
         finalizeBody = { finalizeStageBody(this) }
     }
 
-    def runInsideDocker(Closure closure) {
-        if(dockerImage != null && !dockerImage.isEmpty())
-            script.docker.image(dockerImage).inside(closure)
+    def buildInsideDocker(Closure closure) {
+        if(dockerImageForBuild != null && !dockerImageForBuild.isEmpty())
+            script.docker.image(dockerImageForBuild).inside(closure)
         else
             closure.call()
     }
