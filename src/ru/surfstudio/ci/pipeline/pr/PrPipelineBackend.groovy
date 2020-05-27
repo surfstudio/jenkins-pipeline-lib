@@ -4,6 +4,7 @@ import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.pipeline.helper.BackendPipelineHelper
+import ru.surfstudio.ci.pipeline.helper.DockerHelper
 import ru.surfstudio.ci.stage.StageStrategy
 
 /**
@@ -61,22 +62,15 @@ class PrPipelineBackend extends PrPipeline {
                     mergeLocal(script, destinationBranch)
                 },
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    buildInsideDocker{
-                        BackendPipelineHelper.buildStageBodyBackend(script, buildGradleTask)
-                    }
+                    DockerHelper.runStageInsideDocker(script, dockerImageForBuild, {
+                                                      BackendPipelineHelper.buildStageBodyBackend(script, buildGradleTask)
+                    })
                 },
                 stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    buildInsideDocker{
+                    DockerHelper.runStageInsideDocker(script, dockerImageForBuild, {
                         BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
-                    }
+                    })
                 }]
         finalizeBody = { finalizeStageBody(this) }
-    }
-
-    def buildInsideDocker(Closure closure) {
-        if(dockerImageForBuild != null && !dockerImageForBuild.isEmpty())
-            script.docker.image(dockerImageForBuild).inside(closure)
-        else
-            closure.call()
     }
 }

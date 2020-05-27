@@ -1,7 +1,7 @@
 package ru.surfstudio.ci.pipeline.helper
 
-final class DockerRegistryHelper {
-    private DockerRegistryHelper() {
+final class DockerHelper {
+    private DockerHelper() {
     }
     def static withRegistryCredentials(Object script, String registryUrl, Closure body) {
             script.withCredentials([script.file(credentialsId: "google-container-registry-service-account", variable: 'GCRKEY')]) {
@@ -17,5 +17,11 @@ final class DockerRegistryHelper {
                 image.push(imageTag)
             }
         }
+    }
+    def static runStageInsideDocker(Object script, String dockerImageForBuild, Closure closure) {
+        if(dockerImageForBuild != null && !dockerImageForBuild.isEmpty())
+            script.docker.image(dockerImageForBuild).inside(closure)
+        else
+            closure.call()
     }
 }
