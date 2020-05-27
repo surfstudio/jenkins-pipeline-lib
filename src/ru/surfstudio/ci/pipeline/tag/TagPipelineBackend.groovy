@@ -30,6 +30,10 @@ class TagPipelineBackend extends TagPipeline {
 
         initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }
+        for (Object o  : script.parameters) {
+            script.echo "${o.toString()}"
+        }
+
 
         stages = [
                 stage(CHECKOUT, false) {
