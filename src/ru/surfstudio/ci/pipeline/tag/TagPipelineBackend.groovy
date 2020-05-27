@@ -4,6 +4,7 @@ import ru.surfstudio.ci.NodeProvider
 
 class TagPipelineBackend extends TagPipeline {
     public buildGradleTask = "clean assemble"
+    public registryPathAndProjectId = ""
 
     TagPipelineBackend(Object script) {
         super(script)
