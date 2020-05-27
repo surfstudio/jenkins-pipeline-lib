@@ -18,6 +18,9 @@ class TagPipelineBackend extends TagPipeline {
     public registryPathAndProjectId = ""
     public dockerImageForBuild = null
 
+    public gradleBuildFile = "build.gradle.kts"
+    public appVersionNameGradleVar = "version"
+
     TagPipelineBackend(Object script) {
         super(script)
     }
@@ -30,9 +33,8 @@ class TagPipelineBackend extends TagPipeline {
 
         initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }
-        for (Object o  : script.parameters) {
-            script.echo "${o.toString()}"
-        }
+
+        script.echo "$repoTag"
 
 
         stages = [
@@ -49,13 +51,13 @@ class TagPipelineBackend extends TagPipeline {
                         BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
                     })
                 },
-                stage(DOCKER_BUILD_PUBLISH_IMAGE, registryPathAndProjectId != null && registryPathAndProjectId.isEmpty() ? StageStrategy.SKIP_STAGE : StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                stage(DOCKER_BUILD_PUBLISH_IMAGE, StageStrategy.SKIP_STAGE) {
                     List<String> tags = new ArrayList<String>()
                     String fullCommitHash = RepositoryUtil.getCurrentCommitHash(script)
                     if (fullCommitHash != null && !fullCommitHash.isEmpty())
                         tags.add("dev-${fullCommitHash.reverse().take(8)}")
                     tags.add("dev")
-                    DockerRegistryHelper.buildDockerImageAndPush(script, registryPathAndProjectId, registryUrl, pathToDockerfile, tags)
+                    DockerHelper.buildDockerImageAndPush(script, registryPathAndProjectId, registryUrl, pathToDockerfile, tags)
                 }
         ]
         finalizeBody = { finalizeStageBody(this) }
