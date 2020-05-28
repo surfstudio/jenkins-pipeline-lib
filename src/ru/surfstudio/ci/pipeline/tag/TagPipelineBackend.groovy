@@ -67,7 +67,7 @@ class TagPipelineBackend extends TagPipeline {
                         BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
                     })
                 },
-                stage(VERSION_PUSH, isStaging? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE) {
+                stage(VERSION_PUSH, isStaging? StageStrategy.UNSTABLE_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE) {
                     versionPushStageBody(script,
                             repoTag,
                             branchesPatternsForAutoChangeVersion,
