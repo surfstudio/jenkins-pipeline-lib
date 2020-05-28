@@ -69,6 +69,10 @@ class TagPipelineBackend extends TagPipeline {
                     })
                 },
                 stage(VERSION_PUSH, isStaging? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE) {
+                    def branches = RepositoryUtil.getRefsForCurrentCommitMessage(script)
+                    branches.forEach{ branch->
+                        println branch
+                    }
                     versionPushStageBody(script,
                             repoTag,
                             branchesPatternsForAutoChangeVersion,
