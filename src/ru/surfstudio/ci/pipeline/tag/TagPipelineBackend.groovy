@@ -7,6 +7,7 @@ import ru.surfstudio.ci.pipeline.helper.BackendPipelineHelper
 import ru.surfstudio.ci.pipeline.helper.DockerHelper
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.android.AndroidUtil
+import ru.surfstudio.ci.utils.backend.BackendUtil
 
 import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
 
@@ -111,7 +112,7 @@ class TagPipelineBackend extends TagPipeline {
                                                  String appVersionNameGradleVar,
                                                  String appVersionCodeGradleVar){
         def versionName = CommonUtil.removeQuotesFromTheEnds(
-                AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionNameGradleVar))
+                BackendUtil.getGradleVariableKtStyle(script, gradleConfigFile, appVersionNameGradleVar))
         def versionCode = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
         return "Change version to $versionName ($versionCode) $RepositoryUtil.SKIP_CI_LABEL1 $RepositoryUtil.VERSION_LABEL1"
 
@@ -121,10 +122,10 @@ class TagPipelineBackend extends TagPipeline {
                                       String gradleConfigFile,
                                       String appVersionNameGradleVar,
                                       String appVersionCodeGradleVar) {
-        AndroidUtil.changeGradleVariable(script, gradleConfigFile, appVersionNameGradleVar, "\"$repoTag\"")
+        BackendUtil.changeGradleVariableKtStyle(script, gradleConfigFile, appVersionNameGradleVar, "\"$repoTag\"")
         def codeStr = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
         def newCodeStr = String.valueOf(Integer.valueOf(codeStr) + 1)
-        AndroidUtil.changeGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar, newCodeStr)
+        BackendUtil.changeGradleVariableKtStyle(script, gradleConfigFile, appVersionCodeGradleVar, newCodeStr)
 
     }
 
