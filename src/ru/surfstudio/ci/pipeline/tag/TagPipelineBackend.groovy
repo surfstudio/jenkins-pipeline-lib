@@ -43,15 +43,8 @@ class TagPipelineBackend extends TagPipeline {
         initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }
 
-        String tagRepo = "";
         extractValueFromEnvOrParamsAndRun(script, REPO_TAG_PARAMETER) {
-            value -> tagRepo = value
-        }
-        script.echo "repo tag "
-        script.echo tagRepo
-
-        if(tagRepo.toLowerCase().contains("staging") || tagRepo.toLowerCase().contains("snapshot") || tagRepo.toLowerCase().contains("dev")){
-            isStaging = true
+            value -> isStaging = value.toLowerCase().contains("staging") || value.toLowerCase().contains("snapshot") || value.toLowerCase().contains("dev")
         }
 
         stages = [
@@ -123,7 +116,7 @@ class TagPipelineBackend extends TagPipeline {
                                       String appVersionNameGradleVar,
                                       String appVersionCodeGradleVar) {
         BackendUtil.changeGradleVariableKtStyle(script, gradleConfigFile, appVersionNameGradleVar, "\"$repoTag\"")
-        def codeStr = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
+        def codeStr = BackendUtil.getGradleVariableKtStyle(script, gradleConfigFile, appVersionCodeGradleVar)
         def newCodeStr = String.valueOf(Integer.valueOf(codeStr) + 1)
         BackendUtil.changeGradleVariableKtStyle(script, gradleConfigFile, appVersionCodeGradleVar, newCodeStr)
 
