@@ -85,8 +85,7 @@ class TagPipelineBackend extends TagPipeline {
                     String fullCommitHash = RepositoryUtil.getCurrentCommitHash(script)
                     tags.add(repoTag)
                     if(isStaging) {
-                        if (fullCommitHash != null && !fullCommitHash.isEmpty())
-                            tags.add("dev-${fullCommitHash.reverse().take(8)}")
+                            tags.add("dev-${fullCommitHash.reverse().take(8).reverse()}")
                         tags.add("dev")
                         def gradleVersionNumber = AndroidUtil.getGradleVariable(script, gradleBuildFile, appVersionCodeGradleVar)
                         tags.add("$repoTag.$gradleVersionNumber")
