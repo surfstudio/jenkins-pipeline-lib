@@ -8,6 +8,8 @@ import ru.surfstudio.ci.pipeline.helper.DockerHelper
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.android.AndroidUtil
 
+import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
+
 class TagPipelineBackend extends TagPipeline {
     public buildGradleTask = "clean assemble"
     public unitTestGradleTask = "test"
@@ -40,11 +42,14 @@ class TagPipelineBackend extends TagPipeline {
         initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }
 
+        String tagRepo = "";
+        extractValueFromEnvOrParamsAndRun(script, REPO_TAG_PARAMETER) {
+            value -> tagRepo = value
+        }
         script.echo "repo tag "
-        script.echo repoTag
+        script.echo tagRepo
 
-        if(repoTag.toLowerCase().contains("staging") || repoTag.toLowerCase().contains("snapshot") || repoTag.toLowerCase().contains("dev")){
-
+        if(tagRepo.toLowerCase().contains("staging") || tagRepo.toLowerCase().contains("snapshot") || tagRepo.toLowerCase().contains("dev")){
             isStaging = true
         }
 
