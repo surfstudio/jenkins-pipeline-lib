@@ -40,8 +40,11 @@ class TagPipelineBackend extends TagPipeline {
         initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }
 
-        if(repoTag.toLowerCase().contains("staging") || repoTag.toLowerCase().contains("snapshot") || repoTag.toLowerCase().contains("dev"))
+        if(repoTag.toLowerCase().contains("staging") || repoTag.toLowerCase().contains("snapshot") || repoTag.toLowerCase().contains("dev")){
+            script.echo "contains one of word for staging"
+            script.echo repoTag
             isStaging = true
+        }
 
         stages = [
                 stage(CHECKOUT, false) {
