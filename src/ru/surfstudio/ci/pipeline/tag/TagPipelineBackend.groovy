@@ -6,7 +6,6 @@ import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.BackendPipelineHelper
 import ru.surfstudio.ci.pipeline.helper.DockerHelper
 import ru.surfstudio.ci.stage.StageStrategy
-import ru.surfstudio.ci.utils.android.AndroidUtil
 import ru.surfstudio.ci.utils.backend.BackendUtil
 
 import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
@@ -88,7 +87,7 @@ class TagPipelineBackend extends TagPipeline {
                     if(isStaging) {
                         tags.add("dev-${fullCommitHash.reverse().take(8).reverse()}")
                         tags.add("dev")
-                        def gradleVersionNumber = AndroidUtil.getGradleVariable(script, gradleBuildFile, appVersionCodeGradleVar)
+                        def gradleVersionNumber = BackendUtil.getGradleVariableKtStyle(script, gradleBuildFile, appVersionCodeGradleVar)
                         tags.add("$repoTag.$gradleVersionNumber")
                     } else {
                         tags.add("latest")
