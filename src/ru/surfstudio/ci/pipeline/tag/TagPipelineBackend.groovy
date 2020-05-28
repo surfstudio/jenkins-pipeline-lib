@@ -1,10 +1,12 @@
 package ru.surfstudio.ci.pipeline.tag
 
+import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.BackendPipelineHelper
 import ru.surfstudio.ci.pipeline.helper.DockerHelper
 import ru.surfstudio.ci.stage.StageStrategy
+import ru.surfstudio.ci.utils.android.AndroidUtil
 
 class TagPipelineBackend extends TagPipeline {
     public buildGradleTask = "clean assemble"
@@ -19,7 +21,10 @@ class TagPipelineBackend extends TagPipeline {
     public dockerImageForBuild = null
 
     public gradleBuildFile = "build.gradle.kts"
-    public appVersionNameGradleVar = "version"
+    public appVersionNameGradleVar = "appVersionName"
+    public appVersionCodeGradleVar = "appVersionCode"
+
+    private isStaging = false
 
     TagPipelineBackend(Object script) {
         super(script)
@@ -27,19 +32,27 @@ class TagPipelineBackend extends TagPipeline {
 
     @Override
     def init() {
-        node = NodeProvider.backendNode
-        preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
-        postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
+        node = NodeProvider.getBackendNode()
+
+        preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
+        postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
 
         initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }
 
-        script.echo "$repoTag"
-
+        if(repoTag.toLowerCase().contains("staging") || repoTag.toLowerCase().contains("snapshot") || repoTag.toLowerCase().contains("dev"))
+            isStaging = true
 
         stages = [
                 stage(CHECKOUT, false) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
+                },
+                stage(VERSION_UPDATE, isStaging? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE) {
+                    versionUpdateStageBody(script,
+                            repoTag,
+                            gradleBuildFile,
+                            appVersionNameGradleVar,
+                            appVersionCodeGradleVar)
                 },
                 stage(BUILD) {
                     DockerHelper.runStageInsideDocker(script, dockerImageForBuild, {
@@ -51,15 +64,59 @@ class TagPipelineBackend extends TagPipeline {
                         BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
                     })
                 },
-                stage(DOCKER_BUILD_PUBLISH_IMAGE, StageStrategy.SKIP_STAGE) {
+                stage(VERSION_PUSH, isStaging? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE) {
+                    versionPushStageBody(script,
+                            repoTag,
+                            branchesPatternsForAutoChangeVersion,
+                            repoUrl,
+                            repoCredentialsId,
+                            prepareChangeVersionCommitMessage(
+                                    script,
+                                    gradleBuildFile,
+                                    appVersionNameGradleVar,
+                                    appVersionCodeGradleVar,
+                            ))
+                },
+                stage(DOCKER_BUILD_PUBLISH_IMAGE) {
                     List<String> tags = new ArrayList<String>()
                     String fullCommitHash = RepositoryUtil.getCurrentCommitHash(script)
-                    if (fullCommitHash != null && !fullCommitHash.isEmpty())
-                        tags.add("dev-${fullCommitHash.reverse().take(8)}")
-                    tags.add("dev")
+                    tags.add(repoTag)
+                    if(isStaging) {
+                        if (fullCommitHash != null && !fullCommitHash.isEmpty())
+                            tags.add("dev-${fullCommitHash.reverse().take(8)}")
+                        tags.add("dev")
+                        def gradleVersionNumber = AndroidUtil.getGradleVariable(script, gradleBuildFile, appVersionCodeGradleVar)
+                        tags.add("$repoTag.$gradleVersionNumber")
+                    } else {
+                        tags.add("latest")
+                    }
+
+
                     DockerHelper.buildDockerImageAndPush(script, registryPathAndProjectId, registryUrl, pathToDockerfile, tags)
                 }
         ]
         finalizeBody = { finalizeStageBody(this) }
     }
+    def static prepareChangeVersionCommitMessage(Object script,
+                                                 String gradleConfigFile,
+                                                 String appVersionNameGradleVar,
+                                                 String appVersionCodeGradleVar){
+        def versionName = CommonUtil.removeQuotesFromTheEnds(
+                AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionNameGradleVar))
+        def versionCode = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
+        return "Change version to $versionName ($versionCode) $RepositoryUtil.SKIP_CI_LABEL1 $RepositoryUtil.VERSION_LABEL1"
+
+    }
+    def static versionUpdateStageBody(Object script,
+                                      String repoTag,
+                                      String gradleConfigFile,
+                                      String appVersionNameGradleVar,
+                                      String appVersionCodeGradleVar) {
+        AndroidUtil.changeGradleVariable(script, gradleConfigFile, appVersionNameGradleVar, "\"$repoTag\"")
+        def codeStr = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
+        def newCodeStr = String.valueOf(Integer.valueOf(codeStr) + 1)
+        AndroidUtil.changeGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar, newCodeStr)
+
+    }
+
 }
