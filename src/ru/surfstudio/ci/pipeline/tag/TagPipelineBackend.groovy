@@ -106,7 +106,7 @@ class TagPipelineBackend extends TagPipeline {
                                                  String appVersionCodeGradleVar){
         def versionName = CommonUtil.removeQuotesFromTheEnds(
                 BackendUtil.getGradleVariableKtStyle(script, gradleConfigFile, appVersionNameGradleVar))
-        def versionCode = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
+        def versionCode = BackendUtil.getGradleVariableKtStyle(script, gradleConfigFile, appVersionCodeGradleVar)
         return "Change version to $versionName ($versionCode) $RepositoryUtil.SKIP_CI_LABEL1 $RepositoryUtil.VERSION_LABEL1"
 
     }
