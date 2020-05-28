@@ -149,8 +149,6 @@ class TagPipelineAndroid extends TagPipeline {
                     
                 },
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    String rawRefs = script.sh(script: "git log -1 --pretty=%D", returnStdout: true)
-                    script.echo rawRefs
                     versionPushStageBody(script,
                             repoTag,
                             branchesPatternsForAutoChangeVersion,
