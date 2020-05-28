@@ -18,7 +18,7 @@ final class BackendUtil {
     }
 
     static String changeGradleVariableKtStyle(Object script, String file, String varName, String newVarValue) {
-        String oldVarValue = getGradleVariable(script, file, varName)
+        String oldVarValue = getGradleVariableKtStyle(script, file, varName)
         String fileBody = script.readFile(file)
         String newFileBody = ""
         def lines = fileBody.split("\n")
