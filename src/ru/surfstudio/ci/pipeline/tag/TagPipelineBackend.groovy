@@ -69,8 +69,6 @@ class TagPipelineBackend extends TagPipeline {
                     })
                 },
                 stage(VERSION_PUSH, isStaging? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE) {
-                    String rawRefs = script.sh(script: "git log -1 --pretty=%D", returnStdout: true)
-                    script.echo rawRefs
                     versionPushStageBody(script,
                             repoTag,
                             branchesPatternsForAutoChangeVersion,
