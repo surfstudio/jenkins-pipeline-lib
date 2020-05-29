@@ -18,8 +18,9 @@ package ru.surfstudio.ci.pipeline.api_test
 import ru.surfstudio.ci.*
 import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.pipeline.base.LogRotatorUtil
+import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
-
+import ru.surfstudio.ci.utils.android.AndroidTestUtil
 import ru.surfstudio.ci.utils.android.AndroidUtil
 
 import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
@@ -48,7 +49,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
     public waitApiTestGradleTask = "clean testQaUnitTest -PtestType=waitApi"
 
     public testResultPathXml = "**/test-results/testQaUnitTest/*.xml"
-    public testResultPathDirHtml = "app-injector/build/reports/tests/testQaUnitTest/"
+    public testResultPathDirHtml = "build/reports/tests/testQaUnitTest/"
 
     //cron
     public cronTimeTrigger = '00 05 * * *'
@@ -143,14 +144,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
             }
         } finally {
             script.junit allowEmptyResults: true, testResults: testResultPathXml
-            script.publishHTML(target: [
-                    allowMissing         : true,
-                    alwaysLinkToLastBuild: false,
-                    keepAll              : true,
-                    reportDir            : testResultPathDirHtml,
-                    reportFiles          : "*/index.html",
-                    reportName           : reportName
-            ])
+            AndroidTestUtil.archiveUnitTestHtmlResults(script, testResultPathDirHtml, reportName)
         }
     }
 
