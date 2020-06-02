@@ -16,16 +16,22 @@
 package ru.surfstudio.ci.pipeline.pr
 
 import ru.surfstudio.ci.NodeProvider
+import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
+import ru.surfstudio.ci.stage.Stage
+import ru.surfstudio.ci.stage.SimpleStage
 import ru.surfstudio.ci.stage.StageStrategy
+import ru.surfstudio.ci.CommonUtil
 
 class PrPipelineFlutter extends PrPipeline {
     public static final String STAGE_PARALLEL = 'Parallel Pipeline'
 
+    public static final String STAGE_DOCKER = "Docker Flutter"
     public static final String STAGE_ANDROID = 'Android'
     public static final String STAGE_IOS = 'IOS'
 
-    public static final String STAGE_DOCKER = "Docker Flutter"
+    public static PRE_MERGE_IOS = "PreMerge IOS"
+
     public static final String CHECKOUT_FLUTTER_VERSION_ANDROID = 'Checkout Flutter Project Version (Android)'
     public static final String CHECKOUT_FLUTTER_VERSION_IOS = 'Checkout Flutter Project Version (iOS)'
 
@@ -46,6 +52,10 @@ class PrPipelineFlutter extends PrPipeline {
     public buildIOsCommand = "./script/ios/build.sh -qa"
     public testCommand = "flutter test"
 
+    //nodes
+    public nodeIos
+    public nodeAndroid
+
     //docker
     //
     // Чтобы изменить канал Flutter для сборки проекта
@@ -64,15 +74,6 @@ class PrPipelineFlutter extends PrPipeline {
     }
 
     def init() {
-        node = NodeProvider.androidFlutterNode
-
-        preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
-        postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
-
-        initializeBody = { initBody(this) }
-        propertiesProvider = { properties(this) }
-
-
         def androidStages = [
                 docker(STAGE_DOCKER, dockerImageName, dockerArguments,  [
                         stage(STAGE_ANDROID, false) {
@@ -106,7 +107,7 @@ class PrPipelineFlutter extends PrPipeline {
                 stage(STAGE_IOS, false) {
                     // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                 },
-                stage(PRE_MERGE, false) {
+                stage(PRE_MERGE_IOS, false) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
                 },
                 stage(CHECKOUT_FLUTTER_VERSION_IOS) {
@@ -120,13 +121,28 @@ class PrPipelineFlutter extends PrPipeline {
                 },
         ]
 
+        node = "master"
+        nodeAndroid = nodeAndroid ?: NodeProvider.androidFlutterNode
+        nodeIos = nodeIos ?: NodeProvider.iOSFlutterNode
+
+        preExecuteStageBody = { stage -> preExecuteStageBodyPr(script, stage, repoUrl) }
+        postExecuteStageBody = { stage -> postExecuteStageBodyPr(script, stage, repoUrl) }
+
+        initializeBody = {
+            initBody(this)
+
+            if (this.targetBranchChanged) {
+                script.echo "Build triggered by target branch changes, skip IOS branch"
+                stages = androidStages
+            }
+        }
+        propertiesProvider = { properties(this) }
+
         stages = [
-                parallel(STAGE_PARALLEL,
-                        [
-                                group(STAGE_ANDROID, androidStages),
-                                node(STAGE_IOS, NodeProvider.iOSFlutterNode, false, iosStages)
-                        ]
-                ),
+                parallel(STAGE_PARALLEL, [
+                        node(STAGE_ANDROID, nodeAndroid, false, androidStages),
+                        node(STAGE_IOS, nodeIos , false, iosStages)
+                ]),
         ]
 
         finalizeBody = { finalizeStageBody(this) }

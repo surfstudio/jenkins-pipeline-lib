@@ -21,6 +21,7 @@ import ru.surfstudio.ci.stage.StageWithResult
 import ru.surfstudio.ci.stage.StageWithStrategy
 import ru.surfstudio.ci.utils.StageTreeUtil
 
+
 class CommonUtil {
 
     static int MAX_DEPTH_FOR_SEARCH_SAME_BUILDS = 50
@@ -65,16 +66,20 @@ class CommonUtil {
         return script.env.ANDROID_HOME
     }
 
+    static String getAndroidSdkHome(Object script) {
+        return script.env.ANDROID_SDK_ROOT
+    }
+
     static String getAdbHome(Object script) {
-        return "${getAndroidHome(script)}/platform-tools/adb"
+        return "adb"
     }
 
     static String getEmulatorHome(Object script) {
-        return "${getAndroidHome(script)}/emulator/emulator"
+        return "${getAndroidSdkHome(script)}/emulator/emulator"
     }
 
     private static String getAndroidToolsHome(Object script) {
-        return "${getAndroidHome(script)}/tools/bin"
+        return "${getAndroidSdkHome(script)}/tools/bin"
     }
 
     static String getAaptHome(Object script, String buildToolsVersion) {
@@ -82,12 +87,13 @@ class CommonUtil {
     }
 
     static String getAvdManagerHome(Object script) {
-        return "${getAndroidToolsHome(script)}/avdmanager"
+        return "avdmanager"
     }
 
     static String getSdkManagerHome(Object script) {
-        return "${getAndroidToolsHome(script)}/sdkmanager"
+        return "sdkmanager"
     }
+
     //endregion
 
     def static shWithRuby(Object script, String command, String version = "2.5.5") {
@@ -210,6 +216,10 @@ class CommonUtil {
      * @param actionWithValue{value -> }
      */
     def static extractValueFromParamsAndRun(Object script, String key, Closure actionWithValue) {
+        runWithNotEmptyValue(script, key, null, script.params[key], actionWithValue)
+    }
+
+     def static extractValueFromBoolParamsAndRun(Object script, Boolean key, Closure actionWithValue) {
         runWithNotEmptyValue(script, key, null, script.params[key], actionWithValue)
     }
 

@@ -17,10 +17,6 @@ package ru.surfstudio.ci.pipeline.helper
 
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.RepositoryUtil
-import ru.surfstudio.ci.Result
-import ru.surfstudio.ci.pipeline.pr.PrPipeline
-import ru.surfstudio.ci.stage.SimpleStage
-import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.utils.android.AndroidTestUtil
 import ru.surfstudio.ci.utils.android.AndroidUtil
 import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
@@ -31,10 +27,9 @@ import ru.surfstudio.ci.utils.android.config.AvdConfig
  */
 class AndroidPipelineHelper {
 
+    private static String DEFAULT_INSTRUMENTAL_TEST_REPORT_NAME = "Instrumental tests"
     private static String UNIT_TEST_REPORT_NAME = "Unit Tests"
-    private static String INSTRUMENTAL_TEST_REPORT_NAME = "Instrumental tests"
 
-    private static String DEFAULT_HTML_RESULT_FILENAME = "index.html"
     private static String JIRA_ISSUE_KEY_PATTERN = ~/((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)/
     // https://confluence.atlassian.com/stashkb/integrating-with-custom-jira-issue-key-313460921.html?_ga=2.153274111.652352963.1580752546-1778113334.1579628389
 
@@ -68,7 +63,8 @@ class AndroidPipelineHelper {
                 script.sh "./gradlew $unitTestGradleTask"
             }
         } finally {
-            publishTestResults(script, testResultPathXml, testResultPathDirHtml, UNIT_TEST_REPORT_NAME)
+            script.junit allowEmptyResults: true, testResults: testResultPathXml
+            AndroidTestUtil.archiveUnitTestHtmlResults(script, testResultPathDirHtml, UNIT_TEST_REPORT_NAME)
         }
     }
 
@@ -77,7 +73,8 @@ class AndroidPipelineHelper {
             Object script,
             String testGradleTask,
             String testResultPathXml,
-            String testResultPathDirHtml
+            String testResultPathDirHtml,
+            String reportName = DEFAULT_INSTRUMENTAL_TEST_REPORT_NAME
     ) {
         ru.surfstudio.ci.AndroidUtil.onEmulator(script, "avd-main") {
             try {
@@ -89,7 +86,7 @@ class AndroidPipelineHelper {
                                             keepAll              : true,
                                             reportDir            : testResultPathDirHtml,
                                             reportFiles          : 'index.html',
-                                            reportName           : "Instrumental Tests"
+                                            reportName           : reportName
 
                 ])
             }
@@ -101,12 +98,15 @@ class AndroidPipelineHelper {
             AvdConfig config,
             String androidTestBuildType,
             Closure getTestInstrumentationRunnerName,
-            AndroidTestConfig androidTestConfig
+            AndroidTestConfig androidTestConfig,
+            String reportName = DEFAULT_INSTRUMENTAL_TEST_REPORT_NAME
     ) {
         try {
             AndroidUtil.withGradleBuildCacheCredentials(script) {
                 script.sh "./gradlew ${androidTestConfig.instrumentalTestAssembleGradleTask}"
             }
+            script.sh "rm -rf ${androidTestConfig.instrumentalTestResultPathDirXml}; \
+                rm -rf ${androidTestConfig.instrumentalTestResultPathDirHtml}"
             script.sh "mkdir -p ${androidTestConfig.instrumentalTestResultPathDirXml}; \
                 mkdir -p ${androidTestConfig.instrumentalTestResultPathDirHtml}"
 
@@ -122,35 +122,21 @@ class AndroidPipelineHelper {
             )
         } finally {
             AndroidTestUtil.cleanup(script, config)
-            publishTestResults(
-                    script,
-                    "${androidTestConfig.instrumentalTestResultPathDirXml}/*.xml",
-                    androidTestConfig.instrumentalTestResultPathDirHtml,
-                    INSTRUMENTAL_TEST_REPORT_NAME
-            )
+            script.junit allowEmptyResults: true, testResults: "${androidTestConfig.instrumentalTestResultPathDirXml}/*.xml"
+            script.publishHTML(target: [
+                    allowMissing         : true,
+                    alwaysLinkToLastBuild: false,
+                    keepAll              : true,
+                    reportDir            : androidTestConfig.instrumentalTestResultPathDirHtml,
+                    reportFiles          : "*/index.html",
+                    reportName           : reportName
+            ])
         }
     }
 
     def static staticCodeAnalysisStageBody(Object script) {
         script.echo "empty"
         //todo
-    }
-
-    private static void publishTestResults(
-            Object script,
-            String testResultPathXml,
-            String testResultPathDirHtml,
-            String reportName
-    ) {
-        script.junit allowEmptyResults: true, testResults: testResultPathXml
-        script.publishHTML(target: [
-                allowMissing         : true,
-                alwaysLinkToLastBuild: false,
-                keepAll              : true,
-                reportDir            : testResultPathDirHtml,
-                reportFiles          : "*/$DEFAULT_HTML_RESULT_FILENAME",
-                reportName           : reportName
-        ])
     }
 
     /**
@@ -184,17 +170,16 @@ class AndroidPipelineHelper {
         boolean hasChanges = RepositoryUtil.checkHasChanges(script)
         if (hasChanges) {
             RepositoryUtil.notifyGitlabAboutStageAborted(script, repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, sourceBranch)
-            script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1\""
 
             String jiraIssueKey
             try {
                 jiraIssueKey = "\nApplyed for jira issue: ${(RepositoryUtil.getCurrentCommitMessage(script) =~ JIRA_ISSUE_KEY_PATTERN)[0][0]}."
-            } catch(Exception ignored) {
+            } catch (Exception ignored) {
                 jiraIssueKey = ""
             }
             String commitHash = RepositoryUtil.getCurrentCommitHash(script).toString().take(8)
 
-            script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1." + jiraIssueKey  + "\nLast formatted commit is $commitHash \""
+            script.sh "git commit -a -m \"Code Formatting $RepositoryUtil.SKIP_CI_LABEL1." + jiraIssueKey + "\nLast formatted commit is $commitHash \""
             RepositoryUtil.push(script, repoUrl, repoCredentialsId)
         } else {
             script.echo "No modification after code formatting."

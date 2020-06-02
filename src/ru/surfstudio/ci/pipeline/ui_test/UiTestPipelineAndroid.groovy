@@ -18,12 +18,17 @@ package ru.surfstudio.ci.pipeline.ui_test
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.stage.StageStrategy
+import ru.surfstudio.ci.utils.android.config.AvdConfig
+import ru.surfstudio.ci.utils.android.EmulatorUtil
+import ru.surfstudio.ci.utils.android.AndroidTestUtil
 
 class UiTestPipelineAndroid extends UiTestPipeline {
 
     public artifactForTest = "for_test.apk"
     public buildGradleTask = "clean assembleDebug"
     public builtApkPattern = "${sourcesDir}/**/**.apk"
+
+    public AvdConfig avdConfig = new AvdConfig()
 
     UiTestPipelineAndroid(Object script) {
         super(script)
@@ -45,7 +50,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                     checkoutSourcesBody(script, sourcesDir, sourceRepoUrl, sourceBranch, sourceRepoCredentialsId)
                 },
                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    buildStageBodyAndroid(script, sourcesDir, buildGradleTask)
+                    buildStageBodyAndroid(script, sourcesDir, projectForBuild, buildGradleTask)
                 },
                 stage(PREPARE_ARTIFACT, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     prepareApkStageBodyAndroid(script,
@@ -61,6 +66,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                 },
                 stage(TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     testStageBodyAndroid(script,
+                            emulator,
                             taskKey,
                             sourcesDir,
                             outputsDir,
@@ -68,8 +74,11 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                             artifactForTest,
                             featureForTest,
                             outputHtmlFile,
+                            outputJsonFile,
                             outputrerunTxtFile,
-                            outputsIdsDiff)
+                            outputsIdsDiff,
+                            failedStepsFile,
+                            avdConfig)
                 },
                 stage(PUBLISH_RESULTS, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                     publishResultsStageBody(script,
@@ -78,8 +87,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                             outputHtmlFile,
                             outputrerunTxtFile,
                             jiraAuthenticationName,
-                            "UI Tests ${taskKey} ${taskName}",
-                            failedStepsFile)
+                            "UI Tests ${taskKey} ${taskName}")
 
                 }
 
@@ -89,11 +97,36 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
-    def static buildStageBodyAndroid(Object script, String sourcesDir, String buildGradleTask) {
-        script.dir(sourcesDir) {
-            script.sh "./gradlew ${buildGradleTask}"
+    def static buildStageBodyAndroid(Object script, String sourcesDir, String projectForBuild, String buildGradleTask) {
+            
+ 
+            if (script.env.projectForBuild == '') {
+                 script.dir(sourcesDir) { 
+                     script.sh "./gradlew ${buildGradleTask}"
+
+                 }}
+             else 
+            { 
+             
+             script.dir(sourcesDir) {
+
+                //script.step ([$class: 'CopyArtifact',
+                //projectName: "Labirint_Android_UI_TEST",
+                //filter: "miss_id.txt",
+                //selector: lastCompleted(),
+                //target: "${sourcesDir}"])
+     
+                script.echo "${projectForBuild}"
+                script.step ([$class: 'CopyArtifact',
+                    projectName: "${projectForBuild}",
+                    filter: "**/qa/**/*-qa.apk",
+                    target: "${sourcesDir}"])
+            }
+            
+            }
+    
         }
-    }
+ 
 
     def static prepareApkStageBodyAndroid(Object script, String builtApkPattern, String newApkForTest) {
         script.step([$class: 'ArtifactArchiver', artifacts: builtApkPattern])
@@ -108,6 +141,7 @@ class UiTestPipelineAndroid extends UiTestPipeline {
     }
 
     def static testStageBodyAndroid(Object script,
+                                    Boolean emulator,
                                     String taskKey,
                                     String sourcesDir,
                                     String outputsDir,
@@ -115,12 +149,26 @@ class UiTestPipelineAndroid extends UiTestPipeline {
                                     String artifactForTest,
                                     String featureFile,
                                     String outputHtmlFile,
+                                    String outputJsonFile,
                                     String outputrerunTxtFile,
-                                    String outputsIdsDiff
+                                    String outputsIdsDiff,
+                                    String failedStepsFile,
+                                    AvdConfig avdConfig
                                     ) {
+
+
 
         script.lock("Lock_ui_test_on_${script.env.NODE_NAME}") {
             script.echo "Tests started"
+
+            if (emulator) {
+                AndroidTestUtil.cleanup(script, avdConfig)
+                AndroidTestUtil.launchEmulator(script, avdConfig)
+                AndroidTestUtil.checkEmulatorStatus(script, avdConfig)
+                script.echo "Emulator started"
+            }
+            
+
             script.echo "start tests for $artifactForTest $taskKey"
             CommonUtil.safe(script) {
                 script.sh "mkdir $outputsDir"
@@ -145,16 +193,30 @@ class UiTestPipelineAndroid extends UiTestPipeline {
 
        
             try {
-                CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  -p json_report\" ${featuresDir}/${featureFile} --concurrent")
+                CommonUtil.shWithRuby(script, "set -x; source ~/.bashrc; adb kill-server; adb start-server; adb devices; parallel_calabash -a ${artifactForTest} -o \"-p ${platform} -f rerun -o ${outputsDir}/${outputrerunTxtFile} -f pretty -f html -o ${outputsDir}/${outputHtmlFile}  -f json -o ${outputsDir}/${outputJsonFile} -p json_report\" ${featuresDir}/${featureFile} --concurrent")
             }
             finally {
-      
+                
+                AndroidTestUtil.cleanup(script, avdConfig)
+
                 CommonUtil.shWithRuby(script, "ruby -r \'./find_id.rb\' -e \"Find.new.get_miss_id(\'./${sourcesDir}\', \'./features/android/pages\')\"")
                 script.step([$class: 'ArtifactArchiver', artifacts: outputsIdsDiff, allowEmptyArchive: true])
+                
+                
                 CommonUtil.safe(script) {
                     script.sh "mkdir arhive"
                 }
-                script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir}; mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
+                
+
+                CommonUtil.shWithRuby(script, "ruby -r \'./group_steps.rb\' -e \"GroupScenarios.new.group_failed_scenarios(\'${outputsDir}/${outputJsonFile}\', \'${failedStepsFile}\')\"")
+                
+                CommonUtil.safe(script) {
+                    script.sh "rm ${outputsDir}/${outputJsonFile}"
+                }
+                script.step([$class: 'ArtifactArchiver', artifacts: failedStepsFile, allowEmptyArchive: true])
+            
+                script.sh "find ${outputsDir} -iname '*.json'; cd ${outputsDir};  mv *.json ../arhive; cd ..; zip -r arhive.zip arhive "
+                
             }
         }
     }

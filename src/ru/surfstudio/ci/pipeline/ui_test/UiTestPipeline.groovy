@@ -27,6 +27,8 @@ import ru.surfstudio.ci.stage.StageStrategy
 import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
 import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 
+
+
 abstract class UiTestPipeline extends ScmPipeline {
 
     //stage names
@@ -44,8 +46,9 @@ abstract class UiTestPipeline extends ScmPipeline {
     public jiraProjectKey
     public platform  // "android" or "ios"
     public testBranch // branch with tests
-    public defaultTaskKey  //task for run periodically
-
+    public projectForBuild = "test" 
+    public defaultTaskKey //task for run periodically
+    public emulator = true
     //dirs
     public sourcesDir = "src"
     public featuresDir = "features"
@@ -54,7 +57,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     //files
     public featureForTest = "for_test.feature"
-    public outputJsonFile = "report.json"
+    public outputJsonFile = "output.json"
     public outputHtmlFile = "report.html"
     public outputrerunTxtFile = "rerun.txt"
     public outputsIdsDiff = "miss_id.txt"
@@ -76,6 +79,7 @@ abstract class UiTestPipeline extends ScmPipeline {
     public taskKey = ""
     public taskName = ""
     public userEmail = ""
+    
 
     //cron
     public cronTimeTrigger = '00 09 * * *'
@@ -113,13 +117,12 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     def static initBody(UiTestPipeline ctx) {
         def script = ctx.script
-
         CommonUtil.checkPipelineParameterDefined(script, ctx.sourceRepoUrl, "sourceRepoUrl")
         CommonUtil.checkPipelineParameterDefined(script, ctx.jiraProjectKey, "jiraProjectKey")
         CommonUtil.checkPipelineParameterDefined(script, ctx.platform, "platform")
         CommonUtil.checkPipelineParameterDefined(script, ctx.testBranch, "testBranch")
         CommonUtil.checkPipelineParameterDefined(script, ctx.defaultTaskKey, "defaultTaskKey")
-
+        CommonUtil.checkPipelineParameterDefined(script, ctx.projectForBuild, "projectForBuild")
         CommonUtil.printInitialStageStrategies(ctx)
 
         //если триггером был webhook параметры устанавливаются как env, если запустили вручную, то устанавливается как params
@@ -136,6 +139,10 @@ abstract class UiTestPipeline extends ScmPipeline {
             value -> ctx.testBranch = value
         }
 
+        extractValueFromParamsAndRun(script, PROJECT_FOR_BUILD_PARAMETER) {
+            value -> ctx.projectForBuild = value
+        }
+    
         //jira
         extractValueFromEnvOrParamsAndRun(script, TASK_KEY_PARAMETER) {
             value -> ctx.taskKey = value
@@ -146,6 +153,8 @@ abstract class UiTestPipeline extends ScmPipeline {
         extractValueFromEnvOrParamsAndRun(script, USER_EMAIL_PARAMETER) {
             value -> ctx.userEmail = value
         }
+
+    
 
         if (ctx.notificationEnabled) {
             sendStartNotification(ctx)
@@ -216,13 +225,11 @@ abstract class UiTestPipeline extends ScmPipeline {
                                        String outputsDir,
                                        String outputJsonFile,
                                        String outputHtmlFile,
-                                       String outputrerunTxtFile, 
+                                       String outputrerunTxtFile,
                                        String jiraAuthenticationName,
-                                       String htmlReportName,
-                                       String failedStepsFile) {
+                                       String htmlReportName) {
         script.dir(outputsDir) {
-            //def testResult = script.readFile file: outputJsonFile
-            //script.echo "Test result json: $testResult"
+
             script.withCredentials([script.usernamePassword(
                     credentialsId: jiraAuthenticationName,
                     usernameVariable: 'USERNAME',
@@ -236,10 +243,10 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.sh "cd .. && curl -H \"Content-Type: multipart/form-data\" -u ${script.env.USERNAME}:${script.env.PASSWORD} -F \"file=@arhive.zip\" ${Constants.JIRA_URL}rest/raven/1.0/import/execution/bundle"
             }
             
-            CommonUtil.shWithRuby(script, "set -x; ruby -r './Scripts/group_steps.rb' -e 'GroupScenarios.new.group_failed_scenarios(${outputJsonFile}, ${failedStepsFile})'")
             
             script.step([$class: 'ArtifactArchiver', artifacts: outputrerunTxtFile, allowEmptyArchive: true])
             
+
             CommonUtil.safe(script) {
 
                 script.sh "rm arhive.zip"
@@ -344,15 +351,18 @@ abstract class UiTestPipeline extends ScmPipeline {
     public static final String TASK_KEY_PARAMETER = 'taskKey'
     public static final String TEST_BRANCH_PARAMETER = 'testBranch'
     public static final String SOURCE_BRANCH_PARAMETER = 'sourceBranch'
+    public static final String PROJECT_FOR_BUILD_PARAMETER = 'projectForBuild'
     public static final String USER_EMAIL_PARAMETER = 'userEmail'
+    public static final String EMULATOR_PARAMETER = 'emulator'
     public static final String NODE_PARAMETER = 'node'
+
 
     def static List<Object> properties(UiTestPipeline ctx) {
         def script = ctx.script
         return [
                 buildDiscarder(ctx, script),
                 environments(script, ctx.testBranch),
-                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.node),
+                parameters(script, ctx.defaultTaskKey, ctx.testBranch, ctx.defaultSourceBranch, ctx.projectForBuild, ctx.emulator, ctx.node),
                 triggers(script, ctx.jiraProjectKey, ctx.platform, ctx.cronTimeTrigger)
         ]
     }
@@ -405,7 +415,7 @@ abstract class UiTestPipeline extends ScmPipeline {
 
     }
 
-    private static void parameters(script, String defaultTaskKey, String testBranch, String defaultSourceBranch, String node) {
+    private static void parameters(script, String defaultTaskKey, String testBranch, String defaultSourceBranch, String projectForBuild, boolean emulator, String node) {
         return script.parameters([
                 script.string(
                         name: TASK_KEY_PARAMETER,
@@ -418,15 +428,23 @@ abstract class UiTestPipeline extends ScmPipeline {
                 script.string(
                         name: SOURCE_BRANCH_PARAMETER,
                         defaultValue: defaultSourceBranch,
-                        description: 'Ветка, с исходным кодом приложения, из которой нужно собрать сборку. Необязательный параметр, если не указана, будет использоваться MainBranch repo '),
+                        description: 'Ветка, с исходным кодом приложения, из которой нужно собрать сборку. Необязательный параметр, если не указана, будет использоваться MainBranch repo '),       
                 script.string(
                         name: USER_EMAIL_PARAMETER,
                         defaultValue: "qa@surfstudio.ru",
                         description: 'почта пользователя, которому будут отсылаться уведомления о результатах тестирования. Если не указано. то сообщения будут отсылаться в группу проекта'),
                 script.string(
+                        name: PROJECT_FOR_BUILD_PARAMETER,
+                        defaultValue: projectForBuild,
+                        description: 'Название Job, откуда брать сборку'),
+                script.string(
                         name: NODE_PARAMETER,
                         defaultValue: node,
-                        description: 'Node на котором будет выполняться job')
+                        description: 'Node на котором будет выполняться job'),
+                script.booleanParam(
+                        name: EMULATOR_PARAMETER,
+                        defaultValue: false,
+                        description: 'Чек-бокс включен для запуска эмулятора ')
         ])
     }
 
