@@ -21,6 +21,7 @@ import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.stage.CustomStage
 import ru.surfstudio.ci.stage.CustomStagesWrapper
 import ru.surfstudio.ci.stage.DirStagesWrapper
+import ru.surfstudio.ci.stage.DockerStagesWrapper
 import ru.surfstudio.ci.stage.NodeStagesWrapper
 import ru.surfstudio.ci.stage.ParallelStageSet
 import ru.surfstudio.ci.stage.SimpleStage
@@ -225,6 +226,20 @@ abstract class Pipeline implements Serializable {
      */
     def static node(String node, List<Stage> stages) {
         return new NodeStagesWrapper("Node: $node", node, false, stages)
+    }
+
+    // ----------- Docker --------------
+
+    /**
+     * Run stages inside Docker container
+     * @param name name of stage
+     * @param imageName name of image
+     * @param args additional arguments for docker run
+     * @param stages
+     * @return
+     */
+    def static docker(String name, String imageName, String args = "",  List<Stage> stages) {
+        return new DockerStagesWrapper(name, imageName, args, stages)
     }
 
     // ------------ Dir ----------------
