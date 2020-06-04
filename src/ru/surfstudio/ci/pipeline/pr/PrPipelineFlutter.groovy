@@ -24,13 +24,16 @@ import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.CommonUtil
 
 class PrPipelineFlutter extends PrPipeline {
+
     public static final String STAGE_PARALLEL = 'Parallel Pipeline'
 
-    public static final String STAGE_DOCKER = "Docker Flutter"
+    public static final String STAGE_DOCKER = 'Docker Flutter'
+    
+    
     public static final String STAGE_ANDROID = 'Android'
     public static final String STAGE_IOS = 'IOS'
 
-    public static PRE_MERGE_IOS = "PreMerge IOS"
+    public static PRE_MERGE_IOS = 'PreMerge IOS'
 
     public static final String CHECKOUT_FLUTTER_VERSION_ANDROID = 'Checkout Flutter Project Version (Android)'
     public static final String CHECKOUT_FLUTTER_VERSION_IOS = 'Checkout Flutter Project Version (iOS)'
@@ -39,24 +42,25 @@ class PrPipelineFlutter extends PrPipeline {
     public static final String BUILD_IOS = 'Build iOS'
 
     //required initial configuration
-    public androidKeystoreCredentials = "no_credentials"
-    public androidKeystorePropertiesCredentials = "no_credentials"
+    public androidKeystoreCredentials = 'no_credentials'
+    public androidKeystorePropertiesCredentials = 'no_credentials'
 
-    public iOSKeychainCredenialId = "add420b4-78fc-4db0-95e9-eeb0eac780f6"
-    public iOSCertfileCredentialId = "SurfDevelopmentPrivateKey"
+    public iOSKeychainCredenialId = 'add420b4-78fc-4db0-95e9-eeb0eac780f6'
+    public iOSCertfileCredentialId = 'SurfDevelopmentPrivateKey'
 
     //sh commands
-    public checkoutFlutterVersionCommand = "./script/version.sh" // ios only
+    public checkoutFlutterVersionCommand = './script/version.sh' // ios only
 
-    public buildAndroidCommand = "./script/android/build.sh -qa && ./script/android/build.sh -qa -x64"
-    public buildIOsCommand = "./script/ios/build.sh -qa"
-    public testCommand = "flutter test"
+    public buildAndroidCommand = './script/android/build.sh -qa && ./script/android/build.sh -qa -x64'
+    public buildIOsCommand = './script/ios/build.sh -qa'
+    public testCommand = 'flutter test'
 
     //nodes
     public nodeIos
     public nodeAndroid
 
     //docker
+    
     //
     // Чтобы изменить канал Flutter для сборки проекта
     // необходимо в конфиге нужного job'a (лежит в мастер ветке проекта)
@@ -65,9 +69,12 @@ class PrPipelineFlutter extends PrPipeline {
     //
     // def pipeline = new PrPipelineFlutter(this)
     // pipeline.dockerImageName = "cirrusci/flutter:dev"
+    
     //
-    public dockerImageName = "cirrusci/flutter:stable"
+    public dockerImageName = 'cirrusci/flutter:stable'
+    
     public dockerArguments = "-it -v \${PWD}:/build --workdir /build"
+    
 
     PrPipelineFlutter(Object script) {
         super(script)
@@ -75,9 +82,8 @@ class PrPipelineFlutter extends PrPipeline {
 
     def init() {
         def androidStages = [
-                docker(STAGE_DOCKER, dockerImageName, dockerArguments,  [
                         stage(STAGE_ANDROID, false) {
-                            // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
+                        // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                         },
                         stage(CHECKOUT, false) {
                             checkout(script, repoUrl, sourceBranch, repoCredentialsId)
@@ -99,13 +105,11 @@ class PrPipelineFlutter extends PrPipeline {
                                     androidKeystoreCredentials,
                                     androidKeystorePropertiesCredentials)
                         },
-                ]
-                )
         ]
 
         def iosStages = [
                 stage(STAGE_IOS, false) {
-                    // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
+                // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                 },
                 stage(PRE_MERGE_IOS, false) {
                     preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)
@@ -121,7 +125,7 @@ class PrPipelineFlutter extends PrPipeline {
                 },
         ]
 
-        node = "master"
+        node = 'master'
         nodeAndroid = nodeAndroid ?: NodeProvider.androidFlutterNode
         nodeIos = nodeIos ?: NodeProvider.iOSFlutterNode
 
@@ -132,7 +136,7 @@ class PrPipelineFlutter extends PrPipeline {
             initBody(this)
 
             if (this.targetBranchChanged) {
-                script.echo "Build triggered by target branch changes, skip IOS branch"
+                script.echo 'Build triggered by target branch changes, skip IOS branch'
                 stages = androidStages
             }
         }
@@ -140,11 +144,18 @@ class PrPipelineFlutter extends PrPipeline {
 
         stages = [
                 parallel(STAGE_PARALLEL, [
+                    docker(STAGE_DOCKER, dockerImageName, dockerArguments,  [
+                        
+                        
+                        
+                        
                         node(STAGE_ANDROID, nodeAndroid, false, androidStages),
+                    ]),
                         node(STAGE_IOS, nodeIos , false, iosStages)
                 ]),
         ]
 
         finalizeBody = { finalizeStageBody(this) }
     }
+
 }
