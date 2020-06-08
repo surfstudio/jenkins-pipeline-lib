@@ -144,13 +144,10 @@ class PrPipelineFlutter extends PrPipeline {
 
         stages = [
                 parallel(STAGE_PARALLEL, [
-                    docker(STAGE_DOCKER, dockerImageName, dockerArguments,  [
-                        
-                        
-                        
-                        
-                        node(STAGE_ANDROID, nodeAndroid, false, androidStages),
-                    ]),
+                    node(STAGE_ANDROID, nodeAndroid, false, [
+                        docker(STAGE_DOCKER, dockerImageName, dockerArguments, androidStages)
+                        ]
+                    ),
                         node(STAGE_IOS, nodeIos , false, iosStages)
                 ]),
         ]
