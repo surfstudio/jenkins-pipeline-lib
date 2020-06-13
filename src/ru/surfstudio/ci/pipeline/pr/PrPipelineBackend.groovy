@@ -4,7 +4,6 @@ import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.pipeline.helper.BackendPipelineHelper
-import ru.surfstudio.ci.pipeline.helper.DockerHelper
 import ru.surfstudio.ci.stage.StageStrategy
 
 /**
@@ -28,7 +27,9 @@ class PrPipelineBackend extends PrPipeline {
     public unitTestResultPathXml = "build/test-results/test/*.xml"
     public unitTestResultDirHtml = "build/reports/tests/test"
 
-    public String dockerImageForBuild = null
+    public DOCKER_BUILD_WRAPPED_STAGES = "Executing stages inside docker"
+    public dockerImageForBuild = "gradle:6.0.1-jdk11"
+    public dockerArguments = null
 
     PrPipelineBackend(Object script) {
         super(script)
@@ -44,33 +45,33 @@ class PrPipelineBackend extends PrPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                stage(CHECKOUT, false) {
-                    checkout(script, repoUrl, sourceBranch, repoCredentialsId)
-                    saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
-                    abortDuplicateBuildsWithDescription(this)
-                },
-                stage(CODE_STYLE_FORMATTING) {
-                    AndroidPipelineHelper.ktlintFormatStageAndroid(script, sourceBranch, destinationBranch)
-                    hasChanges = AndroidPipelineHelper.checkChangesAndUpdate(script, repoUrl, repoCredentialsId, sourceBranch)
-                },
-                stage(UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT, false) {
-                    if (hasChanges) {
-                        RepositoryUtil.saveCurrentGitCommitHash(script)
-                    }
-                },
-                stage(PRE_MERGE) {
-                    mergeLocal(script, destinationBranch)
-                },
-                stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
-                    DockerHelper.runStageInsideDocker(script, dockerImageForBuild, {
-                                                      BackendPipelineHelper.buildStageBodyBackend(script, buildGradleTask)
-                    })
-                },
-                stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    DockerHelper.runStageInsideDocker(script, dockerImageForBuild, {
-                        BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
-                    })
-                }]
+                docker(DOCKER_BUILD_WRAPPED_STAGES, dockerImageForBuild, dockerArguments,
+                        [
+                                stage(CHECKOUT, false) {
+                                    checkout(script, repoUrl, sourceBranch, repoCredentialsId)
+                                    saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
+                                    abortDuplicateBuildsWithDescription(this)
+                                },
+                                stage(CODE_STYLE_FORMATTING) {
+                                    AndroidPipelineHelper.ktlintFormatStageAndroid(script, sourceBranch, destinationBranch)
+                                    hasChanges = AndroidPipelineHelper.checkChangesAndUpdate(script, repoUrl, repoCredentialsId, sourceBranch)
+                                },
+                                stage(UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT, false) {
+                                    if (hasChanges) {
+                                        RepositoryUtil.saveCurrentGitCommitHash(script)
+                                    }
+                                },
+                                stage(PRE_MERGE) {
+                                    mergeLocal(script, destinationBranch)
+                                },
+                                stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
+                                    BackendPipelineHelper.buildStageBodyBackend(script, buildGradleTask)
+                                },
+                                stage(UNIT_TEST, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                                    BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
+                                }
+                        ])
+        ]
         finalizeBody = { finalizeStageBody(this) }
     }
 }
