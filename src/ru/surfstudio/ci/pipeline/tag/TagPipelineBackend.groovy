@@ -58,40 +58,42 @@ class TagPipelineBackend extends TagPipeline {
 
 
         stages = [
+                stage(CHECKOUT, false) {
+                    checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
+                },
+                stage(VERSION_UPDATE, isStaging ? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE) {
+                    versionUpdateStageBody(script,
+                            repoTag,
+                            gradleFileWithVersion,
+                            appVersionNameGradleVar,
+                            appVersionCodeGradleVar)
+                }
+        ] + [
+
                 docker(DOCKER_BUILD_WRAPPED_STAGES, dockerImageForBuild, dockerArguments,
                         [
-                                stage(CHECKOUT, false) {
-                                    checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
-                                },
-                                stage(VERSION_UPDATE, isStaging ? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE) {
-                                    versionUpdateStageBody(script,
-                                            repoTag,
-                                            gradleFileWithVersion,
-                                            appVersionNameGradleVar,
-                                            appVersionCodeGradleVar)
-                                },
                                 stage(BUILD) {
                                     BackendPipelineHelper.buildStageBodyBackend(script, buildGradleTask)
                                 },
                                 stage(UNIT_TEST) {
                                     BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
-                                },
-                                stage(VERSION_PUSH, isStaging ? StageStrategy.UNSTABLE_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE) {
-                                    versionPushStageBody(script,
-                                            repoTag,
-                                            branchesPatternsForAutoChangeVersion,
-                                            repoUrl,
-                                            repoCredentialsId,
-                                            prepareChangeVersionCommitMessage(
-                                                    script,
-                                                    gradleFileWithVersion,
-                                                    appVersionNameGradleVar,
-                                                    appVersionCodeGradleVar,
-                                            ))
                                 }
 
                         ])
         ] + [
+                stage(VERSION_PUSH, isStaging ? StageStrategy.UNSTABLE_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE) {
+                    versionPushStageBody(script,
+                            repoTag,
+                            branchesPatternsForAutoChangeVersion,
+                            repoUrl,
+                            repoCredentialsId,
+                            prepareChangeVersionCommitMessage(
+                                    script,
+                                    gradleFileWithVersion,
+                                    appVersionNameGradleVar,
+                                    appVersionCodeGradleVar,
+                            ))
+                },
                 stage(DOCKER_BUILD_PUBLISH_IMAGE) {
                     List<String> tags = new ArrayList<String>()
                     tags.add(repoTag)
