@@ -52,8 +52,10 @@ class TagPipelineBackend extends TagPipeline {
                 tag ->
                     script.echo (tag)
                     isStaging = stagingTags.any{tag.toLowerCase().contains(it)}
+                    script.echo(isStaging)
             }
         }
+        script.echo(isStaging)
         propertiesProvider = { properties(this) }
 
 
