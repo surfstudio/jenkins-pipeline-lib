@@ -2,10 +2,9 @@ package ru.surfstudio.ci.pipeline.pr
 
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
-import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.pipeline.helper.BackendPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
-import ru.surfstudio.ci.utils.kotlin.KotlinUtil
+import ru.surfstudio.ci.utils.code.SourceCodeUtil
 
 class PrPipelineBackend extends PrPipeline {
     private boolean hasChanges = false
@@ -39,8 +38,8 @@ class PrPipelineBackend extends PrPipeline {
                                     standardCheckoutStageBody()
                                 },
                                 stage(CODE_STYLE_FORMATTING) {
-                                    KotlinUtil.codeFormatStage(script, sourceBranch, destinationBranch)
-                                    hasChanges = AndroidPipelineHelper.checkChangesAndUpdate(script, repoUrl, repoCredentialsId, sourceBranch)
+                                    SourceCodeUtil.codeFormatStage(script, sourceBranch, destinationBranch)
+                                    hasChanges = SourceCodeUtil.checkChangesAndUpdate(script, repoUrl, repoCredentialsId, sourceBranch)
                                 },
                                 stage(UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT, false) {
                                     if (hasChanges) {
