@@ -19,11 +19,13 @@ import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.utils.android.config.AvdConfig
 
 /**
- * Утилиты для инструментальных тестов Android
+ * Утилиты для Android тестов
  */
 class AndroidTestUtil {
 
     static String ANDROID_TEST_APK_SUFFIX = "androidTest"
+
+    private static String DEFAULT_HTML_RESULT_FILENAME = "index.html"
 
     private static String SPOON_JAR_NAME = "spoon-runner-1.7.1-jar-with-dependencies.jar"
     private static Integer TIMEOUT_PER_TEST = 60 * 5 // seconds
@@ -97,6 +99,42 @@ class AndroidTestUtil {
                     instrumentationTestRetryCount
             )
         }
+    }
+
+    /**
+     * Функция архивирует html-результаты unit-тестов
+     * @param script контекст вызова
+     * @param testResultPathDirHtml путь для сохранения html-отчетов о результатах тестов
+     * @param reportsName название отчетов
+     */
+    static void archiveUnitTestHtmlResults(
+            Object script,
+            String testResultPathDirHtml,
+            String reportsName
+    ) {
+        script.sh "rm -rf $testResultPathDirHtml"
+
+        //находим не пустые html отчеты (в непустых есть папка classes)
+        String[] reportsDirs = (script.findFiles(glob: '**/build/reports/tests/*/classes/*.html') as String[])
+                .collect { it.substring(0, it.indexOf("/classes/")) }
+                .unique()
+        //переносим html отчеты из модулей в testResultPathDirHtml, так как publishHTML может архивировать только из одной папки
+        reportsDirs.each { reportDir ->
+            String[] folders = reportDir.split('/')
+            //папка модуля находится переде папкой build
+            String moduleName = folders[folders.findIndexOf { it == "build" } - 1]
+
+            script.sh "mkdir -p $testResultPathDirHtml${moduleName} && cp -rf $reportDir/* $testResultPathDirHtml${moduleName}"
+        }
+
+        script.publishHTML(target: [
+                allowMissing         : true,
+                alwaysLinkToLastBuild: false,
+                keepAll              : true,
+                reportDir            : testResultPathDirHtml,
+                reportFiles          : "*/$DEFAULT_HTML_RESULT_FILENAME",
+                reportName           : reportsName
+        ])
     }
 
     /**
