@@ -5,20 +5,8 @@ import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.pipeline.helper.BackendPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
+import ru.surfstudio.ci.utils.kotlin.KotlinUtil
 
-/**
- * In a case when you need running some steps into specific environment (for instance build and run tests using jvm 11)
- * you can use {@link ru.surfstudio.ci.pipeline.pr.PrPipelineBackend#buildInsideDocker(Closure)} method, previously you have to set image name {@link PrPipelineBackend#dockerImageForBuild}.<p>
- * Build and Unit_test steps are wrapped by {@link ru.surfstudio.ci.pipeline.pr.PrPipelineBackend#buildInsideDocker(Closure)} method, therefore if you'll set {@link PrPipelineBackend#dockerImageForBuild} field
- * that steps will run inside docker. <p>
- *     For Instance: <p>
- * <pre>
- * def pipeline = new PrPipelineBackend(this)
- * pipeline.init()
- * pipeline.dockerImage = "gradle:6.0.1-jdk11"
- * pipeline.run()
- * </pre>
- */
 class PrPipelineBackend extends PrPipeline {
     private boolean hasChanges = false
     public buildGradleTask = "clean assemble"
@@ -51,7 +39,7 @@ class PrPipelineBackend extends PrPipeline {
                                     standardCheckoutStageBody()
                                 },
                                 stage(CODE_STYLE_FORMATTING) {
-                                    AndroidPipelineHelper.ktlintFormatStageAndroid(script, sourceBranch, destinationBranch)
+                                    KotlinUtil.codeFormatStage(script, sourceBranch, destinationBranch)
                                     hasChanges = AndroidPipelineHelper.checkChangesAndUpdate(script, repoUrl, repoCredentialsId, sourceBranch)
                                 },
                                 stage(UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT, false) {

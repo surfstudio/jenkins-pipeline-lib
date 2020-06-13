@@ -15,7 +15,7 @@
  */
 package ru.surfstudio.ci.pipeline.helper
 
-import ru.surfstudio.ci.CommonUtil
+
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.utils.android.AndroidTestUtil
 import ru.surfstudio.ci.utils.android.AndroidUtil
@@ -139,27 +139,7 @@ class AndroidPipelineHelper {
         //todo
     }
 
-    /**
-     * Форматирование исходного кода на котлин
-     */
-    static ktlintFormatStageAndroid(
-            Object script,
-            String sourceBranch,
-            String destinationBranch
-    ) {
-        def files = RepositoryUtil.ktFilesDiffPr(script, sourceBranch, destinationBranch)
-        if (CommonUtil.isEmptyStringArray(files)) {
-            script.echo "No *.kt files for formatting."
-            return
-        }
-        try {
-            AndroidUtil.withGradleBuildCacheCredentials(script) {
-                script.sh "./gradlew ktlintFilesFormat -PlintFiles=\"${files.join("\",\"")}\""
-            }
-        } catch (Exception ex) {
-            script.echo "Formatting exception $ex"
-        }
-    }
+
 
     static boolean checkChangesAndUpdate(
             Object script,
