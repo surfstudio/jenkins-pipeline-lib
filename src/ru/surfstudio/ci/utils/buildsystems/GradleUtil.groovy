@@ -21,7 +21,8 @@ final class GradleUtil {
     }
 
     static String changeGradleVariableKtStyle(Object script, String file, String varName, String newVarValue) {
-        changeVariableValue(script, file, varName, newVarValue, GRADLE_KOTLIN_DSL_VERSION_VARIABLE_POSITION)
+        String oldVarValue = getGradleVariableKtStyle(script, file, varName)
+        changeVariableValue(script, file, varName, newVarValue, GRADLE_KOTLIN_DSL_VERSION_VARIABLE_POSITION, oldVarValue)
     }
 
     static String getGradleVariable(Object script, String file, String varName) {
@@ -29,11 +30,11 @@ final class GradleUtil {
     }
 
     static String changeGradleVariable(Object script, String file, String varName, String newVarValue) {
-        changeVariableValue(script, file, varName, newVarValue, GRADLE_GROOVY_DSL_VERSION_VARIABLE_POSITION)
+        String oldVarValue = getGradleVariable(script, file, varName)
+        changeVariableValue(script, file, varName, newVarValue, GRADLE_GROOVY_DSL_VERSION_VARIABLE_POSITION, oldVarValue)
     }
 
-    private static void changeVariableValue(script, String file, String varName, String newVarValue, int variablePosition) {
-        String oldVarValue = getGradleVariable(script, file, varName)
+    private static void changeVariableValue(script, String file, String varName, String newVarValue, int variablePosition, String oldVarValue) {
         String fileBody = script.readFile(file)
         String newFileBody = ""
         def lines = fileBody.split("\n")
