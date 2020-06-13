@@ -1,7 +1,7 @@
-package ru.surfstudio.ci.pipeline.helper
+package ru.surfstudio.ci.utils.backend
 
-final class DockerHelper {
-    private DockerHelper() {
+final class DockerUtil {
+    private DockerUtil() {
     }
     def static withGoogleRegistryCredentials(Object script, String registryUrl, Closure body) {
             script.withCredentials([script.file(credentialsId: "google-container-registry-service-account", variable: 'GCRKEY')]) {

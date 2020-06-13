@@ -4,9 +4,9 @@ import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.BackendPipelineHelper
-import ru.surfstudio.ci.pipeline.helper.DockerHelper
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.backend.BackendUtil
+import ru.surfstudio.ci.utils.backend.DockerUtil
 
 import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
 
@@ -93,7 +93,7 @@ class TagPipelineBackend extends TagPipeline {
                                     } else {
                                         tags.add("latest")
                                     }
-                                    DockerHelper.buildDockerImageAndPushIntoGoogleRegistry(script, registryPathAndProjectId, registryUrl, pathToDockerfile, tags)
+                                    DockerUtil.buildDockerImageAndPushIntoGoogleRegistry(script, registryPathAndProjectId, registryUrl, pathToDockerfile, tags)
                                 }
                         ])
         ]
