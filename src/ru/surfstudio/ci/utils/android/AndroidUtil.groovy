@@ -71,6 +71,7 @@ class AndroidUtil {
     /**
      * Execute body with global variables 'GRADLE_BUILD_CACHE_USER' and 'GRADLE_BUILD_CACHE_PASS'
      */
+    @Deprecated
     def static withGradleBuildCacheCredentials(Object script, Closure body) {
         script.withCredentials([
                 script.usernamePassword(
@@ -82,6 +83,7 @@ class AndroidUtil {
         }
     }
 
+    @Deprecated
     static String getGradleVariable(Object script, String file, String varName) {
         String fileBody = script.readFile(file)
         def lines = fileBody.split("\n")
@@ -96,6 +98,7 @@ class AndroidUtil {
         throw script.error("groovy variable with name: $varName not exist in file: $file")
     }
 
+    @Deprecated
     static String changeGradleVariable(Object script, String file, String varName, String newVarValue) {
         String oldVarValue = getGradleVariable(script, file, varName)
         String fileBody = script.readFile(file)

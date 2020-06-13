@@ -20,6 +20,7 @@ import ru.surfstudio.ci.utils.android.AndroidTestUtil
 import ru.surfstudio.ci.utils.android.AndroidUtil
 import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
 import ru.surfstudio.ci.utils.android.config.AvdConfig
+import ru.surfstudio.ci.utils.buildsystems.GradleUtil
 
 /**
  *
@@ -33,7 +34,7 @@ class AndroidPipelineHelper {
     // https://confluence.atlassian.com/stashkb/integrating-with-custom-jira-issue-key-313460921.html?_ga=2.153274111.652352963.1580752546-1778113334.1579628389
 
     def static buildStageBodyAndroid(Object script, String buildGradleTask) {
-        AndroidUtil.withGradleBuildCacheCredentials(script) {
+        GradleUtil.withGradleBuildCacheCredentials(script) {
             script.sh "./gradlew ${buildGradleTask}"
         }
         script.step([$class: 'ArtifactArchiver', artifacts: '**/*.apk', allowEmptyArchive: true])
@@ -58,7 +59,7 @@ class AndroidPipelineHelper {
             String testResultPathDirHtml
     ) {
         try {
-            AndroidUtil.withGradleBuildCacheCredentials(script) {
+            GradleUtil.withGradleBuildCacheCredentials(script) {
                 script.sh "./gradlew $unitTestGradleTask"
             }
         } finally {
@@ -101,7 +102,7 @@ class AndroidPipelineHelper {
             String reportName = DEFAULT_INSTRUMENTAL_TEST_REPORT_NAME
     ) {
         try {
-            AndroidUtil.withGradleBuildCacheCredentials(script) {
+            GradleUtil.withGradleBuildCacheCredentials(script) {
                 script.sh "./gradlew ${androidTestConfig.instrumentalTestAssembleGradleTask}"
             }
             script.sh "rm -rf ${androidTestConfig.instrumentalTestResultPathDirXml}; \

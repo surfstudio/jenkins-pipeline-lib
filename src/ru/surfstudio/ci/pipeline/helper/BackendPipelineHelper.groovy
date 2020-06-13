@@ -15,7 +15,8 @@
  */
 package ru.surfstudio.ci.pipeline.helper
 
-import ru.surfstudio.ci.utils.android.AndroidUtil
+
+import ru.surfstudio.ci.utils.buildsystems.GradleUtil
 
 final class BackendPipelineHelper {
     private BackendPipelineHelper() {
@@ -25,7 +26,7 @@ final class BackendPipelineHelper {
     private static String DEFAULT_HTML_RESULT_FILENAME = "index.html"
 
     def static buildStageBodyBackend(Object script, String buildGradleTask) {
-        AndroidUtil.withGradleBuildCacheCredentials(script) {
+        GradleUtil.withGradleBuildCacheCredentials(script) {
             script.sh "./gradlew ${buildGradleTask}"
 
         }
@@ -33,7 +34,7 @@ final class BackendPipelineHelper {
 
     def static runUnitTests(Object script, String testGradleTask, testResultPathXml, testResultPathDirHtml){
         try {
-            AndroidUtil.withGradleBuildCacheCredentials(script) {
+            GradleUtil.withGradleBuildCacheCredentials(script) {
                 script.sh "./gradlew $testGradleTask"
             }
         } finally {

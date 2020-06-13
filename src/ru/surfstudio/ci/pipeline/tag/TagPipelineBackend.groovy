@@ -5,8 +5,8 @@ import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.BackendPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
-import ru.surfstudio.ci.utils.backend.BackendUtil
 import ru.surfstudio.ci.utils.backend.DockerUtil
+import ru.surfstudio.ci.utils.buildsystems.GradleUtil
 
 class TagPipelineBackend extends TagPipeline {
     public buildGradleTask = "clean assemble"
@@ -89,7 +89,7 @@ class TagPipelineBackend extends TagPipeline {
                                     if (isStaging) {
                                         tags.add("dev-${fullCommitHash.reverse().take(8).reverse()}")
                                         tags.add("dev")
-                                        def gradleVersionNumber = BackendUtil.getGradleVariableKtStyle(script, gradleFileWithVersion, appVersionCodeGradleVar)
+                                        def gradleVersionNumber = GradleUtil.getGradleVariableKtStyle(script, gradleFileWithVersion, appVersionCodeGradleVar)
                                         tags.add("$repoTag.$gradleVersionNumber")
                                     } else {
                                         tags.add("latest")
@@ -105,8 +105,8 @@ class TagPipelineBackend extends TagPipeline {
                                                  String appVersionNameGradleVar,
                                                  String appVersionCodeGradleVar){
         def versionName = CommonUtil.removeQuotesFromTheEnds(
-                BackendUtil.getGradleVariableKtStyle(script, gradleConfigFile, appVersionNameGradleVar))
-        def versionCode = BackendUtil.getGradleVariableKtStyle(script, gradleConfigFile, appVersionCodeGradleVar)
+                GradleUtil.getGradleVariableKtStyle(script, gradleConfigFile, appVersionNameGradleVar))
+        def versionCode = GradleUtil.getGradleVariableKtStyle(script, gradleConfigFile, appVersionCodeGradleVar)
         return "Change version to $versionName ($versionCode) $RepositoryUtil.SKIP_CI_LABEL1 $RepositoryUtil.VERSION_LABEL1"
 
     }
@@ -115,10 +115,10 @@ class TagPipelineBackend extends TagPipeline {
                                       String gradleConfigFile,
                                       String appVersionNameGradleVar,
                                       String appVersionCodeGradleVar) {
-        BackendUtil.changeGradleVariableKtStyle(script, gradleConfigFile, appVersionNameGradleVar, "\"$repoTag\"")
-        def codeStr = BackendUtil.getGradleVariableKtStyle(script, gradleConfigFile, appVersionCodeGradleVar)
+        GradleUtil.changeGradleVariableKtStyle(script, gradleConfigFile, appVersionNameGradleVar, "\"$repoTag\"")
+        def codeStr = GradleUtil.getGradleVariableKtStyle(script, gradleConfigFile, appVersionCodeGradleVar)
         def newCodeStr = String.valueOf(Integer.valueOf(codeStr) + 1)
-        BackendUtil.changeGradleVariableKtStyle(script, gradleConfigFile, appVersionCodeGradleVar, newCodeStr)
+        GradleUtil.changeGradleVariableKtStyle(script, gradleConfigFile, appVersionCodeGradleVar, newCodeStr)
 
     }
 

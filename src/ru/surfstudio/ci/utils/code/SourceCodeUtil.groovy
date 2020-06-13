@@ -2,7 +2,7 @@ package ru.surfstudio.ci.utils.code
 
 import ru.surfstudio.ci.CommonUtil
 import ru.surfstudio.ci.RepositoryUtil
-import ru.surfstudio.ci.utils.android.AndroidUtil
+import ru.surfstudio.ci.utils.buildsystems.GradleUtil
 
 class SourceCodeUtil {
     private SourceCodeUtil() {
@@ -21,7 +21,7 @@ class SourceCodeUtil {
             return
         }
         try {
-            AndroidUtil.withGradleBuildCacheCredentials(script) {
+            GradleUtil.withGradleBuildCacheCredentials(script) {
                 script.sh "./gradlew ktlintFilesFormat -PlintFiles=\"${files.join("\",\"")}\""
             }
         } catch (Exception ex) {
