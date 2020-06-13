@@ -18,10 +18,4 @@ final class DockerHelper {
             }
         }
     }
-    def static runStageInsideDocker(Object script, String dockerImageForBuild, Closure closure) {
-        if(dockerImageForBuild != null && !dockerImageForBuild.isEmpty())
-            script.docker.image(dockerImageForBuild).inside(closure)
-        else
-            closure.call()
-    }
 }

@@ -13,14 +13,17 @@ import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
 class TagPipelineBackend extends TagPipeline {
     public buildGradleTask = "clean assemble"
     public unitTestGradleTask = "test"
+    public DOCKER_BUILD_WRAPPED_STAGES = "Executing stages inside docker"
+    public dockerImageForBuild = "gradle:6.0.1-jdk11"
+    public dockerArguments = null
     public DOCKER_BUILD_PUBLISH_IMAGE = "Build and publish docker image"
+
 
     public unitTestResultPathXml = "build/test-results/test/*.xml"
     public unitTestResultDirHtml = "build/reports/tests/test"
     public pathToDockerfile = "./"
     public registryUrl = "eu.gcr.io"
     public registryPathAndProjectId = ""
-    public dockerImageForBuild = null
 
     public gradleBuildFile = "build.gradle.kts"
     public appVersionNameGradleVar = "appVersionName"
@@ -47,53 +50,52 @@ class TagPipelineBackend extends TagPipeline {
         }
 
         stages = [
-                stage(CHECKOUT, false) {
-                    checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
-                },
-                stage(VERSION_UPDATE, isStaging? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE) {
-                    versionUpdateStageBody(script,
-                            repoTag,
-                            gradleBuildFile,
-                            appVersionNameGradleVar,
-                            appVersionCodeGradleVar)
-                },
-                stage(BUILD) {
-                    DockerHelper.runStageInsideDocker(script, dockerImageForBuild, {
-                        BackendPipelineHelper.buildStageBodyBackend(script, buildGradleTask)
-                    })
-                },
-                stage(UNIT_TEST) {
-                    DockerHelper.runStageInsideDocker(script, dockerImageForBuild, {
-                        BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
-                    })
-                },
-                stage(VERSION_PUSH, isStaging? StageStrategy.UNSTABLE_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE) {
-                    versionPushStageBody(script,
-                            repoTag,
-                            branchesPatternsForAutoChangeVersion,
-                            repoUrl,
-                            repoCredentialsId,
-                            prepareChangeVersionCommitMessage(
-                                    script,
-                                    gradleBuildFile,
-                                    appVersionNameGradleVar,
-                                    appVersionCodeGradleVar,
-                            ))
-                },
-                stage(DOCKER_BUILD_PUBLISH_IMAGE) {
-                    List<String> tags = new ArrayList<String>()
-                    String fullCommitHash = RepositoryUtil.getCurrentCommitHash(script)
-                    tags.add(repoTag)
-                    if(isStaging) {
-                        tags.add("dev-${fullCommitHash.reverse().take(8).reverse()}")
-                        tags.add("dev")
-                        def gradleVersionNumber = BackendUtil.getGradleVariableKtStyle(script, gradleBuildFile, appVersionCodeGradleVar)
-                        tags.add("$repoTag.$gradleVersionNumber")
-                    } else {
-                        tags.add("latest")
-                    }
-                    DockerHelper.buildDockerImageAndPush(script, registryPathAndProjectId, registryUrl, pathToDockerfile, tags)
-                }
+                docker(DOCKER_BUILD_WRAPPED_STAGES, dockerImageForBuild, dockerArguments,
+                        [
+                                stage(CHECKOUT, false) {
+                                    checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
+                                },
+                                stage(VERSION_UPDATE, isStaging ? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE) {
+                                    versionUpdateStageBody(script,
+                                            repoTag,
+                                            gradleBuildFile,
+                                            appVersionNameGradleVar,
+                                            appVersionCodeGradleVar)
+                                },
+                                stage(BUILD) {
+                                    BackendPipelineHelper.buildStageBodyBackend(script, buildGradleTask)
+                                },
+                                stage(UNIT_TEST) {
+                                    BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
+                                },
+                                stage(VERSION_PUSH, isStaging ? StageStrategy.UNSTABLE_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE) {
+                                    versionPushStageBody(script,
+                                            repoTag,
+                                            branchesPatternsForAutoChangeVersion,
+                                            repoUrl,
+                                            repoCredentialsId,
+                                            prepareChangeVersionCommitMessage(
+                                                    script,
+                                                    gradleBuildFile,
+                                                    appVersionNameGradleVar,
+                                                    appVersionCodeGradleVar,
+                                            ))
+                                },
+                                stage(DOCKER_BUILD_PUBLISH_IMAGE) {
+                                    List<String> tags = new ArrayList<String>()
+                                    String fullCommitHash = RepositoryUtil.getCurrentCommitHash(script)
+                                    tags.add(repoTag)
+                                    if (isStaging) {
+                                        tags.add("dev-${fullCommitHash.reverse().take(8).reverse()}")
+                                        tags.add("dev")
+                                        def gradleVersionNumber = BackendUtil.getGradleVariableKtStyle(script, gradleBuildFile, appVersionCodeGradleVar)
+                                        tags.add("$repoTag.$gradleVersionNumber")
+                                    } else {
+                                        tags.add("latest")
+                                    }
+                                    DockerHelper.buildDockerImageAndPush(script, registryPathAndProjectId, registryUrl, pathToDockerfile, tags)
+                                }
+                        ])
         ]
         finalizeBody = { finalizeStageBody(this) }
     }
