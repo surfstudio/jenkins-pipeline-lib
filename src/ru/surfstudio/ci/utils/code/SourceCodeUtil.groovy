@@ -5,6 +5,8 @@ import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.utils.buildsystems.GradleUtil
 
 class SourceCodeUtil {
+    private static String JIRA_ISSUE_KEY_PATTERN = ~/((?<!([A-Z]{1,10})-?)[A-Z]+-\d+)/
+
     private SourceCodeUtil() {
     }
     /**
