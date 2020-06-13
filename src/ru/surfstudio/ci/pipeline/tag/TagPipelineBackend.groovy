@@ -29,10 +29,10 @@ class TagPipelineBackend extends TagPipeline {
 
     private isStaging = false
 
-    public List<String> productionDockerTags = ["latest"]
-    public List<String> stagingDockerTags = ["dev"]
+    public def productionDockerTags = ["latest"]
+    public def stagingDockerTags = ["dev"]
 
-    public List<String> stagingTags = ["staging","snapshot","dev"]
+    public def stagingTags = ["staging","snapshot","dev"]
 
 
     TagPipelineBackend(Object script) {
@@ -49,7 +49,7 @@ class TagPipelineBackend extends TagPipeline {
         initializeBody = {
             initBody(this)
             CommonUtil.extractValueFromEnvOrParamsAndRun(script, REPO_TAG_PARAMETER) {
-                tag -> isStaging = stagingTags.stream().anyMatch(stagingTag-> tag.toLowerCase().contains(stagingTag))
+                tag -> isStaging = stagingTags.any{tag.toLowerCase().contains(it)}
             }
         }
         propertiesProvider = { properties(this) }
