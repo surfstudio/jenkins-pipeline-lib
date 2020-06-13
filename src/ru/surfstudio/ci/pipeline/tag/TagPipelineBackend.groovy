@@ -29,6 +29,12 @@ class TagPipelineBackend extends TagPipeline {
 
     private isStaging = false
 
+    public List<String> productionDockerTags = ["latest"]
+    public List<String> stagingDockerTags = ["dev"]
+
+    public List<String> stagingTags = ["staging","snapshot","dev"]
+
+
     TagPipelineBackend(Object script) {
         super(script)
     }
@@ -43,7 +49,7 @@ class TagPipelineBackend extends TagPipeline {
         initializeBody = {
             initBody(this)
             CommonUtil.extractValueFromEnvOrParamsAndRun(script, REPO_TAG_PARAMETER) {
-                value -> isStaging = value.toLowerCase().contains("staging") || value.toLowerCase().contains("snapshot") || value.toLowerCase().contains("dev")
+                tag -> isStaging = stagingTags.stream().anyMatch(stagingTag-> tag.toLowerCase().contains(stagingTag))
             }
         }
         propertiesProvider = { properties(this) }
@@ -84,15 +90,11 @@ class TagPipelineBackend extends TagPipeline {
                                 },
                                 stage(DOCKER_BUILD_PUBLISH_IMAGE) {
                                     List<String> tags = new ArrayList<String>()
-                                    String fullCommitHash = RepositoryUtil.getCurrentCommitHash(script)
                                     tags.add(repoTag)
                                     if (isStaging) {
-                                        tags.add("dev-${fullCommitHash.reverse().take(8).reverse()}")
-                                        tags.add("dev")
-                                        def gradleVersionNumber = GradleUtil.getGradleVariableKtStyle(script, gradleFileWithVersion, appVersionCodeGradleVar)
-                                        tags.add("$repoTag.$gradleVersionNumber")
+                                        tags.addAll(stagingDockerTags)
                                     } else {
-                                        tags.add("latest")
+                                        tags.addAll(productionDockerTags)
                                     }
                                     DockerUtil.buildDockerImageAndPushIntoGoogleRegistry(script, registryPathAndProjectId, registryUrl, pathToDockerfile, tags)
                                 }
