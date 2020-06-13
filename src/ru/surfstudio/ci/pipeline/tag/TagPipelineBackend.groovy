@@ -40,7 +40,12 @@ class TagPipelineBackend extends TagPipeline {
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
 
-        initializeBody = { initBody(this) }
+        initializeBody = {
+            initBody(this)
+            CommonUtil.extractValueFromEnvOrParamsAndRun(script, REPO_TAG_PARAMETER) {
+                value -> isStaging = value.toLowerCase().contains("staging") || value.toLowerCase().contains("snapshot") || value.toLowerCase().contains("dev")
+            }
+        }
         propertiesProvider = { properties(this) }
 
 
