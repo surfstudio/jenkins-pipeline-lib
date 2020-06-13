@@ -76,9 +76,7 @@ class PrPipelineAndroid extends PrPipeline {
 
         stages = [
                 stage(CHECKOUT, false) {
-                    checkout(script, repoUrl, sourceBranch, repoCredentialsId)
-                    saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
-                    abortDuplicateBuildsWithDescription(this)
+                    standardCheckoutStageBody()
                 },
                 stage(CODE_STYLE_FORMATTING, StageStrategy.SKIP_STAGE) {
                     AndroidPipelineHelper.ktlintFormatStageAndroid(script, sourceBranch, destinationBranch)

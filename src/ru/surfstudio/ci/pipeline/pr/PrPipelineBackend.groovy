@@ -48,9 +48,7 @@ class PrPipelineBackend extends PrPipeline {
                 docker(DOCKER_BUILD_WRAPPED_STAGES, dockerImageForBuild, dockerArguments,
                         [
                                 stage(CHECKOUT, false) {
-                                    checkout(script, repoUrl, sourceBranch, repoCredentialsId)
-                                    saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
-                                    abortDuplicateBuildsWithDescription(this)
+                                    standardCheckoutStageBody()
                                 },
                                 stage(CODE_STYLE_FORMATTING) {
                                     AndroidPipelineHelper.ktlintFormatStageAndroid(script, sourceBranch, destinationBranch)
