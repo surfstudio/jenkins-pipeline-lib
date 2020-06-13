@@ -93,7 +93,7 @@ class TagPipelineBackend extends TagPipeline {
                                     } else {
                                         tags.add("latest")
                                     }
-                                    DockerHelper.buildDockerImageAndPush(script, registryPathAndProjectId, registryUrl, pathToDockerfile, tags)
+                                    DockerHelper.buildDockerImageAndPushIntoGoogleRegistry(script, registryPathAndProjectId, registryUrl, pathToDockerfile, tags)
                                 }
                         ])
         ]
