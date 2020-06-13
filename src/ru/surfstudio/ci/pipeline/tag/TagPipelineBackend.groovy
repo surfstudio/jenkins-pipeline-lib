@@ -8,8 +8,6 @@ import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.backend.BackendUtil
 import ru.surfstudio.ci.utils.backend.DockerUtil
 
-import static ru.surfstudio.ci.CommonUtil.extractValueFromEnvOrParamsAndRun
-
 class TagPipelineBackend extends TagPipeline {
     public buildGradleTask = "clean assemble"
     public unitTestGradleTask = "test"
@@ -25,7 +23,7 @@ class TagPipelineBackend extends TagPipeline {
     public registryUrl = "eu.gcr.io"
     public registryPathAndProjectId = ""
 
-    public gradleBuildFile = "build.gradle.kts"
+    public gradleFileWithVersion = "build.gradle.kts"
     public appVersionNameGradleVar = "appVersionName"
     public appVersionCodeGradleVar = "appVersionCode"
 
@@ -45,9 +43,7 @@ class TagPipelineBackend extends TagPipeline {
         initializeBody = { initBody(this) }
         propertiesProvider = { properties(this) }
 
-        extractValueFromEnvOrParamsAndRun(script, REPO_TAG_PARAMETER) {
-            value -> isStaging = value.toLowerCase().contains("staging") || value.toLowerCase().contains("snapshot") || value.toLowerCase().contains("dev")
-        }
+
 
         stages = [
                 docker(DOCKER_BUILD_WRAPPED_STAGES, dockerImageForBuild, dockerArguments,
@@ -58,7 +54,7 @@ class TagPipelineBackend extends TagPipeline {
                                 stage(VERSION_UPDATE, isStaging ? StageStrategy.FAIL_WHEN_STAGE_ERROR : StageStrategy.SKIP_STAGE) {
                                     versionUpdateStageBody(script,
                                             repoTag,
-                                            gradleBuildFile,
+                                            gradleFileWithVersion,
                                             appVersionNameGradleVar,
                                             appVersionCodeGradleVar)
                                 },
@@ -76,7 +72,7 @@ class TagPipelineBackend extends TagPipeline {
                                             repoCredentialsId,
                                             prepareChangeVersionCommitMessage(
                                                     script,
-                                                    gradleBuildFile,
+                                                    gradleFileWithVersion,
                                                     appVersionNameGradleVar,
                                                     appVersionCodeGradleVar,
                                             ))
@@ -88,7 +84,7 @@ class TagPipelineBackend extends TagPipeline {
                                     if (isStaging) {
                                         tags.add("dev-${fullCommitHash.reverse().take(8).reverse()}")
                                         tags.add("dev")
-                                        def gradleVersionNumber = BackendUtil.getGradleVariableKtStyle(script, gradleBuildFile, appVersionCodeGradleVar)
+                                        def gradleVersionNumber = BackendUtil.getGradleVariableKtStyle(script, gradleFileWithVersion, appVersionCodeGradleVar)
                                         tags.add("$repoTag.$gradleVersionNumber")
                                     } else {
                                         tags.add("latest")
