@@ -87,18 +87,20 @@ class TagPipelineBackend extends TagPipeline {
                                                     appVersionNameGradleVar,
                                                     appVersionCodeGradleVar,
                                             ))
-                                },
-                                stage(DOCKER_BUILD_PUBLISH_IMAGE) {
-                                    List<String> tags = new ArrayList<String>()
-                                    tags.add(repoTag)
-                                    if (isStaging) {
-                                        tags.addAll(stagingDockerTags)
-                                    } else {
-                                        tags.addAll(productionDockerTags)
-                                    }
-                                    DockerUtil.buildDockerImageAndPushIntoGoogleRegistry(script, registryPathAndProjectId, registryUrl, pathToDockerfile, tags)
                                 }
-                        ])
+
+                        ]) + [
+                        stage(DOCKER_BUILD_PUBLISH_IMAGE) {
+                            List<String> tags = new ArrayList<String>()
+                            tags.add(repoTag)
+                            if (isStaging) {
+                                tags.addAll(stagingDockerTags)
+                            } else {
+                                tags.addAll(productionDockerTags)
+                            }
+                            DockerUtil.buildDockerImageAndPushIntoGoogleRegistry(script, registryPathAndProjectId, registryUrl, pathToDockerfile, tags)
+                        }
+                        ]
         ]
         finalizeBody = { finalizeStageBody(this) }
     }
