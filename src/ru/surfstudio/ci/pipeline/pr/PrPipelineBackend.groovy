@@ -32,23 +32,24 @@ class PrPipelineBackend extends PrPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
+                stage(CHECKOUT, false) {
+                    standardCheckoutStageBody()
+                },
+                stage(CODE_STYLE_FORMATTING) {
+                    SourceCodeUtil.codeFormatStage(script, sourceBranch, destinationBranch)
+                    hasChanges = SourceCodeUtil.checkChangesAndUpdate(script, repoUrl, repoCredentialsId, sourceBranch)
+                },
+                stage(UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT, false) {
+                    if (hasChanges) {
+                        RepositoryUtil.saveCurrentGitCommitHash(script)
+                    }
+                },
+                stage(PRE_MERGE) {
+                    mergeLocal(script, destinationBranch)
+                }
+        ]+[
                 docker(DOCKER_BUILD_WRAPPED_STAGES, dockerImageForBuild, dockerArguments,
                         [
-                                stage(CHECKOUT, false) {
-                                    standardCheckoutStageBody()
-                                },
-                                stage(CODE_STYLE_FORMATTING) {
-                                    SourceCodeUtil.codeFormatStage(script, sourceBranch, destinationBranch)
-                                    hasChanges = SourceCodeUtil.checkChangesAndUpdate(script, repoUrl, repoCredentialsId, sourceBranch)
-                                },
-                                stage(UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT, false) {
-                                    if (hasChanges) {
-                                        RepositoryUtil.saveCurrentGitCommitHash(script)
-                                    }
-                                },
-                                stage(PRE_MERGE) {
-                                    mergeLocal(script, destinationBranch)
-                                },
                                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                                     BackendPipelineHelper.buildStageBodyBackend(script, buildGradleTask)
                                 },
