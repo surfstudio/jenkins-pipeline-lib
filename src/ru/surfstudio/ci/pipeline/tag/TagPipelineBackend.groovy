@@ -48,14 +48,11 @@ class TagPipelineBackend extends TagPipeline {
 
         initializeBody = {
             initBody(this)
-            CommonUtil.extractValueFromEnvOrParamsAndRun(script, REPO_TAG_PARAMETER) {
-                tag ->
-                    script.echo (tag)
-                    isStaging = stagingTags.any{tag.toLowerCase().contains(it)}
-                    script.echo("$isStaging")
-            }
         }
-        script.echo("$isStaging")
+        CommonUtil.extractValueFromEnvOrParamsAndRun(script, REPO_TAG_PARAMETER) {
+            tag ->
+                isStaging = stagingTags.any{tag.toLowerCase().contains(it)}
+        }
         propertiesProvider = { properties(this) }
 
 
