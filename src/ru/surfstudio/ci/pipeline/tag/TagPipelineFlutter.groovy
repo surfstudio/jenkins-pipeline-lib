@@ -314,16 +314,12 @@ class TagPipelineFlutter extends TagPipeline {
             ctx.getStage(STAGE_PARALLEL).stages = [
                     node(STAGE_IOS, ctx.nodeIos, false, ctx.iosStages)
             ]
-
-//            ctx.forStages(ctx.androidStages) { Stage stage ->
-//                applyStrategy(ctx, stage, skipResolver(true))
-//            }
         }
 
         if (!ctx.shouldBuildIos) {
-            ctx.forStages(ctx.iosStages) { Stage stage ->
-                applyStrategy(ctx, stage, skipResolver(true))
-            }
+            ctx.getStage(STAGE_PARALLEL).stages = [
+                    group(STAGE_ANDROID, ctx.androidStages)
+            ]
         }
 
         CommonUtil.applyStrategiesFromParams(ctx, paramsMap)
