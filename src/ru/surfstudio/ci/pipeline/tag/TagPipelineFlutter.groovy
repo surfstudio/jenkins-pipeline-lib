@@ -92,8 +92,9 @@ class TagPipelineFlutter extends TagPipeline {
     public mainVersionCode = "<undefined>"
     public arm64VersionCode = "<undefined>"
 
-    //ios node
+    //nodes
     public nodeIos
+    public nodeAndroid
 
     //backward compatibility for beta
     public versionPrefix = ""; //todo remove after moving to fad finished
@@ -130,8 +131,9 @@ class TagPipelineFlutter extends TagPipeline {
             ])
         }
 
-        node = NodeProvider.androidFlutterNode
-        nodeIos = NodeProvider.iOSFlutterNode
+        node = 'master'
+        nodeAndroid = nodeAndroid ?: NodeProvider.androidFlutterNode
+        nodeIos = nodeIos ?: NodeProvider.iOSFlutterNode
 
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
@@ -251,7 +253,7 @@ class TagPipelineFlutter extends TagPipeline {
 
         stages = [
                 parallel(STAGE_PARALLEL, [
-                        group(STAGE_ANDROID, androidStages),
+                        node(STAGE_ANDROID, nodeAndroid, false, androidStages),
                         node(STAGE_IOS, nodeIos, false, iosStages)
                 ]),
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
@@ -312,13 +314,13 @@ class TagPipelineFlutter extends TagPipeline {
 
         if (!ctx.shouldBuildAndroid) {
             ctx.getStage(STAGE_PARALLEL).stages = [
-                    node(STAGE_IOS, ctx.nodeIos, false, ctx.iosStages)
+                    ctx.getStage(STAGE_IOS)
             ]
         }
 
         if (!ctx.shouldBuildIos) {
             ctx.getStage(STAGE_PARALLEL).stages = [
-                    group(STAGE_ANDROID, ctx.androidStages)
+                    ctx.getStage(STAGE_ANDROID)
             ]
         }
 
