@@ -19,6 +19,7 @@ package ru.surfstudio.ci.pipeline.tag
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
+import ru.surfstudio.ci.stage.ParallelStageSet
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.flutter.FlutterUtil
@@ -310,9 +311,13 @@ class TagPipelineFlutter extends TagPipeline {
         ]
 
         if (!ctx.shouldBuildAndroid) {
-            ctx.forStages(ctx.androidStages) { Stage stage ->
-                applyStrategy(ctx, stage, skipResolver(true))
-            }
+            ctx.getStage(STAGE_PARALLEL).stages = [
+                    node(STAGE_IOS, ctx.nodeIos, false, ctx.iosStages)
+            ]
+
+//            ctx.forStages(ctx.androidStages) { Stage stage ->
+//                applyStrategy(ctx, stage, skipResolver(true))
+//            }
         }
 
         if (!ctx.shouldBuildIos) {
