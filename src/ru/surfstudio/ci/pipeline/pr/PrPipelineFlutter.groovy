@@ -137,7 +137,7 @@ class PrPipelineFlutter extends PrPipeline {
 
             if (this.targetBranchChanged) {
                 script.echo 'Build triggered by target branch changes, skip IOS branch'
-                stages = androidStages
+                stages = [ node(STAGE_ANDROID, nodeAndroid, false, androidStages) ]
             }
         }
         propertiesProvider = { properties(this) }
