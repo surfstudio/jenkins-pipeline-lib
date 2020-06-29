@@ -263,19 +263,19 @@ abstract class PrPipeline extends ScmPipeline {
                         genericVariables: [
                                 [
                                         key  : SOURCE_BRANCH_PARAMETER,
-                                        value: '$.object_attributes.source_branch'
+                                        value: '$.pull_request.base.ref'
                                 ],
                                 [
                                         key  : DESTINATION_BRANCH_PARAMETER,
-                                        value: '$.object_attributes.target_branch'
+                                        value: '$.pull_request.head.ref'
                                 ],
                                 [
                                         key  : AUTHOR_USERNAME_PARAMETER,
-                                        value: '$.object_attributes.last_commit.author.email'
+                                        value: '$.pull_request.user.login'
                                 ],
                                 [
                                         key  : 'repoUrl',
-                                        value: '$.project.web_url'
+                                        value: '$.repository.html_url'
                                 ],
                                 [
                                         key  : TARGET_BRANCH_CHANGED_PARAMETER,
@@ -284,7 +284,7 @@ abstract class PrPipeline extends ScmPipeline {
                         ],
                         printContributedVariables: true,
                         printPostContent: true,
-                        causeString: 'Triggered by GitLab',
+                        causeString: 'Triggered by GitHub',
                         regexpFilterExpression: "$repoUrl",
                         regexpFilterText: '$repoUrl'
                 ),
