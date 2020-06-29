@@ -263,11 +263,11 @@ abstract class PrPipeline extends ScmPipeline {
                         genericVariables: [
                                 [
                                         key  : SOURCE_BRANCH_PARAMETER,
-                                        value: '$.pull_request.base.ref'
+                                        value: '$.pull_request.head.ref'
                                 ],
                                 [
                                         key  : DESTINATION_BRANCH_PARAMETER,
-                                        value: '$.pull_request.head.ref'
+                                        value: '$.pull_request.base.ref'
                                 ],
                                 [
                                         key  : AUTHOR_USERNAME_PARAMETER,
