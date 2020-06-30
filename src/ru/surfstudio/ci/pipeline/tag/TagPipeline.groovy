@@ -283,21 +283,20 @@ abstract class TagPipeline extends ScmPipeline {
                         genericVariables: [
                                 [
                                         key  : 'repoTag_0', //параметер tag будет доступен по ключу repoTag_0 - особенности GenericWebhookTrigger Plugin
-                                        value: '$.ref',
-                                        regexpFilter: 'refs/tags/'
+                                        value: '$.release.tag_name'
                                 ],
                                 [
                                         key  : 'repoUrl',
-                                        value: '$.project.web_url'
+                                        value: '$.repository.html_url'
                                 ],
                                 [
                                         key :  TAG_HASH_PARAMETER,
-                                        value: '$.checkout_sha'
+                                        value: '$.release.target_commitish'
                                 ]
                         ],
                         printContributedVariables: true,
                         printPostContent: true,
-                        causeString: 'Triggered by Gitlab',
+                        causeString: 'Triggered by GitHub',
                         regexpFilterExpression: /$repoUrl $tagRegexp/,
                         regexpFilterText: '$repoUrl $repoTag_0'
                 ),

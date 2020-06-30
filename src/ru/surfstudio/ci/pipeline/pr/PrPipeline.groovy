@@ -164,14 +164,14 @@ abstract class PrPipeline extends ScmPipeline {
     def static finalizeStageBody(PrPipeline ctx) {
         RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.sourceBranch)
         prepareMessageForPipeline(ctx, { message ->
-            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
+            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "github")
         })
     }
 
     def static debugFinalizeStageBody(PrPipeline ctx) {
         RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.sourceBranch)
         prepareMessageForPipeline(ctx, { message ->
-            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
+            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "github")
             JarvisUtil.sendMessageToGroup(ctx.script, message, "9d0c617e-d14a-490e-9914-83820b135cfc", "stride", false)
         })
     }
@@ -253,7 +253,7 @@ abstract class PrPipeline extends ScmPipeline {
                         description: 'Ветка, в которую будет мержиться пр, обязательный параметр'),
                 script.string(
                         name: AUTHOR_USERNAME_PARAMETER,
-                        description: 'username в gitlab создателя пр, нужно для отправки собщений, обязательный параметр')
+                        description: 'username в github создателя пр, нужно для отправки собщений, обязательный параметр')
         ])
     }
 
@@ -271,7 +271,7 @@ abstract class PrPipeline extends ScmPipeline {
                                 ],
                                 [
                                         key  : AUTHOR_USERNAME_PARAMETER,
-                                        value: '$.pull_request.user.login'
+                                        value: '$.sender.login'
                                 ],
                                 [
                                         key  : 'repoUrl',
