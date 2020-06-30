@@ -18,6 +18,7 @@ package ru.surfstudio.ci.pipeline.tag
 
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
+import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
 import ru.surfstudio.ci.stage.ParallelStageSet
 import ru.surfstudio.ci.stage.Stage
@@ -270,6 +271,37 @@ class TagPipelineFlutter extends TagPipeline {
 
 
         finalizeBody = { finalizeStageBody(this) }
+    }
+
+    def run() {
+        CommonUtil.fixVisualizingStagesInParallelBlock(script)
+        try {
+            def initStage = stage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, false, createInitStageBody())
+            initStage.execute(script, this)
+            if (CommonUtil.notEmpty(node)) {
+                script.echo "Switch to node ${node}: ${script.env.NODE_NAME}"
+            }
+            for (Stage stage : stages) {
+                stage.execute(script, this)
+            }
+        } finally {
+            jobResult = calculateJobResult(stages)
+            if (jobResult == Result.ABORTED || jobResult == Result.FAILURE) {
+                script.echo "Job stopped, see reason above ^^^^"
+            }
+            script.echo "Finalize build:"
+            printStageResults()
+            script.echo "Current job result: ${script.currentBuild.result}"
+            script.echo "Try apply job result: ${jobResult}"
+            script.currentBuild.result = jobResult
+            //нельзя повышать статус, то есть если раньше был установлен failed или unstable, нельзя заменить на success
+            script.echo "Updated job result: ${script.currentBuild.result}"
+            if (finalizeBody) {
+                script.echo "Start finalize body"
+                finalizeBody()
+                script.echo "End finalize body"
+            }
+        }
     }
 
 
