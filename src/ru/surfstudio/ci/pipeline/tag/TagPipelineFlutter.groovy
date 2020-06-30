@@ -93,8 +93,9 @@ class TagPipelineFlutter extends TagPipeline {
     public mainVersionCode = "<undefined>"
     public arm64VersionCode = "<undefined>"
 
-    //ios node
+    //nodes
     public nodeIos
+    public nodeAndroid
 
     //backward compatibility for beta
     public versionPrefix = ""; //todo remove after moving to fad finished
@@ -131,8 +132,9 @@ class TagPipelineFlutter extends TagPipeline {
             ])
         }
 
-        node = NodeProvider.androidFlutterNode
-        nodeIos = NodeProvider.iOSFlutterNode
+        node = 'master'
+        nodeAndroid = nodeAndroid ?: NodeProvider.androidFlutterNode
+        nodeIos = nodeIos ?: NodeProvider.iOSFlutterNode
 
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
@@ -252,7 +254,7 @@ class TagPipelineFlutter extends TagPipeline {
 
         stages = [
                 parallel(STAGE_PARALLEL, [
-                        group(STAGE_ANDROID, androidStages),
+                        node(STAGE_ANDROID, nodeAndroid, false, androidStages),
                         node(STAGE_IOS, nodeIos, false, iosStages)
                 ]),
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
@@ -333,24 +335,24 @@ class TagPipelineFlutter extends TagPipeline {
     }
 
     private static void initStrategies(TagPipelineFlutter ctx) {
-        def skipResolver = { skipStage -> skipStage ? StageStrategy.SKIP_STAGE : DEFAULT_STAGE_STRATEGY }
+        def skipResolver = { skipStage, stageName -> skipStage ? StageStrategy.SKIP_STAGE : ctx.getStage(stageName).strategy }
         def paramsMap = [
-                (BUILD_IOS_BETA)       : skipResolver(!ctx.shouldBuildIosBeta),
-                (BETA_UPLOAD_IOS)      : skipResolver(!ctx.shouldBuildIosBeta),
+                (BUILD_IOS_BETA)       : skipResolver(!ctx.shouldBuildIosBeta, BUILD_IOS_BETA),
+                (BETA_UPLOAD_IOS)      : skipResolver(!ctx.shouldBuildIosBeta, BETA_UPLOAD_IOS),
 
-                (BUILD_IOS_TESTFLIGHT) : skipResolver(!ctx.shouldBuildIosTestFlight),
-                (TESTFLIGHT_UPLOAD_IOS): skipResolver(!ctx.shouldBuildIosTestFlight),
+                (BUILD_IOS_TESTFLIGHT) : skipResolver(!ctx.shouldBuildIosTestFlight, BUILD_IOS_TESTFLIGHT),
+                (TESTFLIGHT_UPLOAD_IOS): skipResolver(!ctx.shouldBuildIosTestFlight, TESTFLIGHT_UPLOAD_IOS),
         ]
 
         if (!ctx.shouldBuildAndroid) {
             ctx.getStage(STAGE_PARALLEL).stages = [
-                    node(STAGE_IOS, ctx.nodeIos, false, ctx.iosStages)
+                    ctx.getStage(STAGE_IOS)
             ]
         }
 
         if (!ctx.shouldBuildIos) {
             ctx.getStage(STAGE_PARALLEL).stages = [
-                    group(STAGE_ANDROID, ctx.androidStages)
+                    ctx.getStage(STAGE_ANDROID)
             ]
         }
 
