@@ -297,7 +297,7 @@ abstract class TagPipeline extends ScmPipeline {
                         printContributedVariables: true,
                         printPostContent: true,
                         causeString: 'Triggered by GitHub',
-                        regexpFilterExpression: /$repoUrl $tagRegexp/,
+                        regexpFilterExpression: /https:\/\/github.com\/surfstudio\/inventiveretail-android-test $tagRegexp/,
                         regexpFilterText: '$repoUrl $repoTag_0'
                 ),
                 script.pollSCM('')
