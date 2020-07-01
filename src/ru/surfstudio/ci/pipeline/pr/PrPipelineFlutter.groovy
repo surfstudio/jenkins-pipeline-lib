@@ -125,7 +125,7 @@ class PrPipelineFlutter extends PrPipeline {
                 },
         ]
 
-        node = 'master'
+        node = null //null because not needed in this pipeline
         nodeAndroid = nodeAndroid ?: NodeProvider.androidFlutterNode
         nodeIos = nodeIos ?: NodeProvider.iOSFlutterNode
 
@@ -136,6 +136,7 @@ class PrPipelineFlutter extends PrPipeline {
             initBody(this)
 
             if (this.targetBranchChanged) {
+                //android build stages are skipped by superclass. androidStages not recreated.
                 script.echo 'Build triggered by target branch changes, skip IOS branch'
                 stages = [ node(STAGE_ANDROID, nodeAndroid, false, androidStages) ]
             }
@@ -148,7 +149,7 @@ class PrPipelineFlutter extends PrPipeline {
                         docker(STAGE_DOCKER, dockerImageName, dockerArguments, androidStages)
                         ]
                     ),
-                        node(STAGE_IOS, nodeIos , false, iosStages)
+                    node(STAGE_IOS, nodeIos , false, iosStages)
                 ]),
         ]
 
