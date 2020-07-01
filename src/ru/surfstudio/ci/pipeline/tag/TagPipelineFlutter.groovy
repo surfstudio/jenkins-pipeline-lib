@@ -132,7 +132,7 @@ class TagPipelineFlutter extends TagPipeline {
             ])
         }
 
-        node = 'master'
+        node = null
         nodeAndroid = nodeAndroid ?: NodeProvider.androidFlutterNode
         nodeIos = nodeIos ?: NodeProvider.iOSFlutterNode
 
