@@ -26,8 +26,67 @@ class RepositoryUtil {
     def static SKIP_CI_LABEL1 = "[skip ci]"
     def static SKIP_CI_LABEL2 = "[ci skip]"
     def static VERSION_LABEL1 = "[version]"
-    def static DEFAULT_GITLAB_CONNECTION = "Gitlab Surf"
     def static SYNTHETIC_PIPELINE_STAGE = "Pipeline"
+
+    def static notifyGithubAboutStageStart(Object script, String repoUrl, String stageName){
+        def githubStatus = "PENDING"
+        def account = "surfstudio"
+        def commit = getSavedGitCommitHash(script)
+        def slug = getCurrentGithubRepoSlug(script, repoUrl)
+        if (!commit) {
+            script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
+        }
+        script.echo "Notify GitHub - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $githubStatus"
+        script.githubNotify(credentialsId: 'b72070fe-76a3-467a-85c4-beccf4b0979f', context: stageName,
+                description: "Выполняется...", status: githubStatus, repo: slug, account: account, sha: commit)
+    }
+
+    def static notifyGithubAboutStageFinish(Object script, String repoUrl, String stageName, String result){
+        def commit = getSavedGitCommitHash(script)
+        if (!commit) {
+            script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
+        }
+        notifyGithubAboutStageFinish(script, repoUrl, stageName, result, commit)
+    }
+
+    def static notifyGithubAboutStageFinish(Object script, String repoUrl, String stageName, String result, String revision){
+        def githubStatus = ""
+        def description = ""
+        def account = "surfstudio"
+        def slug = getCurrentGithubRepoSlug(script, repoUrl)
+
+        switch (result) {
+            case Result.SUCCESS:
+                githubStatus = "SUCCESS"
+                description = "Успех!"
+                break
+            case Result.NOT_BUILT:
+            case Result.ABORTED:
+                githubStatus = "ERROR"
+                description = "Отменен"
+                break
+            case Result.FAILURE:
+            case Result.UNSTABLE:
+                githubStatus = "FAILURE"
+                description = "Сборка провалилась :("
+                break
+            default:
+                script.error "Unsupported Result: ${result}"
+        }
+
+        script.echo "Notify GitHub - stage: $stageName, repoSlug: $slug, commitId: $revision, status: $githubStatus"
+        script.githubNotify(credentialsId: 'b72070fe-76a3-467a-85c4-beccf4b0979f', context: stageName,
+                description: description, status: githubStatus, repo: slug, account: account, sha: revision)
+    }
+
+    def static notifyGithubAboutStagePending(Object script, String repoUrl, String stageName, String sourceBranch){
+        def githubStatus = "PENDING"
+        def account = "surfstudio"
+        def slug = getCurrentGithubRepoSlug(script, repoUrl)
+        script.echo "Notify GitHub - stage: $stageName, repoSlug: $slug, status: $githubStatus"
+        script.githubNotify(credentialsId: 'b72070fe-76a3-467a-85c4-beccf4b0979f', context: stageName,
+                description: "В ожидании...", status: githubStatus, repo: slug, account: account, sha: sourceBranch)
+    }
 
     def static notifyGitlabAboutStageStart(Object script, String repoUrl, String stageName){
         def gitlabStatus = "running"
@@ -146,6 +205,11 @@ class RepositoryUtil {
                 splittedUrlString += "/"
             }
         return splittedUrlString
+    }
+
+    def static getCurrentGithubRepoSlug(Object script, String repoUrl){
+        def splittedUrl = repoUrl.split("/")
+        return splittedUrl[splittedUrl.length - 1]
     }
 
     def static getCurrentBitbucketRepoSlug(Object script, String repoUrl){
