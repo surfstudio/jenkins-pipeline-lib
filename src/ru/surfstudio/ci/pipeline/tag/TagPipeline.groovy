@@ -102,7 +102,7 @@ abstract class TagPipeline extends ScmPipeline {
         def buildDescription = ctx.repoTag
         CommonUtil.setBuildDescription(script, buildDescription)
         CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.ANOTHER, buildDescription)
-        RepositoryUtil.notifyGitlabAboutStagePending(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.tagHash)
+        RepositoryUtil.notifyGithubAboutStagePending(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.tagHash)
     }
 
     def static checkoutStageBody(Object script, String url, String repoTag, String credentialsId) {
@@ -172,14 +172,14 @@ abstract class TagPipeline extends ScmPipeline {
     }
 
     def static finalizeStageBody(TagPipeline ctx) {
-        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.tagHash)
+        RepositoryUtil.notifyGithubAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.tagHash)
         if (ctx.getStage(ctx.CHECKOUT).result != Result.ABORTED) { //do not handle builds skipped via [skip ci] label
             JarvisUtil.createVersionAndNotify(ctx)
         }
     }
 
     def static debugFinalizeStageBody(TagPipeline ctx) {
-        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.tagHash)
+        RepositoryUtil.notifyGithubAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.tagHash)
         if (ctx.getStage(ctx.CHECKOUT).result != Result.ABORTED) { //do not handle builds skipped via [skip ci] label
             JarvisUtil.createVersionAndNotify(ctx)
         }
@@ -189,12 +189,12 @@ abstract class TagPipeline extends ScmPipeline {
     }
 
     def static preExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
-        RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, stage.name)
-        RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE)
+        RepositoryUtil.notifyGithubAboutStageStart(script, repoUrl, stage.name)
+        RepositoryUtil.notifyGithubAboutStageStart(script, repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE)
     }
 
     def static postExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
-        RepositoryUtil.notifyGitlabAboutStageFinish(script, repoUrl, stage.name, stage.result)
+        RepositoryUtil.notifyGithubAboutStageFinish(script, repoUrl, stage.name, stage.result)
     }
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
 
