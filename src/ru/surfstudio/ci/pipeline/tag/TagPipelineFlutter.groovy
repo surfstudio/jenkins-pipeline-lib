@@ -117,6 +117,8 @@ class TagPipelineFlutter extends TagPipeline {
     public dockerImageName = "cirrusci/flutter:stable"
     public dockerArguments = "-it -v \${PWD}:/build --workdir /build"
 
+    public nodeForVersionPush = ''
+
     TagPipelineFlutter(Object script) {
         super(script)
     }
@@ -152,6 +154,7 @@ class TagPipelineFlutter extends TagPipeline {
         androidStages = [
                 docker(STAGE_DOCKER, dockerImageName, dockerArguments, [
                         stage(STAGE_ANDROID, false) {
+                            nodeForVersionPush =  script.env.NODE_NAME;
                             // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                         },
                         stage(CHECKOUT, false) {
@@ -198,7 +201,7 @@ class TagPipelineFlutter extends TagPipeline {
                         stage(STATIC_CODE_ANALYSIS) {
                             FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                         },
-                    ],
+                ],
                 ),
                 stage(BETA_UPLOAD_ANDROID) {
                     uploadStageBody(script, shBetaUploadCommandAndroid)
@@ -257,18 +260,21 @@ class TagPipelineFlutter extends TagPipeline {
                         node(STAGE_ANDROID, nodeAndroid, false, androidStages),
                         node(STAGE_IOS, nodeIos, false, iosStages)
                 ]),
-                stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    versionPushStageBody(script,
-                            repoTag,
-                            branchesPatternsForAutoChangeVersion,
-                            repoUrl,
-                            repoCredentialsId,
-                            prepareChangeVersionCommitMessage(
-                                    script,
-                                    configFile,
-                                    compositeVersionNameVar
-                            ))
-                },
+                node(nodeForVersionPush, [
+                        stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                            versionPushStageBody(script,
+                                    repoTag,
+                                    branchesPatternsForAutoChangeVersion,
+                                    repoUrl,
+                                    repoCredentialsId,
+                                    prepareChangeVersionCommitMessage(
+                                            script,
+                                            configFile,
+                                            compositeVersionNameVar
+                                    )
+                            )
+                        }
+                ]),
         ]
 
 
