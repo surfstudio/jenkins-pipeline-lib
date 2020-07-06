@@ -283,7 +283,7 @@ abstract class TagPipeline extends ScmPipeline {
                         genericVariables: [
                                 [
                                         key  : 'repoTag_0', //параметер tag будет доступен по ключу repoTag_0 - особенности GenericWebhookTrigger Plugin
-                                        value: '$.release.tag_name'
+                                        value: '$.ref'
                                 ],
                                 [
                                         key  : 'repoUrl',
@@ -291,7 +291,7 @@ abstract class TagPipeline extends ScmPipeline {
                                 ],
                                 [
                                         key :  TAG_HASH_PARAMETER,
-                                        value: '$.release.target_commitish'
+                                        value: '$.master_branch'
                                 ]
                         ],
                         printContributedVariables: true,
