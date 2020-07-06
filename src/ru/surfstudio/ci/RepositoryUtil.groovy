@@ -27,10 +27,10 @@ class RepositoryUtil {
     def static SKIP_CI_LABEL2 = "[ci skip]"
     def static VERSION_LABEL1 = "[version]"
     def static SYNTHETIC_PIPELINE_STAGE = "Pipeline"
+    def static GITHUB_ACCOUNT = "surfstudio"
 
     def static notifyGithubAboutStageStart(Object script, String repoUrl, String stageName){
         def githubStatus = "PENDING"
-        def account = "surfstudio"
         def commit = getSavedGitCommitHash(script)
         def slug = getCurrentGithubRepoSlug(script, repoUrl)
         if (!commit) {
@@ -38,7 +38,7 @@ class RepositoryUtil {
         }
         script.echo "Notify GitHub - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $githubStatus"
         script.githubNotify(credentialsId: 'b72070fe-76a3-467a-85c4-beccf4b0979f', context: stageName,
-                description: "Выполняется...", status: githubStatus, repo: slug, account: account, sha: commit)
+                description: "Выполняется...", status: githubStatus, repo: slug, account: GITHUB_ACCOUNT, sha: commit)
     }
 
     def static notifyGithubAboutStageFinish(Object script, String repoUrl, String stageName, String result){
@@ -52,7 +52,6 @@ class RepositoryUtil {
     def static notifyGithubAboutStageFinish(Object script, String repoUrl, String stageName, String result, String revision){
         def githubStatus = ""
         def description = ""
-        def account = "surfstudio"
         def slug = getCurrentGithubRepoSlug(script, repoUrl)
 
         switch (result) {
@@ -61,14 +60,20 @@ class RepositoryUtil {
                 description = "Успех!"
                 break
             case Result.NOT_BUILT:
+                githubStatus = "SUCCESS"
+                description = "Стейдж в состоянии NOT_BUILT"
+                break
             case Result.ABORTED:
                 githubStatus = "ERROR"
                 description = "Отменен"
                 break
             case Result.FAILURE:
-            case Result.UNSTABLE:
                 githubStatus = "FAILURE"
                 description = "Сборка провалилась :("
+                break
+            case Result.UNSTABLE:
+                githubStatus = "FAILURE"
+                description = "Стейдж в состоянии UNSTABLE"
                 break
             default:
                 script.error "Unsupported Result: ${result}"
@@ -76,16 +81,15 @@ class RepositoryUtil {
 
         script.echo "Notify GitHub - stage: $stageName, repoSlug: $slug, commitId: $revision, status: $githubStatus"
         script.githubNotify(credentialsId: 'b72070fe-76a3-467a-85c4-beccf4b0979f', context: stageName,
-                description: description, status: githubStatus, repo: slug, account: account, sha: revision)
+                description: description, status: githubStatus, repo: slug, account: GITHUB_ACCOUNT, sha: revision)
     }
 
     def static notifyGithubAboutStagePending(Object script, String repoUrl, String stageName, String sourceBranch){
         def githubStatus = "PENDING"
-        def account = "surfstudio"
         def slug = getCurrentGithubRepoSlug(script, repoUrl)
         script.echo "Notify GitHub - stage: $stageName, repoSlug: $slug, status: $githubStatus"
         script.githubNotify(credentialsId: 'b72070fe-76a3-467a-85c4-beccf4b0979f', context: stageName,
-                description: "В ожидании...", status: githubStatus, repo: slug, account: account, sha: sourceBranch)
+                description: "В ожидании...", status: githubStatus, repo: slug, account: GITHUB_ACCOUNT, sha: sourceBranch)
     }
 
     def static notifyGitlabAboutStageStart(Object script, String repoUrl, String stageName){
