@@ -190,7 +190,6 @@ abstract class TagPipeline extends ScmPipeline {
 
     def static preExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
         RepositoryUtil.notifyGithubAboutStageStart(script, repoUrl, stage.name)
-        RepositoryUtil.notifyGithubAboutStageStart(script, repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE)
     }
 
     def static postExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
