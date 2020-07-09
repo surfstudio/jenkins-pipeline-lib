@@ -1,4 +1,4 @@
-@Library('surf-lib@backend')
+@Library('surf-lib@backend') //todo изменить версию на основную
 import ru.surfstudio.ci.pipeline.tag.TagPipelineBackend
 
 def pipeline = new TagPipelineBackend(this)
