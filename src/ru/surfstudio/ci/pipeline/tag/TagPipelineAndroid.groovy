@@ -23,6 +23,7 @@ import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.android.AndroidUtil
 import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
 import ru.surfstudio.ci.utils.android.config.AvdConfig
+import ru.surfstudio.ci.utils.buildsystems.GradleUtil
 
 class TagPipelineAndroid extends TagPipeline {
 
@@ -193,10 +194,10 @@ class TagPipelineAndroid extends TagPipeline {
                                              String gradleConfigFile,
                                              String appVersionNameGradleVar,
                                              String appVersionCodeGradleVar) {
-        AndroidUtil.changeGradleVariable(script, gradleConfigFile, appVersionNameGradleVar, "\"$repoTag\"")
-        def codeStr = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
+        GradleUtil.changeGradleVariable(script, gradleConfigFile, appVersionNameGradleVar, "\"$repoTag\"")
+        def codeStr = GradleUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
         def newCodeStr = String.valueOf(Integer.valueOf(codeStr) + 1)
-        AndroidUtil.changeGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar, newCodeStr)
+        GradleUtil.changeGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar, newCodeStr)
 
     }
 
@@ -205,8 +206,8 @@ class TagPipelineAndroid extends TagPipeline {
                                                         String appVersionNameGradleVar,
                                                         String appVersionCodeGradleVar){
         def versionName = CommonUtil.removeQuotesFromTheEnds(
-                AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionNameGradleVar))
-        def versionCode = AndroidUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
+                GradleUtil.getGradleVariable(script, gradleConfigFile, appVersionNameGradleVar))
+        def versionCode = GradleUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
         return "Change version to $versionName ($versionCode) $RepositoryUtil.SKIP_CI_LABEL1 $RepositoryUtil.VERSION_LABEL1"
 
     }
@@ -225,7 +226,7 @@ class TagPipelineAndroid extends TagPipeline {
     }
 
     private def static gradleTaskWithBuildCache(Object script, String gradleTask) {
-        AndroidUtil.withGradleBuildCacheCredentials(script) {
+        GradleUtil.withGradleBuildCacheCredentials(script) {
             script.sh "./gradlew ${gradleTask}"
         }
     }
