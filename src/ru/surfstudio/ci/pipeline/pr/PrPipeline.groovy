@@ -164,14 +164,14 @@ abstract class PrPipeline extends ScmPipeline {
     def static finalizeStageBody(PrPipeline ctx) {
         RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.sourceBranch)
         prepareMessageForPipeline(ctx, { message ->
-            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
+            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "github")
         })
     }
 
     def static debugFinalizeStageBody(PrPipeline ctx) {
         RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.sourceBranch)
         prepareMessageForPipeline(ctx, { message ->
-            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "gitlab")
+            JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "github")
             JarvisUtil.sendMessageToGroup(ctx.script, message, "9d0c617e-d14a-490e-9914-83820b135cfc", "stride", false)
         })
     }
@@ -253,7 +253,7 @@ abstract class PrPipeline extends ScmPipeline {
                         description: 'Ветка, в которую будет мержиться пр, обязательный параметр'),
                 script.string(
                         name: AUTHOR_USERNAME_PARAMETER,
-                        description: 'username в gitlab создателя пр, нужно для отправки собщений, обязательный параметр')
+                        description: 'username в github создателя пр, нужно для отправки собщений, обязательный параметр')
         ])
     }
 
@@ -263,19 +263,19 @@ abstract class PrPipeline extends ScmPipeline {
                         genericVariables: [
                                 [
                                         key  : SOURCE_BRANCH_PARAMETER,
-                                        value: '$.object_attributes.source_branch'
+                                        value: '$.pull_request.head.ref'
                                 ],
                                 [
                                         key  : DESTINATION_BRANCH_PARAMETER,
-                                        value: '$.object_attributes.target_branch'
+                                        value: '$.pull_request.base.ref'
                                 ],
                                 [
                                         key  : AUTHOR_USERNAME_PARAMETER,
-                                        value: '$.object_attributes.last_commit.author.email'
+                                        value: '$.sender.login'
                                 ],
                                 [
                                         key  : 'repoUrl',
-                                        value: '$.project.web_url'
+                                        value: '$.repository.html_url'
                                 ],
                                 [
                                         key  : TARGET_BRANCH_CHANGED_PARAMETER,
@@ -284,7 +284,7 @@ abstract class PrPipeline extends ScmPipeline {
                         ],
                         printContributedVariables: true,
                         printPostContent: true,
-                        causeString: 'Triggered by GitLab',
+                        causeString: 'Triggered by GitHub',
                         regexpFilterExpression: "$repoUrl",
                         regexpFilterText: '$repoUrl'
                 ),
