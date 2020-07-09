@@ -21,6 +21,7 @@ import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.android.config.AndroidTestConfig
 import ru.surfstudio.ci.utils.android.config.AvdConfig
+import ru.surfstudio.ci.utils.code.SourceCodeUtil
 
 class PrPipelineAndroid extends PrPipeline {
 
@@ -76,13 +77,11 @@ class PrPipelineAndroid extends PrPipeline {
 
         stages = [
                 stage(CHECKOUT, false) {
-                    checkout(script, repoUrl, sourceBranch, repoCredentialsId)
-                    saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
-                    abortDuplicateBuildsWithDescription(this)
+                    standardCheckoutStageBody()
                 },
                 stage(CODE_STYLE_FORMATTING, StageStrategy.SKIP_STAGE) {
-                    AndroidPipelineHelper.ktlintFormatStageAndroid(script, sourceBranch, destinationBranch)
-                    hasChanges = AndroidPipelineHelper.checkChangesAndUpdate(script, repoUrl, repoCredentialsId, sourceBranch)
+                    SourceCodeUtil.codeFormatStage(script, sourceBranch, destinationBranch)
+                    hasChanges = SourceCodeUtil.checkChangesAndUpdate(script, repoUrl, repoCredentialsId, sourceBranch)
                 },
                 stage(UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT, StageStrategy.SKIP_STAGE, false) {
                     if (hasChanges) {

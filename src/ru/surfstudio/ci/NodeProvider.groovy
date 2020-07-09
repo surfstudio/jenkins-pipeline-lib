@@ -36,6 +36,10 @@ class NodeProvider {
         return "flutter"
     }
 
+    def static getBackendNode() {
+        return getAndroidNode()
+    }
+
     def static getAndroidFlutterNode() {
         return "$flutterNode && $androidNode"
     }

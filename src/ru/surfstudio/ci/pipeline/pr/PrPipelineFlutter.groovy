@@ -16,12 +16,8 @@
 package ru.surfstudio.ci.pipeline.pr
 
 import ru.surfstudio.ci.NodeProvider
-import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
-import ru.surfstudio.ci.stage.Stage
-import ru.surfstudio.ci.stage.SimpleStage
 import ru.surfstudio.ci.stage.StageStrategy
-import ru.surfstudio.ci.CommonUtil
 
 class PrPipelineFlutter extends PrPipeline {
 
@@ -86,9 +82,7 @@ class PrPipelineFlutter extends PrPipeline {
                         // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                         },
                         stage(CHECKOUT, false) {
-                            checkout(script, repoUrl, sourceBranch, repoCredentialsId)
-                            saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
-                            abortDuplicateBuildsWithDescription(this)
+                            standardCheckoutStageBody()
                         },
                         stage(PRE_MERGE, false) {
                             preMergeStageBody(script, repoUrl, sourceBranch, destinationBranch, repoCredentialsId)

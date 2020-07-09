@@ -15,11 +15,7 @@
  */
 package ru.surfstudio.ci.pipeline.pr
 
-import ru.surfstudio.ci.AbortDuplicateStrategy
-import ru.surfstudio.ci.CommonUtil
-import ru.surfstudio.ci.JarvisUtil
-import ru.surfstudio.ci.RepositoryUtil
-import ru.surfstudio.ci.Result
+import ru.surfstudio.ci.*
 import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.pipeline.base.LogRotatorUtil
 import ru.surfstudio.ci.stage.SimpleStage
@@ -123,6 +119,12 @@ abstract class PrPipeline extends ScmPipeline {
         checkout(script, url, sourceBranch, credentialsId)
         mergeLocal(script, destinationBranch)
         saveCommitHashAndCheckSkipCi(script, false)
+    }
+
+    def standardCheckoutStageBody() {
+        checkout(script, repoUrl, sourceBranch, repoCredentialsId)
+        saveCommitHashAndCheckSkipCi(script, targetBranchChanged)
+        abortDuplicateBuildsWithDescription(this)
     }
 
     def static checkout(Object script, String url, String sourceBranch, String credentialsId) {

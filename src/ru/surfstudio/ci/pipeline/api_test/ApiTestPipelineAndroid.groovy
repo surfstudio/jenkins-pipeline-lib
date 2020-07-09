@@ -18,10 +18,9 @@ package ru.surfstudio.ci.pipeline.api_test
 import ru.surfstudio.ci.*
 import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.pipeline.base.LogRotatorUtil
-import ru.surfstudio.ci.pipeline.helper.AndroidPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.android.AndroidTestUtil
-import ru.surfstudio.ci.utils.android.AndroidUtil
+import ru.surfstudio.ci.utils.buildsystems.GradleUtil
 
 import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 
@@ -139,7 +138,7 @@ class ApiTestPipelineAndroid extends ScmPipeline {
             String reportName
     ) {
         try {
-            AndroidUtil.withGradleBuildCacheCredentials(script) {
+            GradleUtil.withGradleBuildCacheCredentials(script) {
                 script.sh "./gradlew $testGradleTask"
             }
         } finally {
