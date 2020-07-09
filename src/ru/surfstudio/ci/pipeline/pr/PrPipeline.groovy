@@ -69,7 +69,7 @@ abstract class PrPipeline extends ScmPipeline {
 
     def static initBody(PrPipeline ctx) {
         initBodyWithOutAbortDuplicateBuilds(ctx)
-        RepositoryUtil.notifyGitlabAboutStagePending(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.sourceBranch)
+        RepositoryUtil.notifyGithubAboutStagePending(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.sourceBranch)
     }
 
     def static initBodyWithOutAbortDuplicateBuilds(PrPipeline ctx) {
@@ -164,14 +164,14 @@ abstract class PrPipeline extends ScmPipeline {
     }
 
     def static finalizeStageBody(PrPipeline ctx) {
-        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.sourceBranch)
+        RepositoryUtil.notifyGithubAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.sourceBranch)
         prepareMessageForPipeline(ctx, { message ->
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "github")
         })
     }
 
     def static debugFinalizeStageBody(PrPipeline ctx) {
-        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.sourceBranch)
+        RepositoryUtil.notifyGithubAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.sourceBranch)
         prepareMessageForPipeline(ctx, { message ->
             JarvisUtil.sendMessageToUser(ctx.script, message, ctx.authorUsername, "github")
             JarvisUtil.sendMessageToGroup(ctx.script, message, "9d0c617e-d14a-490e-9914-83820b135cfc", "stride", false)
@@ -179,12 +179,12 @@ abstract class PrPipeline extends ScmPipeline {
     }
 
     def static preExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
-        RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, stage.name)
-        RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE)
+        RepositoryUtil.notifyGithubAboutStageStart(script, repoUrl, stage.name)
+        RepositoryUtil.notifyGithubAboutStageStart(script, repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE)
     }
 
     def static postExecuteStageBodyPr(Object script, SimpleStage stage, String repoUrl) {
-        RepositoryUtil.notifyGitlabAboutStageFinish(script, repoUrl, stage.name, stage.result)
+        RepositoryUtil.notifyGithubAboutStageFinish(script, repoUrl, stage.name, stage.result)
     }
 
     String buildDescription() {
@@ -209,8 +209,7 @@ abstract class PrPipeline extends ScmPipeline {
         return [
                 buildDiscarder(ctx, script),
                 parameters(script),
-                triggers(script, ctx.repoUrl),
-                script.gitLabConnection(ctx.gitlabConnection)
+                triggers(script, ctx.repoUrl)
         ]
     }
 
