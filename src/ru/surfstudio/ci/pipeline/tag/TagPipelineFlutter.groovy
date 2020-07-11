@@ -18,6 +18,7 @@ package ru.surfstudio.ci.pipeline.tag
 
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
+import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
 import ru.surfstudio.ci.stage.ParallelStageSet
 import ru.surfstudio.ci.stage.Stage
@@ -92,8 +93,9 @@ class TagPipelineFlutter extends TagPipeline {
     public mainVersionCode = "<undefined>"
     public arm64VersionCode = "<undefined>"
 
-    //ios node
+    //nodes
     public nodeIos
+    public nodeAndroid
 
     //backward compatibility for beta
     public versionPrefix = ""; //todo remove after moving to fad finished
@@ -115,6 +117,8 @@ class TagPipelineFlutter extends TagPipeline {
     public dockerImageName = "cirrusci/flutter:stable"
     public dockerArguments = "-it -v \${PWD}:/build --workdir /build"
 
+    public nodeForVersionPush = ''
+
     TagPipelineFlutter(Object script) {
         super(script)
     }
@@ -130,8 +134,9 @@ class TagPipelineFlutter extends TagPipeline {
             ])
         }
 
-        node = NodeProvider.androidFlutterNode
-        nodeIos = NodeProvider.iOSFlutterNode
+        node = null
+        nodeAndroid = nodeAndroid ?: NodeProvider.androidFlutterNode
+        nodeIos = nodeIos ?: NodeProvider.iOSFlutterNode
 
         preExecuteStageBody = { stage -> preExecuteStageBodyTag(script, stage, repoUrl) }
         postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
@@ -149,6 +154,7 @@ class TagPipelineFlutter extends TagPipeline {
         androidStages = [
                 docker(STAGE_DOCKER, dockerImageName, dockerArguments, [
                         stage(STAGE_ANDROID, false) {
+                            nodeForVersionPush =  script.env.NODE_NAME;
                             // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                         },
                         stage(CHECKOUT, false) {
@@ -195,7 +201,7 @@ class TagPipelineFlutter extends TagPipeline {
                         stage(STATIC_CODE_ANALYSIS) {
                             FlutterPipelineHelper.staticCodeAnalysisStageBody(script)
                         },
-                    ],
+                ],
                 ),
                 stage(BETA_UPLOAD_ANDROID) {
                     uploadStageBody(script, shBetaUploadCommandAndroid)
@@ -251,27 +257,29 @@ class TagPipelineFlutter extends TagPipeline {
 
         stages = [
                 parallel(STAGE_PARALLEL, [
-                        group(STAGE_ANDROID, androidStages),
+                        node(STAGE_ANDROID, nodeAndroid, false, androidStages),
                         node(STAGE_IOS, nodeIos, false, iosStages)
                 ]),
-                stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                    versionPushStageBody(script,
-                            repoTag,
-                            branchesPatternsForAutoChangeVersion,
-                            repoUrl,
-                            repoCredentialsId,
-                            prepareChangeVersionCommitMessage(
-                                    script,
-                                    configFile,
-                                    compositeVersionNameVar
-                            ))
-                },
+                node(nodeForVersionPush, [
+                        stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                            versionPushStageBody(script,
+                                    repoTag,
+                                    branchesPatternsForAutoChangeVersion,
+                                    repoUrl,
+                                    repoCredentialsId,
+                                    prepareChangeVersionCommitMessage(
+                                            script,
+                                            configFile,
+                                            compositeVersionNameVar
+                                    )
+                            )
+                        }
+                ]),
         ]
 
 
         finalizeBody = { finalizeStageBody(this) }
     }
-
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ ======================================================
     private static initBodyFlutter(TagPipelineFlutter ctx) {
@@ -301,24 +309,24 @@ class TagPipelineFlutter extends TagPipeline {
     }
 
     private static void initStrategies(TagPipelineFlutter ctx) {
-        def skipResolver = { skipStage -> skipStage ? StageStrategy.SKIP_STAGE : DEFAULT_STAGE_STRATEGY }
+        def skipResolver = { skipStage, stageName -> skipStage ? StageStrategy.SKIP_STAGE : ctx.getStage(stageName).strategy }
         def paramsMap = [
-                (BUILD_IOS_BETA)       : skipResolver(!ctx.shouldBuildIosBeta),
-                (BETA_UPLOAD_IOS)      : skipResolver(!ctx.shouldBuildIosBeta),
+                (BUILD_IOS_BETA)       : skipResolver(!ctx.shouldBuildIosBeta, BUILD_IOS_BETA),
+                (BETA_UPLOAD_IOS)      : skipResolver(!ctx.shouldBuildIosBeta, BETA_UPLOAD_IOS),
 
-                (BUILD_IOS_TESTFLIGHT) : skipResolver(!ctx.shouldBuildIosTestFlight),
-                (TESTFLIGHT_UPLOAD_IOS): skipResolver(!ctx.shouldBuildIosTestFlight),
+                (BUILD_IOS_TESTFLIGHT) : skipResolver(!ctx.shouldBuildIosTestFlight, BUILD_IOS_TESTFLIGHT),
+                (TESTFLIGHT_UPLOAD_IOS): skipResolver(!ctx.shouldBuildIosTestFlight, TESTFLIGHT_UPLOAD_IOS),
         ]
 
         if (!ctx.shouldBuildAndroid) {
             ctx.getStage(STAGE_PARALLEL).stages = [
-                    node(STAGE_IOS, ctx.nodeIos, false, ctx.iosStages)
+                    ctx.getStage(STAGE_IOS)
             ]
         }
 
         if (!ctx.shouldBuildIos) {
             ctx.getStage(STAGE_PARALLEL).stages = [
-                    group(STAGE_ANDROID, ctx.androidStages)
+                    ctx.getStage(STAGE_ANDROID)
             ]
         }
 
