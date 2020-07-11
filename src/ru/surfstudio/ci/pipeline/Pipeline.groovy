@@ -88,13 +88,15 @@ abstract class Pipeline implements Serializable {
         try {
             def initStage = stage(INIT, StageStrategy.FAIL_WHEN_STAGE_ERROR, false, createInitStageBody())
             initStage.execute(script, this)
-            script.node(node) {
-                if (CommonUtil.notEmpty(node)) {
-                    script.echo "Switch to node ${node}: ${script.env.NODE_NAME}"
+            if (node) {
+                script.node(node) {
+                    if (CommonUtil.notEmpty(node)) {
+                        script.echo "Switch to node ${node}: ${script.env.NODE_NAME}"
+                    }
+                    executeStages(stages)
                 }
-                for (Stage stage : stages) {
-                    stage.execute(script, this)
-                }
+            } else {
+                executeStages(stages)
             }
         } finally {
             jobResult = calculateJobResult(stages)
@@ -113,6 +115,12 @@ abstract class Pipeline implements Serializable {
                 finalizeBody()
                 script.echo "End finalize body"
             }
+        }
+    }
+
+    void executeStages(List<Stage> stages) {
+        for (Stage stage : stages) {
+            stage.execute(script, this)
         }
     }
 
