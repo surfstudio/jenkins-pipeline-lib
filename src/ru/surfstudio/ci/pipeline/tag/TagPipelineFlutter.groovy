@@ -18,15 +18,13 @@ package ru.surfstudio.ci.pipeline.tag
 
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
-import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
-import ru.surfstudio.ci.stage.ParallelStageSet
 import ru.surfstudio.ci.stage.Stage
+import ru.surfstudio.ci.stage.StageGroup
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.flutter.FlutterUtil
 import ru.surfstudio.ci.CommonUtil
 
-import static ru.surfstudio.ci.CommonUtil.applyStrategy
 import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 
 class TagPipelineFlutter extends TagPipeline {
@@ -154,7 +152,8 @@ class TagPipelineFlutter extends TagPipeline {
         androidStages = [
                 docker(STAGE_DOCKER, dockerImageName, dockerArguments, [
                         stage(STAGE_ANDROID, false) {
-                            nodeForVersionPush =  script.env.NODE_NAME;
+                            nodeForVersionPush = script.env.NODE_NAME
+                            stages.add(versionPushWrapNodeStage(this, script))
                             // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                         },
                         stage(CHECKOUT, false) {
@@ -260,21 +259,6 @@ class TagPipelineFlutter extends TagPipeline {
                         node(STAGE_ANDROID, nodeAndroid, false, androidStages),
                         node(STAGE_IOS, nodeIos, false, iosStages)
                 ]),
-                node(nodeForVersionPush, [
-                        stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                            versionPushStageBody(script,
-                                    repoTag,
-                                    branchesPatternsForAutoChangeVersion,
-                                    repoUrl,
-                                    repoCredentialsId,
-                                    prepareChangeVersionCommitMessage(
-                                            script,
-                                            configFile,
-                                            compositeVersionNameVar
-                                    )
-                            )
-                        }
-                ]),
         ]
 
 
@@ -322,6 +306,8 @@ class TagPipelineFlutter extends TagPipeline {
             ctx.getStage(STAGE_PARALLEL).stages = [
                     ctx.getStage(STAGE_IOS)
             ]
+
+            (ctx.getStage(STAGE_IOS) as StageGroup).stages.add(versionPushStage(ctx, ctx.script))
         }
 
         if (!ctx.shouldBuildIos) {
@@ -375,6 +361,28 @@ class TagPipelineFlutter extends TagPipeline {
         def compositeVersion = FlutterUtil.getYamlVariable(script, configYamlFile, compositeVersionNameVar)
         return "Change version to $compositeVersion $RepositoryUtil.SKIP_CI_LABEL1 $RepositoryUtil.VERSION_LABEL1"
 
+    }
+
+    def static versionPushWrapNodeStage(TagPipelineFlutter ctx, Object script) {
+        node(ctx.nodeForVersionPush, [
+                versionPushStage(ctx, script)
+        ])
+    }
+
+    def static versionPushStage(TagPipelineFlutter ctx, Object script) {
+        stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+            versionPushStageBody(script,
+                    repoTag,
+                    branchesPatternsForAutoChangeVersion,
+                    repoUrl,
+                    repoCredentialsId,
+                    prepareChangeVersionCommitMessage(
+                            script,
+                            configFile,
+                            compositeVersionNameVar
+                    )
+            )
+        }
     }
 
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
@@ -433,5 +441,4 @@ class TagPipelineFlutter extends TagPipeline {
 
         ])
     }
-
 }
