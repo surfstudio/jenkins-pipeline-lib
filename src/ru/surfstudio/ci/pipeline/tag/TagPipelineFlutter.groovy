@@ -94,6 +94,7 @@ class TagPipelineFlutter extends TagPipeline {
     //nodes
     public nodeIos
     public nodeAndroid
+    public nodeForVersionPush = ''
 
     //backward compatibility for beta
     public versionPrefix = ""; //todo remove after moving to fad finished
@@ -101,6 +102,7 @@ class TagPipelineFlutter extends TagPipeline {
     //stages
     public List<Stage> androidStages
     public List<Stage> iosStages
+    public Stage versionPushStage
 
     //docker
     //
@@ -114,8 +116,6 @@ class TagPipelineFlutter extends TagPipeline {
     //
     public dockerImageName = "cirrusci/flutter:stable"
     public dockerArguments = "-it -v \${PWD}:/build --workdir /build"
-
-    public nodeForVersionPush = ''
 
     TagPipelineFlutter(Object script) {
         super(script)
@@ -149,11 +149,29 @@ class TagPipelineFlutter extends TagPipeline {
             ]
         }
 
+        versionPushStage = versionPushStage ?: node(nodeForVersionPush, [
+                stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                    versionPushStageBody(script,
+                            repoTag,
+                            branchesPatternsForAutoChangeVersion,
+                            repoUrl,
+                            repoCredentialsId,
+                            prepareChangeVersionCommitMessage(
+                                    script,
+                                    configFile,
+                                    compositeVersionNameVar
+                            )
+
+                    )
+                }
+        ])
+
         androidStages = [
                 docker(STAGE_DOCKER, dockerImageName, dockerArguments, [
                         stage(STAGE_ANDROID, false) {
                             nodeForVersionPush = script.env.NODE_NAME
-                            stages.add(versionPushWrapNodeStage(this, script))
+
+                            stages.add(versionPushStage)
                             // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                         },
                         stage(CHECKOUT, false) {
@@ -307,7 +325,7 @@ class TagPipelineFlutter extends TagPipeline {
                     ctx.getStage(STAGE_IOS)
             ]
 
-            (ctx.getStage(STAGE_IOS) as StageGroup).stages.add(versionPushStage(ctx, ctx.script))
+            (ctx.getStage(STAGE_IOS) as StageGroup).stages.add(ctx.versionPushStage)
         }
 
         if (!ctx.shouldBuildIos) {
@@ -361,28 +379,6 @@ class TagPipelineFlutter extends TagPipeline {
         def compositeVersion = FlutterUtil.getYamlVariable(script, configYamlFile, compositeVersionNameVar)
         return "Change version to $compositeVersion $RepositoryUtil.SKIP_CI_LABEL1 $RepositoryUtil.VERSION_LABEL1"
 
-    }
-
-    def static versionPushWrapNodeStage(TagPipelineFlutter ctx, Object script) {
-        node(ctx.nodeForVersionPush, [
-                versionPushStage(ctx, script)
-        ])
-    }
-
-    def static versionPushStage(TagPipelineFlutter ctx, Object script) {
-        stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-            versionPushStageBody(script,
-                    repoTag,
-                    branchesPatternsForAutoChangeVersion,
-                    repoUrl,
-                    repoCredentialsId,
-                    prepareChangeVersionCommitMessage(
-                            script,
-                            configFile,
-                            compositeVersionNameVar
-                    )
-            )
-        }
     }
 
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
