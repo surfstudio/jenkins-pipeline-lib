@@ -18,15 +18,13 @@ package ru.surfstudio.ci.pipeline.tag
 
 import ru.surfstudio.ci.NodeProvider
 import ru.surfstudio.ci.RepositoryUtil
-import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
-import ru.surfstudio.ci.stage.ParallelStageSet
 import ru.surfstudio.ci.stage.Stage
+import ru.surfstudio.ci.stage.StageGroup
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.flutter.FlutterUtil
 import ru.surfstudio.ci.CommonUtil
 
-import static ru.surfstudio.ci.CommonUtil.applyStrategy
 import static ru.surfstudio.ci.CommonUtil.extractValueFromParamsAndRun
 
 class TagPipelineFlutter extends TagPipeline {
@@ -96,6 +94,7 @@ class TagPipelineFlutter extends TagPipeline {
     //nodes
     public nodeIos
     public nodeAndroid
+    public nodeForVersionPush = ''
 
     //backward compatibility for beta
     public versionPrefix = ""; //todo remove after moving to fad finished
@@ -103,6 +102,7 @@ class TagPipelineFlutter extends TagPipeline {
     //stages
     public List<Stage> androidStages
     public List<Stage> iosStages
+    public Stage versionPushStage
 
     //docker
     //
@@ -116,8 +116,6 @@ class TagPipelineFlutter extends TagPipeline {
     //
     public dockerImageName = "cirrusci/flutter:stable"
     public dockerArguments = "-it -v \${PWD}:/build --workdir /build"
-
-    public nodeForVersionPush = ''
 
     TagPipelineFlutter(Object script) {
         super(script)
@@ -151,10 +149,29 @@ class TagPipelineFlutter extends TagPipeline {
             ]
         }
 
+        versionPushStage = versionPushStage ?: node(nodeForVersionPush, [
+                stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
+                    versionPushStageBody(script,
+                            repoTag,
+                            branchesPatternsForAutoChangeVersion,
+                            repoUrl,
+                            repoCredentialsId,
+                            prepareChangeVersionCommitMessage(
+                                    script,
+                                    configFile,
+                                    compositeVersionNameVar
+                            )
+
+                    )
+                }
+        ])
+
         androidStages = [
                 docker(STAGE_DOCKER, dockerImageName, dockerArguments, [
                         stage(STAGE_ANDROID, false) {
-                            nodeForVersionPush =  script.env.NODE_NAME;
+                            nodeForVersionPush = script.env.NODE_NAME
+
+                            stages.add(versionPushStage)
                             // todo it's a dirty hack from this comment https://issues.jenkins-ci.org/browse/JENKINS-53162?focusedCommentId=352174&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-352174
                         },
                         stage(CHECKOUT, false) {
@@ -260,21 +277,6 @@ class TagPipelineFlutter extends TagPipeline {
                         node(STAGE_ANDROID, nodeAndroid, false, androidStages),
                         node(STAGE_IOS, nodeIos, false, iosStages)
                 ]),
-                node(nodeForVersionPush, [
-                        stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
-                            versionPushStageBody(script,
-                                    repoTag,
-                                    branchesPatternsForAutoChangeVersion,
-                                    repoUrl,
-                                    repoCredentialsId,
-                                    prepareChangeVersionCommitMessage(
-                                            script,
-                                            configFile,
-                                            compositeVersionNameVar
-                                    )
-                            )
-                        }
-                ]),
         ]
 
 
@@ -322,6 +324,8 @@ class TagPipelineFlutter extends TagPipeline {
             ctx.getStage(STAGE_PARALLEL).stages = [
                     ctx.getStage(STAGE_IOS)
             ]
+
+            (ctx.getStage(STAGE_IOS) as StageGroup).stages.add(ctx.versionPushStage)
         }
 
         if (!ctx.shouldBuildIos) {
@@ -433,5 +437,4 @@ class TagPipelineFlutter extends TagPipeline {
 
         ])
     }
-
 }
