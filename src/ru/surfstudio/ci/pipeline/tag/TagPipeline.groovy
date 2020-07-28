@@ -206,8 +206,7 @@ abstract class TagPipeline extends ScmPipeline {
         return [
                 buildDiscarder(ctx, script),
                 parameters(script),
-                triggers(script, ctx.repoUrl, ctx.tagRegexp),
-                script.gitLabConnection(ctx.gitlabConnection)
+                triggers(script, ctx.repoUrl, ctx.tagRegexp)
         ]
     }
 
