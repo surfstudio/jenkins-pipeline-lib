@@ -36,7 +36,7 @@ abstract class PrPipeline extends ScmPipeline {
     public static final String UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT = "Update current commit hash after format"
 
     //scm
-    public sourceBranch = ""
+    public sourceBranch = "master"
     public destinationBranch = ""
     public authorUsername = ""
     public boolean targetBranchChanged = false
