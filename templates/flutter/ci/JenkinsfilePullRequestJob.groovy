@@ -1,4 +1,4 @@
-@Library('surf-lib@flutter') // https://gitlab.com/surfstudio/infrastructure/tools/jenkins-pipeline-lib //todo change version to snapshot
+@Library('surf-lib@fversion-4.0.0-SNAPSHOT') // https://gitlab.com/surfstudio/infrastructure/tools/jenkins-pipeline-lib //todo change version to snapshot
 import ru.surfstudio.ci.pipeline.pr.PrPipelineFlutter
 import ru.surfstudio.ci.stage.StageStrategy
 
