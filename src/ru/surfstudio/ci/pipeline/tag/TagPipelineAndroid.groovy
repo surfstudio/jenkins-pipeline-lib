@@ -69,8 +69,7 @@ class TagPipelineAndroid extends TagPipeline {
      * Если для всех модулей проекта используется одинаковый instrumentation runner,
      * то функцию можно переопределить следующим образом:
      *
-     * pipeline.getTestInstrumentationRunnerName = { script, prefix -> return "androidx.test.runner.AndroidJUnitRunner" }
-     */
+     * pipeline.getTestInstrumentationRunnerName = { script, prefix -> return "androidx.test.runner.AndroidJUnitRunner" }*/
     public getTestInstrumentationRunnerName = { script, prefix -> return getDefaultTestInstrumentationRunnerName(script, prefix) }
 
     public AvdConfig avdConfig = new AvdConfig()
@@ -131,23 +130,23 @@ class TagPipelineAndroid extends TagPipeline {
                     AndroidPipelineHelper.staticCodeAnalysisStageBody(script)
                 },
                 stage(BETA_UPLOAD) {
-                     if (useFirebaseDistribution) {
+                    if (useFirebaseDistribution) {
                         firebaseUploadWithKeystoreStageBodyAndroid(
-                            script,
-                            googleServiceAccountCredsId,
-                            firebaseAppDistributionTask,
-                            keystoreCredentials,
-                            keystorePropertiesCredentials
+                                script,
+                                googleServiceAccountCredsId,
+                                firebaseAppDistributionTask,
+                                keystoreCredentials,
+                                keystorePropertiesCredentials
                         )
                     } else {
                         betaUploadWithKeystoreStageBodyAndroid(
-                            script,
-                            betaUploadGradleTask,
-                            keystoreCredentials,
-                            keystorePropertiesCredentials
+                                script,
+                                betaUploadGradleTask,
+                                keystoreCredentials,
+                                keystorePropertiesCredentials
                         )
                     }
-                    
+
                 },
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     versionPushStageBody(script,
@@ -163,7 +162,9 @@ class TagPipelineAndroid extends TagPipeline {
                             ))
                 },
         ]
-        finalizeBody = { // finalizeStageBody(this) }
+        finalizeBody = {
+            // finalizeStageBody(this)
+        }
     }
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ ======================================================
@@ -174,7 +175,7 @@ class TagPipelineAndroid extends TagPipeline {
                                                       String keystorePropertiesCredentials) {
         AndroidUtil.withKeystore(script, keystoreCredentials, keystorePropertiesCredentials) {
             betaUploadStageBodyAndroid(script, betaUploadGradleTask)
-        }  
+        }
     }
 
     def static firebaseUploadWithKeystoreStageBodyAndroid(Object script,
@@ -204,7 +205,7 @@ class TagPipelineAndroid extends TagPipeline {
     def static prepareChangeVersionCommitMessageAndroid(Object script,
                                                         String gradleConfigFile,
                                                         String appVersionNameGradleVar,
-                                                        String appVersionCodeGradleVar){
+                                                        String appVersionCodeGradleVar) {
         def versionName = CommonUtil.removeQuotesFromTheEnds(
                 GradleUtil.getGradleVariable(script, gradleConfigFile, appVersionNameGradleVar))
         def versionCode = GradleUtil.getGradleVariable(script, gradleConfigFile, appVersionCodeGradleVar)
