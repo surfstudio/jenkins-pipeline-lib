@@ -163,7 +163,7 @@ class TagPipelineAndroid extends TagPipeline {
                             ))
                 },
         ]
-        finalizeBody = { finalizeStageBody(this) }
+        finalizeBody = { // finalizeStageBody(this) }
     }
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ ======================================================
