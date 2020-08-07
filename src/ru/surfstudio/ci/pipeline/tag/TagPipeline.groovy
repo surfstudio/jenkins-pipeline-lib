@@ -109,6 +109,10 @@ abstract class TagPipeline extends ScmPipeline {
 
         script.sh "git checkout tags/$repoTag"
 
+        if (RepositoryUtil.isCurrentCommitMessageContainsSkipCiLabel(script) && !CommonUtil.isJobStartedByUser(script)) {
+            scmSkip(deleteBuild: true, skipPattern: '.*\\[skip ci\\].*')
+        }
+
         RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
 
         RepositoryUtil.saveCurrentGitCommitHash(script)
