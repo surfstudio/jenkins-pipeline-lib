@@ -173,7 +173,7 @@ class AndroidPipelineHelper {
     ) {
         boolean hasChanges = RepositoryUtil.checkHasChanges(script)
         if (hasChanges) {
-            RepositoryUtil.notifyGitlabAboutStageAborted(script, repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, sourceBranch)
+            RepositoryUtil.notifyGithubAboutStageAborted(script, repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, sourceBranch)
 
             String jiraIssueKey
             try {

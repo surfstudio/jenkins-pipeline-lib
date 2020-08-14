@@ -28,17 +28,19 @@ class RepositoryUtil {
     def static VERSION_LABEL1 = "[version]"
     def static SYNTHETIC_PIPELINE_STAGE = "Pipeline"
     def static GITHUB_ACCOUNT = "surfstudio"
+    def static CREDENTIALS_ID = "b72070fe-76a3-467a-85c4-beccf4b0979f"
 
     def static notifyGithubAboutStageStart(Object script, String repoUrl, String stageName){
         def githubStatus = "PENDING"
+        def description = "Running"
         def commit = getSavedGitCommitHash(script)
         def slug = getCurrentGithubRepoSlug(script, repoUrl)
         if (!commit) {
             script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
         }
         script.echo "Notify GitHub - stage: $stageName, repoSlug: $slug, commitId: $commit, status: $githubStatus"
-        script.githubNotify(credentialsId: 'b72070fe-76a3-467a-85c4-beccf4b0979f', context: stageName,
-                description: "Выполняется...", status: githubStatus, repo: slug, account: GITHUB_ACCOUNT, sha: commit)
+        script.githubNotify(credentialsId: CREDENTIALS_ID, context: stageName,
+                description: description, status: githubStatus, repo: slug, account: GITHUB_ACCOUNT, sha: commit)
     }
 
     def static notifyGithubAboutStageFinish(Object script, String repoUrl, String stageName, String result){
@@ -57,39 +59,55 @@ class RepositoryUtil {
         switch (result) {
             case Result.SUCCESS:
                 githubStatus = "SUCCESS"
-                description = "Успех!"
+                description = "Success"
                 break
             case Result.NOT_BUILT:
                 githubStatus = "SUCCESS"
-                description = "Стейдж в состоянии NOT_BUILT"
+                description = "NOT_BUILT"
                 break
             case Result.ABORTED:
                 githubStatus = "ERROR"
-                description = "Отменен"
+                description = "Aborted"
                 break
             case Result.FAILURE:
                 githubStatus = "FAILURE"
-                description = "Сборка провалилась :("
+                description = "Failure"
                 break
             case Result.UNSTABLE:
                 githubStatus = "FAILURE"
-                description = "Стейдж в состоянии UNSTABLE"
+                description = "Unstable"
                 break
             default:
                 script.error "Unsupported Result: ${result}"
         }
 
         script.echo "Notify GitHub - stage: $stageName, repoSlug: $slug, commitId: $revision, status: $githubStatus"
-        script.githubNotify(credentialsId: 'b72070fe-76a3-467a-85c4-beccf4b0979f', context: stageName,
+        script.githubNotify(credentialsId: CREDENTIALS_ID, context: stageName,
                 description: description, status: githubStatus, repo: slug, account: GITHUB_ACCOUNT, sha: revision)
     }
 
     def static notifyGithubAboutStagePending(Object script, String repoUrl, String stageName, String sourceBranch){
         def githubStatus = "PENDING"
+        def description = "Pending"
         def slug = getCurrentGithubRepoSlug(script, repoUrl)
-        script.echo "Notify GitHub - stage: $stageName, repoSlug: $slug, status: $githubStatus"
-        script.githubNotify(credentialsId: 'b72070fe-76a3-467a-85c4-beccf4b0979f', context: stageName,
-                description: "В ожидании...", status: githubStatus, repo: slug, account: GITHUB_ACCOUNT, sha: sourceBranch)
+
+        if (!sourceBranch) {
+            script.echo "Skip Notify GitHub synthetic stage. sourceBranch: $sourceBranch is empty"
+        }
+        else {
+            script.echo "Notify GitHub synthetic stage - stage: $stageName, repoSlug: $slug, status: $githubStatus"
+            script.githubNotify(credentialsId: CREDENTIALS_ID, context: stageName,
+                    description: description, status: githubStatus, repo: slug, account: GITHUB_ACCOUNT, sha: sourceBranch)
+        }
+    }
+
+    def static notifyGithubAboutStageAborted(Object script, String repoUrl, String stageName, String sourceBranch){
+        def githubStatus = "ERROR"
+        def description = "Aborted"
+        def slug = getCurrentGitlabRepoSlug(script, repoUrl)
+        script.echo "Notify GitHub - synthetic stage: $stageName, repoSlug: $slug, branch: $sourceBranch, status: $githubStatus"
+        script.githubNotify(credentialsId: CREDENTIALS_ID, context: stageName,
+                description: description, status: githubStatus, repo: slug, account: GITHUB_ACCOUNT, sha: sourceBranch)
     }
 
     def static notifyGitlabAboutStageStart(Object script, String repoUrl, String stageName){
