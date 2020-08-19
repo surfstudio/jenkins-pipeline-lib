@@ -96,7 +96,7 @@ class SimpleStage implements Stage, StageWithStrategy, StageWithResult {
     void afterBody(Closure action) {
         def prevBody = this.body
         this.body = {
-            this.body()
+            prevBody()
             action(this)
         }
     }
@@ -109,7 +109,7 @@ class SimpleStage implements Stage, StageWithStrategy, StageWithResult {
         def prevBody = this.body
         this.body = {
             action(this)
-            this.body()
+            prevBody()
         }
     }
 }
