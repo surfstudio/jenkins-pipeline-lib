@@ -151,7 +151,7 @@ class TagPipelineBackend extends TagPipeline {
         if (ctx.repoTag ==~ ctx.deployCommandTagRegexp) {
             ctx.getStage(APPLY_DEPLOY_COMMAND_TAG).strategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
         } else {
-            if(ctx.repoTag != null && !ctx.repoTag.isEmpty()) { //skip for first launch, otherwise it fail and properties are not applyed
+            if(ctx.repoTag != null && !ctx.repoTag.isEmpty()) { //skip for first launch, otherwise it fail and properties are not applied
                 fillVersionParts(ctx, ctx.repoTag)
             }
         }
