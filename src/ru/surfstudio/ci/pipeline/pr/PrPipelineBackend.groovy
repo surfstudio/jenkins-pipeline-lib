@@ -46,8 +46,7 @@ class PrPipelineBackend extends PrPipeline {
                 },
                 stage(PRE_MERGE) {
                     mergeLocal(script, destinationBranch)
-                }
-        ]+[
+                },
                 docker(DOCKER_BUILD_WRAPPED_STAGES, dockerImageForBuild, dockerArguments,
                         [
                                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {

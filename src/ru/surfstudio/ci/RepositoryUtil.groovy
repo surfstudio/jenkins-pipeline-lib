@@ -273,10 +273,15 @@ class RepositoryUtil {
         }
     }
 
+    @Deprecated //ранее неправильное было название метода
     def static Collection<String> getRefsForCurrentCommitMessage(Object script){
+        return getRefsForCurrentCommit(script)
+    }
+
+    def static Collection<String> getRefsForCurrentCommit(Object script){
         def String rawRefs = script.sh(script: "git log -1 --pretty=%D", returnStdout: true)
         def result = rawRefs.split(/(->|, |\n)/).findAll({it?.trim()})
-        script.echo "extracted refs for current commit message: $result"
+        script.echo "extracted refs for current commit: $result"
         return result
     }
 

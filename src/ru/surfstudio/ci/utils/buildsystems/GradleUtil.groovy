@@ -2,7 +2,7 @@ package ru.surfstudio.ci.utils.buildsystems
 
 final class GradleUtil {
 
-    private static String DEFAULT_REGEX= /(;| |\t|=|,|:)/
+    private static String DEFAULT_REGEX = /(;| |\t|=|,|:)/
     private static int GRADLE_KOTLIN_DSL_VERSION_VARIABLE_POSITION = 1
     private static int GRADLE_KOTLIN_DSL_VERSION_VALUE_POSITION = 2
 
@@ -16,25 +16,42 @@ final class GradleUtil {
     private GradleUtil() {
     }
 
-    static String getGradleVariableKtStyle(Object script, String file, String varName) {
-        return getVariable(script, file, varName, DEFAULT_REGEX,GRADLE_KOTLIN_DSL_VERSION_VARIABLE_POSITION, GRADLE_KOTLIN_DSL_VERSION_VALUE_POSITION)
-    }
-
-    static String changeGradleVariableKtStyle(Object script, String file, String varName, String newVarValue) {
-        String oldVarValue = getGradleVariableKtStyle(script, file, varName)
-        changeVariableValue(script, file, varName, newVarValue, GRADLE_KOTLIN_DSL_VERSION_VARIABLE_POSITION, oldVarValue)
+    static String isKtLang(String gradleFile) {
+        return gradleFile.endsWith(".kts")
     }
 
     static String getGradleVariable(Object script, String file, String varName) {
-        return getVariable(script, file, varName, DEFAULT_REGEX,GRADLE_GROOVY_DSL_VERSION_VARIABLE_POSITION, GRADLE_GROOVY_DSL_VERSION_VALUE_POSITION)
+        return isKtLang(file) ? getGradleVariableKtLang(script, file, varName) : getGradleVariableGroovyLang(script, file, varName)
     }
 
     static String changeGradleVariable(Object script, String file, String varName, String newVarValue) {
-        String oldVarValue = getGradleVariable(script, file, varName)
+        isKtLang(file) ? changeGradleVariableKtLang(script, file, varName, newVarValue) : changeGradleVariableGroovyLang(script, file, varName, newVarValue)
+    }
+
+    static String getGradleVariableKtLang(Object script, String file, String varName) {
+        return getVariable(script, file, varName, DEFAULT_REGEX, GRADLE_KOTLIN_DSL_VERSION_VARIABLE_POSITION, GRADLE_KOTLIN_DSL_VERSION_VALUE_POSITION)
+    }
+
+    static String changeGradleVariableKtLang(Object script, String file, String varName, String newVarValue) {
+        String oldVarValue = getGradleVariableKtLang(script, file, varName)
+        changeVariableValue(script, file, varName, newVarValue, GRADLE_KOTLIN_DSL_VERSION_VARIABLE_POSITION, oldVarValue)
+    }
+
+    static String getGradleVariableGroovyLang(Object script, String file, String varName) {
+        return getVariable(script, file, varName, DEFAULT_REGEX, GRADLE_GROOVY_DSL_VERSION_VARIABLE_POSITION, GRADLE_GROOVY_DSL_VERSION_VALUE_POSITION)
+    }
+
+    static String changeGradleVariableGroovyLang(Object script, String file, String varName, String newVarValue) {
+        String oldVarValue = getGradleVariableGroovyLang(script, file, varName)
         changeVariableValue(script, file, varName, newVarValue, GRADLE_GROOVY_DSL_VERSION_VARIABLE_POSITION, oldVarValue)
     }
 
-    private static void changeVariableValue(script, String file, String varName, String newVarValue, int variablePosition, String oldVarValue) {
+    private static void changeVariableValue(script,
+                                            String file,
+                                            String varName,
+                                            String newVarValue,
+                                            int variablePosition,
+                                            String oldVarValue) {
         String fileBody = script.readFile(file)
         String newFileBody = ""
         def lines = fileBody.split("\n")
@@ -52,7 +69,12 @@ final class GradleUtil {
         script.echo "$varName value changed to $newVarValue in file $file"
     }
 
-    private static String getVariable(script, String file, String varName, String regex, int variablePosition, int valuePosition) {
+    private static String getVariable(script,
+                                      String file,
+                                      String varName,
+                                      String regex,
+                                      int variablePosition,
+                                      int valuePosition) {
         String fileBody = script.readFile(file)
         def lines = fileBody.split("\n")
         for (line in lines) {
@@ -65,7 +87,6 @@ final class GradleUtil {
         }
         throw script.error("groovy variable with name: $varName not exist in file: $file")
     }
-
 
     /**
      * Execute body with global variables 'GRADLE_BUILD_CACHE_USER' and 'GRADLE_BUILD_CACHE_PASS'

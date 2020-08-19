@@ -26,7 +26,7 @@ class SimpleStage implements Stage, StageWithStrategy, StageWithResult {
     String name
     Closure body
     String strategy //see class StageStrategy
-    String result  //see class StageResult
+    String result  //see class Result, possible values: NOT_BUILT, SUCCESS, ABORTED, FAILURE
     boolean runPreAndPostExecuteStageBodies = true
 
     SimpleStage(String name, String strategy, Closure body) {
@@ -86,6 +86,30 @@ class SimpleStage implements Stage, StageWithStrategy, StageWithResult {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * call action after current body
+     * @param action: { SimpleStage => ... }
+     */
+    void afterBody(Closure action) {
+        def prevBody = this.body
+        this.body = {
+            this.body()
+            action(this)
+        }
+    }
+
+    /**
+     * call action before current body
+     * @param action: { SimpleStage => ... }
+     */
+    void beforeBody(Closure action) {
+        def prevBody = this.body
+        this.body = {
+            action(this)
+            this.body()
         }
     }
 }

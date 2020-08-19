@@ -127,41 +127,44 @@ abstract class TagPipeline extends ScmPipeline {
                                     Collection<String> branchesPatternsForAutoChangeVersion,
                                     String repoUrl,
                                     String repoCredentialsId,
-                                    String changeVersionCommitMessage) {
-        //find branch for change version
-        def branches = RepositoryUtil.getRefsForCurrentCommitMessage(script)
-        def branchForChangeVersion = null
-        for (branchRegexp in branchesPatternsForAutoChangeVersion) {
-            Pattern pattern = Pattern.compile(branchRegexp)
-            for (branch in branches) {
-                if (pattern.matcher(branch).matches()) {
-                    branchForChangeVersion = branch
+                                    String changeVersionCommitMessage,
+                                    boolean versionUpdatedInSourceCode = true) {
+        if(versionUpdatedInSourceCode) {
+            //find branch for change version
+            def branches = RepositoryUtil.getRefsForCurrentCommit(script)
+            def branchForChangeVersion = null
+            for (branchRegexp in branchesPatternsForAutoChangeVersion) {
+                Pattern pattern = Pattern.compile(branchRegexp)
+                for (branch in branches) {
+                    if (pattern.matcher(branch).matches()) {
+                        branchForChangeVersion = branch
+                        break
+                    }
+                }
+                if (branchForChangeVersion) {
                     break
                 }
             }
-            if (branchForChangeVersion) {
-                break
+
+            if (!branchForChangeVersion) {
+                script.error "WARN: Do not find suitable branch for setting version. Branches searched for patterns: $branchesPatternsForAutoChangeVersion"
             }
+
+            script.sh "git stash"
+
+            def localBranch = branchForChangeVersion.replace("origin/", "")
+            script.sh "git checkout -B $localBranch $branchForChangeVersion"
+
+            script.sh "git stash apply"
+
+            RepositoryUtil.setDefaultJenkinsGitUser(script)
+
+            //commit and push new version
+            script.sh "git commit -a -m \"$changeVersionCommitMessage\""
+            RepositoryUtil.push(script, repoUrl, repoCredentialsId)
         }
 
-        if (!branchForChangeVersion) {
-            script.error "WARN: Do not find suitable branch for setting version. Branches searched for patterns: $branchesPatternsForAutoChangeVersion"
-        }
-
-        script.sh "git stash"
-
-        def localBranch = branchForChangeVersion.replace("origin/", "")
-        script.sh "git checkout -B $localBranch $branchForChangeVersion"
-
-        script.sh "git stash apply"
-
-        RepositoryUtil.setDefaultJenkinsGitUser(script)
-
-        //commit and push new version
-        script.sh "git commit -a -m \"$changeVersionCommitMessage\""
-        RepositoryUtil.push(script, repoUrl, repoCredentialsId)
-
-        //reset tag to new commit and push
+        //reset tag to new commit or apply new tag and push
         script.sh "git tag -f $repoTag"
         RepositoryUtil.pushForceTag(script, repoUrl, repoCredentialsId)
     }

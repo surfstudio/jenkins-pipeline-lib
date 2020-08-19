@@ -22,6 +22,7 @@ import ru.surfstudio.ci.pipeline.helper.FlutterPipelineHelper
 import ru.surfstudio.ci.stage.Stage
 import ru.surfstudio.ci.stage.StageGroup
 import ru.surfstudio.ci.stage.StageStrategy
+import ru.surfstudio.ci.utils.YamlUtil
 import ru.surfstudio.ci.utils.flutter.FlutterUtil
 import ru.surfstudio.ci.CommonUtil
 
@@ -342,7 +343,7 @@ class TagPipelineFlutter extends TagPipeline {
                                               String compositeVersionNameVar,
                                               Integer minVersionCode) {
         def script = ctx.script
-        def compositeVersion = FlutterUtil.getYamlVariable(script, configFile, compositeVersionNameVar)
+        def compositeVersion = YamlUtil.getYamlVariable(script, configFile, compositeVersionNameVar)
         def versionCode = Integer.valueOf(FlutterUtil.getVersionCode(compositeVersion))
         def newMainVersionCode = versionCode + 1
         if (newMainVersionCode < minVersionCode) {
@@ -370,13 +371,13 @@ class TagPipelineFlutter extends TagPipeline {
                                       String configYamlFile,
                                       String compositeVersionNameVar) {
         def newCompositeVersion = "$repoTag+$versionCode"
-        FlutterUtil.changeYamlVariable(script, configYamlFile, compositeVersionNameVar, newCompositeVersion)
+        YamlUtil.changeYamlVariable(script, configYamlFile, compositeVersionNameVar, newCompositeVersion)
     }
 
     def static prepareChangeVersionCommitMessage(Object script,
                                                  String configYamlFile,
                                                  String compositeVersionNameVar) {
-        def compositeVersion = FlutterUtil.getYamlVariable(script, configYamlFile, compositeVersionNameVar)
+        def compositeVersion = YamlUtil.getYamlVariable(script, configYamlFile, compositeVersionNameVar)
         return "Change version to $compositeVersion $RepositoryUtil.SKIP_CI_LABEL1 $RepositoryUtil.VERSION_LABEL1"
 
     }

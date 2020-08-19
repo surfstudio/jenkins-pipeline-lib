@@ -35,16 +35,26 @@ class CommonUtil {
         return "<a href=\"${Constants.JIRA_URL}browse/${taskKey}\">${taskKey}</a>"
     }
 
+    def static getClassicJobLink(Object script) {
+        return "${script.env.JENKINS_URL}job/${script.env.JOB_NAME}/"
+    }
+
     def static getBuildUrlMarkdownLink(Object script) {
         return "[build](${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline)"
     }
 
-    def static getBuildUrlSlackLink(Object script){
-        return "<${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline|build>"
+    def static getBuildUrlSlackLink(Object script) {
+        return toSlackLink(
+                "${script.env.JENKINS_URL}blue/organizations/jenkins/${script.env.JOB_NAME}/detail/${script.env.JOB_NAME}/${script.env.BUILD_NUMBER}/pipeline",
+                "build")
     }
 
     def static getJiraTaskMarkdownLink(String taskKey) {
         return "[${taskKey}](${Constants.JIRA_URL}browse/${taskKey})"
+    }
+
+    static String toSlackLink(String url, String linkName) {
+        return "<$url|$linkName>"
     }
 
     /**
@@ -199,27 +209,27 @@ class CommonUtil {
     /**
      * Firstly extract from env, if empty, extract from params
      * Value sets to env when extracted from webhook body, so it with more priority
-     * @param actionWithValue{value -> }
+     * @param actionWithValue {value -> }
      */
     def static extractValueFromEnvOrParamsAndRun(Object script, String key, Closure actionWithValue) {
         runWithNotEmptyValue(script, key, script.env[key], script.params[key], actionWithValue)
     }
 
     /**
-     * @param actionWithValue{value -> }
+     * @param actionWithValue {value -> }
      */
     def static extractValueFromEnvAndRun(Object script, String key, Closure actionWithValue) {
         runWithNotEmptyValue(script, key, script.env[key], null, actionWithValue)
     }
 
     /**
-     * @param actionWithValue{value -> }
+     * @param actionWithValue {value -> }
      */
     def static extractValueFromParamsAndRun(Object script, String key, Closure actionWithValue) {
         runWithNotEmptyValue(script, key, null, script.params[key], actionWithValue)
     }
 
-     def static extractValueFromBoolParamsAndRun(Object script, Boolean key, Closure actionWithValue) {
+    def static extractValueFromBoolParamsAndRun(Object script, Boolean key, Closure actionWithValue) {
         runWithNotEmptyValue(script, key, null, script.params[key], actionWithValue)
     }
 
@@ -244,7 +254,7 @@ class CommonUtil {
     }
 
     def static isEmptyStringArray(String[] array) {
-        array.size() == 0 || array.every {it -> it.isEmpty()}
+        array.size() == 0 || array.every { it -> it.isEmpty() }
     }
 
     def static printInitialVar(Object script, String varName, varValue) {
