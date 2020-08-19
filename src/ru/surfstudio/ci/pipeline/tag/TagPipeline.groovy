@@ -47,6 +47,17 @@ abstract class TagPipeline extends ScmPipeline {
     //будет выбрана первая подходящая ветка
     public branchesPatternsForAutoChangeVersion = [/^origin\/dev\/.*/, /^origin\/feature\/.*/]
 
+    //logic for customize
+    public Closure applyStrategiesFromParams = { ctx -> //todo нужна ли вообще эта логика?
+        def params = script.params
+        CommonUtil.applyStrategiesFromParams(ctx, [
+                (UNIT_TEST)           : params[UNIT_TEST_STAGE_STRATEGY_PARAMETER],
+                (INSTRUMENTATION_TEST): params[INSTRUMENTATION_TEST_STAGE_STRATEGY_PARAMETER],
+                (STATIC_CODE_ANALYSIS): params[STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER],
+                (BETA_UPLOAD)         : params[BETA_UPLOAD_STAGE_STRATEGY_PARAMETER],
+        ])
+    }
+
     //region customization of stored artifacts
 
     // artifacts are only kept up to this days
@@ -186,7 +197,12 @@ abstract class TagPipeline extends ScmPipeline {
     // ============================================= ↓↓↓ JOB PROPERTIES CONFIGURATION ↓↓↓  ==========================================
 
     //parameters
+    public static final String UNIT_TEST_STAGE_STRATEGY_PARAMETER = 'unitTestStageStrategy'
+    public static final String INSTRUMENTATION_TEST_STAGE_STRATEGY_PARAMETER = 'instrumentationTestStageStrategy'
+    public static final String STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER = 'staticCodeAnalysisStageStrategy'
+    public static final String BETA_UPLOAD_STAGE_STRATEGY_PARAMETER = 'betaUploadStageStrategy'
     public static final String REPO_TAG_PARAMETER = 'repoTag_0'
+    public static final String STAGE_STRATEGY_PARAM_DESCRIPTION = 'stage strategy types, see repo <a href="https://bitbucket.org/surfstudio/jenkins-pipeline-lib">jenkins-pipeline-lib</a> , class StageStrategy. If empty, job will use initial strategy for this stage'
 
     static List<Object> properties(TagPipeline ctx) {
         def script = ctx.script
@@ -237,7 +253,20 @@ abstract class TagPipeline extends ScmPipeline {
                         description  : 'Тег для сборки',
                         selectedValue: 'NONE',
                         sortMode     : 'DESCENDING_SMART'
-                ]
+                ],
+                script.string(
+                        name: UNIT_TEST_STAGE_STRATEGY_PARAMETER,
+                        description: STAGE_STRATEGY_PARAM_DESCRIPTION),
+                script.string(
+                        name: INSTRUMENTATION_TEST_STAGE_STRATEGY_PARAMETER,
+                        description: STAGE_STRATEGY_PARAM_DESCRIPTION),
+                script.string(
+                        name: STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER,
+                        description: STAGE_STRATEGY_PARAM_DESCRIPTION),
+                script.string(
+                        name: BETA_UPLOAD_STAGE_STRATEGY_PARAMETER,
+                        description: STAGE_STRATEGY_PARAM_DESCRIPTION),
+
         ])
     }
 
