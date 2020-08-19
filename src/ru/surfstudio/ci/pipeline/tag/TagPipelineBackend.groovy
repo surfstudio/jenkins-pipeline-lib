@@ -208,7 +208,7 @@ class TagPipelineBackend extends TagPipeline {
     def static applyDelpoyCommandTagStageBody(TagPipelineBackend ctx) {
         def script = ctx.script
         def prevVersion = GradleUtil.getGradleVariable(script, ctx.gradleFileWithVersion, ctx.appVersionNameGradleVar)
-        if (prevVersion != ~ctx.versionRegexp) {
+        if (!(prevVersion ==~ ctx.versionRegexp)) {
             script.error("app version must matches to regexp: $ctx.versionRegexp")
         }
         fillVersionParts(ctx, prevVersion)
@@ -277,7 +277,7 @@ class TagPipelineBackend extends TagPipeline {
 
     def static fillVersionParts(TagPipelineBackend ctx, String version) {
         def script = ctx.script
-        if (version != ~ctx.versionRegexp) {
+        if (!(version ==~ ctx.versionRegexp)) {
             script.error("app version must matches to regexp: $ctx.versionRegexp")
         }
         ctx.fullVersion = version
