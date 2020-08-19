@@ -151,7 +151,9 @@ class TagPipelineBackend extends TagPipeline {
         if (ctx.repoTag ==~ ctx.deployCommandTagRegexp) {
             ctx.getStage(APPLY_DEPLOY_COMMAND_TAG).strategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
         } else {
-            fillVersionParts(ctx, ctx.repoTag)
+            if(ctx.repoTag != null) { //skip for first launch, otherwise it fail and properties are not applyed
+                fillVersionParts(ctx, ctx.repoTag)
+            }
         }
     }
 
@@ -168,7 +170,7 @@ class TagPipelineBackend extends TagPipeline {
                                              String version,
                                              String gradleFileWithVersion,
                                              String appVersionNameGradleVar) {
-        if(GradleUtil.getGradleVariable(script, gradleFileWithVersion, appVersionNameGradleVar) == version){
+        if (GradleUtil.getGradleVariable(script, gradleFileWithVersion, appVersionNameGradleVar) == version) {
             return false
         } else {
             GradleUtil.changeGradleVariable(script, gradleFileWithVersion, appVersionNameGradleVar, "\"$version\"")
@@ -213,7 +215,6 @@ class TagPipelineBackend extends TagPipeline {
         ctx.deployType = ctx.repoTag.replace("deploy-", "")
         def isDeployToProduction = ctx.productionDeployTypes.contains(ctx.deployType)
 
-
         //try find new main version in branch name
         def branches = RepositoryUtil.getRefsForCurrentCommit(script)
         def branchWithVersion = null
@@ -252,7 +253,7 @@ class TagPipelineBackend extends TagPipeline {
 
         //check new version tag is not exist
         def tags = script.sh(returnStdout: true, script: "git tag").trim().split("\n").toList()
-        if(isDeployToProduction && tags.contains(ctx.fullVersion)) {
+        if (isDeployToProduction && tags.contains(ctx.fullVersion)) {
             script.error("Version $ctx.fullVersion already deployed, pleace change version and start again")
         }
 
@@ -304,13 +305,14 @@ class TagPipelineBackend extends TagPipeline {
         def script = ctx.script
         if (ctx.getStage(CHECKOUT).result != Result.ABORTED) { //do not handle builds skipped via [skip ci] label
             if (ctx.qaDeployTypes.contains(ctx.deployType)) {
-                ctx.repoTag = ctx.fullVersion //todo хак чтобы не переписывать метод createVersionAndNotify, нужно вообще пересмотреть как работать в этом месте с джарвисом
+                ctx.repoTag = ctx.fullVersion
+                //todo хак чтобы не переписывать метод createVersionAndNotify, нужно вообще пересмотреть как работать в этом месте с джарвисом
                 JarvisUtil.createVersionAndNotify(ctx)
             } else {
                 def message = null
                 def result = ctx.jobResult
                 if (ctx.getStage(CHECK_RELEASE_DEPLOY_STARTED_BY_HAND).result == Result.ABORTED) {
-                    message = "Развертывание в продакшн для безопасности должно быть запущено вручную, пожалуйста, запустите ${CommonUtil.toSlackLink(CommonUtil.getClassicJobLink(script)+ "build?delay=0sec", "Jenkins Job")} с праметром tag: $ctx.fullVersion"
+                    message = "Развертывание в продакшн для безопасности должно быть запущено вручную, пожалуйста, запустите ${CommonUtil.toSlackLink(CommonUtil.getClassicJobLink(script) + "build?delay=0sec", "Jenkins Job")} с праметром tag: $ctx.fullVersion"
                 } else if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED && ctx.jobResult != Result.NOT_BUILT) {
                     def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
                     message = "Развертывание по тегу ${ctx.repoTag} завершилось с результатом ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlSlackLink(ctx.script)}; создание версии в джире и перенос задач не предусмотрены для $ctx.deployType развертывания"
