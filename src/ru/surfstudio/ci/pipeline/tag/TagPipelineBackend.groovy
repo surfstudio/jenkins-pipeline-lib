@@ -313,9 +313,9 @@ class TagPipelineBackend extends TagPipeline {
                     message = "Развертывание в продакшн для безопасности должно быть запущено вручную, пожалуйста, запустите ${CommonUtil.toSlackLink(CommonUtil.getClassicJobLink(script)+ "build?delay=0sec", "Jenkins Job")} с праметром tag: $ctx.fullVersion"
                 } else if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED && ctx.jobResult != Result.NOT_BUILT) {
                     def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
-                    message = "Развертывание по тегу ${ctx.repoTag} завершилось с результатом ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlSlackLink(ctx.script)}"
+                    message = "Развертывание по тегу ${ctx.repoTag} завершилось с результатом ${ctx.jobResult} из-за этапов: ${unsuccessReasons}; ${CommonUtil.getBuildUrlSlackLink(ctx.script)}; создание версии в джире и перенос задач не предусмотрены для $ctx.deployType развертывания"
                 } else if (ctx.jobResult == Result.SUCCESS) {
-                    message = "Развертывание c версией ${ctx.fullVersion} произведено успешно, создание версии в джире и перенос задач не предусмотрены для типа развертывания: $ctx.deployType"
+                    message = "Развертывание c версией ${ctx.fullVersion} произведено успешно, создание версии в джире и перенос задач не предусмотрены для $ctx.deployType развертывания: "
                 }
                 JarvisUtil.sendMessageToGroup(ctx.script, message, ctx.repoUrl, "github", result)
             }
