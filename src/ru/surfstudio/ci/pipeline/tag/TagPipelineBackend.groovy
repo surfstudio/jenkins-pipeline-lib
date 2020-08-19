@@ -147,11 +147,11 @@ class TagPipelineBackend extends TagPipeline {
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
     def static initBodyBackend(TagPipelineBackend ctx) {
-        TagPipeline.initBody(ctx)
+        TagPipeline.initBody(ctx) //todo проверка тега на соответствие regexp заранее, возможно в отдельном стейдже
         if (ctx.repoTag ==~ ctx.deployCommandTagRegexp) {
             ctx.getStage(APPLY_DEPLOY_COMMAND_TAG).strategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
         } else {
-            if(ctx.repoTag != null) { //skip for first launch, otherwise it fail and properties are not applyed
+            if(ctx.repoTag != null && !ctx.repoTag.isEmpty()) { //skip for first launch, otherwise it fail and properties are not applyed
                 fillVersionParts(ctx, ctx.repoTag)
             }
         }
