@@ -208,6 +208,7 @@ class TagPipelineBackend extends TagPipeline {
     def static applyDelpoyCommandTagStageBody(TagPipelineBackend ctx) {
         def script = ctx.script
         def prevVersion = GradleUtil.getGradleVariable(script, ctx.gradleFileWithVersion, ctx.appVersionNameGradleVar)
+        prevVersion = prevVersion.substring(1, prevVersion.length()-1) //remove quotes
         fillVersionParts(ctx, prevVersion)
         ctx.deployType = ctx.repoTag.replace("deploy-", "")
         def isDeployToProduction = ctx.productionDeployTypes.contains(ctx.deployType)
