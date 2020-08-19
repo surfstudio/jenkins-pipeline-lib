@@ -69,7 +69,7 @@ class TagPipelineBackend extends TagPipeline {
     TagPipelineBackend(Object script) {
         super(script)
         //override values from parent class
-        tagRegexp = "$ctx.versionRegexp|$ctx.deployCommandTagRegexp"
+        tagRegexp = "$versionRegexp|$deployCommandTagRegexp"
         branchesPatternsForAutoChangeVersion = /.*/  //any
     }
 

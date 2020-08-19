@@ -5,8 +5,8 @@ import ru.surfstudio.ci.stage.StageStrategy
 def pipeline = new PrPipelineBackend(this)
 pipeline.init()
 
-pipeline.getStage(PrPipelineBackend.CODE_STYLE_FORMATTING).strategy = StageStrategy.SKIP_STAGE
-pipeline.getStage(PrPipelineBackend.UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT).strategy = StageStrategy.SKIP_STAGE
+pipeline.getStage(pipeline.CODE_STYLE_FORMATTING).strategy = StageStrategy.SKIP_STAGE
+pipeline.getStage(pipeline.UPDATE_CURRENT_COMMIT_HASH_AFTER_FORMAT).strategy = StageStrategy.SKIP_STAGE
 
 
 pipeline.run()
