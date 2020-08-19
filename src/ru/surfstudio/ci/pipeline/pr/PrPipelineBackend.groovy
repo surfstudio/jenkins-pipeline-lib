@@ -14,7 +14,7 @@ class PrPipelineBackend extends PrPipeline {
     public unitTestResultPathXml = "build/test-results/test/*.xml"
     public unitTestResultDirHtml = "build/reports/tests/test"
 
-    public DOCKER_BUILD_WRAPPED_STAGES = "Executing stages inside docker"
+    public DOCKER_BUILD_WRAPPER = "Inside docker"
     public dockerImageForBuild = "gradle:6.0.1-jdk11"
     public dockerArguments = null
 
@@ -47,7 +47,7 @@ class PrPipelineBackend extends PrPipeline {
                 stage(PRE_MERGE) {
                     mergeLocal(script, destinationBranch)
                 },
-                docker(DOCKER_BUILD_WRAPPED_STAGES, dockerImageForBuild, dockerArguments,
+                docker(DOCKER_BUILD_WRAPPER, dockerImageForBuild, dockerArguments,
                         [
                                 stage(BUILD, StageStrategy.FAIL_WHEN_STAGE_ERROR) {
                                     BackendPipelineHelper.buildStageBodyBackend(script, buildGradleTask)

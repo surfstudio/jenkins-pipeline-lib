@@ -1,5 +1,5 @@
-import ru.surfstudio.ci.RepositoryUtil
 @Library('surf-lib@version-4.0.0-SNAPSHOT')
+import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.pipeline.tag.TagPipelineBackend
 import ru.surfstudio.ci.stage.StageStrategy
 import ru.surfstudio.ci.utils.YamlUtil
