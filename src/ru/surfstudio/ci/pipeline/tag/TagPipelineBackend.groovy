@@ -122,17 +122,18 @@ class TagPipelineBackend extends TagPipeline {
                                 },
                                 stage(UNIT_TEST) {
                                     BackendPipelineHelper.runUnitTests(script, unitTestGradleTask, unitTestResultPathXml, unitTestResultDirHtml)
-                                },
-                                stage(BUILD_PUBLISH_DOCKER_IMAGES) {
-                                    dockerBuildPublishStageBody(script,
-                                            dockerRegistryUrl,
-                                            dockerRegistryCredentialsId,
-                                            dockerRepository,
-                                            dockerFiles,
-                                            fullVersion,
-                                            dockerImageAdditionalTags)
-                                },
+                                }
+
                         ]),
+                stage(BUILD_PUBLISH_DOCKER_IMAGES) {
+                    dockerBuildPublishStageBody(script,
+                            dockerRegistryUrl,
+                            dockerRegistryCredentialsId,
+                            dockerRepository,
+                            dockerFiles,
+                            fullVersion,
+                            dockerImageAdditionalTags)
+                },
                 stage(DEPLOY, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     script.echo "This stage empty by default, please configure it in your jenkinsfile"
                     script.error("Empty stage")
@@ -149,8 +150,7 @@ class TagPipelineBackend extends TagPipeline {
         if (ctx.repoTag ==~ ctx.deployCommandTagRegexp) {
             ctx.getStage(APPLY_DEPLOY_COMMAND_TAG).strategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
         } else {
-            if (ctx.repoTag != null && !ctx.repoTag.isEmpty()) {
-                //skip for first launch, otherwise it fail and properties are not applied
+            if(ctx.repoTag != null && !ctx.repoTag.isEmpty()) { //skip for first launch, otherwise it fail and properties are not applied
                 fillVersionParts(ctx, ctx.repoTag)
             }
         }
@@ -209,7 +209,7 @@ class TagPipelineBackend extends TagPipeline {
     def static applyDelpoyCommandTagStageBody(TagPipelineBackend ctx) {
         def script = ctx.script
         def prevVersion = GradleUtil.getGradleVariable(script, ctx.gradleFileWithVersion, ctx.appVersionNameGradleVar)
-        prevVersion = prevVersion.substring(1, prevVersion.length() - 1) //remove quotes
+        prevVersion = prevVersion.substring(1, prevVersion.length()-1) //remove quotes
         fillVersionParts(ctx, prevVersion)
         ctx.deployType = ctx.repoTag.replace("deploy-", "")
         def isDeployToProduction = ctx.productionDeployTypes.contains(ctx.deployType)
