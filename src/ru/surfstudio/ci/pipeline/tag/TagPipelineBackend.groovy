@@ -85,11 +85,11 @@ class TagPipelineBackend extends TagPipeline {
         propertiesProvider = { properties(this) }
 
         stages = [
-                stage(CHECK_TAG) {
-                    checkTagStageBody(this)
-                },
                 stage(CHECKOUT, false) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
+                },
+                stage(CHECK_TAG) {
+                    checkTagStageBody(this)
                 },
                 stage(APPLY_DEPLOY_COMMAND_TAG, StageStrategy.SKIP_STAGE) {
                     applyDeployCommandTagStageBody(this)
