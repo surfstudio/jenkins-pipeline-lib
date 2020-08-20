@@ -102,7 +102,7 @@ class TagPipelineBackend extends TagPipeline {
                 },
                 stage(VERSION_PUSH, StageStrategy.UNSTABLE_WHEN_STAGE_ERROR) {
                     versionPushStageBody(script,
-                            repoTag,
+                            fullVersion,
                             branchesPatternsForAutoChangeVersion,
                             repoUrl,
                             repoCredentialsId,
