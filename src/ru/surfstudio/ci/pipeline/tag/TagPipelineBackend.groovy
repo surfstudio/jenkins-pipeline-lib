@@ -21,9 +21,9 @@ class TagPipelineBackend extends TagPipeline {
     public static DEPLOY = "Deploy"
 
     // ===== Tags & versions =====
-    public deployCommandTagRegexp = /^deploy-.+$/  // "deploy-prod", "deploy-dev"
+    public deployCommandTagRegexp = /^deploy-[A-Za-z0-9]+$/  // "deploy-prod", "deploy-dev"
     // Examples: "0.2-dev-3", "2.0-prod", "1.3.5-staging-3-featureFoo"
-    public versionRegexp = /^\d{1,4}\.\d{1,4}(\.\d{1,4})?-[A-Za-z]+(-[0-9]+(-[A-Za-z0-9]+)?)?$/
+    public versionRegexp = /^\d{1,4}\.\d{1,4}(\.\d{1,4})?-[A-Za-z0-9]+(-[0-9]+(-[A-Za-z0-9]+)?)?$/
     // Full version / Tag is: <mainVersion>-<deployType>-<additionalVersionCounter>-<versionLabel>
     // <additionalVersionCounter> - only for not production
     // <versionLabel> - optional and can exist if additionalVersionCounter exist
