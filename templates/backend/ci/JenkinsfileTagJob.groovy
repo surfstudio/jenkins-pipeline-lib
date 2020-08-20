@@ -17,7 +17,7 @@ pipeline.getStage(pipeline.BUILD_PUBLISH_DOCKER_IMAGES).beforeBody {
     pipeline.dockerRepository = "foo/bar/$pipeline.deployType"
 }
 
-
+//ArgoCD deploy
 def k8sRepo = "<undefined>" // repo with k8s configs
 def k8sBranch = "<undefined>" // branch with k8s configs in repo $k8sRepo
 pipeline.getStage(pipeline.DEPLOY).strategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
@@ -27,7 +27,7 @@ pipeline.getStage(pipeline.DEPLOY).body = {
         def fileToChange = "manifests/overlays/$pipeline.deployType/kustomization.yaml"
         YamlUtil.changeYamlVariable(script, fileToChange, "newTag", pipeline.fullVersion)
         script.sh "git commit -a -m \"New Docker tag: $pipeline.fullVersion for deploy: $pipeline.deployType\""
-        RepositoryUtil.push(script, repoUrl, repoCredentialsId)
+        script.sh "git push ${k8sRepo} ${k8sBranch}"
     }
 }
 

@@ -160,7 +160,7 @@ class TagPipelineBackend extends TagPipeline {
                                              String version,
                                              String gradleFileWithVersion,
                                              String appVersionNameGradleVar) {
-        if (GradleUtil.getGradleVariable(script, gradleFileWithVersion, appVersionNameGradleVar) == version) {
+        if (GradleUtil.getGradleVariable(script, gradleFileWithVersion, appVersionNameGradleVar).equals(version)) {
             return false
         } else {
             GradleUtil.changeGradleVariable(script, gradleFileWithVersion, appVersionNameGradleVar, "\"$version\"")
