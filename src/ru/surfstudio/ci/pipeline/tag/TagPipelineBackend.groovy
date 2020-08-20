@@ -15,7 +15,7 @@ class TagPipelineBackend extends TagPipeline {
     //Additional stages
 
     public static APPLY_DEPLOY_COMMAND_TAG = "Apply deploy command tag"
-    public static CHECK_RELEASE_DEPLOY_STARTED_BY_HAND = "Check release deploy not started by hand"
+    public static CHECK_PRODUCTION_DEPLOY_STARTED_BY_HAND = "Check production deploy not started by hand"
     public static BUILD_PUBLISH_DOCKER_IMAGES = "Build and publish docker images"
     public static DOCKER_BUILD_WRAPPER = "Inside docker"
     public static DEPLOY = "Deploy"
@@ -112,7 +112,7 @@ class TagPipelineBackend extends TagPipeline {
                             ),
                             versionUpdatedInSourceCode)
                 },
-                stage(CHECK_RELEASE_DEPLOY_STARTED_BY_HAND) {
+                stage(CHECK_PRODUCTION_DEPLOY_STARTED_BY_HAND) {
                     checkReleaseDeployStartedByHandStageBody(script,
                             productionDeployTypes.contains(deployType),
                             fullVersion)
@@ -309,7 +309,7 @@ class TagPipelineBackend extends TagPipeline {
             } else {
                 def message = null
                 def result = ctx.jobResult
-                if (ctx.getStage(CHECK_RELEASE_DEPLOY_STARTED_BY_HAND).result == Result.ABORTED) {
+                if (ctx.getStage(CHECK_PRODUCTION_DEPLOY_STARTED_BY_HAND).result == Result.ABORTED) {
                     message = "Развертывание в продакшн для безопасности должно быть запущено вручную, пожалуйста, запустите ${CommonUtil.toSlackLink(CommonUtil.getClassicJobLink(script) + "build?delay=0sec", "Jenkins Job")} с праметром tag: $ctx.fullVersion"
                 } else if (ctx.jobResult != Result.SUCCESS && ctx.jobResult != Result.ABORTED && ctx.jobResult != Result.NOT_BUILT) {
                     def unsuccessReasons = CommonUtil.unsuccessReasonsToString(ctx.stages)
