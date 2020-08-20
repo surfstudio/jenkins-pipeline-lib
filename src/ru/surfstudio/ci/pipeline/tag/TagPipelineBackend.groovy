@@ -160,13 +160,15 @@ class TagPipelineBackend extends TagPipeline {
                                              String version,
                                              String gradleFileWithVersion,
                                              String appVersionNameGradleVar) {
+        def result
         if (GradleUtil.getGradleVariable(script, gradleFileWithVersion, appVersionNameGradleVar).equals("\"$version\"")) {
-            return false
+            result = false
         } else {
             GradleUtil.changeGradleVariable(script, gradleFileWithVersion, appVersionNameGradleVar, "\"$version\"")
-            return true
+            result = true
         }
-
+        script.echo "Version changed: $result"
+        return result
     }
 
     def static dockerBuildPublishStageBody(Object script,
