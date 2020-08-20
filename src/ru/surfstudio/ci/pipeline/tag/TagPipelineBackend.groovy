@@ -196,7 +196,7 @@ class TagPipelineBackend extends TagPipeline {
             def imagePrefix = "$registryUrl/$repository"
             dockerFiles.each { file ->
                 def imageName = "$imagePrefix/$file.key:$version"
-                def splittedPath = file.value.split('/')
+                def splittedPath = file.value.split('/').toList()
                 def dockerFile = splittedPath.get(splittedPath.size() - 1)
                 def dockerFileDir = splittedPath.subList(0, splittedPath.size() - 1).join('/')
                 def image = script.docker.build(imageName, "-f $dockerFile $dockerFileDir")

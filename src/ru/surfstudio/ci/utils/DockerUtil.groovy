@@ -2,6 +2,10 @@ package ru.surfstudio.ci.utils
 
 class DockerUtil {
 
+    /**
+     * Analog of docker.withRegistry(url, credentialsId) which support gcloud registry
+     * docker.withRegistry not work with gcloud credentials, even with Google Container Registry Auth Plugin https://issues.jenkins-ci.org/browse/JENKINS-50557
+     */
     def static withRegistry(Object script,
                             String url,
                             String credentialsId,
