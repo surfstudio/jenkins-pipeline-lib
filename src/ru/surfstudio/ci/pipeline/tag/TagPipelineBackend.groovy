@@ -156,7 +156,7 @@ class TagPipelineBackend extends TagPipeline {
 
     }
 
-    def static versionUpdateStageBodyBackend(Object script,
+    static boolean versionUpdateStageBodyBackend(Object script,
                                              String version,
                                              String gradleFileWithVersion,
                                              String appVersionNameGradleVar) {
