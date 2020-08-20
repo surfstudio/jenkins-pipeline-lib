@@ -262,7 +262,7 @@ class TagPipelineBackend extends TagPipeline {
 
         //delete tag-command
         script.sh "git tag -d $ctx.repoTag"
-        script.sh "git push --delete origin :refs/tags/$ctx.repoTag"
+        script.sh "git push --delete origin $ctx.repoTag"
     }
 
     def static checkReleaseDeployStartedByHandStageBody(Object script,
