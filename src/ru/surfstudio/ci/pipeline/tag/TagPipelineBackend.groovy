@@ -23,20 +23,18 @@ class TagPipelineBackend extends TagPipeline {
     // ===== Tags & versions =====
     public deployCommandTagRegexp = /^deploy-.+$/  // "deploy-prod", "deploy-dev"
     // Examples: "dev/0.2-alpha3", "prod/2.0", "staging/1.3.5-beta3-featureFoo"
-    public versionRegexp = /^[A-Za-z0-9]+\/\d{1,4}\.\d{1,4}(\.\d{1,4})?(-[A-Za-z]+[0-9]+(-[A-Za-z0-9]+)?)?$/
-    // Full version / Tag is: <deployType>/<mainVersion>-<versionModificator><versionModificatorCounter>-<versionLabel>
-    // <versionModificator><versionModificatorCounter> - optional
-    // <versionLabel> - optional and can exist if modificator exist
+    public versionRegexp = /^\d{1,4}\.\d{1,4}(\.\d{1,4})?-[A-Za-z]+(-[0-9]+(-[A-Za-z0-9]+)?)?$/
+    // Full version / Tag is: <mainVersion>-<deployType>-<additionalVersionCounter>-<versionLabel>
+    // <additionalVersionCounter> - only for not production
+    // <versionLabel> - optional and can exist if additionalVersionCounter exist
     public fullVersion = "<unspecified>"                // equals $repoTag if $repoTag is not deploy command
     public deployType                   // "dev", "prod", etc.
     public mainVersion                // X.Y.Z or X.Y
-    public versionModificator         // alpha, beta, etc.
-    public versionModificatorCounter  // number
+    public additionalVersionCounter  // number
     public versionLabel               // some text
 
     public productionDeployTypes = ["prod"]
     public qaDeployTypes = ["staging"] // сборка которая идет на тестирование
-    public defaultVersionModificator = "alpha"
     //version always last part of branch name
     public branchWithVersionRegexps = [/^[a-zA-Z0-9]+\/\d{1,4}\.\d{1,4}(\.\d{1,4})?$/]
     //how to divide version from branch name
@@ -147,6 +145,7 @@ class TagPipelineBackend extends TagPipeline {
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
     def static initBodyBackend(TagPipelineBackend ctx) {
+        //todo check prod tag without counter
         TagPipeline.initBody(ctx) //todo проверка тега на соответствие regexp заранее, возможно в отдельном стейдже
         if (ctx.repoTag ==~ ctx.deployCommandTagRegexp) {
             ctx.getStage(APPLY_DEPLOY_COMMAND_TAG).strategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
@@ -199,7 +198,7 @@ class TagPipelineBackend extends TagPipeline {
                 def splittedPath = file.value.split('/').toList()
                 def dockerFile = splittedPath.get(splittedPath.size() - 1)
                 def dockerFileDir = splittedPath.subList(0, splittedPath.size() - 1).join('/')
-                def image = script.docker.build(imageName, "-f $dockerFile $dockerFileDir")
+                def image = script.docker.build(imageName, "-f ./$dockerFile $dockerFileDir")
                 image.push()
                 for (String imageTag : additionalTags) {
                     image.push(imageTag)
@@ -237,15 +236,13 @@ class TagPipelineBackend extends TagPipeline {
 
         //calculate version parts depends on deployType
         if (isDeployToProduction) {
-            ctx.versionModificatorCounter = null
-            ctx.versionModificator = null
+            ctx.additionalVersionCounter = null
             ctx.versionLabel = null
         } else {
-            if (ctx.versionModificator == null) ctx.versionModificator = ctx.defaultVersionModificator
-            if (ctx.versionModificatorCounter == null) {
-                ctx.versionModificatorCounter = 0
+            if (ctx.additionalVersionCounter == null) {
+                ctx.additionalVersionCounter = 0
             } else {
-                ctx.versionModificatorCounter++
+                ctx.additionalVersionCounter++
             }
         }
 
@@ -259,7 +256,7 @@ class TagPipelineBackend extends TagPipeline {
         }
 
         while (tags.contains(ctx.fullVersion)) {
-            ctx.versionModificatorCounter++
+            ctx.additionalVersionCounter++
             assembleFullVersionFromParts(ctx)
         }
 
@@ -282,12 +279,11 @@ class TagPipelineBackend extends TagPipeline {
             script.error("app version must matches to regexp: $ctx.versionRegexp")
         }
         ctx.fullVersion = version
-        def splittedVersion = version.split("/|-")
-        ctx.deployType = splittedVersion[0]
-        ctx.mainVersion = splittedVersion[1]
+        def splittedVersion = version.split("-")
+        ctx.mainVersion = splittedVersion[0]
+        ctx.deployType = splittedVersion[1]
         if (splittedVersion.size() > 2) {
-            ctx.versionModificator = splittedVersion[2].replaceAll(/[0-9]*/, "")
-            ctx.versionModificatorCounter = splittedVersion[2].replace(ctx.versionModificator, "")
+            ctx.additionalVersionCounter = Integer.parseInt(splittedVersion[2])
         }
         if (splittedVersion.size() > 3) {
             ctx.versionLabel = splittedVersion[3]
@@ -296,8 +292,8 @@ class TagPipelineBackend extends TagPipeline {
 
 
     def static assembleFullVersionFromParts(TagPipelineBackend ctx) {
-        def fullVersion = "$ctx.deployType/$ctx.mainVersion"
-        if (ctx.versionModificator != null) fullVersion += "-$ctx.versionModificator$ctx.versionModificatorCounter"
+        def fullVersion = "$ctx.mainVersion-$ctx.deployType"
+        if (ctx.additionalVersionCounter != null) fullVersion += "-$ctx.additionalVersionCounter"
         if (ctx.versionLabel != null) fullVersion += "-$ctx.versionLabel"
         ctx.fullVersion = fullVersion
     }
