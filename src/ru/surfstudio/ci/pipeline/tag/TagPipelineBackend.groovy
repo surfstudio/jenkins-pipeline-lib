@@ -7,7 +7,7 @@ import ru.surfstudio.ci.RepositoryUtil
 import ru.surfstudio.ci.Result
 import ru.surfstudio.ci.pipeline.helper.BackendPipelineHelper
 import ru.surfstudio.ci.stage.StageStrategy
-
+import ru.surfstudio.ci.utils.DockerUtil
 import ru.surfstudio.ci.utils.buildsystems.GradleUtil
 
 class TagPipelineBackend extends TagPipeline {
@@ -180,16 +180,19 @@ class TagPipelineBackend extends TagPipeline {
     }
 
     def static dockerBuildPublishStageBody(Object script,
-                                           registryUrl,
-                                           registryCredentialsId,
-                                           repository,
-                                           dockerFiles, //map[imageName:dockerFilePath]
-                                           version,
-                                           additionalTags) {
+                                           String registryUrl,
+                                           String registryCredentialsId,
+                                           String repository,
+                                           Map<String, String> dockerFiles, //map[imageName:dockerFilePath]
+                                           String version,
+                                           Collection<String> additionalTags) {
+
+        // Full image path is: <registryUrl>/<repository>/<imageName>:<version|additionalTag>
+
         if (dockerFiles.isEmpty()) {
             script.error("No dockerfiles specified")
         }
-        script.withRegistry(registryUrl, registryCredentialsId) {
+        DockerUtil.withRegistry(script, registryUrl, registryCredentialsId) {
             def imagePrefix = "$registryUrl/$repository"
             dockerFiles.each { file ->
                 def imageName = "$imagePrefix/$file.key:$version"

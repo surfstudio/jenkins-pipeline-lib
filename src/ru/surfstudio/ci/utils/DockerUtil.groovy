@@ -7,7 +7,8 @@ class DockerUtil {
                             String credentialsId,
                             Closure body) {
         if(credentialsId.startsWith("gcr:")){
-            script.withCredentials([file(credentialsId: credentialsId, variable: 'registry_json_key')]) {
+            def clearCredId = credentialsId.replace("gcr:", "")
+            script.withCredentials([script.file(credentialsId: clearCredId, variable: 'registry_json_key')]) {
                 script.sh "cat $script.registry_json_key | docker login -u _json_key --password-stdin $url"
                 body()
                 script.sh "docker logout $url"
