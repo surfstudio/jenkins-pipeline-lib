@@ -129,6 +129,7 @@ abstract class TagPipeline extends ScmPipeline {
                                     String repoCredentialsId,
                                     String changeVersionCommitMessage,
                                     boolean versionUpdatedInSourceCode = true) {
+        script.echo "versionUpdatedInSourceCode: $versionUpdatedInSourceCode"
         if(versionUpdatedInSourceCode) {
             //find branch for change version
             def branches = RepositoryUtil.getBranchesForCurrentCommit(script)
