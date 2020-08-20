@@ -131,7 +131,7 @@ abstract class TagPipeline extends ScmPipeline {
                                     boolean versionUpdatedInSourceCode = true) {
         if(versionUpdatedInSourceCode) {
             //find branch for change version
-            def branches = RepositoryUtil.getRefsForCurrentCommit(script)
+            def branches = RepositoryUtil.getBranchesForCurrentCommit(script)
             def branchForChangeVersion = null
             for (branchRegexp in branchesPatternsForAutoChangeVersion) {
                 Pattern pattern = Pattern.compile(branchRegexp)

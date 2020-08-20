@@ -17,7 +17,6 @@ package ru.surfstudio.ci
 
 import com.cloudbees.plugins.credentials.CredentialsProvider
 import com.cloudbees.plugins.credentials.common.IdCredentials
-import org.apache.tools.ant.types.selectors.SelectSelector
 import org.eclipse.jgit.transport.URIish
 import org.jenkinsci.plugins.gitclient.Git
 
@@ -30,7 +29,7 @@ class RepositoryUtil {
     def static GITHUB_ACCOUNT = "surfstudio"
     def static CREDENTIALS_ID = "b72070fe-76a3-467a-85c4-beccf4b0979f"
 
-    def static notifyGithubAboutStageStart(Object script, String repoUrl, String stageName){
+    def static notifyGithubAboutStageStart(Object script, String repoUrl, String stageName) {
         def githubStatus = "PENDING"
         def description = "Running"
         def commit = getSavedGitCommitHash(script)
@@ -43,7 +42,7 @@ class RepositoryUtil {
                 description: description, status: githubStatus, repo: slug, account: GITHUB_ACCOUNT, sha: commit)
     }
 
-    def static notifyGithubAboutStageFinish(Object script, String repoUrl, String stageName, String result){
+    def static notifyGithubAboutStageFinish(Object script, String repoUrl, String stageName, String result) {
         def commit = getSavedGitCommitHash(script)
         if (!commit) {
             script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
@@ -51,7 +50,8 @@ class RepositoryUtil {
         notifyGithubAboutStageFinish(script, repoUrl, stageName, result, commit)
     }
 
-    def static notifyGithubAboutStageFinish(Object script, String repoUrl, String stageName, String result, String revision){
+    def
+    static notifyGithubAboutStageFinish(Object script, String repoUrl, String stageName, String result, String revision) {
         def githubStatus = ""
         def description = ""
         def slug = getCurrentGithubRepoSlug(script, repoUrl)
@@ -86,22 +86,21 @@ class RepositoryUtil {
                 description: description, status: githubStatus, repo: slug, account: GITHUB_ACCOUNT, sha: revision)
     }
 
-    def static notifyGithubAboutStagePending(Object script, String repoUrl, String stageName, String sourceBranch){
+    def static notifyGithubAboutStagePending(Object script, String repoUrl, String stageName, String sourceBranch) {
         def githubStatus = "PENDING"
         def description = "Pending"
         def slug = getCurrentGithubRepoSlug(script, repoUrl)
 
         if (!sourceBranch) {
             script.echo "Skip Notify GitHub synthetic stage. sourceBranch: $sourceBranch is empty"
-        }
-        else {
+        } else {
             script.echo "Notify GitHub synthetic stage - stage: $stageName, repoSlug: $slug, status: $githubStatus"
             script.githubNotify(credentialsId: CREDENTIALS_ID, context: stageName,
                     description: description, status: githubStatus, repo: slug, account: GITHUB_ACCOUNT, sha: sourceBranch)
         }
     }
 
-    def static notifyGithubAboutStageAborted(Object script, String repoUrl, String stageName, String sourceBranch){
+    def static notifyGithubAboutStageAborted(Object script, String repoUrl, String stageName, String sourceBranch) {
         def githubStatus = "ERROR"
         def description = "Aborted"
         def slug = getCurrentGitlabRepoSlug(script, repoUrl)
@@ -110,7 +109,7 @@ class RepositoryUtil {
                 description: description, status: githubStatus, repo: slug, account: GITHUB_ACCOUNT, sha: sourceBranch)
     }
 
-    def static notifyGitlabAboutStageStart(Object script, String repoUrl, String stageName){
+    def static notifyGitlabAboutStageStart(Object script, String repoUrl, String stageName) {
         def gitlabStatus = "running"
         def slug = getCurrentGitlabRepoSlug(script, repoUrl)
         def commit = getSavedGitCommitHash(script)
@@ -121,7 +120,7 @@ class RepositoryUtil {
         script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "$commit"]])
     }
 
-    def static notifyGitlabAboutStageFinish(Object script, String repoUrl, String stageName, String result){
+    def static notifyGitlabAboutStageFinish(Object script, String repoUrl, String stageName, String result) {
         def commit = getSavedGitCommitHash(script)
         if (!commit) {
             script.error("You must call RepositoryUtil.saveCurrentGitCommitHash() before invoke this method")
@@ -129,21 +128,22 @@ class RepositoryUtil {
         notifyGitlabAboutStageFinish(script, repoUrl, stageName, result, commit)
     }
 
-    def static notifyGitlabAboutStageAborted(Object script, String repoUrl, String stageName, String sourceBranch){
+    def static notifyGitlabAboutStageAborted(Object script, String repoUrl, String stageName, String sourceBranch) {
         def gitlabStatus = "canceled"
         def slug = getCurrentGitlabRepoSlug(script, repoUrl)
         script.echo "Notify GitLab - synthetic stage: $stageName, repoSlug: $slug, branch: $sourceBranch, status: $gitlabStatus"
         script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "$sourceBranch"]])
     }
 
-    def static notifyGitlabAboutStagePending(Object script, String repoUrl, String stageName, String sourceBranch){
+    def static notifyGitlabAboutStagePending(Object script, String repoUrl, String stageName, String sourceBranch) {
         def gitlabStatus = "pending"
         def slug = getCurrentGitlabRepoSlug(script, repoUrl)
         script.echo "Notify GitLab - synthetic stage: $stageName, repoSlug: $slug, branch: $sourceBranch, status: $gitlabStatus"
         script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "$sourceBranch"]])
     }
 
-    def static notifyGitlabAboutStageFinish(Object script, String repoUrl, String stageName, String result, String revision){
+    def
+    static notifyGitlabAboutStageFinish(Object script, String repoUrl, String stageName, String result, String revision) {
         def gitlabStatus = ""
 
         switch (result) {
@@ -166,7 +166,7 @@ class RepositoryUtil {
         script.updateGitlabCommitStatus(name: "$stageName", state: "$gitlabStatus", builds: [[projectId: "$slug", revisionHash: "$revision"]])
     }
 
-    def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName){
+    def static notifyBitbucketAboutStageStart(Object script, String repoUrl, String stageName) {
         def bitbucketStatus = 'INPROGRESS'
         def slug = getCurrentBitbucketRepoSlug(script, repoUrl)
         def commit = getSavedGitCommitHash(script)
@@ -183,10 +183,10 @@ class RepositoryUtil {
         )
     }
 
-    def static notifyBitbucketAboutStageFinish(Object script, String repoUrl, String stageName, String result){
+    def static notifyBitbucketAboutStageFinish(Object script, String repoUrl, String stageName, String result) {
         def bitbucketStatus = ""
 
-        switch (result){
+        switch (result) {
             case Result.SUCCESS:
                 bitbucketStatus = 'SUCCESSFUL'
                 break
@@ -215,26 +215,25 @@ class RepositoryUtil {
         )
     }
 
-    def static getCurrentGitlabRepoSlug(Object script, String repoUrl){
+    def static getCurrentGitlabRepoSlug(Object script, String repoUrl) {
         def splittedUrlString = ""
         def splittedUrlArray = repoUrl.split("/")
         for (def i = 3; i < splittedUrlArray.length; i++)
-            if(i == splittedUrlArray.length - 1) {
+            if (i == splittedUrlArray.length - 1) {
                 splittedUrlString += splittedUrlArray[i]
-            }
-            else {
+            } else {
                 splittedUrlString += splittedUrlArray[i]
                 splittedUrlString += "/"
             }
         return splittedUrlString
     }
 
-    def static getCurrentGithubRepoSlug(Object script, String repoUrl){
+    def static getCurrentGithubRepoSlug(Object script, String repoUrl) {
         def splittedUrl = repoUrl.split("/")
         return splittedUrl[splittedUrl.length - 1]
     }
 
-    def static getCurrentBitbucketRepoSlug(Object script, String repoUrl){
+    def static getCurrentBitbucketRepoSlug(Object script, String repoUrl) {
         def splittedUrl = repoUrl.split("/")
         return splittedUrl[splittedUrl.length - 1]
     }
@@ -268,38 +267,41 @@ class RepositoryUtil {
             def config = script.scm.userRemoteConfigs.first()
             script.echo "Extracted initial repoUrl: $config.url, repoCredentialsId: $config.credentialsId"
             handler(config.url, config.credentialsId)
-        } catch (e){
+        } catch (e) {
             script.echo "Cannot extract initial repository remote config: ${e.toString()}"
         }
     }
 
-    @Deprecated //ранее неправильное было название метода
-    def static Collection<String> getRefsForCurrentCommitMessage(Object script){
-        return getRefsForCurrentCommit(script)
+    @Deprecated
+    //ранее неправильное было название метода
+    def static Collection<String> getRefsForCurrentCommitMessage(Object script) {
+        return getBranchesForCurrentCommit(script)
     }
 
-    def static Collection<String> getRefsForCurrentCommit(Object script){
+    def static Collection<String> getBranchesForCurrentCommit(Object script) {
         def String rawRefs = script.sh(script: "git log -1 --pretty=%D", returnStdout: true)
-        def result = rawRefs.split(/(->|, |\n)/).findAll({it?.trim()})
+        def result = rawRefs.split(/(->|, |\n)/)
+                .collect({ it.trim() })
+                .findAll({ !it.equals("HEAD") && !it.contains("tag:") })
         script.echo "extracted refs for current commit: $result"
         return result
     }
 
-    def static String getCurrentCommitMessage(Object script){
+    def static String getCurrentCommitMessage(Object script) {
         def message = script.sh(script: "git log -1 --pretty=%B", returnStdout: true)
         script.echo "extracted current commit message: $message"
         return message
     }
 
-    def static isContainsSkipCi(String text){
+    def static isContainsSkipCi(String text) {
         return text.contains(SKIP_CI_LABEL1) || text.contains(SKIP_CI_LABEL2)
     }
 
-    def static isCurrentCommitMessageContainsSkipCiLabel(Object script){
+    def static isCurrentCommitMessageContainsSkipCiLabel(Object script) {
         return isContainsSkipCi(getCurrentCommitMessage(script))
     }
 
-    def static isCurrentCommitMessageContainsVersionLabel(Object script){
+    def static isCurrentCommitMessageContainsVersionLabel(Object script) {
         return getCurrentCommitMessage(script).contains(VERSION_LABEL1)
     }
 
@@ -337,12 +339,13 @@ class RepositoryUtil {
         return gitClient
     }
 
-    def static checkLastCommitMessageContainsSkipCiLabel(Object script){
+    def static checkLastCommitMessageContainsSkipCiLabel(Object script) {
         script.echo "Checking $RepositoryUtil.SKIP_CI_LABEL1 label in last commit message for automatic builds"
-        if (isCurrentCommitMessageContainsSkipCiLabel(script) && !CommonUtil.isJobStartedByUser(script)){
+        if (isCurrentCommitMessageContainsSkipCiLabel(script) && !CommonUtil.isJobStartedByUser(script)) {
             throw new InterruptedException("Job aborted, because it triggered automatically and last commit message contains $RepositoryUtil.SKIP_CI_LABEL1 label")
         }
     }
+
     static checkHasChanges(Object script) {
         return !script.sh(returnStdout: true, script: "git status --porcelain --untracked-files=no").isEmpty()
     }

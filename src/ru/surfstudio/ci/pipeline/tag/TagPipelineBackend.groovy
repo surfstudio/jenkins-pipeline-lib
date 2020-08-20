@@ -215,7 +215,7 @@ class TagPipelineBackend extends TagPipeline {
         def isDeployToProduction = ctx.productionDeployTypes.contains(ctx.deployType)
 
         //try find new main version in branch name
-        def branches = RepositoryUtil.getRefsForCurrentCommit(script)
+        def branches = RepositoryUtil.getBranchesForCurrentCommit(script)
         def branchWithVersion = null
         for (branchRegexp in ctx.branchWithVersionRegexps) {
             for (branch in branches) {
