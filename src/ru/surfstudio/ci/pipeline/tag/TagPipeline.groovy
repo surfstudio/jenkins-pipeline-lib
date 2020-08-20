@@ -136,7 +136,7 @@ abstract class TagPipeline extends ScmPipeline {
             for (branchRegexp in branchesPatternsForAutoChangeVersion) {
                 Pattern pattern = Pattern.compile(branchRegexp)
                 for (branch in branches) {
-                    if (pattern.matcher(branch).matches()) {
+                    if (pattern.matcher(branch).matches() && branch == "HEAD") {
                         branchForChangeVersion = branch
                         break
                     }
