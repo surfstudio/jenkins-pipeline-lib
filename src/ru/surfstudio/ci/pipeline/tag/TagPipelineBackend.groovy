@@ -13,7 +13,7 @@ import ru.surfstudio.ci.utils.buildsystems.GradleUtil
 class TagPipelineBackend extends TagPipeline {
 
     //Additional stages
-
+    public static CHECK_TAG = "Check tag"
     public static APPLY_DEPLOY_COMMAND_TAG = "Apply deploy command tag"
     public static CHECK_PRODUCTION_DEPLOY_STARTED_BY_HAND = "Check production deploy not started by hand"
     public static BUILD_PUBLISH_DOCKER_IMAGES = "Build and publish docker images"
@@ -67,7 +67,7 @@ class TagPipelineBackend extends TagPipeline {
     TagPipelineBackend(Object script) {
         super(script)
         //override values from parent class
-        tagRegexp = "$versionRegexp|$deployCommandTagRegexp"
+        tagRegexp = /.*/ //any, check tag in separate stage
         branchesPatternsForAutoChangeVersion = [/.*/]  //any
     }
 
@@ -79,17 +79,20 @@ class TagPipelineBackend extends TagPipeline {
         postExecuteStageBody = { stage -> postExecuteStageBodyTag(script, stage, repoUrl) }
 
         initializeBody = {
-            initBodyBackend(this)
+            initBody(this)
         }
 
         propertiesProvider = { properties(this) }
 
         stages = [
+                stage(CHECK_TAG) {
+                    checkTagStageBody(this)
+                },
                 stage(CHECKOUT, false) {
                     checkoutStageBody(script, repoUrl, repoTag, repoCredentialsId)
                 },
                 stage(APPLY_DEPLOY_COMMAND_TAG, StageStrategy.SKIP_STAGE) {
-                    applyDelpoyCommandTagStageBody(this)
+                    applyDeployCommandTagStageBody(this)
                 },
                 stage(VERSION_UPDATE) {
                     versionUpdatedInSourceCode = versionUpdateStageBodyBackend(script,
@@ -144,18 +147,6 @@ class TagPipelineBackend extends TagPipeline {
 
     // =============================================== 	↓↓↓ EXECUTION LOGIC ↓↓↓ =================================================
 
-    def static initBodyBackend(TagPipelineBackend ctx) {
-        //todo check prod tag without counter
-        TagPipeline.initBody(ctx) //todo проверка тега на соответствие regexp заранее, возможно в отдельном стейдже
-        if (ctx.repoTag ==~ ctx.deployCommandTagRegexp) {
-            ctx.getStage(APPLY_DEPLOY_COMMAND_TAG).strategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
-        } else {
-            if(ctx.repoTag != null && !ctx.repoTag.isEmpty()) { //skip for first launch, otherwise it fail and properties are not applied
-                fillVersionParts(ctx, ctx.repoTag)
-            }
-        }
-    }
-
     def static prepareChangeVersionCommitMessage(Object script,
                                                  String gradleConfigFile,
                                                  String appVersionNameGradleVar) {
@@ -206,7 +197,19 @@ class TagPipelineBackend extends TagPipeline {
         }
     }
 
-    def static applyDelpoyCommandTagStageBody(TagPipelineBackend ctx) {
+    def static checkTagStageBody(TagPipelineBackend ctx) {
+        def script = ctx.script
+        //todo check prod tag without counter
+        if (ctx.repoTag ==~ ctx.deployCommandTagRegexp) {
+            ctx.getStage(APPLY_DEPLOY_COMMAND_TAG).strategy = StageStrategy.FAIL_WHEN_STAGE_ERROR
+        } else if (ctx.repoTag ==~ ctx.versionRegexp) {
+            fillVersionParts(ctx, ctx.repoTag)
+        } else {
+            script.error("Tag must match deployCommandTagRegexp: $ctx.deployCommandTagRegexp or versionRegexp: $ctx.versionRegexp")
+        }
+    }
+
+    def static applyDeployCommandTagStageBody(TagPipelineBackend ctx) {
         def script = ctx.script
         def prevVersion = GradleUtil.getGradleVariable(script, ctx.gradleFileWithVersion, ctx.appVersionNameGradleVar)
         prevVersion = prevVersion.substring(1, prevVersion.length()-1) //remove quotes
