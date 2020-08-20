@@ -15,7 +15,7 @@ class TagPipelineBackend extends TagPipeline {
     //Additional stages
     public static CHECK_TAG = "Check tag"
     public static APPLY_DEPLOY_COMMAND_TAG = "Apply deploy command tag"
-    public static CHECK_PRODUCTION_DEPLOY_STARTED_BY_HAND = "Check production deploy not started by hand"
+    public static CHECK_PRODUCTION_DEPLOY_STARTED_BY_HAND = "Check production deploy started by hand"
     public static BUILD_PUBLISH_DOCKER_IMAGES = "Build and publish docker images"
     public static DOCKER_BUILD_WRAPPER = "Inside docker"
     public static DEPLOY = "Deploy"
