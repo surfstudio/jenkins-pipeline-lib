@@ -22,7 +22,7 @@ class TagPipelineBackend extends TagPipeline {
 
     // ===== Tags & versions =====
     public deployCommandTagRegexp = /^deploy-.+$/  // "deploy-prod", "deploy-dev"
-    // Examples: "dev/0.2-alpha3", "prod/2.0", "staging/1.3.5-beta3-featureFoo"
+    // Examples: "0.2-dev-3", "2.0-prod", "1.3.5-staging-3-featureFoo"
     public versionRegexp = /^\d{1,4}\.\d{1,4}(\.\d{1,4})?-[A-Za-z]+(-[0-9]+(-[A-Za-z0-9]+)?)?$/
     // Full version / Tag is: <mainVersion>-<deployType>-<additionalVersionCounter>-<versionLabel>
     // <additionalVersionCounter> - only for not production
@@ -198,7 +198,7 @@ class TagPipelineBackend extends TagPipeline {
                 def splittedPath = file.value.split('/').toList()
                 def dockerFile = splittedPath.get(splittedPath.size() - 1)
                 def dockerFileDir = splittedPath.subList(0, splittedPath.size() - 1).join('/')
-                def image = script.docker.build(imageName, "-f ./$dockerFile $dockerFileDir")
+                def image = script.docker.build(imageName, "-f $dockerFile $dockerFileDir")
                 image.push()
                 for (String imageTag : additionalTags) {
                     image.push(imageTag)
