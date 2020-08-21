@@ -47,8 +47,8 @@ class TagPipelineBackend extends TagPipeline {
     public appVersionNameGradleVar = "version"
     public buildGradleTask = "clean assemble"
     public unitTestGradleTask = "test"
-    public unitTestResultPathXml = "build/test-results/test/*.xml"
-    public unitTestResultDirHtml = "build/reports/tests/test"
+    public unitTestResultPathXml = "**/test-results/test/*.xml"
+    public unitTestResultDirHtml = "**/reports/tests/test"
 
     // ===== Docker ======
     // Full image path is: <dockerRegistryUrl>/<dockerRepository>/<imageName>:<fullVersion>
