@@ -11,8 +11,8 @@ class PrPipelineBackend extends PrPipeline {
     public buildGradleTask = "clean assemble"
     public unitTestGradleTask = "test"
 
-    public unitTestResultPathXml = "build/test-results/test/*.xml"
-    public unitTestResultDirHtml = "build/reports/tests/test"
+    public unitTestResultPathXml = "**/test-results/test/*.xml"
+    public unitTestResultDirHtml = "**/reports/tests/test"
 
     public DOCKER_BUILD_WRAPPER = "Inside docker"
     public dockerImageForBuild = "gradle:6.0.1-jdk11"
