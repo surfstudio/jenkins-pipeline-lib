@@ -112,6 +112,8 @@ abstract class TagPipeline extends ScmPipeline {
         RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
 
         RepositoryUtil.saveCurrentGitCommitHash(script)
+
+        script.sh "git submodule update --init"
     }
 
     def static prepareMessageForPipeline(TagPipeline ctx, Closure handler) {

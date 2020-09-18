@@ -141,6 +141,8 @@ abstract class PrPipeline extends ScmPipeline {
                 credentialsId: credentialsId,
                 branch: sourceBranch
         )
+
+        script.sh "git submodule update --init"
     }
 
     def static mergeLocal(Object script, String destinationBranch) {
