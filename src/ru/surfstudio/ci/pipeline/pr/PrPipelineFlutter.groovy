@@ -69,7 +69,7 @@ class PrPipelineFlutter extends PrPipeline {
     //
     public dockerImageName = 'cirrusci/flutter:stable'
     
-    public dockerArguments = "-it -v \${PWD}:/build --workdir /build"
+    public dockerArguments = "-it -u 0:0 -v \${PWD}:/build --workdir /build"
     
 
     PrPipelineFlutter(Object script) {
