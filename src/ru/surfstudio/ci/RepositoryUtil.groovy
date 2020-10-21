@@ -101,7 +101,7 @@ class RepositoryUtil {
     }
 
     def static notifyGithubAboutStageAborted(Object script, String repoUrl, String stageName, String sourceBranch) {
-        def githubStatus = "ERROR"
+        def githubStatus = "SUCCESS"
         def description = "Aborted"
         def slug = getCurrentGitlabRepoSlug(script, repoUrl)
         script.echo "Notify GitHub - synthetic stage: $stageName, repoSlug: $slug, branch: $sourceBranch, status: $githubStatus"
