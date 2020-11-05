@@ -26,6 +26,7 @@ class RepositoryUtil {
     def static SKIP_CI_LABEL2 = "[ci skip]"
     def static VERSION_LABEL1 = "[version]"
     def static SYNTHETIC_PIPELINE_STAGE = "Pipeline"
+    def static DEFAULT_GITLAB_CONNECTION = "Gitlab Surf"
     def static GITHUB_ACCOUNT = "surfstudio"
     def static CREDENTIALS_ID = "b72070fe-76a3-467a-85c4-beccf4b0979f"
 
