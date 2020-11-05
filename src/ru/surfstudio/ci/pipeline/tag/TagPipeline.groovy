@@ -15,12 +15,7 @@
  */
 package ru.surfstudio.ci.pipeline.tag
 
-import ru.surfstudio.ci.AbortDuplicateStrategy
-import ru.surfstudio.ci.CommonUtil
-import ru.surfstudio.ci.JarvisUtil
-import ru.surfstudio.ci.RepositoryUtil
-import ru.surfstudio.ci.Result
-
+import ru.surfstudio.ci.*
 import ru.surfstudio.ci.pipeline.ScmPipeline
 import ru.surfstudio.ci.pipeline.base.LogRotatorUtil
 import ru.surfstudio.ci.stage.SimpleStage
@@ -43,6 +38,7 @@ abstract class TagPipeline extends ScmPipeline {
 
     //scm
     public tagRegexp = /(.*)?\d{1,4}\.\d{1,4}\.\d{1,4}(.*)?/
+    public tagHash = ""
     public repoTag = ""
     //будет выбрана первая подходящая ветка
     public branchesPatternsForAutoChangeVersion = [/^origin\/dev\/.*/, /^origin\/feature\/.*/]
@@ -94,10 +90,14 @@ abstract class TagPipeline extends ScmPipeline {
         extractValueFromEnvOrParamsAndRun(script, REPO_TAG_PARAMETER) {
             value -> ctx.repoTag = value
         }
+        extractValueFromEnvOrParamsAndRun(script, TAG_HASH_PARAMETER) {
+            value -> ctx.tagHash = value
+        }
 
         def buildDescription = ctx.repoTag
         CommonUtil.setBuildDescription(script, buildDescription)
         CommonUtil.abortDuplicateBuildsWithDescription(script, AbortDuplicateStrategy.ANOTHER, buildDescription)
+        RepositoryUtil.notifyGitlabAboutStagePending(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.tagHash)
     }
 
     def static checkoutStageBody(Object script, String url, String repoTag, String credentialsId) {
@@ -112,8 +112,6 @@ abstract class TagPipeline extends ScmPipeline {
         RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
 
         RepositoryUtil.saveCurrentGitCommitHash(script)
-
-        script.sh "git submodule update --init"
     }
 
     def static prepareMessageForPipeline(TagPipeline ctx, Closure handler) {
@@ -173,12 +171,14 @@ abstract class TagPipeline extends ScmPipeline {
     }
 
     def static finalizeStageBody(TagPipeline ctx) {
+        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.tagHash)
         if (ctx.getStage(ctx.CHECKOUT).result != Result.ABORTED) { //do not handle builds skipped via [skip ci] label
             JarvisUtil.createVersionAndNotify(ctx)
         }
     }
 
     def static debugFinalizeStageBody(TagPipeline ctx) {
+        RepositoryUtil.notifyGitlabAboutStageFinish(ctx.script, ctx.repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE, ctx.jobResult, ctx.tagHash)
         if (ctx.getStage(ctx.CHECKOUT).result != Result.ABORTED) { //do not handle builds skipped via [skip ci] label
             JarvisUtil.createVersionAndNotify(ctx)
         }
@@ -188,11 +188,12 @@ abstract class TagPipeline extends ScmPipeline {
     }
 
     def static preExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
-        RepositoryUtil.notifyGithubAboutStageStart(script, repoUrl, stage.name)
+        RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, stage.name)
+        RepositoryUtil.notifyGitlabAboutStageStart(script, repoUrl, RepositoryUtil.SYNTHETIC_PIPELINE_STAGE)
     }
 
     def static postExecuteStageBodyTag(Object script, SimpleStage stage, String repoUrl) {
-        RepositoryUtil.notifyGithubAboutStageFinish(script, repoUrl, stage.name, stage.result)
+        RepositoryUtil.notifyGitlabAboutStageFinish(script, repoUrl, stage.name, stage.result)
     }
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
 
@@ -205,6 +206,7 @@ abstract class TagPipeline extends ScmPipeline {
     public static final String STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER = 'staticCodeAnalysisStageStrategy'
     public static final String BETA_UPLOAD_STAGE_STRATEGY_PARAMETER = 'betaUploadStageStrategy'
     public static final String REPO_TAG_PARAMETER = 'repoTag_0'
+    public static final String TAG_HASH_PARAMETER = 'tagHash'
     public static final String STAGE_STRATEGY_PARAM_DESCRIPTION = 'stage strategy types, see repo <a href="https://bitbucket.org/surfstudio/jenkins-pipeline-lib">jenkins-pipeline-lib</a> , class StageStrategy. If empty, job will use initial strategy for this stage'
 
     static List<Object> properties(TagPipeline ctx) {
@@ -212,7 +214,8 @@ abstract class TagPipeline extends ScmPipeline {
         return [
                 buildDiscarder(ctx, script),
                 parameters(script),
-                triggers(script, ctx.repoUrl, ctx.tagRegexp)
+                triggers(script, ctx.repoUrl, ctx.tagRegexp),
+                script.gitLabConnection(ctx.gitlabConnection)
         ]
     }
 
@@ -279,16 +282,21 @@ abstract class TagPipeline extends ScmPipeline {
                         genericVariables: [
                                 [
                                         key  : 'repoTag_0', //параметер tag будет доступен по ключу repoTag_0 - особенности GenericWebhookTrigger Plugin
-                                        value: '$.ref'
+                                        value: '$.ref',
+                                        regexpFilter: 'refs/tags/'
                                 ],
                                 [
                                         key  : 'repoUrl',
-                                        value: '$.repository.html_url'
+                                        value: '$.project.web_url'
+                                ],
+                                [
+                                        key :  TAG_HASH_PARAMETER,
+                                        value: '$.checkout_sha'
                                 ]
                         ],
                         printContributedVariables: true,
                         printPostContent: true,
-                        causeString: 'Triggered by GitHub',
+                        causeString: 'Triggered by Gitlab',
                         regexpFilterExpression: /$repoUrl $tagRegexp/,
                         regexpFilterText: '$repoUrl $repoTag_0'
                 ),
