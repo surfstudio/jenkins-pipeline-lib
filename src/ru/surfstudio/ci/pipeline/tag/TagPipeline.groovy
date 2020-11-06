@@ -297,8 +297,8 @@ abstract class TagPipeline extends ScmPipeline {
                         printContributedVariables: true,
                         printPostContent: true,
                         causeString: 'Triggered by Gitlab',
-                        regexpFilterExpression: /$repoUrl $tagRegexp ((?!null).)*/,
-                        regexpFilterText: '$repoUrl $repoTag_0 $'+TAG_HASH_PARAMETER
+                        regexpFilterExpression: /$repoUrl ((?!${'$'}tagHash).)* $tagRegexp/,
+                        regexpFilterText: '$repoUrl $'+TAG_HASH_PARAMETER+' $repoTag_0'
                 ),
                 script.pollSCM('')
         ])
