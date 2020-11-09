@@ -109,7 +109,9 @@ abstract class TagPipeline extends ScmPipeline {
 
         script.sh "git checkout tags/$repoTag"
 
-        RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
+        if (RepositoryUtil.isLastCommitMessageContainsVersion(script, repoTag)) {
+            RepositoryUtil.checkLastCommitMessageContainsSkipCiLabel(script)
+        }
 
         RepositoryUtil.saveCurrentGitCommitHash(script)
 
@@ -132,7 +134,7 @@ abstract class TagPipeline extends ScmPipeline {
                                     String changeVersionCommitMessage,
                                     boolean versionUpdatedInSourceCode = true) {
         script.echo "versionUpdatedInSourceCode: $versionUpdatedInSourceCode"
-        if(versionUpdatedInSourceCode) {
+        if (versionUpdatedInSourceCode) {
             //find branch for change version
             def branches = RepositoryUtil.getBranchesForCurrentCommit(script)
             def branchForChangeVersion = null
@@ -196,7 +198,6 @@ abstract class TagPipeline extends ScmPipeline {
     }
     // =============================================== 	↑↑↑  END EXECUTION LOGIC ↑↑↑ =================================================
 
-
     // ============================================= ↓↓↓ JOB PROPERTIES CONFIGURATION ↓↓↓  ==========================================
 
     //parameters
@@ -205,7 +206,8 @@ abstract class TagPipeline extends ScmPipeline {
     public static final String STATIC_CODE_ANALYSIS_STAGE_STRATEGY_PARAMETER = 'staticCodeAnalysisStageStrategy'
     public static final String BETA_UPLOAD_STAGE_STRATEGY_PARAMETER = 'betaUploadStageStrategy'
     public static final String REPO_TAG_PARAMETER = 'repoTag_0'
-    public static final String STAGE_STRATEGY_PARAM_DESCRIPTION = 'stage strategy types, see repo <a href="https://bitbucket.org/surfstudio/jenkins-pipeline-lib">jenkins-pipeline-lib</a> , class StageStrategy. If empty, job will use initial strategy for this stage'
+    public static
+    final String STAGE_STRATEGY_PARAM_DESCRIPTION = 'stage strategy types, see repo <a href="https://bitbucket.org/surfstudio/jenkins-pipeline-lib">jenkins-pipeline-lib</a> , class StageStrategy. If empty, job will use initial strategy for this stage'
 
     static List<Object> properties(TagPipeline ctx) {
         def script = ctx.script

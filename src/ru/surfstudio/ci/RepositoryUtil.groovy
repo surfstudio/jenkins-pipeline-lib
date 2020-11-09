@@ -346,6 +346,12 @@ class RepositoryUtil {
         }
     }
 
+    def static isLastCommitMessageContainsVersion(Object script, String version) {
+        def result = isCurrentCommitMessageContainsVersionLabel(script) && getCurrentCommitMessage(script).contains(" $version ")
+        script.echo "Label: $RepositoryUtil.VERSION_LABEL1 and version: $version in last commit message - $result"
+        return result
+    }
+
     static checkHasChanges(Object script) {
         return !script.sh(returnStdout: true, script: "git status --porcelain --untracked-files=no").isEmpty()
     }
