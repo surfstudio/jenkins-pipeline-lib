@@ -116,7 +116,7 @@ class TagPipelineFlutter extends TagPipeline {
     // pipeline.dockerImageName = "cirrusci/flutter:dev"
     //
     public dockerImageName = "cirrusci/flutter:stable"
-    public dockerArguments = "-v /home/jenkins/.gitconfig:/home/jenkins/.gitconfig:rw,z"
+    public dockerArguments = ""
 
     TagPipelineFlutter(Object script) {
         super(script)
