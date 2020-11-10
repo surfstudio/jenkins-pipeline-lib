@@ -69,7 +69,7 @@ class PrPipelineFlutter extends PrPipeline {
     //
     public dockerImageName = 'cirrusci/flutter:stable'
     
-    public dockerArguments = "-v $HOME/.gitconfig:/home/jenkins/.gitconfig:rw,z"
+    public dockerArguments = "-v /home/jenkins/.gitconfig:/home/jenkins/.gitconfig:rw,z"
     
 
     PrPipelineFlutter(Object script) {
