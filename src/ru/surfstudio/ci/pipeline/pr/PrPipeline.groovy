@@ -128,8 +128,8 @@ abstract class PrPipeline extends ScmPipeline {
     }
 
     def static checkout(Object script, String url, String sourceBranch, String credentialsId) {
-        //script.sh 'git config --global user.name "Jenkins"'
-        //script.sh 'git config --global user.email "jenkins@surfstudio.ru"'
+        //script.sh 'git config --global user.name "builder-surf"'
+        //script.sh 'git config --global user.email "builder@surfstudio.ru"'
 
         CommonUtil.safe(script) {
             script.sh "git reset --merge" //revert previous failed merge
