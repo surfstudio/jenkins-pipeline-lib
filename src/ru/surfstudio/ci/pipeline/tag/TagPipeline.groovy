@@ -101,6 +101,11 @@ abstract class TagPipeline extends ScmPipeline {
     }
 
     def static checkoutStageBody(Object script, String url, String repoTag, String credentialsId) {
+        CommonUtil.safe(script) {
+            script.sh "git reset --merge" //revert previous failed merge
+            RepositoryUtil.revertUncommittedChanges(script)
+        }
+
         script.git(
                 url: url,
                 credentialsId: credentialsId,
